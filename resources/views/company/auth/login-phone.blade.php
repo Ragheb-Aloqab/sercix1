@@ -81,7 +81,7 @@
                     <label class="text-sm font-bold text-slate-700">رقم الجوال</label>
                     <input name="phone"
                            value="{{ old('phone') }}"
-                           placeholder="مثال: 05xxxxxxxx"
+                           placeholder="مثال: +9665xxxxxxxx"
                            class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
                     <p class="mt-2 text-xs text-slate-500">
                         * يفضّل إدخال الرقم بصيغة السعودية.
