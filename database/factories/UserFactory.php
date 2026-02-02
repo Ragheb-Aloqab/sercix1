@@ -5,55 +5,54 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Faker\Factory as FakerFactory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
-    protected static ?string $password = null;
-
-    /**
-     * حالات (States)
-     */
+    // database/factories/UserFactory.php
     public function admin(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn() => [
             'role' => 'admin',
         ]);
     }
 
     public function technician(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn() => [
             'role' => 'technician',
         ]);
     }
 
     /**
+     * The current password being used by the factory.
+     */
+    protected static ?string $password = "12345678";
+
+    /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
-        // 🔐 حل جذري: تأكيد وجود faker
-        $faker = $this->faker ?? FakerFactory::create();
-
         return [
-            'name'              => $faker->name(),
-            'email'             => $faker->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password'          => static::$password ??= Hash::make('password'),
-            'remember_token'    => Str::random(10),
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Unverified email
+     * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
