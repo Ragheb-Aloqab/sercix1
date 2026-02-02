@@ -70,7 +70,7 @@ class OtpAuthController extends Controller
         Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
 
         // إرسال OTP
-        if (!app()->environment('local')) {
+        if (app()->environment('local')) {
             // في التطوير فقط
             Log::info("[OTP-DEV] Company Login OTP", [
                 'phone' => $phone,
@@ -109,7 +109,7 @@ class OtpAuthController extends Controller
 
         // 3) إرسال OTP مباشرة هنا
         try {
-            if (!app()->environment('local')) {
+            if (app()->environment('local')) {
                 // الإنتاج: إرسال SMS حقيقي
                 Log::info("[OTP-DEV] Company Login OTP", [
                     'phone' => $phone,
