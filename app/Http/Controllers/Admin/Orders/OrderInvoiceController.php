@@ -16,9 +16,17 @@ class OrderInvoiceController extends Controller
 
     public function store(Order $order)
     {
+        $order->load('services');
+
+        $subtotal = (float) $order->total_amount;
+        $tax = (float) ($order->tax_amount ?? 0);
+
         $order->invoice()->firstOrCreate([], [
-            'number' => 'INV-'.$order->id.'-'.now()->format('Ymd'),
-            'issued_at' => now(),
+            'company_id'      => $order->company_id,
+            'invoice_number'  => 'INV-' . $order->id . '-' . now()->format('Ymd'),
+            'subtotal'        => $subtotal,
+            'tax'             => $tax,
+            'paid_amount'     => 0,
         ]);
 
         return back()->with('success', 'تم إنشاء الفاتورة.');

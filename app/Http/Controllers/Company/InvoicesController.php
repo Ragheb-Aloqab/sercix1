@@ -31,6 +31,7 @@ class InvoicesController extends Controller
                 'order.payments' => function ($q) {
                     $q->select('id', 'order_id', 'status', 'amount', 'method', 'paid_at', 'created_at');
                 },
+                'order.services',
             ])
             ->latest()
             ->paginate(12)

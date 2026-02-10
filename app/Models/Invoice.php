@@ -36,11 +36,19 @@ class Invoice extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
     /*
-    ارجاع المبلغ المدفوع
+    ارجاع إجمالي الفاتورة (من الحقول أو من الطلب إذا كانت قديمة ولم تُملأ)
     */
     public function getTotalAttribute()
     {
-      return round($this->subtotal + $this->tax, 2);
+        $sum = (float) $this->subtotal + (float) $this->tax;
+        if ($sum > 0) {
+            return round($sum, 2);
+        }
+        if ($this->relationLoaded('order') && $this->order) {
+            return round((float) $this->order->total_amount, 2);
+        }
+        $this->loadMissing('order');
+        return $this->order ? round((float) $this->order->total_amount, 2) : 0.0;
     }
     /*
     ارجاع المبلغ المتبقي

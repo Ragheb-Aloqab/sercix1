@@ -22,9 +22,12 @@
 
             <div class="flex flex-wrap gap-2">
                 @if(!empty($invoice->pdf_path))
+
                     <a href="{{ route('company.invoices.pdf', $invoice) }}"
+
                        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
                         تحميل PDF
+                        <i class="fa-solid fa-file-pdf"></i>
                     </a>
                 @endif
 
@@ -109,7 +112,7 @@
                                     <tr>
                                         <td class="p-3 font-semibold">{{ $svc->name }}</td>
                                         <td class="p-3">
-                                            {{ number_format((float)($svc->pivot->base_price ?? $svc->pivot->price ?? 0), 2) }} SAR
+                                            {{ number_format((float)($svc->pivot->unit_price ?? $svc->pivot->total_price ?? $svc->base_price ?? 0), 2) }} SAR
                                         </td>
                                         <td class="p-3">
                                             {{ $svc->pivot->estimated_minutes ?? '-' }}
