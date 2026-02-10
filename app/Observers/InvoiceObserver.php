@@ -11,11 +11,16 @@ class InvoiceObserver
     public function saving(Invoice $invoice): void
       {
         $total = $invoice->subtotal + $invoice->tax;
+
         if ($invoice->status === 'void') {
+
             return;
+
         }
         if ($invoice->paid_amount <= 0) {
+
             $invoice->status = 'unpaid';
+            
         } elseif ($invoice->paid_amount < $total) {
             $invoice->status = 'partial';
         } else {

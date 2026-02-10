@@ -17,6 +17,8 @@
         <div class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400">الإجمالي</span>
             <span class="font-bold">{{ number_format($order->total_amount ?? 0, 2) }} SAR</span>
+            
+            
         </div>
     </div>
 </div>

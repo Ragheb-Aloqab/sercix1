@@ -19,7 +19,7 @@
             {{-- Company --}}
             <div class="mt-3">
                 <p class="text-xs text-slate-500 dark:text-slate-400">الشركة</p>
-                <p class="font-semibold">{{ $order->company?->name ?? '—' }}</p>
+                <p class="font-semibold">{{ $order->company?->company_name ?? '—' }}</p>
                 @if (!empty($order->company?->phone))
                     <p class="text-xs text-slate-500 dark:text-slate-400">{{ $order->company?->phone }}</p>
                 @endif
@@ -117,7 +117,7 @@
                         <td class="py-4 px-4 font-bold">#{{ $order->id }}</td>
 
                         <td class="py-4 px-4">
-                            <p class="font-semibold">{{ $order->company?->name ?? '—' }}</p>
+                            <p class="font-semibold">{{ $order->company?->company_name ?? '—' }}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 {{ $order->company?->phone ?? '' }}
                             </p>
