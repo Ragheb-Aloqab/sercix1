@@ -50,13 +50,14 @@
         <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
             <p class="text-sm text-slate-500">المدفوع</p>
             <p class="text-2xl font-black text-emerald-600">
-                {{ number_format($invoice->paid_amount ?? 0, 2) }} SAR</p>
+                {{ number_format($paidAmount ?? 0, 2) }} SAR
+            </p>
         </div>
 
         <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
             <p class="text-sm text-slate-500">المتبقي</p>
             <p class="text-2xl font-black text-rose-600">
-                {{ number_format(($invoice->getRemainingAttribute()), 2) }} SAR
+                {{ number_format($remainingAmount ?? 0, 2) }} SAR
             </p>
         </div>
     </div>
@@ -188,7 +189,7 @@
 
                 <a href="{{ route('company.payments.index', ['order_id' => $invoice->order->id]) }}"
                    class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center">
-                    Go to Payments
+                    <i class="fa-solid fa-credit-card me-2"></i> الذهاب للدفع
                 </a>
             </div>
         </div>

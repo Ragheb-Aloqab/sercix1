@@ -18,12 +18,14 @@ class PaymentsController extends Controller
     {
         $company = auth('company')->user();
 
-        $status = $request->string('status')->toString(); // pending|paid|failed|refunded|all
-        $method = $request->string('method')->toString(); // tap|cash|bank|all
-        $q      = $request->string('q')->toString();      // order_id او payment id
+        $status   = $request->string('status')->toString();
+        $method   = $request->string('method')->toString();
+        $q        = $request->string('q')->toString();
+        $orderId  = $request->integer('order_id');
 
         $payments = Payment::query()
             ->where('company_id', $company->id)
+            ->when($orderId > 0, fn($qq) => $qq->where('order_id', $orderId))
             ->when($status && $status !== 'all', fn($qq) => $qq->where('status', $status))
             ->when($method && $method !== 'all', fn($qq) => $qq->where('method', $method))
             ->when($q !== '', function ($qq) use ($q) {

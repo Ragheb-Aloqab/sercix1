@@ -22,7 +22,7 @@ use App\Http\Controllers\Admin\Settings\BankAccountController;
 
 use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\ActivityController;
-use App\Models\InventoryTransaction;
+use App\Http\Controllers\Admin\InventoryMovementExportController;
 // Webhooks خارج auth (لو تحتاج)
 // use App\Http\Controllers\Payments\TapWebhookController;
 // Route::post('/webhooks/tap', [TapWebhookController::class, 'handle'])->name('webhooks.tap');
@@ -31,11 +31,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // /admin -> /admin/dashboard
     Route::redirect('/', '/admin/dashboard');
-Route::get('/inventory/trans',function(){
-          $inventoy_transaction = InventoryTransaction::all();
-         // dd($inventoy_transaction);
-          return view('admin.inventory.movements',compact('inventoy_transaction'));
-        })->name('inventory.movements');
+
     /**
      * ✅ كل لوحة الأدمن محمية: auth:web + role:admin
      * أي "تقني" يحاول يدخل /admin/dashboard بياخذ 403 مباشرة
@@ -107,6 +103,11 @@ Route::get('/inventory/trans',function(){
         // =========================
         Route::resource('customers', CustomersController::class)->except(['show'])->names('customers');
         Route::resource('inventory', InventoryController::class)->except(['show'])->names('inventory');
+
+        Route::get('/inventory/movements', fn () => view('admin.inventory.movements'))
+            ->name('inventory.movements');
+        Route::get('/inventory/movements/export', InventoryMovementExportController::class)
+            ->name('inventory.movements.export');
         
         // =========================
         // Notifications

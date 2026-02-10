@@ -166,24 +166,20 @@
 
 
                 <a href="{{ route('admin.inventory.index') }}"
-                    class="mt-2 {{ $is('admin.inventory.*') ? $active : $link }}">
-                    <span class="{{ $is('admin.inventory.*') ? $iconWrapActive : $iconWrap }}"><i
+                    class="mt-2 {{ $is('admin.inventory.index') ? $active : $link }}">
+                    <span class="{{ $is('admin.inventory.index') ? $iconWrapActive : $iconWrap }}"><i
                             class="fa-solid fa-boxes-stacked"></i></span>
                     <div class="flex-1">
                         <p class="font-bold leading-5">المخزون</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">قطع/زيوت/فلاتر</p>
                     </div>
-<!-- عنصر فرعي تحت المخزون -->
-<form method="get" action="{{ route('admin.inventory.movements') }}"
-   class="flex items-center gap-3 pr-6 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
-
-    <div class="flex-1">
-        <p class="font-semibold leading-5 text-sm">حركة المخزون</p>
-        <button type="submit" class="text-[11px] text-slate-500 dark:text-slate-400">
-            إضافة / خصم / تعديل
-        </button>
-    </div>
-</form>
+                </a>
+                <a href="{{ route('admin.inventory.movements') }}"
+                   class="mt-1 flex items-center gap-3 pr-6 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 {{ $is('admin.inventory.movements') ? 'bg-slate-100 dark:bg-slate-800' : '' }}">
+                    <div class="flex-1">
+                        <p class="font-semibold leading-5 text-sm">حركة المخزون</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">إضافة / خصم / تعديل</p>
+                    </div>
                 </a>
                 <a href="{{ route('admin.activities.index') }}"
                     class="mt-2 {{ $is('admin.activities.*') ? $active : $link }}">
