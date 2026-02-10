@@ -37,7 +37,7 @@ class InvoicesController extends Controller
             ->withQueryString();
 
         $invoices->getCollection()->transform(function ($invoice) {
-            $total = (float) ($invoice->total_amount ?? 0);
+            $total = (float) ($invoice->total ?? 0);
 
             $paid = (float) ($invoice->order?->payments
                 ?->where('status', 'paid')
@@ -68,7 +68,7 @@ class InvoicesController extends Controller
             'order.payments',
         ]);
 
-        $total = (float) ($invoice->total_amount ?? 0);
+        $total = (float) ($invoice->total ?? 0);
 
         $paid = (float) ($invoice->order?->payments
             ?->where('status', 'paid')
@@ -98,4 +98,5 @@ class InvoicesController extends Controller
             ->route('company.invoices.show', $invoice->id)
             ->with('error', 'No PDF available for this invoice.');
     }
+   
 }

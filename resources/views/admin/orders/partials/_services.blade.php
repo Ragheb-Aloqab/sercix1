@@ -9,8 +9,8 @@
 
         $subtotal = $items->sum(function ($service) {
             $qty  = (float) ($service->pivot->qty ?? 0);
-            $unit = (float) ($service->pivot->unit_price ?? 0);
-            $row  = (float) ($service->pivot->total_price ?? ($qty * $unit));
+            $unit = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
+            $row  = (float) ($service->pivot->total_price ?: ($qty * $unit));
             return $row;
         });
         // عدّلها لاحقاً لو عندك
@@ -34,9 +34,9 @@
             <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800">
                 @forelse($items as $service)
                     @php
-                        $qty  = (float) ($service->pivot->qty ?? 0);
-                        $unit = (float) ($service->pivot->unit_price ?? 0);
-                        $total = (float) ($service->pivot->total_price ?? ($qty * $unit));
+                        $qty   = (float) ($service->pivot->qty ?? 0);
+                        $unit  = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
+                        $total = (float) ($service->pivot->total_price ?: ($qty * $unit));
                     @endphp
 
                     <tr>

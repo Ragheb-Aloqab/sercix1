@@ -160,16 +160,26 @@ class OrdersController extends Controller
                 'notes'             => $data['notes'] ?? null,
             ]);
 
-            // ✅ ربط الخدمات بالطلب
-            $order->services()->sync($services->pluck('id')->all());
-            //dd();
+            // ✅ ربط الخدمات بالطلب مع أسعار البيفوت (وحدة + إجمالي = total_price)
+            $syncData = [];
+            foreach ($services as $s) {
+                $qty = 1;
+                $unitPrice = (float) ($s->pivot_base_price ?? $s->base_price ?? 0);
+                $syncData[$s->id] = [
+                    'qty'         => $qty,
+                    'unit_price'  => $unitPrice,
+                    'total_price' => $qty * $unitPrice,
+                ];
+            }
+            $order->services()->sync($syncData);
+
             // ✅ إنشاء دفعة
             Payment::create([
                 'order_id'   => $order->id,
                 'company_id' => $company->id,
                 'method'     => $data['payment_method'],
                 'status'     => 'pending',
-                'amount'     => $services->first()->base_price,
+                'amount'     => $amount,
             ]);
             
             return $order;

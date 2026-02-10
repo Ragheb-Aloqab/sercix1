@@ -29,9 +29,13 @@
             default   => 'bg-slate-100 text-slate-700',
         };
 
-        // إجمالي الطلب: إذا عندك total_amount استخدمه، وإلا احسبه من pivot
+        // إجمالي الطلب: من pivot (total_price أو qty*unit_price مع fallback لـ base_price)
         $items = $order->services ?? collect();
-        $computedTotal = $items->sum(fn($s) => (float) ($s->pivot->base_price ?? ((float)($s->pivot->qty ?? 0) * (float)($s->pivot->unit_price ?? 0))));
+        $computedTotal = $items->sum(function ($s) {
+            $qty  = (float) ($s->pivot->qty ?? 0);
+            $unit = (float) ($s->pivot->unit_price ?? 0) ?: (float) ($s->base_price ?? 0);
+            return (float) ($s->pivot->total_price ?: ($qty * $unit));
+        });
         $total = (float) ($order->total_amount ?? $computedTotal);
 
         $paidAmount = (float) ($payment?->amount ?? 0);

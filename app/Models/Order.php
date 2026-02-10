@@ -81,5 +81,20 @@ class Order extends Model
     {
         return $this->hasMany(Attachment::class)->where('type', 'after_photo');
     }
-    
+
+    /**
+     * إجمالي الطلب من خدمات البيفوت (للعرض عندما لا يوجد عمود total_amount في الجدول).
+     */
+    public function getTotalAmountAttribute(): float
+    {
+        $items = $this->services ?? collect();
+        if ($items->isEmpty()) {
+            return 0.0;
+        }
+        return (float) $items->sum(function ($s) {
+            $qty  = (float) ($s->pivot->qty ?? 0);
+            $unit = (float) ($s->pivot->unit_price ?? 0) ?: (float) ($s->base_price ?? 0);
+            return (float) ($s->pivot->total_price ?: ($qty * $unit));
+        });
+    }
 }
