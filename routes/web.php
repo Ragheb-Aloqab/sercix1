@@ -17,6 +17,8 @@ Route::post('/logout', function (Request $request) {
 
 Route::get('/', fn () => view('index'));
 
+Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('set-locale');
+
 /*
 |--------------------------------------------------------------------------
 | Company Auth (OTP)

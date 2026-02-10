@@ -12,29 +12,9 @@ use Illuminate\Support\Facades\DB;
 use App\Notifications\OrderCancelRequested;
 class OrdersController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $company = auth('company')->user();
-        $status  = $request->string('status')->toString();
-
-        $orders = Order::query()
-            ->where('company_id', $company->id)
-            ->when($status !== '', fn ($q) => $q->where('status', $status))
-            ->with(['technician:id,name,phone', 'payments', 'services'])
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
-
-        $statuses = [
-            'pending',
-            'accepted',
-            'on_the_way',
-            'in_progress',
-            'completed',
-            'cancelled',
-        ];
-
-        return view('company.orders.index', compact('company', 'orders', 'statuses', 'status'));
+        return view('company.orders.index');
     }
 
     public function show(Order $order)
@@ -57,40 +37,7 @@ class OrdersController extends Controller
 
     public function create()
     {
-        $company = auth('company')->user();
-
-        // ✅ كل الخدمات + بيانات الشركة (إن وجدت) من company_services
-        $services = Service::query()
-            ->select('services.*')
-            ->leftJoin('company_services as cs', function ($join) use ($company) {
-                $join->on('cs.service_id', '=', 'services.id')
-                    ->where('cs.company_id', '=', $company->id);
-            })
-            ->addSelect([
-                'cs.base_price as pivot_base_price',
-                'cs.estimated_minutes as pivot_estimated_minutes',
-                'cs.is_enabled as pivot_is_enabled',
-            ])
-            // ✅ المتاح:
-            // - شركة جديدة (لا يوجد pivot) => متاح
-            // - يوجد pivot => لازم is_enabled = 1
-            ->where(function ($q) {
-                $q->whereNull('cs.is_enabled')
-                    ->orWhere('cs.is_enabled', 1);
-            })
-            ->orderBy('services.name')
-            ->get();
-
-        $branches = $company->branches()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        $vehicles = $company->vehicles()
-            ->orderByDesc('id')
-            ->get();
-
-        return view('company.orders.create', compact('company', 'services', 'branches', 'vehicles'));
+        return view('company.orders.create');
     }
 
     public function store(Request $request)

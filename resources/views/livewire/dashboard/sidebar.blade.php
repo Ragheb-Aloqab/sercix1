@@ -114,12 +114,20 @@
 
             {{-- Admin menu --}}
             @if ($role === 'admin')
-                <a href="{{ route('admin.orders.index') }}" class="mt-2 {{ $is('admin.orders.*') ? $active : $link }}">
-                    <span class="{{ $is('admin.orders.*') ? $iconWrapActive : $iconWrap }}"><i
+                <a href="{{ route('admin.orders.index') }}" class="mt-2 {{ $is('admin.orders.index') || $is('admin.orders.show') ? $active : $link }}">
+                    <span class="{{ $is('admin.orders.index') || $is('admin.orders.show') ? $iconWrapActive : $iconWrap }}"><i
                             class="fa-solid fa-receipt"></i></span>
                     <div class="flex-1">
                         <p class="font-bold leading-5">الطلبات</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">متابعة وإسناد</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.bank-transfers.index') }}" class="mt-2 {{ $is('admin.bank-transfers.*') ? $active : $link }}">
+                    <span class="{{ $is('admin.bank-transfers.*') ? $iconWrapActive : $iconWrap }}"><i class="fa-solid fa-landmark"></i></span>
+                    <div class="flex-1">
+                        <p class="font-bold leading-5">التحويلات البنكية</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">مراجعة إيصالات</p>
                     </div>
                 </a>
 
@@ -199,17 +207,6 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">الحساب/النظام</p>
                     </div>
                 </a>
-
-
-                {{-- <a href="{{ route('admin.notifications.index') }}"
-                    class="mt-2 {{ $is('admin.notifications.*') ? $active : $link }}">
-                    <span class="{{ $is('admin.notifications.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-bell"></i></span>
-                    <div class="flex-1">
-                        <p class="font-bold leading-5">الإشعارات</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">تنبيهات المدير</p>
-                    </div>
-                </a> --}}
             @endif
 
             {{-- Technician menu --}}
@@ -223,15 +220,6 @@
                     </div>
                 </a>
 
-                {{-- <a href="{{ route('tech.notifications.index') }}"
-                    class="mt-2 {{ $is('tech.notifications.*') ? $active : $link }}">
-                    <span class="{{ $is('tech.notifications.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-bell"></i></span>
-                    <div class="flex-1">
-                        <p class="font-bold leading-5">الإشعارات</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">تنبيهات الفني</p>
-                    </div>
-                </a> --}}
 
                 <a href="{{ route('tech.settings') }}" class="mt-2 {{ $is('tech.settings') ? $active : $link }}">
                     <span class="{{ $is('tech.settings') ? $iconWrapActive : $iconWrap }}">
@@ -307,16 +295,6 @@
                     </div>
                 </a>
 
-                {{-- <a href="{{ route('company.notifications.index') }}"
-                    class="mt-2 {{ $is('company.notifications.*') ? $active : $link }}">
-                    <span class="{{ $is('company.notifications.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-bell"></i></span>
-                    <div class="flex-1">
-                        <p class="font-bold leading-5">الإشعارات</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">تنبيهات الشركة</p>
-                    </div>
-                </a> --}}
-
                 <a href="{{ route('company.settings') }}"
                     class="mt-2 {{ $is('company.settings') ? $active : $link }}">
                     <span class="{{ $is('company.settings') ? $iconWrapActive : $iconWrap }}">
@@ -355,8 +333,6 @@
             </div>
 
             
-            {{--  logout حسب الـ guard --}}
-            {{--<form method="POST" action="{{ $isCompany ? route('company.logout') : route('logout') }}">--}}
             <form method="POST" action="{{ request()->is('company/*') ? route('company.logout') : route('logout') }}">
                 @csrf
                 <button type="submit"

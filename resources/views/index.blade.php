@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ session('ui.dir', 'rtl') }}">
 
 <head>
     <meta charset="utf-8"/>
@@ -99,15 +99,12 @@
             @php
                 $user = null;
                 $dashboardRoute = '#';
-                if(Auth::guard('company')->check()) {
+                if (Auth::guard('company')->check()) {
                     $user = Auth::guard('company')->user();
                     $dashboardRoute = route('company.dashboard');
-                } elseif(Auth::guard('tech')->check()) {
-                    $user = Auth::guard('technician')->user();
-                    $dashboardRoute = route('tech.dashboard');
-                } elseif(Auth::guard('web')->check()) {
+                } elseif (Auth::guard('web')->check()) {
                     $user = Auth::guard('web')->user();
-                    $dashboardRoute = route('admin.dashboard');
+                    $dashboardRoute = ($user->role ?? null) === 'technician' ? route('tech.dashboard') : route('admin.dashboard');
                 }
             @endphp
 
@@ -122,7 +119,7 @@
                     </button>
 
                     <div x-show="open" x-transition
-                         class="absolute right-0 mt-2 w-48 bg-white  text-slate-50 dark:bg-slate-800 rounded-xl shadow-lg py-2 text-sm z-50">
+                         class="absolute end-0 mt-2 w-48 bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-50 rounded-xl shadow-lg py-2 text-sm z-50">
                         <a href="{{ $dashboardRoute }}"
                            class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">لوحة التحكم</a>
                         <form method="POST" action="{{ route('logout') }}">
@@ -826,8 +823,8 @@
     };
 
     const state = {
-        lang: "ar",
-        dir: "rtl",
+        lang: "{{ app()->getLocale() }}",
+        dir: "{{ session('ui.dir', 'rtl') }}",
         billing: "monthly" // monthly | po | cod
     };
 
@@ -1241,37 +1238,26 @@
 
     $("btnLang").addEventListener("click", () => {
         const next = state.lang === "ar" ? "en" : "ar";
-        applyLang(next);
+        const nextDir = next === "ar" ? "rtl" : "ltr";
+        fetch("{{ route('set-locale') }}?lang=" + next, { headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" } })
+            .then(r => r.json().catch(() => ({})))
+            .then(() => { applyLang(next); applyDir(nextDir); });
     });
 
     $("btnDir").addEventListener("click", () => {
         const next = state.dir === "rtl" ? "ltr" : "rtl";
-        applyDir(next);
+        fetch("{{ route('set-locale') }}?dir=" + next, { headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" } })
+            .then(r => r.json().catch(() => ({})))
+            .then(() => { applyDir(next); });
     });
 
-    // init
+    // init from session (lang/dir already on <html>; sync UI and translations)
     $("year").textContent = new Date().getFullYear();
-    applyLang("ar");
-    applyDir("rtl");
+    applyLang(state.lang);
+    applyDir(state.dir);
     updateHeroSummary();
     syncRequestFromHero();
     updateRequestSummary();
-</script>
-<script>
-    const btn = document.getElementById('userMenuButton');
-    const dropdown = document.getElementById('userDropdown');
-
-    if (btn) {
-        btn.addEventListener('click', () => {
-            dropdown.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', function (event) {
-            if (!btn.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-    }
 </script>
 
 </body>

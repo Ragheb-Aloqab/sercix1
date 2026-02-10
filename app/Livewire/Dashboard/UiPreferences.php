@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use Illuminate\Support\Facades\App;
 use Livewire\Component;
 
 class UiPreferences extends Component
@@ -26,7 +27,9 @@ class UiPreferences extends Component
     public function toggleDir()
     {
         $this->dir = $this->dir === 'rtl' ? 'ltr' : 'rtl';
-        session(['ui.dir' => $this->dir]);
+        $locale = $this->dir === 'rtl' ? 'ar' : 'en';
+        session(['ui.dir' => $this->dir, 'ui.locale' => $locale]);
+        App::setLocale($locale);
 
         $this->dispatch('ui-dir-changed', dir: $this->dir);
     }

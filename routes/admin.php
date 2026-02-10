@@ -80,6 +80,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{order}/invoice', [OrderInvoiceController::class, 'store'])->name('orders.invoice.store');
         });
 
+        Route::get('/bank-transfers', fn () => view('admin.bank-transfers.index'))->name('bank-transfers.index');
+
         // =========================
         // Services
         // =========================

@@ -18,33 +18,9 @@ class TasksController extends Controller
      * قائمة مهام الفني
      * GET /tech/tasks
      */
-    public function index(Request $request)
+    public function index()
     {
-        $technician = Auth::guard('web')->user();
-
-        $status = $request->string('status')->toString(); // فلتر اختياري عبر ?status=
-
-        $query = Order::query()
-            ->where('technician_id', $technician->id)
-            ->with(['company:id,company_name,phone'])
-            ->latest();
-
-        if ($status !== '') {
-            $query->where('status', $status);
-        }
-
-        $tasks = $query->paginate(12)->withQueryString();
-
-        $statuses = [
-            'pending',
-            'accepted',
-            'on_the_way',
-            'in_progress',
-            'completed',
-            'cancelled',
-        ];
-
-        return view('technician.tasks.index', compact('technician', 'tasks', 'statuses', 'status'));
+        return view('technician.tasks.index');
     }
 
     /**
