@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Company;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -49,6 +51,15 @@ class TechnicianResponseNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $url = null;
+        if ($notifiable instanceof Company) {
+            $url = route('company.orders.show', $this->order->id);
+        } elseif ($notifiable instanceof User && $notifiable->role === 'technician') {
+            $url = route('tech.tasks.show', $this->order->id);
+        } else {
+            $url = route('admin.orders.show', $this->order->id);
+        }
+
         return [
             'order_id' => $this->order->id,
             'technician_id' => $this->technician->id,
@@ -59,6 +70,7 @@ class TechnicianResponseNotification extends Notification
             'message' => $this->status === 'accepted'
                 ? "الفني {$this->technician->name} قبل تنفيذ الطلب"
                 : "الفني {$this->technician->name} رفض تنفيذ الطلب",
+            'url' => $url,
         ];
     }
 }

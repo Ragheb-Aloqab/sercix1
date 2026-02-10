@@ -25,6 +25,7 @@ class OrderAssignedToTechnician extends Notification
             'title' => 'تم إسناد طلب جديد لك',
             'order_id' => $this->order->id,
             'customer_name' => $this->order->customer_name ?? null,
+            'url' => route('tech.tasks.show', $this->order->id),
             'created_at' => now(),
         ];
         

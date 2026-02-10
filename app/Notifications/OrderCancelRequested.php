@@ -23,6 +23,7 @@ class OrderCancelRequested extends Notification
             'title' => 'طلب إلغاء طلب',
             'message' => 'هناك طلب إلغاء للطلب رقم #' . $this->order->id,
             'order_id' => $this->order->id,
+            'url' => route('admin.orders.show', $this->order->id),
         ];
     }
 }

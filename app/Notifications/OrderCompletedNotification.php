@@ -20,12 +20,14 @@ class OrderCompletedNotification extends Notification /*implements ShouldQueue*/
 
     public function toArray(object $notifiable): array
     {
+        $url = route('company.orders.show', $this->order->id);
         return [
             'type' => 'order_completed',
             'title' => 'Order completed',
             'message' => 'Your order has been completed.',
             'order_id' => $this->order->id,
-            'route' => route('company.orders.show', $this->order->id),
+            'route' => $url,
+            'url' => $url,
         ];
     }
 }

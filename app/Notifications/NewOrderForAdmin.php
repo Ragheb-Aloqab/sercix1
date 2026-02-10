@@ -24,6 +24,7 @@ class NewOrderForAdmin extends Notification
             'title' => 'طلب جديد من عميل',
             'order_id' => $this->order->id,
             'customer_name' => $this->order->customer_name ?? null,
+            'url' => route('admin.orders.show', $this->order->id),
             'created_at' => now(),
         ];
     }

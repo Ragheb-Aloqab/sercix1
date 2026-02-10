@@ -20,7 +20,7 @@ class OrdersController extends Controller
         $orders = Order::query()
             ->where('company_id', $company->id)
             ->when($status !== '', fn ($q) => $q->where('status', $status))
-            ->with(['technician:id,name,phone'])
+            ->with(['technician:id,name,phone', 'payments', 'services'])
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -147,8 +147,8 @@ class OrdersController extends Controller
             'One or more services are not enabled.'
         );
 
-        // ✅ المبلغ من أسعار الشركة (pivot) + لو null اعتبرها 0
-        $amount = (float) $services->sum(fn ($s) => (float) ($s->pivot_base_price ?? 0));
+        // ✅ المبلغ من أسعار الشركة (pivot) أو السعر الافتراضي للخدمة للشركات الجديدة
+        $amount = (float) $services->sum(fn ($s) => (float) ($s->pivot_base_price ?? $s->base_price ?? 0));
 
         $order = DB::transaction(function () use ($company, $data, $services, $amount) {
 
@@ -189,21 +189,20 @@ class OrdersController extends Controller
             ->route('company.orders.show', $order->id)
             ->with('success', 'Order created successfully.');
     }
-    public function cancel($id)
-{
-    $order = Order::findOrFail($id);
+    public function cancel(Order $order)
+    {
+        $company = auth('company')->user();
+        abort_unless((int) $order->company_id === (int) $company->id, 403);
 
-    if ($order->technician_id) {
-        return back()->with('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');
+        if ($order->technician_id) {
+            return back()->with('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');
+        }
+
+        $admin = User::where('role', 'admin')->first();
+        if ($admin) {
+            $admin->notify(new OrderCancelRequested($order));
+        }
+
+        return back()->with('success', 'تم إرسال طلب الإلغاء للمدير.');
     }
-
-    // جلب المدير
-    $admin = User::where('role', 'admin')->first();
-
-    if ($admin) {
-        $admin->notify(new OrderCancelRequested($order));
-    }
-
-    return back()->with('success', 'تم إرسال طلب الإلغاء للمدير.');
-}
 }

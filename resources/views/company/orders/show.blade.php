@@ -53,7 +53,7 @@
 
         @php
             $payment = $order->payments?->first();
-            $amount = $payment?->amount;
+            $amount = $payment?->amount ?? $order->total_amount;
             $serviceName = $order->services->first()?->name ?? '-';
             
             $before = $order->attachments?->where('type', 'before_photo') ?? collect();
@@ -73,7 +73,7 @@
                 <div class="flex items-center justify-between">
                     <span class="text-slate-500">المبلغ المطلوب</span>
                     <span class="font-bold">
-                        {{ is_null($amount) ? '-' : number_format((float) $amount, 2) . ' SAR' }}
+                        {{ (float)$amount > 0 ? number_format((float) $amount, 2) . ' SAR' : '-' }}
                     </span>
                 </div>
 
@@ -139,7 +139,7 @@
 
                         <div class="flex items-center justify-between">
                             <span class="text-slate-500">الإجمالي</span>
-                            <span class="font-bold">{{ $order->invoice->total ?? '-' }}</span>
+                            <span class="font-bold">{{ $order->invoice->total ? number_format((float)$order->invoice->total, 2) . ' SAR' : '-' }}</span>
                         </div>
 
                         <a href="{{ route('company.invoices.show', $order->invoice->id) }}"

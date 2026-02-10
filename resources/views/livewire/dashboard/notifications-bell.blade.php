@@ -1,8 +1,8 @@
-<div class="relative" x-data="{ open: @entangle('open') }" @click.away="open=false">
+<div class="relative" x-data="{ open: @entangle('open').live }" @click.away="$wire.close(); open=false" wire:poll.visible.20s="refreshUnread">
 
     <button type="button"
         class="inline-flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
-        @click="open = !open">
+        wire:click="toggle">
         <i class="fa-regular fa-bell"></i>
 
         @if ($unreadCount > 0)
@@ -28,14 +28,14 @@
         <div class="max-h-[420px] overflow-auto">
             @forelse($notifications as $n)
                 @php
-                    $title = data_get($n->data, 'title', 'Notification');
+                    $title = data_get($n, 'data.title', 'Notification');
                     
-                    $companyName = data_get($n->data, 'company_name');
-                    $orderId = data_get($n->data, 'order_id');
-                    $isUnread = is_null($n->read_at);
+                    $companyName = data_get($n, 'data.company_name');
+                    $orderId = data_get($n, 'data.order_id');
+                    $isUnread = empty($n['read_at'] ?? null);
                 @endphp
 
-                <button type="button" wire:click="openNotification({{ $n->id }})"
+                <button type="button" wire:click="openNotification('{{ $n['id'] }}')"
                     class="w-full text-start px-5 py-4 border-b border-slate-200/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
 
                     <div class="flex items-start gap-3">
@@ -54,7 +54,7 @@
                                 @if ($orderId)
                                     <div>Order #{{ $orderId }}</div>
                                 @endif
-                              <div>{{ $n->created_at?->shortRelativeDiffForHumans() }}</div>
+                              <div>{{ data_get($n, 'created_human') }}</div>
                             </div>
                         </div>
 

@@ -78,8 +78,8 @@
                             @php
                                 $old = collect(old('service_ids', []))->map(fn($v) => (string) $v);
                                 $checked = $old->contains((string) $service->id);
-                                $price = $service->pivot?->base_price;
-                                $minutes = $service->pivot?->estimated_minutes;
+                                $price = $service->pivot_base_price ?? $service->base_price ?? null;
+                                $minutes = $service->pivot_estimated_minutes ?? null;
                             @endphp
 
                             <label class="flex items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">

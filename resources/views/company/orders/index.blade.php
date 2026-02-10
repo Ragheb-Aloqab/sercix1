@@ -82,14 +82,14 @@
                         @forelse($orders as $order)
                             @php
                                 $payment = $order->payments?->first();
-                                $amount = $payment?->amount;
+                                $amount = $payment?->amount ?? $order->total_amount;
                             @endphp
 
                             <tr class="border-t border-slate-200/70 dark:border-slate-800">
                                 <td class="p-4 font-bold">#{{ $order->id }}</td>
 
                                 <td class="p-4 font-bold">
-                                    {{ is_null($amount) ? '-' : number_format((float) $amount, 2) . ' SAR' }}
+                                    {{ (float)$amount > 0 ? number_format((float) $amount, 2) . ' SAR' : '-' }}
                                 </td>
 
                                 <td class="p-4">

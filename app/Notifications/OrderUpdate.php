@@ -51,6 +51,7 @@ class OrderUpdate extends Notification
             'title' => 'تعليق   طلب',
             'message' => '    تم تعليق طلبك رقم #' . $this->order->id,
             'order_id' => $this->order->id,
+            'url' => route('company.orders.show', $this->order->id),
         ];
     }
 }
