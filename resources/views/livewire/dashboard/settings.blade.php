@@ -46,7 +46,7 @@
         @elseif($actorType === 'user' && $tab === 'password')
             <livewire:dashboard.settings.user-password />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'branding')
-            <livewire:dashboard.settings.branding />
+            <livewire:dashboard.settings.system-branding />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'otp')
             <livewire:dashboard.settings.otp-provider />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'tap')

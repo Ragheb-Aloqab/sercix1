@@ -31,9 +31,14 @@
     <div class="w-full max-w-md">
 
         <a href="{{ url('/') }}" class="flex items-center justify-center mb-6">
-            <div class="bg-white rounded-2xl px-5 py-3 shadow-soft border border-slate-200 text-center">
-                <div class="text-lg font-extrabold">OilGo Business</div>
-                <div class="text-xs text-slate-500">إنشاء حساب شركة</div>
+            <div class="bg-white rounded-2xl px-5 py-3 shadow-soft border border-slate-200 text-center flex items-center gap-3">
+                @if($siteLogoUrl ?? null)
+                    <img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-xl object-cover">
+                @endif
+                <div>
+                    <div class="text-lg font-extrabold">{{ $siteName ?? 'SERV.X' }}</div>
+                    <div class="text-xs text-slate-500">إنشاء حساب شركة</div>
+                </div>
             </div>
         </a>
 
@@ -103,7 +108,7 @@
         </div>
 
         <div class="mt-4 text-center text-xs text-slate-500">
-            © {{ date('Y') }} OilGo Business
+            © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
         </div>
     </div>
 </div>

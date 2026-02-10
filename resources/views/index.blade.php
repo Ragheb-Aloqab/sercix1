@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>OilGo Business — إدارة أساطيل الشركات (زيوت وفلاتر)</title>
+    <title>{{ $siteName ?? 'SERV.X' }} — إدارة أساطيل الشركات (زيوت وفلاتر)</title>
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -79,21 +79,21 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
         <a href="#home" class="flex items-center gap-3">
-            <div class="flex items-center justify-center h-12 w-32 rounded-2xl shadow-soft bg-white">
-                <img src="{{ asset('logo.png') }}" alt="logo" class="h-10 w-auto object-contain"/>
+            <div class="flex items-center justify-center h-12 w-32 rounded-2xl shadow-soft bg-white overflow-hidden">
+                <img src="{{ $siteLogoUrl ?? asset('logo.png') }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-10 w-auto object-contain"/>
             </div>
             <div>
-                <div class="text-lg font-extrabold leading-5" id="brandName">OilGo Business</div>
+                <div class="text-lg font-extrabold leading-5" id="brandName">{{ $siteName ?? 'SERV.X' }}</div>
                 <div class="text-xs text-slate-500" id="brandTag">حلول صيانة الأساطيل للشركات</div>
             </div>
         </a>
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-            <a href="#solutions" class="text-slate-700 hover:text-slate-900">الحلول</a>
-            <a href="#how" class="text-slate-700 hover:text-slate-900">كيف تعمل</a>
-            <a href="#plans" class="text-slate-700 hover:text-slate-900">الخطط</a>
-            <a href="#faq" class="text-slate-700 hover:text-slate-900">الأسئلة</a>
+            <a href="#solutions" class="text-slate-700 hover:text-slate-900" id="navServices">{{ __('index.navServices') }}</a>
+            <a href="#how" class="text-slate-700 hover:text-slate-900" id="navHow">{{ __('index.navHow') }}</a>
+            <a href="#plans" class="text-slate-700 hover:text-slate-900" id="navPricing">{{ __('index.navPricing') }}</a>
+            <a href="#faq" class="text-slate-700 hover:text-slate-900" id="navFaq">{{ __('index.navFaq') }}</a>
 
             <!-- User Authentication -->
             @php
@@ -110,23 +110,22 @@
 
             @if($user)
                 <!-- User Menu -->
-                <div class="relative" x-data="{ open: false }" @click.away="open=false">
-                    <button @click="open = !open"
+                <div class="relative" id="userMenuWrap">
+                    <button type="button" id="userMenuBtn" aria-expanded="false" aria-haspopup="true"
                             class="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900 font-extrabold">
                         <i class="fa-solid fa-user"></i>
                         <span>{{ $user->name ?? $user->company_name }}</span>
                         <i class="fa-solid fa-chevron-down text-xs"></i>
                     </button>
 
-                    <div x-show="open" x-transition
-                         class="absolute end-0 mt-2 w-48 bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-50 rounded-xl shadow-lg py-2 text-sm z-50">
-                        <a href="{{ $dashboardRoute }}"
-                           class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">لوحة التحكم</a>
+                    <div id="userDropdown" class="hidden absolute end-0 mt-2 w-48 bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-50 rounded-xl shadow-lg py-2 text-sm z-50 border border-slate-200 dark:border-slate-700">
+                        <a href="{{ $dashboardRoute }}" data-i18n="navDashboard"
+                           class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">{{ __('index.navDashboard') }}</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit"
+                            <button type="submit" data-i18n="navLogout"
                                     class="w-full rtl:text-right ltr:text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
-                                تسجيل الخروج
+                                {{ __('index.navLogout') }}
                             </button>
                         </form>
                     </div>
@@ -135,17 +134,17 @@
                 <a href="{{ route('company.login') }}"
                    class="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900 font-extrabold">
                     <i class="fa-solid fa-right-to-bracket"></i>
-                    تسجيل الدخول
+                    {{ __('index.navLogin') }}
                 </a>
             @endif
         </nav>
 
         <!-- Mobile Menu Button -->
         <div class="flex items-center gap-2">
-            <a href="#request"
+            <a href="#request" id="ctaBookTop"
                class="hidden sm:inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-white text-sm font-semibold hover:bg-slate-800 transition">
                 <i class="fa-solid fa-file-signature me-2"></i>
-                اطلب عرض سعر
+                {{ __('index.ctaBookTop') }}
             </a>
 
             <button id="btnMobile"
@@ -158,23 +157,19 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200 bg-white">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-2 text-sm font-medium">
-            <a href="#solutions" class="py-2">الحلول</a>
-            <a href="#how" class="py-2">كيف تعمل</a>
-            <a href="#plans" class="py-2">الخطط</a>
-            <a href="#faq" class="py-2">الأسئلة</a>
+            <a href="#solutions" class="py-2" id="mNavServices">{{ __('index.mNavServices') }}</a>
+            <a href="#how" class="py-2" id="mNavHow">{{ __('index.mNavHow') }}</a>
+            <a href="#plans" class="py-2" id="mNavPricing">{{ __('index.mNavPricing') }}</a>
+            <a href="#faq" class="py-2" id="mNavFaq">{{ __('index.mNavFaq') }}</a>
 
             @if($user)
-                <a href="{{ $dashboardRoute }}" class="py-2 font-extrabold text-slate-900">لوحة التحكم</a>
+                <a href="{{ $dashboardRoute }}" class="py-2 font-extrabold text-slate-900" data-i18n="navDashboard">{{ __('index.navDashboard') }}</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full text-left py-2 font-extrabold text-slate-900">تسجيل
-                        الخروج
-                    </button>
+                    <button type="submit" class="w-full text-start py-2 font-extrabold text-slate-900" data-i18n="navLogout">{{ __('index.navLogout') }}</button>
                 </form>
             @else
-                <a href="{{ route('company.login') }}" class="py-2 font-extrabold text-slate-900">
-                    تسجيل الدخول
-                </a>
+                <a href="{{ route('company.login') }}" class="py-2 font-extrabold text-slate-900">{{ __('index.navLogin') }}</a>
             @endif
         </div>
     </div>
@@ -727,7 +722,7 @@
 
                     <div id="toast"
                          class="hidden mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                        تم إرسال طلب عرض السعر (عرض تجريبي). لاحقًا نربطه بحسابات الشركات + API + الفوترة.
+                        <span id="toastSuccess"></span>
                     </div>
                 </form>
             </div>
@@ -772,10 +767,13 @@
         <div class="grid md:grid-cols-3 gap-8">
             <div>
                 <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 shadow-soft">
-                    </div>
+                    @if($siteLogoUrl ?? null)
+                        <img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-2xl object-cover shadow-soft">
+                    @else
+                        <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 shadow-soft"></div>
+                    @endif
                     <div>
-                        <div class="text-lg font-extrabold">OilGo Business</div>
+                        <div class="text-lg font-extrabold">{{ $siteName ?? 'SERV.X' }}</div>
                         <div class="text-xs text-white/60" id="footerTag">حلول صيانة أساطيل للشركات</div>
                     </div>
                 </div>
@@ -807,14 +805,27 @@
 
         <div
                 class="mt-10 pt-6 border-t border-white/10 text-xs text-white/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div>© <span id="year"></span> OilGo Business — Demo UI</div>
+            <div>© <span id="year"></span> {{ $siteName ?? 'SERV.X' }} — Demo UI</div>
             <div id="buildNote">Tailwind + JavaScript + FontAwesome (RTL/LTR)</div>
         </div>
     </div>
 </footer>
 
-<!-- JS -->
+<!-- JS: translations from lang files (ar/en) -->
+@php
+    $currentLocale = app()->getLocale();
+    app()->setLocale('ar');
+    $translationsAr = trans('index');
+    app()->setLocale('en');
+    $translationsEn = trans('index');
+    app()->setLocale($currentLocale);
+@endphp
 <script>
+    window.translations = {
+        ar: @json($translationsAr),
+        en: @json($translationsEn)
+    };
+
     // ------- Helpers -------
     const $ = (id) => document.getElementById(id);
     const getOptPrice = (selectEl) => {
@@ -863,15 +874,10 @@
     }
 
     function billingText() {
-        if (state.lang === "ar") {
-            if (state.billing === "monthly") return "الفوترة: شهرية (Net 30)";
-            if (state.billing === "po") return "الفوترة: PO + تحويل";
-            return "الدفع: ميداني (لطوارئ)";
-        } else {
-            if (state.billing === "monthly") return "Billing: Monthly (Net 30)";
-            if (state.billing === "po") return "Billing: PO + Bank transfer";
-            return "Payment: On-site (urgent)";
-        }
+        const t = window.translations[state.lang] || window.translations.ar;
+        if (state.billing === "monthly") return t.billingMonthly || t.toggleBilling;
+        if (state.billing === "po") return t.billingPo;
+        return t.billingCod;
     }
 
     function updateHeroSummary() {
@@ -879,8 +885,8 @@
         const contractText = $("contractType").options[$("contractType").selectedIndex].text;
         const pkgText = $("packageType").options[$("packageType").selectedIndex].text;
 
-        const city = $("city").value?.trim() ? $("city").value.trim() : (state.lang === "ar" ? "— مدينة غير محددة" :
-            "— city not set");
+        const t = window.translations[state.lang] || window.translations.ar;
+        const city = $("city").value?.trim() ? $("city").value.trim() : (t.cityPlaceholder || "—");
         const windowText = $("visitWindow").options[$("visitWindow").selectedIndex].text;
 
         $("summaryLine").textContent = `${pkgText} • ${fleetText}`;
@@ -923,248 +929,17 @@
         $("toggleBilling").textContent = billingText();
     }
 
-    // ------- RTL/LTR + Language toggle (B2B translations) -------
-    const translations = {
-        ar: {
-            announceText: "خدمة أساطيل للشركات: صيانة زيوت وفلاتر في موقع شركتك + فواتير شهرية",
-            brandTag: "حلول صيانة الأساطيل للشركات",
-            navServices: "الحلول",
-            navHow: "كيف تعمل",
-            navPricing: "الخطط",
-            navFaq: "الأسئلة",
-            mNavServices: "الحلول",
-            mNavHow: "كيف تعمل",
-            mNavPricing: "الخطط",
-            mNavFaq: "الأسئلة",
-            ctaBookTop: "اطلب عرض سعر",
-            ctaBookMobile: "اطلب عرض سعر",
-            heroBadge: "B2B • أسطول • جدولة • فواتير • SLA",
-            heroTitle1: "إدارة صيانة",
-            heroTitle2: "أسطول شركتك بسهولة",
-            heroDesc: "خدمة مخصصة للشركات: تغيير زيت وفلاتر في موقعكم (مقر/فروع)، جدولة دورية، فريق متنقل، تقارير، وفواتير شهرية مجمعة — مع API جاهزة للدمج.",
-            heroCtaPrimary: "اطلب عرض سعر",
-            heroCtaSecondary: "كيف تعمل الخدمة؟",
-            stat1Label: "SLA",
-            stat1Value: "حسب العقد",
-            stat2Label: "الفوترة",
-            stat2Value: "شهرية",
-            stat3Label: "التقارير",
-            stat3Value: "PDF/CSV",
-            stat4Label: "الدفع",
-            stat4Value: "عقد/تحويل",
-            quickCardTitle: "بناء عرض سعر للشركة",
-            quickCardSubtitle: "احسب تقديرًا سريعًا للأسطول خلال دقيقة",
-            lblFleet: "حجم الأسطول",
-            lblContract: "نوع التعاقد",
-            lblPackage: "الخطة",
-            lblWindow: "نافذة الزيارة",
-            lblCompanyLocation: "موقع/مدينة الخدمة",
-            btnDetect: "تحديد",
-            mapNoteTitle: "خريطة (Placeholder):",
-            mapNoteText: "لاحقًا نربط خرائط لاختيار مواقع الفروع + حساب رسوم التنقل حسب المسافة.",
-            summaryTitle: "ملخص العرض",
-            priceLabel: "تقدير شهري",
-            priceNote: "* تقدير تقريبي للعرض فقط",
-            goRequest: "إرسال طلب عرض سعر",
-            toggleBilling: "الفوترة: شهرية (Net 30)",
-            note: "* هذه واجهة B2B تجريبية. لاحقًا: حسابات شركات، موافقات داخلية، فواتير ضريبية، وربط REST API.",
-            servicesTitle: "حلول للشركات",
-            servicesDesc: "كل ما تحتاجه لإدارة صيانة الأسطول بشكل منظم وقابل للتوسع.",
-            servicesLink: "اطلب عرض سعر →",
-            srv1Title: "جدولة دورية",
-            srv1Desc: "صيانة حسب الكيلومترات/الوقت، مع تذكيرات للمركبات.",
-            srv2Title: "فواتير شهرية مجمعة",
-            srv2Desc: "فاتورة واحدة لكل فرع/شركة + ضريبة + تقارير PDF/CSV.",
-            srv3Title: "Workflow موافقات",
-            srv3Desc: "طلب → اعتماد مدير الأسطول → إسناد فريق → تنفيذ.",
-            srv4Title: "فرق متنقلة للفروع",
-            srv4Desc: "تنفيذ في مقر الشركة/المواقف/الورش المتعاقدة.",
-            srv5Title: "إشعارات وتشغيل",
-            srv5Desc: "تنبيهات للحالة + تذكير صيانة + سجل مركبة.",
-            srv6Title: "REST API للشركات",
-            srv6Desc: "دمج مع ERP/CRM: أوامر، فواتير، حالات، وتتبّع.",
-            howTitle: "كيف تعمل خدمة الشركات؟",
-            howDesc: "3 خطوات: بيانات الشركة → تهيئة الأسطول → تشغيل وجدولة.",
-            step1No: "الخطوة 1",
-            step1Title: "حساب شركة + بيانات فوترة",
-            step1Desc: "السجل التجاري/الضريبي، فروع، جهات اتصال، وشروط الدفع.",
-            step2No: "الخطوة 2",
-            step2Title: "إضافة المركبات والجدولة",
-            step2Desc: "VIN/لوحات، أنواع الزيوت، فترات صيانة، وموافقات داخلية.",
-            step3No: "الخطوة 3",
-            step3Title: "إسناد الفرق + تقارير",
-            step3Desc: "إسناد تلقائي حسب المنطقة، تحديث الحالة، وفاتورة مجمعة.",
-            pricingTitle: "خطط مخصصة للشركات",
-            pricingDesc: "خطط تشغيل + فوترة + تقارير (أسعار تجريبية للعرض).",
-            bookingTitle: "طلب عرض سعر للشركات",
-            bookingDesc: "نموذج B2B جاهز للربط مع REST API + لوحة تحكم لاحقًا.",
-            apiHintTitle: "ملاحظة تقنية",
-            apiHintDesc: "لاحقًا نربط النموذج مع API مثل: /api/companies و /api/fleets و /api/work-orders و /api/invoices.",
-            bookingSummaryTitle: "ملخص الطلب",
-            bookingTotalLabel: "تقدير",
-            lblCompany: "اسم الشركة",
-            lblManager: "اسم المسؤول",
-            lblEmail: "البريد الإلكتروني",
-            lblPhone: "رقم الجوال",
-            lblCR: "السجل التجاري (اختياري)",
-            lblVAT: "الرقم الضريبي (اختياري)",
-            lblFleet2: "عدد المركبات",
-            lblBranchCount: "عدد الفروع",
-            lblPackage2: "الخطة المطلوبة",
-            lblContract2: "التعاقد",
-            lblAddress2: "المدينة/العنوان الرئيسي",
-            billingTitle: "الفوترة والدفع",
-            billMonthly: "فاتورة شهرية (Net 30)",
-            billPO: "أوامر شراء (PO) + تحويل",
-            billCOD: "دفع ميداني (لطلبات طارئة)",
-            policyTitle: "ملاحظات تشغيل",
-            policyText: "يمكن إضافة: رسوم تنقل حسب المسافة، SLA حسب المناطق، حدود موافقات، ومستخدمين متعددين للشركة.",
-            btnSubmit: "إرسال الطلب (Demo)",
-            btnPreview: "معاينة الملخص",
-            faqTitle: "أسئلة شائعة (شركات)",
-            q1: "هل توجد فواتير ضريبية وفواتير مجمعة للفروع؟",
-            a1: "نعم، يمكن إصدار فواتير حسب الفرع أو فاتورة مجمعة + تقارير شهرية.",
-            q2: "هل تدعمون أوامر شراء PO وشروط Net 30؟",
-            a2: "نعم، يمكن ضبط PO/تحويل بنكي وشروط دفع حسب العقد.",
-            q3: "هل يوجد نظام موافقات ومدراء متعددين؟",
-            a3: "نعم، يمكن إضافة أدوار وصلاحيات (مدير أسطول/مشتريات/محاسب) مع موافقات.",
-            q4: "هل يوجد API للربط مع ERP/CRM؟",
-            a4: "نعم، REST API + Webhooks لتحديث الحالات وإرسال الفواتير والتقارير.",
-            footerTag: "حلول صيانة أساطيل للشركات",
-            footerDesc: "واجهة B2B تجريبية — جاهزة للربط مع Backend + REST API + لوحة تحكم.",
-            footerLinks: "روابط",
-            fServices: "الحلول",
-            fHow: "كيف تعمل",
-            fBooking: "طلب عرض سعر",
-            footerContact: "تواصل",
-            footerNote: "* بيانات تجريبية للعرض",
-            buildNote: "Tailwind + JavaScript + FontAwesome (RTL/LTR)"
-        },
-        en: {
-            announceText: "B2B Fleet service: oil & filters on-site + monthly consolidated invoicing",
-            brandTag: "Corporate fleet maintenance solutions",
-            navServices: "Solutions",
-            navHow: "How it works",
-            navPricing: "Plans",
-            navFaq: "FAQ",
-            mNavServices: "Solutions",
-            mNavHow: "How it works",
-            mNavPricing: "Plans",
-            mNavFaq: "FAQ",
-            ctaBookTop: "Request a quote",
-            ctaBookMobile: "Request a quote",
-            heroBadge: "B2B • Fleet • Scheduling • Invoicing • SLA",
-            heroTitle1: "Manage",
-            heroTitle2: "your fleet maintenance easily",
-            heroDesc: "Built for companies: on-site oil & filter service (HQ/branches), recurring schedules, mobile teams, reports, and consolidated monthly invoicing — with REST API ready to integrate.",
-            heroCtaPrimary: "Request a quote",
-            heroCtaSecondary: "How it works?",
-            stat1Label: "SLA",
-            stat1Value: "Contract-based",
-            stat2Label: "Invoicing",
-            stat2Value: "Monthly",
-            stat3Label: "Reports",
-            stat3Value: "PDF/CSV",
-            stat4Label: "Payment",
-            stat4Value: "Contract/Transfer",
-            quickCardTitle: "Build a corporate estimate",
-            quickCardSubtitle: "Get a quick fleet estimate in under a minute",
-            lblFleet: "Fleet size",
-            lblContract: "Contract type",
-            lblPackage: "Plan",
-            lblWindow: "Visit window",
-            lblCompanyLocation: "Service city/location",
-            btnDetect: "Set",
-            mapNoteTitle: "Map (Placeholder):",
-            mapNoteText: "Later: multi-branch map pins + distance-based mobility fees.",
-            summaryTitle: "Estimate summary",
-            priceLabel: "Monthly estimate",
-            priceNote: "* Demo estimate only",
-            goRequest: "Send quote request",
-            toggleBilling: "Billing: Monthly (Net 30)",
-            note: "* B2B demo UI. Next: corporate accounts, approvals, tax invoices, REST API.",
-            servicesTitle: "Corporate solutions",
-            servicesDesc: "Everything you need to manage fleet maintenance at scale.",
-            servicesLink: "Request a quote →",
-            srv1Title: "Recurring schedules",
-            srv1Desc: "Mileage/time-based maintenance with reminders.",
-            srv2Title: "Consolidated monthly invoicing",
-            srv2Desc: "Per-branch or consolidated invoicing + PDF/CSV reports.",
-            srv3Title: "Approval workflow",
-            srv3Desc: "Request → approval → dispatch → completion.",
-            srv4Title: "Mobile teams for branches",
-            srv4Desc: "On-site service at HQ/branches/partner locations.",
-            srv5Title: "Operations notifications",
-            srv5Desc: "Status updates + maintenance reminders + vehicle history.",
-            srv6Title: "REST API for enterprises",
-            srv6Desc: "Integrate with ERP/CRM: orders, invoices, statuses.",
-            howTitle: "How does B2B work?",
-            howDesc: "3 steps: company setup → fleet onboarding → operations & scheduling.",
-            step1No: "Step 1",
-            step1Title: "Company account + billing",
-            step1Desc: "Commercial/VAT details, branches, contacts, payment terms.",
-            step2No: "Step 2",
-            step2Title: "Add vehicles & schedules",
-            step2Desc: "VIN/plates, oil types, intervals, internal approvals.",
-            step3No: "Step 3",
-            step3Title: "Dispatch teams + reporting",
-            step3Desc: "Auto assignment, live status, consolidated invoices.",
-            pricingTitle: "Corporate plans",
-            pricingDesc: "Operations + billing + reporting (demo prices).",
-            bookingTitle: "Corporate quote request",
-            bookingDesc: "B2B form ready to connect to REST API + dashboard.",
-            apiHintTitle: "Technical note",
-            apiHintDesc: "Later connect to: /api/companies, /api/fleets, /api/work-orders, /api/invoices.",
-            bookingSummaryTitle: "Request summary",
-            bookingTotalLabel: "Estimate",
-            lblCompany: "Company name",
-            lblManager: "Contact person",
-            lblEmail: "Email",
-            lblPhone: "Phone",
-            lblCR: "Commercial Reg. (optional)",
-            lblVAT: "VAT number (optional)",
-            lblFleet2: "Vehicles count",
-            lblBranchCount: "Branches",
-            lblPackage2: "Requested plan",
-            lblContract2: "Contract",
-            lblAddress2: "City / primary address",
-            billingTitle: "Billing & payment",
-            billMonthly: "Monthly invoice (Net 30)",
-            billPO: "Purchase Order (PO) + transfer",
-            billCOD: "On-site payment (urgent)",
-            policyTitle: "Operations notes",
-            policyText: "You can add: distance fees, region SLA, approval limits, multi-users per company.",
-            btnSubmit: "Submit (Demo)",
-            btnPreview: "Preview summary",
-            faqTitle: "FAQ (Corporate)",
-            q1: "Do you provide tax invoices and branch consolidation?",
-            a1: "Yes—per-branch or consolidated invoicing plus monthly reports.",
-            q2: "Do you support PO and Net 30 terms?",
-            a2: "Yes—PO/bank transfer and configurable payment terms.",
-            q3: "Is there an approval workflow and multiple managers?",
-            a3: "Yes—roles (fleet manager/procurement/accounting) with approvals.",
-            q4: "Do you offer an API for ERP/CRM integration?",
-            a4: "Yes—REST API + webhooks for statuses, invoices and reports.",
-            footerTag: "Corporate fleet maintenance solutions",
-            footerDesc: "B2B demo UI — ready for Backend + REST API + dashboard.",
-            footerLinks: "Links",
-            fServices: "Solutions",
-            fHow: "How it works",
-            fBooking: "Request a quote",
-            footerContact: "Contact",
-            footerNote: "* Demo data",
-            buildNote: "Tailwind + JavaScript + FontAwesome (RTL/LTR)"
-        }
-    };
-
     function applyLang(lang) {
-        const dict = translations[lang];
+        const dict = window.translations && window.translations[lang] ? window.translations[lang] : {};
         Object.keys(dict).forEach((key) => {
             const el = document.getElementById(key);
             if (el) el.textContent = dict[key];
+            document.querySelectorAll("[data-i18n=\"" + key + "\"]").forEach(function (node) {
+                node.textContent = dict[key];
+            });
         });
         state.lang = lang;
-        $("btnLang").textContent = lang === "ar" ? "EN" : "AR";
+        if ($("btnLang")) $("btnLang").textContent = lang === "ar" ? "EN" : "AR";
         updateHeroSummary();
         updateRequestSummary();
     }
@@ -1179,10 +954,25 @@
     // ------- Events -------
     $("btnMobile").addEventListener("click", () => $("mobileMenu").classList.toggle("hidden"));
 
-    // ✅ إغلاق المينيو بعد الضغط على أي رابط في الموبايل (اختياري ومفيد)
     document.querySelectorAll("#mobileMenu a").forEach(a => {
         a.addEventListener("click", () => $("mobileMenu").classList.add("hidden"));
     });
+
+    // User menu dropdown (hidden by default, toggle on click, close on outside click)
+    (function () {
+        const btn = document.getElementById("userMenuBtn");
+        const dropdown = document.getElementById("userDropdown");
+        if (!btn || !dropdown) return;
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            dropdown.classList.toggle("hidden");
+            btn.setAttribute("aria-expanded", dropdown.classList.contains("hidden") ? "false" : "true");
+        });
+        document.addEventListener("click", function () {
+            dropdown.classList.add("hidden");
+            btn.setAttribute("aria-expanded", "false");
+        });
+    })();
 
     ["fleetSize", "contractType", "packageType", "visitWindow"].forEach(id => {
         $(id).addEventListener("change", () => {

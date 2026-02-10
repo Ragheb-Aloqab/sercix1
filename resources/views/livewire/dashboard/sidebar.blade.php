@@ -46,13 +46,17 @@
     {{-- Brand (Fixed Top) --}}
     <div class="px-6 py-6 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div
-                class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-black">
-                S
-            </div>
-            <div>
-                <p class="font-extrabold leading-5">
-                    SERV.X
+            @if(($siteLogoUrl ?? null))
+                <img src="{{ $siteLogoUrl }}" alt="" class="w-11 h-11 rounded-2xl object-cover flex-shrink-0">
+            @else
+                <div
+                    class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-black flex-shrink-0">
+                    S
+                </div>
+            @endif
+            <div class="min-w-0">
+                <p class="font-extrabold leading-5 truncate">
+                    {{ $siteName ?? 'SERV.X' }}
                     @if ($role === 'admin')
                         Admin
                     @elseif($role === 'technician')

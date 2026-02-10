@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'لوحة التحكم | SERV.X')</title>
+    <title>@yield('title', 'لوحة التحكم | ' . ($siteName ?? 'SERV.X'))</title>
 
     {{-- Tailwind CDN (للمعاينة فقط) --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,7 +57,7 @@
             @yield('content')
 
             <div class="mt-8 text-sm text-slate-500 dark:text-slate-400">
-                © {{ date('Y') }} SERV.X • Prototype UI (Tailwind + JS + FontAwesome)
+                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }} • Prototype UI (Tailwind + JS + FontAwesome)
             </div>
         </section>
     </main>

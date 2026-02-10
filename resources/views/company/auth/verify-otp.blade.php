@@ -83,7 +83,7 @@
             </div>
 
             <div class="mt-4 text-center text-xs text-slate-500">
-                © {{ date('Y') }} OilGo Business
+                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
             </div>
         </div>
     </div>
