@@ -3,8 +3,12 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Models\User;
 use App\Events\OrderCreated;
 use App\Events\OrderAssignedToTechnician;
+use App\Notifications\DriverServiceRequestNotification;
+use App\Notifications\NewOrderForAdmin;
+
 class OrderObserver
 {
     /**
@@ -12,7 +16,15 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        event(new OrderCreated($order));
+        if ($order->status === 'requested') {
+            // Driver submitted: notify company (so they can approve)
+            $company = $order->company;
+            if ($company) {
+                $company->notify(new DriverServiceRequestNotification($order));
+            }
+        } else {
+            event(new OrderCreated($order));
+        }
     }
 
     /**
@@ -20,6 +32,14 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        // Company approved request: notify admin
+        if ($order->wasChanged('status') && $order->status === 'pending' && $order->getOriginal('status') === 'requested') {
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewOrderForAdmin($order));
+            }
+        }
+
         if (
             $order->isDirty('technician_id') &&
             $order->technician_id !== null

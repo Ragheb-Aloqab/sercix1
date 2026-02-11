@@ -72,6 +72,8 @@ class VehiclesController extends Controller
 
             'notes'        => ['nullable', 'string', 'max:1000'],
             'is_active'    => ['nullable', 'boolean'],
+            'driver_name'  => ['nullable', 'string', 'max:100'],
+            'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
 
         // ✅ حماية: لا تختار فرع ليس للشركة
@@ -86,12 +88,33 @@ class VehiclesController extends Controller
 
         $data['company_id'] = $company->id;
         $data['is_active'] = (bool)($data['is_active'] ?? true);
+        if (!empty($data['driver_phone'])) {
+            $data['driver_phone'] = $this->normalizePhone($data['driver_phone']);
+        }
 
         Vehicle::create($data);
 
         return redirect()
             ->route('company.vehicles.index')
             ->with('success', 'تم إضافة المركبة بنجاح ✅');
+    }
+
+    /**
+     * GET /company/vehicles/{vehicle}
+     * company.vehicles.show — تفاصيل المركبة + كل الطلبات والخدمات والمدفوعات
+     */
+    public function show(Vehicle $vehicle)
+    {
+        $company = auth('company')->user();
+        abort_unless((int) $vehicle->company_id === (int) $company->id, 403);
+
+        $vehicle->load([
+            'branch:id,name',
+            'orders' => fn ($q) => $q->with(['services', 'payments', 'technician:id,name,phone'])
+                ->latest(),
+        ]);
+
+        return view('company.vehicles.show', compact('company', 'vehicle'));
     }
 
     /**
@@ -132,6 +155,8 @@ class VehiclesController extends Controller
 
             'notes'        => ['nullable', 'string', 'max:1000'],
             'is_active'    => ['nullable', 'boolean'],
+            'driver_name'  => ['nullable', 'string', 'max:100'],
+            'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
 
         // ✅ حماية: لا تختار فرع ليس للشركة
@@ -145,11 +170,31 @@ class VehiclesController extends Controller
         }
 
         $data['is_active'] = (bool)($data['is_active'] ?? $vehicle->is_active);
+        if (array_key_exists('driver_phone', $data) && $data['driver_phone'] !== null) {
+            $data['driver_phone'] = $data['driver_phone'] === '' ? null : $this->normalizePhone($data['driver_phone']);
+        }
 
         $vehicle->update($data);
 
         return redirect()
             ->route('company.vehicles.index')
             ->with('success', 'تم تحديث المركبة بنجاح ✅');
+    }
+
+    /** Normalize Saudi phone to +966XXXXXXXXX so driver login matches. */
+    private function normalizePhone(string $phone): string
+    {
+        $phone = trim($phone);
+        $digits = preg_replace('/[^0-9]/', '', $phone);
+        if (str_starts_with($digits, '966') && strlen($digits) >= 12) {
+            return '+' . substr($digits, 0, 12);
+        }
+        if (str_starts_with($digits, '0') && strlen($digits) >= 10) {
+            return '+966' . substr($digits, 1, 9);
+        }
+        if (strlen($digits) === 9 && str_starts_with($digits, '5')) {
+            return '+966' . $digits;
+        }
+        return $phone;
     }
 }

@@ -69,18 +69,20 @@ class OtpAuthController extends Controller
         Session::put('otp.code', $otp);
         Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
 
-        // إرسال OTP
-        if (app()->environment('local')) {
-            // في التطوير فقط
-            Log::info("[OTP-DEV] Company Login OTP", [
+        // إرسال OTP: إذا لا يوجد API أو بيئة محلية → نكتب الرمز في storage/logs/laravel.log
+        $hasOtpApi = !empty(config('services.authentica.api_key', '')) || !empty(env('AUTHENTICA_API_KEY'));
+        $sendViaApi = $hasOtpApi && !app()->environment('local');
+
+        if (!$sendViaApi) {
+            Log::channel('single')->info('[OTP-DEV] Company Login — OTP (no API or local)', [
                 'phone' => $phone,
-                'otp' => $otp,
+                'otp'   => $otp,
+                'hint'  => 'Copy the "otp" value and paste it on the verify screen.',
             ]);
-        } else {
-            // في الإنتاج يرسل SMS حقيقي
+        }
+        if ($sendViaApi) {
             $response = OtpService::send($phone, $otp);
             Log::info('Authentica OTP Response', $response);
-
         }
 
         return redirect()

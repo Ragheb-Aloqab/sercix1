@@ -66,17 +66,21 @@
                             </thead>
                             <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800">
                                 @foreach ($vehicles as $v)
-                                    <tr>
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                         <td class="py-3 font-bold">
-                                            {{ $v->plate_number }}
+                                            <a href="{{ route('company.vehicles.show', $v) }}" class="text-emerald-600 dark:text-emerald-400 hover:underline">
+                                                {{ $v->plate_number }}
+                                            </a>
                                         </td>
                                         <td class="py-3">
-                                            <div class="font-semibold">
-                                                {{ $v->brand ?? '-' }} {{ $v->model ?? '' }}
-                                            </div>
-                                            <div class="text-xs text-slate-500 dark:text-slate-400">
-                                                سنة: {{ $v->year ?? '-' }} — VIN: {{ $v->vin ?? '-' }}
-                                            </div>
+                                            <a href="{{ route('company.vehicles.show', $v) }}" class="block hover:opacity-80">
+                                                <div class="font-semibold">
+                                                    {{ $v->make ?? $v->brand ?? '-' }} {{ $v->model ?? '' }}
+                                                </div>
+                                                <div class="text-xs text-slate-500 dark:text-slate-400">
+                                                    سنة: {{ $v->year ?? '-' }} — VIN: {{ $v->vin ?? '-' }}
+                                                </div>
+                                            </a>
                                         </td>
                                         <td class="py-3">
                                             {{ $v->branch?->name ?? '-' }}
@@ -95,6 +99,10 @@
                                             @endif
                                         </td>
                                         <td class="py-3 text-end">
+                                            <a href="{{ route('company.vehicles.show', $v) }}"
+                                                class="px-3 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold inline-flex items-center gap-2 me-2">
+                                                <i class="fa-solid fa-list"></i> تفاصيل
+                                            </a>
                                             <a href="{{ route('company.vehicles.edit', $v->id) }}"
                                                 class="px-3 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 inline-flex items-center gap-2">
                                                 <i class="fa-solid fa-pen"></i> تعديل

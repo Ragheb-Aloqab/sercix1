@@ -92,6 +92,18 @@
                         placeholder="أي تفاصيل إضافية...">{{ old('notes') }}</textarea>
                 </div>
 
+                <div>
+                    <label class="text-sm font-bold">اسم السائق (اختياري)</label>
+                    <input type="text" name="driver_name" value="{{ old('driver_name') }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
+                        placeholder="اسم السائق للتواصل">
+                </div>
+                <div>
+                    <label class="text-sm font-bold">جوال السائق (اختياري)</label>
+                    <input type="text" name="driver_phone" value="{{ old('driver_phone') }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
+                        placeholder="05xxxxxxxx — للتسجيل وطلبات الخدمة">
+                </div>
                 <div class="lg:col-span-2 flex items-center gap-2">
                     <input id="is_active" type="checkbox" name="is_active" value="1" class="rounded"
                         @checked(old('is_active', 1))>

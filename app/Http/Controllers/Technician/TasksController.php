@@ -35,7 +35,8 @@ class TasksController extends Controller
 
         $order->load([
             'company:id,company_name,phone',
-            // 'attachments',
+            'vehicle:id,plate_number,make,model',
+            'services',
         ]);
 
         return view('technician.tasks.show', compact('technician', 'order'));

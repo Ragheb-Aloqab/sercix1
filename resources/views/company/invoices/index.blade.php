@@ -7,8 +7,7 @@
     <div class="space-y-6">
 
         <form method="GET" class="flex flex-wrap gap-3">
-            <input type="text" name="q" value="{{ $q }}" placeholder=" رقم الفاتورة..."
-                value="{{ request('q') }}"
+            <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="رقم الفاتورة..."
                 class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent">
 
             <select name="status" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent">
@@ -38,7 +37,7 @@
                             <th class="p-4 text-start">الاجمالي</th>
                             <th class="p-4 text-start">المدفوع</th>
                             <th class="p-4 text-start">المتبقي</th>
-                            <th class="p-4 text-start">الحالة</th>
+                            <th class="p-4 text-start">حالة الدفع</th>
                             <th class="p-4 text-start">التاريخ</th>
                             <th class="p-4 text-start">اجراء</th>
                         </tr>
@@ -52,19 +51,30 @@
 
                                 <td class="p-4">{{ $invoice->invoice_number ?? '-' }}</td>
 
-                                <td class="p-4 font-semibold">{{ number_format((float) ($invoice->total ?? 0), 2) }}
-                                </td>
+                                <td class="p-4 font-semibold">{{ number_format((float) ($invoice->total ?? 0), 2) }} SAR</td>
                                 <td class="p-4 font-semibold text-emerald-700">
-                                    {{ number_format((float) ($invoice->paid_amount ?? 0), 2) }}</td>
+                                    {{ number_format((float) ($invoice->paid_amount ?? 0), 2) }} SAR</td>
                                 <td class="p-4 font-semibold text-amber-700">
-                                    {{ number_format((float) ($invoice->remaining_amount ?? 0), 2) }}</td>
+                                    {{ number_format((float) ($invoice->remaining_amount ?? 0), 2) }} SAR</td>
 
                                 <td class="p-4">
-                                    <span
-                                        class="px-3 py-1 rounded-full text-xs font-bold
-                                    {{ $invoice->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : ($invoice->status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-700') }}">
-                                        {{ ucfirst($invoice->status) }}
-                                    </span>
+                                    @php
+                                        $isPaid = ($invoice->remaining_amount ?? 0) <= 0 && (float)($invoice->total ?? 0) > 0;
+                                        $isPartial = (float)($invoice->paid_amount ?? 0) > 0 && ($invoice->remaining_amount ?? 0) > 0;
+                                    @endphp
+                                    @if ($isPaid)
+                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700">
+                                            <i class="fa-solid fa-check-circle me-1"></i> مدفوع
+                                        </span>
+                                    @elseif ($isPartial)
+                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
+                                            <i class="fa-solid fa-clock me-1"></i> مدفوع جزئياً
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700">
+                                            <i class="fa-solid fa-times-circle me-1"></i> غير مدفوع
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="p-4 text-slate-500">{{ optional($invoice->created_at)->format('Y-m-d') }}</td>

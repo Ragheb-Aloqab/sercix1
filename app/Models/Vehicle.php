@@ -9,7 +9,7 @@ class Vehicle extends Model
 {
     protected $fillable = [
         'company_id',
-        'company_branch_id', // ✅ الحل هنا
+        'company_branch_id',
         'type',
         'make',
         'model',
@@ -17,6 +17,8 @@ class Vehicle extends Model
         'plate_number',
         'color',
         'image_path',
+        'driver_name',
+        'driver_phone',
         'is_active',
     ];
 

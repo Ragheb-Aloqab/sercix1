@@ -1,6 +1,7 @@
 @php
     $map = [
         'pending' => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+        'requested' => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
         'assigned' => 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
         'on_the_way' => 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
         'in_progress' => 'bg-amber-500/10 text-amber-800 dark:text-amber-300',

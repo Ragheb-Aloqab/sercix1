@@ -29,9 +29,11 @@
             @forelse($notifications as $n)
                 @php
                     $title = data_get($n, 'data.title', 'Notification');
-                    
+                    $message = data_get($n, 'data.message');
                     $companyName = data_get($n, 'data.company_name');
                     $orderId = data_get($n, 'data.order_id');
+                    $methodLabel = data_get($n, 'data.method_label');
+                    $amount = data_get($n, 'data.amount');
                     $isUnread = empty($n['read_at'] ?? null);
                 @endphp
 
@@ -47,14 +49,20 @@
                             <div class="font-bold text-sm">{{ $title }}</div>
 
                             <div class="mt-1 text-xs text-slate-500 dark:text-slate-400 space-y-1">
-                                @if ($companyName)
-                                    <div>{{ $companyName }}</div>
+                                @if ($message)
+                                    <div class="text-slate-700 dark:text-slate-300">{{ $message }}</div>
+                                @else
+                                    @if ($companyName)
+                                        <div>{{ $companyName }}</div>
+                                    @endif
+                                    @if ($orderId)
+                                        <div>Order #{{ $orderId }}</div>
+                                    @endif
                                 @endif
-
-                                @if ($orderId)
-                                    <div>Order #{{ $orderId }}</div>
+                                @if ($methodLabel && $amount !== null)
+                                    <div>{{ $methodLabel }} — {{ number_format((float)$amount, 2) }} ر.س</div>
                                 @endif
-                              <div>{{ data_get($n, 'created_human') }}</div>
+                                <div>{{ data_get($n, 'created_human') }}</div>
                             </div>
                         </div>
 

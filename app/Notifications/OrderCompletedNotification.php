@@ -20,12 +20,16 @@ class OrderCompletedNotification extends Notification /*implements ShouldQueue*/
 
     public function toArray(object $notifiable): array
     {
-        $url = route('company.orders.show', $this->order->id);
+        $url = route('admin.orders.show', $this->order->id);
+        $technicianName = $this->order->technician ? $this->order->technician->name : null;
         return [
             'type' => 'order_completed',
-            'title' => 'Order completed',
-            'message' => 'Your order has been completed.',
+            'title' => 'تم إكمال الطلب',
+            'message' => $technicianName
+                ? "تم إكمال الطلب بواسطة الفني: {$technicianName}"
+                : 'تم إكمال الطلب.',
             'order_id' => $this->order->id,
+            'technician_name' => $technicianName,
             'route' => $url,
             'url' => $url,
         ];

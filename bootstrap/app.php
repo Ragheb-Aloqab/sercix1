@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'auth.any' => \App\Http\Middleware\AuthenticateAny::class,
+            'driver.session' => \App\Http\Middleware\EnsureDriverSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

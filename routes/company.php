@@ -93,6 +93,10 @@ Route::middleware(['auth:company'])
         Route::post('/vehicles', [VehiclesController::class, 'store'])
             ->name('vehicles.store');
 
+        Route::get('/vehicles/{vehicle}', [VehiclesController::class, 'show'])
+            ->name('vehicles.show')
+            ->whereNumber('vehicle');
+
         Route::get('/vehicles/{vehicle}/edit', [VehiclesController::class, 'edit'])
             ->name('vehicles.edit')
             ->whereNumber('vehicle');

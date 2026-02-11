@@ -88,6 +88,18 @@
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
                 </div>
 
+                <div>
+                    <label class="text-sm font-bold">اسم السائق (اختياري)</label>
+                    <input type="text" name="driver_name" value="{{ old('driver_name', $vehicle->driver_name) }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
+                        placeholder="اسم السائق">
+                </div>
+                <div>
+                    <label class="text-sm font-bold">جوال السائق (اختياري)</label>
+                    <input type="text" name="driver_phone" value="{{ old('driver_phone', $vehicle->driver_phone) }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
+                        placeholder="05xxxxxxxx">
+                </div>
                 <div class="lg:col-span-2">
                     <label class="text-sm font-bold">ملاحظات</label>
                     <textarea name="notes" rows="3"

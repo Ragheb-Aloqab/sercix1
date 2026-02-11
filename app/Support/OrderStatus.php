@@ -5,6 +5,7 @@ namespace App\Support;
 final class OrderStatus
 {
     public const PENDING   = 'pending';
+    public const REQUESTED = 'requested';  // driver submitted, waiting company approval
     public const ASSIGNED  = 'assigned';
     public const ON_THE_WAY = 'on_the_way';
     public const IN_PROGRESS = 'in_progress';
@@ -15,6 +16,7 @@ final class OrderStatus
 
     public const ALL = [
         self::PENDING,
+        self::REQUESTED,
         self::ASSIGNED,
         self::ON_THE_WAY,
         self::IN_PROGRESS,
@@ -27,6 +29,7 @@ final class OrderStatus
     // المسموح به من كل حالة إلى حالات أخرى
     public const TRANSITIONS = [
         self::PENDING => [self::ASSIGNED, self::CANCELLED],
+        self::REQUESTED => [self::PENDING, self::CANCELLED],
         self::ASSIGNED => [self::ON_THE_WAY, self::CANCELLED],
         self::ON_THE_WAY => [self::IN_PROGRESS, self::CANCELLED],
         self::IN_PROGRESS => [self::COMPLETED, self::CANCELLED],

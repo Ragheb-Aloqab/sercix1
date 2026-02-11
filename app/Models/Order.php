@@ -19,6 +19,8 @@ class Order extends Model
         'lat',
         'lng',
         'notes',
+        'requested_by_name',
+        'driver_phone',
     ];
     public function company()
     {

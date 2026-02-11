@@ -19,11 +19,14 @@ class NewOrderForAdmin extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $companyName = $this->order->company ? $this->order->company->company_name : null;
         return [
             'type' => 'new_order',
-            'title' => 'طلب جديد من عميل',
+            'title' => 'طلب جديد',
+            'message' => $companyName ? "طلب جديد من الشركة: {$companyName}" : 'طلب جديد من عميل',
             'order_id' => $this->order->id,
-            'customer_name' => $this->order->customer_name ?? null,
+            'company_name' => $companyName,
+            'driver_phone' => $this->order->driver_phone,
             'url' => route('admin.orders.show', $this->order->id),
             'created_at' => now(),
         ];

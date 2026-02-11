@@ -21,11 +21,42 @@ Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('
 
 /*
 |--------------------------------------------------------------------------
-| Company Auth (OTP)
+| Unified Sign-In (Company + Driver) — one form, redirect by role
+|--------------------------------------------------------------------------
+*/
+Route::prefix('sign-in')->name('sign-in.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\UnifiedAuthController::class, 'showLogin'])->name('index');
+    Route::post('/send-otp', [\App\Http\Controllers\UnifiedAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::get('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'showVerify'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'verifyOtp'])->name('verify_otp');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Driver Auth (OTP) + Dashboard — /driver/login redirects to unified sign-in
+|--------------------------------------------------------------------------
+*/
+Route::prefix('driver')->name('driver.')->group(function () {
+    Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
+    Route::post('/send-otp', [\App\Http\Controllers\DriverAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::get('/verify', [\App\Http\Controllers\DriverAuthController::class, 'showVerify'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\DriverAuthController::class, 'verifyOtp'])->name('verify_otp');
+    Route::post('/logout', [\App\Http\Controllers\DriverAuthController::class, 'logout'])->name('logout');
+
+    Route::middleware('driver.session')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\DriverController::class, 'dashboard'])->name('dashboard');
+        Route::get('/request', [\App\Http\Controllers\DriverController::class, 'createRequest'])->name('request.create');
+        Route::post('/request', [\App\Http\Controllers\DriverController::class, 'storeRequest'])->name('request.store');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Company Auth (OTP) — /company/login redirects to unified sign-in
 |--------------------------------------------------------------------------
 */
 Route::prefix('company')->name('company.')->group(function () {
-    Route::get('/login', [OtpAuthController::class, 'showPhoneForm'])->name('login');
+    Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
     Route::post('/login/send-otp', [OtpAuthController::class, 'sendOtp'])->name('send_otp');
     Route::get('/login/verify', [OtpAuthController::class, 'showVerifyForm'])->name('verify');
     Route::post('/login/verify', [OtpAuthController::class, 'verifyOtp'])->name('verify_otp');

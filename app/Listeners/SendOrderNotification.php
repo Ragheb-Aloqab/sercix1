@@ -23,12 +23,14 @@ class SendOrderNotification
      */
     public function handle(OrderCreated $event): void
     {
-        $admins = User::where('role', 'admin')->get();
+        // Only notify admin when order is pending (ready for assignment), not when driver just requested
+        if ($event->order->status === 'requested') {
+            return;
+        }
 
+        $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            $admin->notify(
-                new NewOrderForAdmin($event->order)
-            );
+            $admin->notify(new NewOrderForAdmin($event->order));
         }
       ActivityLogger::log(
             action: 'order_created',

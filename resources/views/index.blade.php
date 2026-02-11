@@ -63,6 +63,7 @@
             <span id="announceText">خدمة أساطيل للشركات: صيانة زيوت وفلاتر في موقع شركتك + فواتير شهرية</span>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('sign-in.index') }}" class="rounded-full bg-white/10 px-3 py-1 hover:bg-white/20 transition text-sm">دخول السائق</a>
             <button id="btnLang"
                     class="rounded-full bg-white/10 px-3 py-1 hover:bg-white/20 transition">EN
             </button>
@@ -131,7 +132,7 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('company.login') }}"
+                <a href="{{ route('sign-in.index') }}"
                    class="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900 font-extrabold">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     {{ __('index.navLogin') }}
@@ -169,7 +170,7 @@
                     <button type="submit" class="w-full text-start py-2 font-extrabold text-slate-900" data-i18n="navLogout">{{ __('index.navLogout') }}</button>
                 </form>
             @else
-                <a href="{{ route('company.login') }}" class="py-2 font-extrabold text-slate-900">{{ __('index.navLogin') }}</a>
+                <a href="{{ route('sign-in.index') }}" class="py-2 font-extrabold text-slate-900">{{ __('index.navLogin') }}</a>
             @endif
         </div>
     </div>
