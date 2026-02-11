@@ -1,7 +1,7 @@
 <div class="relative" x-data="{ open: @entangle('open').live }" @click.away="$wire.close(); open=false" wire:poll.visible.20s="refreshUnread">
 
     <button type="button"
-        class="inline-flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+        class="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
         wire:click="toggle">
         <i class="fa-regular fa-bell"></i>
 
@@ -17,18 +17,18 @@
         class="absolute end-0 mt-3 w-[360px] max-w-[92vw] rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden z-50">
 
         <div class="px-5 py-4 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
-            <div class="font-black">Notifications</div>
+            <div class="font-black">{{ __('dashboard.notifications') }}</div>
 
             <button type="button" wire:click="markAllAsRead"
                 class="text-xs font-bold px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
-                Mark all as read
+                {{ __('dashboard.mark_all_read') }}
             </button>
         </div>
 
         <div class="max-h-[420px] overflow-auto">
             @forelse($notifications as $n)
                 @php
-                    $title = data_get($n, 'data.title', 'Notification');
+                    $title = data_get($n, 'data.title', __('dashboard.notification'));
                     $message = data_get($n, 'data.message');
                     $companyName = data_get($n, 'data.company_name');
                     $orderId = data_get($n, 'data.order_id');
@@ -56,7 +56,7 @@
                                         <div>{{ $companyName }}</div>
                                     @endif
                                     @if ($orderId)
-                                        <div>Order #{{ $orderId }}</div>
+                                        <div>{{ __('dashboard.order') }} #{{ $orderId }}</div>
                                     @endif
                                 @endif
                                 @if ($methodLabel && $amount !== null)
@@ -68,14 +68,14 @@
 
                         @if ($isUnread)
                             <div class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-xl">
-                                New
+                                {{ __('dashboard.new') }}
                             </div>
                         @endif
                     </div>
                 </button>
             @empty
                 <div class="px-5 py-8 text-center text-sm text-slate-500">
-                    No notifications
+                    {{ __('dashboard.no_notifications') }}
                 </div>
             @endforelse
         </div>

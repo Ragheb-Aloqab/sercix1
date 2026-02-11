@@ -1,6 +1,6 @@
 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
     <h2 class="text-lg font-black">بيانات الحساب</h2>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">تعديل الاسم والإيميل والجوال</p>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ __('common.edit_profile') }}</p>
 
     @if (session('success'))
         <div class="mt-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">

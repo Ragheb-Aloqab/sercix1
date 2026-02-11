@@ -47,8 +47,8 @@
                 class="px-3 py-2 rounded-xl border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
             <option value="">نوع الحركة</option>
             <option value="in">دخول</option>
-            <option value="out">خروج</option>
-            <option value="adjustment">تعديل</option>
+            <option value="out">{{ __('common.out') }}</option>
+            <option value="adjustment">{{ __('common.adjustment') }}</option>
             <option value="return">إرجاع</option>
             <option value="transfer">نقل</option>
         </select>

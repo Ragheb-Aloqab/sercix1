@@ -20,7 +20,7 @@ class CompanyFactory extends Factory
         return [
             'company_name'   => $this->faker->company(),
             'email'          => $this->faker->unique()->safeEmail(),
-            'phone'          => '05' . $this->faker->numberBetween(10000000, 99999999),
+            'phone'          => '+9665' . $this->faker->numberBetween(10000000, 99999999),
             'password'       => Hash::make('password'),
             'phone_verified_at' => now(),
             'contact_person' => $this->faker->name(),

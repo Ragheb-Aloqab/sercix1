@@ -17,7 +17,7 @@
                 @endforeach
             </select>
 
-            <button class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold">بحث</button>
+            <button class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold">{{ __('common.search') }}</button>
         </form>
 
         @if (session('error'))

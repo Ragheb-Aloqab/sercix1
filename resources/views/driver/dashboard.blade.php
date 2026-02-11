@@ -17,7 +17,7 @@
                 @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" class="h-9 w-9 rounded-xl object-cover">@endif
                 <span class="font-extrabold text-lg">{{ $siteName ?? 'SERV.X' }} — السائق</span>
             </div>
-            <form method="POST" action="{{ route('driver.logout') }}" class="inline">@csrf<button type="submit" class="px-4 py-2 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50">خروج</button></form>
+            <form method="POST" action="{{ route('driver.logout') }}" class="inline">@csrf<button type="submit" class="px-4 py-2 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50">{{ __('dashboard.logout') }}</button></form>
         </div>
     </header>
 

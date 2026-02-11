@@ -46,7 +46,7 @@
 
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden">
         <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
-            <h2 class="text-lg font-black">الطلبات</h2>
+            <h2 class="text-lg font-black">{{ __('dashboard.orders') }}</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">

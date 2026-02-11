@@ -95,7 +95,7 @@
             @if($invoice->order->services && $invoice->order->services->count())
                 <div class="mt-5">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-black">الخدمات</h3>
+                        <h3 class="font-black">{{ __('common.services') }}</h3>
                         <span class="text-sm text-slate-500">{{ $invoice->order->services->count() }} items</span>
                     </div>
 

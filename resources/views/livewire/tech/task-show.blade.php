@@ -77,7 +77,7 @@
         </div>
         @if($order->services && $order->services->isNotEmpty())
             <div class="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-800">
-                <p class="text-slate-500 dark:text-slate-400 text-sm mb-2">الخدمات المطلوبة</p>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('common.required_services') }}</p>
                 <ul class="flex flex-wrap gap-2">
                     @foreach($order->services as $s)
                         <li class="px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 text-sm font-medium">{{ $s->name }}</li>

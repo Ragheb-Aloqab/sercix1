@@ -1,18 +1,18 @@
 <header
     class="sticky top-0 z-30 bg-slate-50/70 dark:bg-slate-950/60 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-3 min-w-0">
         <button id="openSidebar"
-            class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-2xl
+            class="lg:hidden shrink-0 inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl
       border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
             <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="flex-1">
-            <p class="text-sm text-slate-500 dark:text-slate-400">@yield('subtitle', 'لوحة التحكم')</p>
-            <h1 class="text-xl sm:text-2xl font-black tracking-tight">@yield('page_title', 'نظرة عامة على التشغيل')</h1>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">@yield('subtitle', __('dashboard.subtitle_default'))</p>
+            <h1 class="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate">@yield('page_title', __('dashboard.page_title_default'))</h1>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
             <livewire:dashboard.ui-preferences />
 
             <livewire:dashboard.global-search />

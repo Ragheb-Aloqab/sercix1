@@ -9,7 +9,7 @@
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-black">المدفوعات</h1>
-            <p class="text-sm text-slate-500 mt-1">عرض المدفوعات المكتملة والدفعات المعلّقة — اضغط «دفع / تفاصيل» لسداد المبلغ.</p>
+            <p class="text-sm text-slate-500 mt-1">{{ __('company.payments_page_desc') }}</p>
             @if(request('order_id'))
                 <p class="text-sm text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">دفعات الطلب #{{ request('order_id') }}</p>
             @endif
@@ -37,7 +37,7 @@
                 <option value="bank" @selected(request('method')==='bank')>تحويل بنكي</option>
             </select>
 
-            <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">بحث</button>
+            <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">{{ __('common.search') }}</button>
         </form>
     </div>
 
@@ -51,7 +51,7 @@
                     <th class="px-5 py-4 text-start font-bold">الطريقة</th>
                     <th class="px-5 py-4 text-start font-bold">الحالة</th>
                     <th class="px-5 py-4 text-start font-bold">التاريخ</th>
-                    <th class="px-5 py-4 text-center font-bold">عرض</th>
+                    <th class="px-5 py-4 text-center font-bold">{{ __('common.view') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800">

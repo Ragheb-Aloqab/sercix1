@@ -128,4 +128,5 @@ return [
     'footerNote' => '* Demo data',
     'buildNote' => 'Tailwind + JavaScript + FontAwesome (RTL/LTR)',
     'cityPlaceholder' => '— city not set',
+    'language' => 'Language',
 ];

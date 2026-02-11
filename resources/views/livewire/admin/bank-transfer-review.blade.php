@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
         <h1 class="text-xl font-black">تحويلات بنكية بانتظار المراجعة</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">عرض إيصال التحويل وتأكيد أو رفض الدفع.</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ __('common.bank_transfer_review_desc') }}</p>
     </div>
 
     <div class="space-y-4">

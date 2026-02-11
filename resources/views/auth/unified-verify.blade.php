@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>تأكيد الرمز — {{ $siteName ?? 'SERV.X' }}</title>
+    <title>{{ __('login.verify_title') }} — {{ $siteName ?? 'SERV.X' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style> body { font-family: "Tajawal", system-ui, sans-serif; } .shadow-soft { box-shadow: 0 18px 60px rgba(0,0,0,.12); } </style>
@@ -19,8 +19,8 @@
         </a>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-soft p-6 sm:p-8">
-            <h1 class="text-2xl font-extrabold">تأكيد رمز التحقق</h1>
-            <p class="mt-2 text-sm text-slate-600">تم إرسال الرمز إلى: <span class="font-bold">{{ $phone }}</span></p>
+            <h1 class="text-2xl font-extrabold">{{ __('login.verify_title') }}</h1>
+            <p class="mt-2 text-sm text-slate-600">{{ __('login.verify_sent') }}: <span class="font-bold">{{ $phone }}</span></p>
 
             @if (session('success'))<div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
             @if ($errors->any())<div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
@@ -28,13 +28,18 @@
             <form method="POST" action="{{ route('sign-in.verify_otp') }}" class="mt-6 space-y-4">
                 @csrf
                 <div>
-                    <label class="text-sm font-bold text-slate-700">رمز التحقق (6 أرقام)</label>
-                    <input name="otp" inputmode="numeric" maxlength="6" placeholder="123456"
+                    <label class="text-sm font-bold text-slate-700">{{ __('login.verify_otp_label') }}</label>
+                    <input name="otp" inputmode="numeric" maxlength="6" placeholder="{{ __('login.verify_otp_placeholder') }}"
                         class="mt-2 w-full tracking-widest text-center text-2xl font-extrabold rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
                 </div>
-                <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-white font-extrabold hover:bg-emerald-700">تحقق والدخول</button>
+                <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-white font-extrabold hover:bg-emerald-700">{{ __('login.verify_submit') }}</button>
             </form>
-            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-bold text-slate-700">تغيير رقم الجوال</a>
+            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-bold text-slate-700">{{ __('login.change_phone') }}</a>
+        </div>
+        <div class="mt-4 flex justify-center gap-2">
+            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'ar' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">العربية</a>
+            <span class="text-slate-400">|</span>
+            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'en' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">English</a>
         </div>
         <p class="mt-4 text-center text-xs text-slate-500">© {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}</p>
     </div>

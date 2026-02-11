@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ar"
-      dir="{{ session('ui.dir', 'rtl') }}"
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}"
       class="{{ session('ui.theme') === 'dark' ? 'dark' : '' }} h-full scroll-smooth">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'لوحة التحكم | ' . ($siteName ?? 'SERV.X'))</title>
+    <title>@yield('title', __('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'SERV.X'))</title>
 
     {{-- Tailwind CDN (للمعاينة فقط) --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,13 @@
         ::-webkit-scrollbar { height: 10px; width: 10px }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px }
         .dark ::-webkit-scrollbar-thumb { background: #475569 }
+        /* RTL: sidebar on right, hide to right when closed */
+        [dir="rtl"] #sidebar { left: auto; right: 0; }
+        [dir="rtl"] #sidebar { transform: translateX(100%); }
+        [dir="rtl"] #sidebar.sidebar-open { transform: translateX(0); }
+        @media (min-width: 1024px) {
+            [dir="rtl"] #sidebar { transform: translateX(0); }
+        }
     </style>
 
     {{-- ✅ لازم داخل head --}}
@@ -38,22 +45,22 @@
     @stack('styles')
 </head>
 
-<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden">
 
 {{-- Backdrop --}}
-<div id="backdrop" class="fixed inset-0 bg-black/40 hidden z-40"></div>
+<div id="backdrop" class="fixed inset-0 bg-black/40 hidden z-40 lg:hidden"></div>
 
-<div class="min-h-screen flex">
+<div class="min-h-screen flex w-full min-w-0">
     {{-- Sidebar --}}
     <livewire:dashboard.sidebar />
 
     {{-- Main --}}
-    <main class="flex-1 lg:ms-80">
+    <main class="flex-1 min-w-0 w-full lg:ms-80 lg:min-w-0">
         {{-- Topbar --}}
         @include('admin.partials.topbar')
 
         {{-- Page Content --}}
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 w-full min-w-0">
             @yield('content')
 
             <div class="mt-8 text-sm text-slate-500 dark:text-slate-400">
@@ -91,12 +98,17 @@
     const sidebar = $('sidebar');
     const backdrop = $('backdrop');
 
+    const isRtl = () => document.documentElement.dir === 'rtl';
     const openSidebar = () => {
-        sidebar?.classList.remove('translate-x-full');
+        if (!sidebar) return;
+        sidebar.classList.remove('translate-x-full', '-translate-x-full');
+        sidebar.classList.add('sidebar-open');
         backdrop?.classList.remove('hidden');
     };
     const closeSidebar = () => {
-        sidebar?.classList.add('translate-x-full');
+        if (!sidebar) return;
+        sidebar.classList.remove('sidebar-open');
+        if (!isRtl()) sidebar.classList.add('translate-x-full');
         backdrop?.classList.add('hidden');
     };
 
@@ -120,12 +132,12 @@
     // Responsive reset
     window.addEventListener('resize', () => {
         if (!sidebar || !backdrop) return;
-
         if (window.innerWidth >= 1024) {
             backdrop.classList.add('hidden');
-            sidebar.classList.remove('translate-x-full');
+            sidebar.classList.remove('translate-x-full', '-translate-x-full', 'sidebar-open');
         } else {
-            sidebar.classList.add('translate-x-full');
+            sidebar.classList.remove('sidebar-open');
+            if (!isRtl()) sidebar.classList.add('translate-x-full');
         }
     });
 </script>

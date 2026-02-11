@@ -36,7 +36,7 @@
                 </select>
             </div>
             <div id="services-wrap" class="hidden">
-                <label class="text-sm font-bold text-slate-700">الخدمات المطلوبة *</label>
+                <label class="text-sm font-bold text-slate-700">{{ __('common.required_services') }} *</label>
                 <p class="text-slate-500 text-sm mt-1 mb-2">اختر خدمة أو أكثر ليعرف الفريق ماذا تحتاج.</p>
                 <div id="services-list" class="mt-2 space-y-2 max-h-56 overflow-y-auto rounded-2xl border border-slate-200 p-3 bg-slate-50"></div>
                 @error('service_ids')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
@@ -55,7 +55,7 @@
             </div>
             <div class="flex gap-3 pt-4">
                 <button type="submit" class="flex-1 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3" id="submit-btn" disabled><i class="fa-solid fa-paper-plane me-2"></i>إرسال الطلب</button>
-                <a href="{{ route('driver.dashboard') }}" class="px-6 py-3 rounded-2xl border border-slate-200 font-bold">إلغاء</a>
+                <a href="{{ route('driver.dashboard') }}" class="px-6 py-3 rounded-2xl border border-slate-200 font-bold">{{ __('common.cancel') }}</a>
             </div>
         </form>
     </main>

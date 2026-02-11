@@ -149,7 +149,7 @@
                                 </div>
                                 <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <p class="text-slate-500 dark:text-slate-400 font-bold mb-2">الخدمات</p>
+                                        <p class="text-slate-500 dark:text-slate-400 font-bold mb-2">{{ __('common.services') }}</p>
                                         @if ($order->services && $order->services->count())
                                             <ul class="space-y-1">
                                                 @foreach ($order->services as $s)

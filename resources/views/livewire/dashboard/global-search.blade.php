@@ -3,8 +3,8 @@
         <i class="fa-solid fa-magnifying-glass text-slate-500 dark:text-slate-400"></i>
 
         <input type="text" wire:model.live.debounce.400ms="q"
-            class="bg-transparent outline-none placeholder:text-slate-400 text-sm w-56"
-            placeholder="ابحث عن طلب / شركة..." />
+            class="bg-transparent outline-none placeholder:text-slate-400 text-sm w-40 sm:w-56"
+            placeholder="{{ __('dashboard.search_placeholder') }}" />
     </div>
 
     @if (mb_strlen($q) >= 2)
@@ -13,7 +13,7 @@
 
             {{-- Orders --}}
             @if ($orders->count())
-                <div class="px-4 py-2 text-xs font-bold text-slate-500">الطلبات</div>
+                <div class="px-4 py-2 text-xs font-bold text-slate-500">{{ __('dashboard.orders') }}</div>
 
                 @foreach ($orders as $order)
                     @php
@@ -45,10 +45,10 @@
                     @if ($orderShowRoute)
                         <a href="{{ $orderShowRoute }}"
                             class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
-                            طلب #{{ $order->id }}
+                            {{ __('dashboard.order') }} #{{ $order->id }}
                         </a>
                     @else
-                        <div class="px-4 py-2 text-sm">طلب #{{ $order->id }}</div>
+                        <div class="px-4 py-2 text-sm">{{ __('dashboard.order') }} #{{ $order->id }}</div>
                     @endif
                 @endforeach
             @endif
@@ -57,7 +57,7 @@
             @if ($companies->count())
                 <div
                     class="px-4 py-2 text-xs font-bold text-slate-500 border-t border-slate-200/70 dark:border-slate-800">
-                    الشركات
+                    {{ __('dashboard.companies') }}
                 </div>
 
                 @foreach ($companies as $company)
@@ -79,7 +79,7 @@
             @endif
 
             @if (!$orders->count() && !$companies->count())
-                <div class="px-4 py-3 text-sm text-slate-500">لا توجد نتائج</div>
+                <div class="px-4 py-3 text-sm text-slate-500">{{ __('dashboard.no_results') }}</div>
             @endif
         </div>
     @endif

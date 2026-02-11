@@ -131,7 +131,7 @@
             class="bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4">
             @csrf
 
-            <h2 class="text-lg font-black">إضافة حساب بنكي</h2>
+            <h2 class="text-lg font-black">{{ __('common.add_bank_account') }}</h2>
 
             <div>
                 <label class="text-sm font-bold">اسم البنك</label>

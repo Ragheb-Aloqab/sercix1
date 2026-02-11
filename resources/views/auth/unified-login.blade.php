@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>تسجيل الدخول — {{ $siteName ?? 'SERV.X' }}</title>
+    <title>{{ __('login.title') }} — {{ $siteName ?? 'SERV.X' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -17,29 +17,29 @@
                 @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-xl object-cover">@endif
                 <div>
                     <div class="text-lg font-extrabold">{{ $siteName ?? 'SERV.X' }}</div>
-                    <div class="text-xs text-slate-500">تسجيل الدخول</div>
+                    <div class="text-xs text-slate-500">{{ __('login.title') }}</div>
                 </div>
             </div>
         </a>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-soft p-6 sm:p-8">
-            <h1 class="text-2xl font-extrabold">تسجيل الدخول</h1>
-            <p class="mt-2 text-sm text-slate-600 mb-4">اختر نوع الدخول ثم أدخل رقم الجوال (للشركة أو السائق).</p>
+            <h1 class="text-2xl font-extrabold">{{ __('login.title') }}</h1>
+            <p class="mt-2 text-sm text-slate-600 mb-4">{{ __('login.subtitle') }}</p>
 
             {{-- اختيار نوع الدخول --}}
             <div class="grid grid-cols-3 gap-2 mb-6">
                 <a href="{{ route('login') }}" class="rounded-2xl px-4 py-3 font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition text-center">
                     <i class="fa-solid fa-wrench block text-lg mb-1"></i>
-                    فني
+                    {{ __('login.technician') }}
                 </a>
                 <button type="button" data-role="company" class="role-btn rounded-2xl px-4 py-3 font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition text-center">
                     <i class="fa-solid fa-building block text-lg mb-1"></i>
-                    شركة
-                </button>
+                    {{ __('login.company') }}
+                </a>
                 <button type="button" data-role="driver" class="role-btn rounded-2xl px-4 py-3 font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition text-center">
                     <i class="fa-solid fa-car block text-lg mb-1"></i>
-                    سائق
-                </button>
+                    {{ __('login.driver') }}
+                </a>
             </div>
 
             @if (session('success'))<div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
@@ -51,17 +51,23 @@
                     @csrf
                     <input type="hidden" name="role" id="input-role" value="" />
                     <div>
-                        <label class="text-sm font-bold text-slate-700">رقم الجوال</label>
-                        <input name="phone" value="{{ old('phone') }}" placeholder="05xxxxxxxx أو +9665xxxxxxxx"
+                        <label class="text-sm font-bold text-slate-700">{{ __('login.phone_label') }}</label>
+                        <input name="phone" value="{{ old('phone') }}" placeholder="{{ __('login.phone_placeholder') }}"
                             class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
                     </div>
-                    <button type="submit" class="w-full rounded-2xl bg-slate-900 px-6 py-3 text-white font-extrabold hover:bg-slate-800">إرسال رمز التحقق</button>
+                    <button type="submit" class="w-full rounded-2xl bg-slate-900 px-6 py-3 text-white font-extrabold hover:bg-slate-800">{{ __('login.send_otp') }}</button>
                 </form>
             </div>
 
             <a href="{{ route('company.register') }}" class="mt-4 block w-full text-center rounded-2xl border border-slate-300 px-6 py-3 font-bold text-slate-700 hover:bg-slate-50">
-                إنشاء حساب شركة
+                {{ __('login.create_company_account') }}
             </a>
+        </div>
+        <div class="mt-4 flex justify-center gap-2">
+            <span class="text-xs text-slate-500">{{ __('index.language') }}:</span>
+            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'ar' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">العربية</a>
+            <span class="text-slate-400">|</span>
+            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'en' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">English</a>
         </div>
         <p class="mt-4 text-center text-xs text-slate-500">© {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}</p>
     </div>

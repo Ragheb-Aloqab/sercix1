@@ -40,7 +40,7 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">الخدمات</label>
+                    <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ __('common.services') }}</label>
                     <div class="mt-2 space-y-2">
                         @foreach ($services as $service)
                             @php

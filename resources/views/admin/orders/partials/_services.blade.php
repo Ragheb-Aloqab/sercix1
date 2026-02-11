@@ -1,7 +1,7 @@
 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft">
     <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
-        <h2 class="text-lg font-black">الخدمات</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">الخدمات المرتبطة بالطلب</p>
+        <h2 class="text-lg font-black">{{ __('common.services') }}</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('common.services_in_order') }}</p>
     </div>
 
     @php

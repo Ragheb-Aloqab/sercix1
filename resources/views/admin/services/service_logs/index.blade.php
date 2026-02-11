@@ -5,14 +5,14 @@
     <div class="flex items-center justify-between gap-3">
         <div>
             <h1 class="text-2xl font-black">سجل الخدمات</h1>
-            <p class="text-sm text-slate-500">الخدمات المنفّذة وغير المنفّذة حسب حالة الطلب</p>
+            <p class="text-sm text-slate-500">{{ __('common.services_log_desc') }}</p>
         </div>
     </div>
 
     <div class="mt-6 bg-white border rounded-2xl p-4">
         <form method="GET" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
             <div class="lg:col-span-7">
-                <label class="text-xs text-slate-500">بحث</label>
+                <label class="text-xs text-slate-500">{{ __('common.search') }}</label>
                 <input name="q" value="{{ $q }}" class="mt-1 w-full rounded-xl border-slate-200" placeholder="اسم الخدمة أو لوحة السيارة">
             </div>
 

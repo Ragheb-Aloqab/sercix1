@@ -152,7 +152,7 @@
             @endphp
 
             <div class="mt-6">
-                <h2 class="font-black text-lg mb-3">الخدمات</h2>
+                <h2 class="font-black text-lg mb-3">{{ __('common.services') }}</h2>
 
                 <div class="overflow-x-auto border rounded-2xl">
                     <table class="min-w-full text-sm">

@@ -105,6 +105,10 @@ class OtpAuthController extends Controller
         ]);
 
         $phone = trim($data['phone']);
+        // Normalize phone to +966 format for consistency
+        if (str_starts_with($phone, '0')) {
+            $phone = '+966' . substr($phone, 1);
+        }
 
         // 2) توليد OTP
         $otp = (string)random_int(100000, 999999);

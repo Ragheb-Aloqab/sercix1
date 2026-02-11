@@ -18,7 +18,7 @@
 
             {{-- Company --}}
             <div class="mt-3">
-                <p class="text-xs text-slate-500 dark:text-slate-400">الشركة</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('common.company') }}</p>
                 <p class="font-semibold">{{ $order->company?->company_name ?? '—' }}</p>
                 @if (!empty($order->company?->phone))
                     <p class="text-xs text-slate-500 dark:text-slate-400">{{ $order->company?->phone }}</p>
@@ -27,7 +27,7 @@
 
             {{-- Services --}}
             <div class="mt-3">
-                <p class="text-xs text-slate-500 dark:text-slate-400">الخدمات</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('common.services') }}</p>
                 @if ($order->services->count())
                     <div class="mt-1 flex flex-wrap gap-1">
                         @foreach ($order->services as $service)
@@ -61,19 +61,19 @@
                     @if ($paymentStatus === 'paid')
                         <span
                             class="inline-flex px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                            مدفوع
+                            {{ __('common.paid') }}
                         </span>
                     @elseif($paymentStatus === 'partial')
                         <span class="inline-flex px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                            مدفوع جزئي
+                            {{ __('common.partial_paid') }}
                         </span>
                     @elseif($paymentStatus === 'failed')
                         <span class="inline-flex px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-                            فشل الدفع
+                            {{ __('common.payment_failed') }}
                         </span>
                     @else
                         <span class="inline-flex px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-                            غير مدفوع
+                            {{ __('common.unpaid') }}
                         </span>
                     @endif
                 </div>
@@ -83,13 +83,13 @@
             <div class="mt-4 flex justify-end">
                 <a href="{{ route('admin.orders.show', $order) }}"
                     class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold">
-                    فتح
+                    {{ __('common.open') }}
                 </a>
             </div>
         </div>
     @empty
         <div class="py-8 text-center text-slate-500">
-            لا توجد طلبات
+            {{ __('common.no_orders') }}
         </div>
     @endforelse
 </div>
@@ -100,14 +100,14 @@
         <table class="min-w-[1000px] w-full text-sm bg-white dark:bg-slate-900">
             <thead class="text-slate-500 dark:text-slate-400">
                 <tr class="text-start">
-                    <th class="py-3 px-4 font-semibold">رقم</th>
-                    <th class="py-3 px-4 font-semibold">الشركة</th>
-                    <th class="py-3 px-4 font-semibold">الخدمات</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('common.number') }}</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('common.company') }}</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('common.services') }}</th>
                     <th class="py-3 px-4 font-semibold">تاريخ الطلب</th>
                     <th class="py-3 px-4 font-semibold">الدفع</th>
                     <th class="py-3 px-4 font-semibold">حالة الدفع</th>
                     <th class="py-3 px-4 font-semibold">الحالة</th>
-                    <th class="py-3 px-4 font-semibold">إجراءات</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
 
@@ -156,19 +156,19 @@
                             @php($paymentStatus = $order->payment?->status)
                             @if ($paymentStatus === 'paid')
                                 <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                                    مدفوع
+                                    {{ __('common.paid') }}
                                 </span>
                             @elseif($paymentStatus === 'partial')
                                 <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                                    مدفوع جزئي
+                                    {{ __('common.partial_paid') }}
                                 </span>
                             @elseif($paymentStatus === 'failed')
                                 <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-                                    فشل الدفع
+                                    {{ __('common.payment_failed') }}
                                 </span>
                             @else
                                 <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-                                    غير مدفوع
+                                    {{ __('common.unpaid') }}
                                 </span>
                             @endif
                         </td>
@@ -180,14 +180,14 @@
                         <td class="py-4 px-4">
                             <a href="{{ route('admin.orders.show', $order) }}"
                                 class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold">
-                                فتح
+                                {{ __('common.open') }}
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="8" class="py-8 text-center text-slate-500">
-                            لا توجد طلبات
+                            {{ __('common.no_orders') }}
                         </td>
                     </tr>
                 @endforelse

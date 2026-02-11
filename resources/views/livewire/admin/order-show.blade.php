@@ -84,7 +84,7 @@
                                     <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank"><img src="{{ asset('storage/' . $att->file_path) }}" class="w-full h-32 object-cover" alt=""></a>
                                     <div class="p-3 flex justify-between items-center">
                                         <span class="text-xs text-slate-500">{{ $att->created_at?->format('Y-m-d H:i') }}</span>
-                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">حذف</button>
+                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                                     </div>
                                 </div>
                             @empty
@@ -100,7 +100,7 @@
                                     <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank"><img src="{{ asset('storage/' . $att->file_path) }}" class="w-full h-32 object-cover" alt=""></a>
                                     <div class="p-3 flex justify-between items-center">
                                         <span class="text-xs text-slate-500">{{ $att->created_at?->format('Y-m-d H:i') }}</span>
-                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">حذف</button>
+                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                                     </div>
                                 </div>
                             @empty
@@ -115,7 +115,7 @@
                                 <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                     <div class="flex justify-between items-center">
                                         <p class="font-bold">{{ $att->type }}</p>
-                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">حذف</button>
+                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                                     </div>
                                     <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank" class="text-sky-600 font-semibold text-sm">فتح الملف</a>
                                 </div>
@@ -233,7 +233,7 @@
                     <input type="number" step="0.01" wire:model="payment_amount"
                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
                            placeholder="Amount SAR" />
-                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">حفظ الدفع</button>
+                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">{{ __('common.save_payment') }}</button>
                 </form>
             </div>
 

@@ -15,7 +15,7 @@
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-black">تعديل الفرع</h1>
+                    <h1 class="text-2xl font-black">{{ __('common.edit_branch') }}</h1>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
                         {{ $branch->name }}
                         @if ($branch->is_default)

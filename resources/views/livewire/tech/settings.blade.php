@@ -2,7 +2,7 @@
 
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-black">الإعدادات</h1>
+            <h1 class="text-2xl font-black">{{ __('dashboard.settings') }}</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">تحديث بيانات الحساب وكلمة المرور</p>
         </div>
     </div>

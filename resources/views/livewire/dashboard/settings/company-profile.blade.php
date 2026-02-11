@@ -1,6 +1,6 @@
 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
     <h2 class="text-lg font-black">بيانات الشركة</h2>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">تعديل البيانات + رفع الشعار</p>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ __('common.edit_company_data') }}</p>
 
     @if (session('success_company'))
         <div class="mt-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">

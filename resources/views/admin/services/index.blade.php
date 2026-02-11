@@ -53,7 +53,7 @@
                 class="grid grid-cols-1 lg:grid-cols-12 gap-3">
 
                 <div class="lg:col-span-6">
-                    <label class="text-xs text-slate-500">بحث</label>
+                    <label class="text-xs text-slate-500">{{ __('common.search') }}</label>
                     <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="ابحث باسم الخدمة..."
                         class="mt-1 w-full rounded-xl border-slate-200 dark:border-slate-800 dark:bg-slate-950">
                 </div>

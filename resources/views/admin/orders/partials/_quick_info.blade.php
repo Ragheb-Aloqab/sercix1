@@ -7,11 +7,11 @@
             <span class="font-bold">{{ $order->status }}</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400">فني</span>
+            <span class="text-slate-500 dark:text-slate-400">{{ __('dashboard.technician_label') }}</span>
             <span class="font-bold">{{ $order->technician?->name ?? '—' }}</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400">الخدمات</span>
+            <span class="text-slate-500 dark:text-slate-400">{{ __('common.services') }}</span>
             <span class="font-bold">{{ $order->services?->count() ?? 0 }}</span>
         </div>
         <div class="flex items-center justify-between">

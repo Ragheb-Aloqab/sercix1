@@ -55,26 +55,6 @@
 
 <body class="bg-slate-50 text-slate-900">
 
-<!-- Top Announcement -->
-<div class="bg-slate-900 text-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 text-sm">
-        <div class="flex items-center gap-2">
-            <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
-            <span id="announceText">خدمة أساطيل للشركات: صيانة زيوت وفلاتر في موقع شركتك + فواتير شهرية</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('sign-in.index') }}" class="rounded-full bg-white/10 px-3 py-1 hover:bg-white/20 transition text-sm">دخول السائق</a>
-            <button id="btnLang"
-                    class="rounded-full bg-white/10 px-3 py-1 hover:bg-white/20 transition">EN
-            </button>
-            <button id="btnDir"
-                    class="rounded-full bg-white/10 px-3 py-1 hover:bg-white/20 transition">LTR
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Header -->
 <!-- Header -->
 <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
@@ -95,6 +75,27 @@
             <a href="#how" class="text-slate-700 hover:text-slate-900" id="navHow">{{ __('index.navHow') }}</a>
             <a href="#plans" class="text-slate-700 hover:text-slate-900" id="navPricing">{{ __('index.navPricing') }}</a>
             <a href="#faq" class="text-slate-700 hover:text-slate-900" id="navFaq">{{ __('index.navFaq') }}</a>
+
+            <!-- Language Menu -->
+            @php $currentLocale = app()->getLocale(); @endphp
+            <div class="relative" id="langMenuWrap">
+                <button type="button" id="langMenuBtn" aria-expanded="false" aria-haspopup="true"
+                        class="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>{{ $currentLocale === 'ar' ? 'العربية' : 'English' }}</span>
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                <div id="langDropdown" class="hidden absolute end-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-2 text-sm z-50 border border-slate-200">
+                    <a href="{{ route('set-locale', ['lang' => 'ar']) }}"
+                       class="block px-4 py-2 hover:bg-slate-100 {{ $currentLocale === 'ar' ? 'bg-slate-50 font-semibold' : '' }}">
+                        العربية
+                    </a>
+                    <a href="{{ route('set-locale', ['lang' => 'en']) }}"
+                       class="block px-4 py-2 hover:bg-slate-100 {{ $currentLocale === 'en' ? 'bg-slate-50 font-semibold' : '' }}">
+                        English
+                    </a>
+                </div>
+            </div>
 
             <!-- User Authentication -->
             @php
@@ -162,6 +163,18 @@
             <a href="#how" class="py-2" id="mNavHow">{{ __('index.mNavHow') }}</a>
             <a href="#plans" class="py-2" id="mNavPricing">{{ __('index.mNavPricing') }}</a>
             <a href="#faq" class="py-2" id="mNavFaq">{{ __('index.mNavFaq') }}</a>
+
+            <div class="flex items-center gap-3 py-2 border-t border-slate-100 mt-2 pt-3">
+                <span class="text-slate-500 text-xs">{{ __('index.language') }}:</span>
+                <a href="{{ route('set-locale', ['lang' => 'ar']) }}"
+                   class="py-1 px-3 rounded-lg {{ $currentLocale === 'ar' ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-100 hover:bg-slate-200' }}">
+                    العربية
+                </a>
+                <a href="{{ route('set-locale', ['lang' => 'en']) }}"
+                   class="py-1 px-3 rounded-lg {{ $currentLocale === 'en' ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-100 hover:bg-slate-200' }}">
+                    English
+                </a>
+            </div>
 
             @if($user)
                 <a href="{{ $dashboardRoute }}" class="py-2 font-extrabold text-slate-900" data-i18n="navDashboard">{{ __('index.navDashboard') }}</a>
@@ -963,6 +976,22 @@
     (function () {
         const btn = document.getElementById("userMenuBtn");
         const dropdown = document.getElementById("userDropdown");
+        if (!btn || !dropdown) return;
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            dropdown.classList.toggle("hidden");
+            btn.setAttribute("aria-expanded", dropdown.classList.contains("hidden") ? "false" : "true");
+        });
+        document.addEventListener("click", function () {
+            dropdown.classList.add("hidden");
+            btn.setAttribute("aria-expanded", "false");
+        });
+    })();
+
+    // Language menu dropdown
+    (function () {
+        const btn = document.getElementById("langMenuBtn");
+        const dropdown = document.getElementById("langDropdown");
         if (!btn || !dropdown) return;
         btn.addEventListener("click", function (e) {
             e.stopPropagation();

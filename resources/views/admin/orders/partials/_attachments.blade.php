@@ -70,7 +70,7 @@
 
                             <form method="POST" action="{{ route('admin.orders.attachments.destroy', $att) }}">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="text-rose-600 font-bold text-sm">حذف</button>
+                                <button type="submit" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                             </form>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
 
                             <form method="POST" action="{{ route('admin.orders.attachments.destroy', $att) }}">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="text-rose-600 font-bold text-sm">حذف</button>
+                                <button type="submit" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                             </form>
                         </div>
                     </div>
@@ -116,7 +116,7 @@
 
                             <form method="POST" action="{{ route('admin.orders.attachments.destroy', $att) }}">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="text-rose-600 font-bold text-sm">حذف</button>
+                                <button type="submit" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                             </form>
                         </div>
 

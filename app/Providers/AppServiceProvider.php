@@ -33,18 +33,29 @@ class AppServiceProvider extends ServiceProvider
 
         // Site branding (name + logo) for all views — admin can change in Settings
         View::composer('*', function ($view) {
+            try {
+                $siteName = Setting::get('site_name', 'SERV.X');
+                $siteLogoUrl = $this->siteLogoUrl();
+            } catch (\Throwable $e) {
+                $siteName = 'SERV.X';
+                $siteLogoUrl = null;
+            }
             $view->with([
-                'siteName' => Setting::get('site_name', 'SERV.X'),
-                'siteLogoUrl' => $this->siteLogoUrl(),
+                'siteName' => $siteName,
+                'siteLogoUrl' => $siteLogoUrl,
             ]);
         });
     }
 
     private function siteLogoUrl(): ?string
     {
-        $path = Setting::get('site_logo_path');
-        if ($path) {
-            return asset('storage/' . $path);
+        try {
+            $path = Setting::get('site_logo_path');
+            if ($path) {
+                return asset('storage/' . $path);
+            }
+        } catch (\Throwable $e) {
+            // Table may not exist in tests
         }
         return null;
     }
