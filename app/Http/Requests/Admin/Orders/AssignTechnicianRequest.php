@@ -11,7 +11,7 @@ class AssignTechnicianRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('assignTechnician', $this->route('order'));
     }
 
     /**

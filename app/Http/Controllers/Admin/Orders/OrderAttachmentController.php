@@ -11,6 +11,8 @@ class OrderAttachmentController extends Controller
 {
     public function store(UploadAttachmentRequest $request, Order $order)
     {
+        $this->authorize('manageAttachments', $order);
+
         $path = $request->file('file')->store('orders/'.$order->id, 'public');
 
         $order->attachments()->create([
@@ -24,7 +26,11 @@ class OrderAttachmentController extends Controller
 
     public function destroy(Attachment $attachment)
     {
-        // يمكنك لاحقًا حذف الملف من storage
+        $this->authorize('manageAttachments', $attachment->order);
+
+        if ($attachment->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachment->file_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->file_path);
+        }
         $attachment->delete();
 
         return back()->with('success', 'تم حذف المرفق.');

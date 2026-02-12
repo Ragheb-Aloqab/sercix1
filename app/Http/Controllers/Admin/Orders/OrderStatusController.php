@@ -10,33 +10,11 @@ use App\Models\User;
 use App\Services\ActivityLogger;
 class OrderStatusController extends Controller
 {
-    // public function store(ChangeOrderStatusRequest $request, Order $order)
-    // {
-    //     $from = $order->status;
-    //     $to = $request->string('to_status')->toString();
-
-    //     if (!OrderStatus::canTransition($from, $to)) {
-    //         return back()->withErrors([
-    //             'to_status' => "انتقال غير مسموح: {$from} → {$to}"
-    //         ]);
-    //     }
-
-    //     $order->update(['status' => $to]);
-
-    //     $order->statusLogs()->create([
-    //         'from_status' => $from,
-    //         'to_status' => $to,
-    //         'note' => $request->input('note'),
-    //         'changed_by' => $request->user()->id,
-    //     ]);
-
-    //     return back()->with('success', 'تم تحديث حالة الطلب بنجاح ✅');
-    // }
+   
     public function store(ChangeOrderStatusRequest $request, Order $order)
     {
-        
-        
-        
+        $this->authorize('changeStatus', $order);
+
         $from = (string) $order->status;
         $to   = $request->string('to_status')->toString();
 

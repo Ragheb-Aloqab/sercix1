@@ -127,6 +127,8 @@ return [
     'footerContact' => 'تواصل',
     'footerNote' => '* بيانات تجريبية للعرض',
     'buildNote' => 'Tailwind + JavaScript + FontAwesome (RTL/LTR)',
+    'footerCreditsText' => 'صمّم وطوّر بواسطة',
+    'footerCreditsAnd' => ' و ',
     'cityPlaceholder' => '— مدينة غير محددة',
     'language' => 'اللغة',
 ];

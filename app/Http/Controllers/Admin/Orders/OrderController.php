@@ -14,6 +14,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        $this->authorize('view', $order);
+
         $order->load([
             'company',
             'vehicle',
@@ -27,7 +29,7 @@ class OrderController extends Controller
 
         $technicians = \App\Models\User::query()
             ->where('role', 'technician')
-            ->where('status', 'active') // إذا عندك قيم status مختلفة عدّلها
+            ->where('status', 'active') 
             ->orderBy('name')
             ->get(['id', 'name', 'phone']);
 

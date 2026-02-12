@@ -2,84 +2,131 @@
 
 namespace App\Policies;
 
+use App\Models\Company;
 use App\Models\Order;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class OrderPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User|Company $user): bool
     {
-        return $user->role === 'admin';
+        return $this->isAdmin($user)
+            || $this->isCompany($user)
+            || $this->isTechnician($user);
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Order $order): bool
+    public function view(User|Company $user, Order $order): bool
     {
-        return $user->role === 'admin';
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+        if ($this->isCompany($user)) {
+            return (int) $order->company_id === (int) $user->id;
+        }
+        if ($this->isTechnician($user)) {
+            return (int) $order->technician_id === (int) $user->id;
+        }
+        return false;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User|Company $user): bool
     {
-        return false;
+        return $this->isCompany($user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Order $order): bool
+    public function update(User|Company $user, Order $order): bool
     {
-        return $user->role === 'admin';
+        return $this->view($user, $order);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function assignTechnician(User $user, Order $order): bool
-    {
-        return $user->role === 'admin';
-    }
-
-    public function changeStatus(User $user, Order $order): bool
-    {
-        return $user->role === 'admin';
-    }
-
-    public function managePayment(User $user, Order $order): bool
-    {
-        return $user->role === 'admin';
-    }
-
-    public function manageAttachments(User $user, Order $order): bool
-    {
-        return $user->role === 'admin';
-    }
-    public function delete(User $user, Order $order): bool
+    public function delete(User|Company $user, Order $order): bool
     {
         return false;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Order $order): bool
+    public function assignTechnician(User|Company $user, Order $order): bool
+    {
+        return $this->isAdmin($user);
+    }
+
+    public function changeStatus(User|Company $user, Order $order): bool
+    {
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+        if ($this->isTechnician($user)) {
+            return (int) $order->technician_id === (int) $user->id;
+        }
+        return false;
+    }
+
+    public function managePayment(User|Company $user, Order $order): bool
+    {
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+        if ($this->isCompany($user)) {
+            return (int) $order->company_id === (int) $user->id;
+        }
+        return false;
+    }
+
+    public function manageAttachments(User|Company $user, Order $order): bool
+    {
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+        if ($this->isTechnician($user)) {
+            return (int) $order->technician_id === (int) $user->id;
+        }
+        return false;
+    }
+
+    public function cancel(User|Company $user, Order $order): bool
+    {
+        if ($this->isCompany($user)) {
+            return (int) $order->company_id === (int) $user->id;
+        }
+        return false;
+    }
+
+    public function restore(User|Company $user, Order $order): bool
     {
         return false;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Order $order): bool
+    public function forceDelete(User|Company $user, Order $order): bool
     {
         return false;
+    }
+
+    private function isAdmin(User|Company $user): bool
+    {
+        return $user instanceof User && $user->role === 'admin';
+    }
+
+    private function isCompany(User|Company $user): bool
+    {
+        return $user instanceof Company;
+    }
+
+    private function isTechnician(User|Company $user): bool
+    {
+        return $user instanceof User && $user->role === 'technician';
     }
 }

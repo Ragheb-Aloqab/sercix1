@@ -11,7 +11,7 @@ class UploadAttachmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('manageAttachments', $this->route('order'));
     }
 
     /**

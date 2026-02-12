@@ -47,10 +47,9 @@ class PaymentsController extends Controller
 
     public function show(Payment $payment)
     {
+        $this->authorize('view', $payment);
+
         $company = auth('company')->user();
-
-        abort_unless($payment->company_id === $company->id, 403);
-
         $enabled = [
             'cash' => (bool) Setting::get('enable_cash_payment', 1),
             'tap'  => (bool) Setting::get('enable_online_payment', 1),
@@ -67,9 +66,9 @@ class PaymentsController extends Controller
     // ====== (اختياري) بدء الدفع عبر Tap ======
     public function payWithTap(Payment $payment)
     {
-        $company = auth('company')->user();
-        abort_unless($payment->company_id === $company->id, 403);
+        $this->authorize('update', $payment);
 
+        $company = auth('company')->user();
         if ($payment->status === 'paid') {
             return back()->with('error', 'هذه الدفعة مدفوعة بالفعل.');
         }
@@ -105,9 +104,9 @@ class PaymentsController extends Controller
     // ====== (اختياري) رفع إيصال التحويل البنكي ======
     public function uploadBankReceipt(Request $request, Payment $payment)
     {
-        $company = auth('company')->user();
-        abort_unless($payment->company_id === $company->id, 403);
+        $this->authorize('update', $payment);
 
+        $company = auth('company')->user();
         if ($payment->status === 'paid') {
             return back()->with('error', 'هذه الدفعة مدفوعة بالفعل.');
         }

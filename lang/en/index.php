@@ -127,6 +127,8 @@ return [
     'footerContact' => 'Contact',
     'footerNote' => '* Demo data',
     'buildNote' => 'Tailwind + JavaScript + FontAwesome (RTL/LTR)',
+    'footerCreditsText' => 'Designed and developed by',
+    'footerCreditsAnd' => ' and ',
     'cityPlaceholder' => '— city not set',
     'language' => 'Language',
 ];

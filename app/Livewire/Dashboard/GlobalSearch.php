@@ -44,8 +44,17 @@ class GlobalSearch extends Component
             // -------------------------
             $ordersQuery = Order::query()->latest();
 
-            // بحث بالـ ID فقط (لأن عندك ما فيه order_number)
-            $ordersQuery->when(is_numeric($q), fn($qq) => $qq->where('id', (int) $q));
+            if (is_numeric($q)) {
+                $ordersQuery->where('id', (int) $q);
+            } else {
+                $ordersQuery->where(function ($query) use ($q) {
+                    $query->where('address', 'like', "%{$q}%")
+                        ->orWhere('city', 'like', "%{$q}%")
+                        ->orWhere('notes', 'like', "%{$q}%")
+                        ->orWhere('requested_by_name', 'like', "%{$q}%")
+                        ->orWhereHas('company', fn ($cq) => $cq->where('company_name', 'like', "%{$q}%"));
+                });
+            }
 
             if ($role === 'company') {
                 // ✅ عدّل اسم العمود حسب مشروعك: company_id أو customer_id ...
@@ -65,7 +74,11 @@ class GlobalSearch extends Component
             // -------------------------
             if ($role === 'admin') {
                 $companies = Company::query()
-                    ->where('company_name', 'like', "%{$q}%")
+                    ->where(function ($query) use ($q) {
+                        $query->where('company_name', 'like', "%{$q}%")
+                            ->orWhere('phone', 'like', "%{$q}%")
+                            ->orWhere('email', 'like', "%{$q}%");
+                    })
                     ->latest()
                     ->limit(5)
                     ->get();

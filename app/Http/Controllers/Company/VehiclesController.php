@@ -78,12 +78,8 @@ class VehiclesController extends Controller
 
         // ✅ حماية: لا تختار فرع ليس للشركة
         if (!empty($data['company_branch_id'])) {
-            $branchOk = CompanyBranch::query()
-                ->where('id', $data['company_branch_id'])
-                ->where('company_id', $company->id)
-                ->exists();
-
-            abort_unless($branchOk, 403, 'الفرع غير تابع لشركتك');
+            $branch = CompanyBranch::findOrFail($data['company_branch_id']);
+            $this->authorize('view', $branch);
         }
 
         $data['company_id'] = $company->id;
@@ -105,9 +101,9 @@ class VehiclesController extends Controller
      */
     public function show(Vehicle $vehicle)
     {
-        $company = auth('company')->user();
-        abort_unless((int) $vehicle->company_id === (int) $company->id, 403);
+        $this->authorize('view', $vehicle);
 
+        $company = auth('company')->user();
         $vehicle->load([
             'branch:id,name',
             'orders' => fn ($q) => $q->with(['services', 'payments', 'technician:id,name,phone'])
@@ -123,9 +119,9 @@ class VehiclesController extends Controller
      */
     public function edit(Vehicle $vehicle)
     {
-        $company = auth('company')->user();
-        abort_unless((int)$vehicle->company_id === (int)$company->id, 403);
+        $this->authorize('update', $vehicle);
 
+        $company = auth('company')->user();
         $branches = CompanyBranch::query()
             ->where('company_id', $company->id)
             ->where('is_active', true)
@@ -141,9 +137,9 @@ class VehiclesController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
-        $company = auth('company')->user();
-        abort_unless((int)$vehicle->company_id === (int)$company->id, 403);
+        $this->authorize('update', $vehicle);
 
+        $company = auth('company')->user();
         $data = $request->validate([
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
 
@@ -161,12 +157,8 @@ class VehiclesController extends Controller
 
         // ✅ حماية: لا تختار فرع ليس للشركة
         if (!empty($data['company_branch_id'])) {
-            $branchOk = CompanyBranch::query()
-                ->where('id', $data['company_branch_id'])
-                ->where('company_id', $company->id)
-                ->exists();
-
-            abort_unless($branchOk, 403, 'الفرع غير تابع لشركتك');
+            $branch = CompanyBranch::findOrFail($data['company_branch_id']);
+            $this->authorize('view', $branch);
         }
 
         $data['is_active'] = (bool)($data['is_active'] ?? $vehicle->is_active);

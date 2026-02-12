@@ -43,7 +43,7 @@
                     @endphp
 
                     @if ($orderShowRoute)
-                        <a href="{{ $orderShowRoute }}"
+                        <a href="{{ $orderShowRoute }}" wire:navigate
                             class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
                             {{ __('dashboard.order') }} #{{ $order->id }}
                         </a>
@@ -62,13 +62,13 @@
 
                 @foreach ($companies as $company)
                     @php
-                        $companyShowRoute = \Illuminate\Support\Facades\Route::has('admin.companies.show')
-                            ? route('admin.companies.show', $company)
+                        $companyShowRoute = \Illuminate\Support\Facades\Route::has('admin.customers.edit')
+                            ? route('admin.customers.edit', $company)
                             : null;
                     @endphp
 
                     @if ($companyShowRoute)
-                        <a href="{{ $companyShowRoute }}"
+                        <a href="{{ $companyShowRoute }}" wire:navigate
                             class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
                             {{ $company->company_name }}
                         </a>

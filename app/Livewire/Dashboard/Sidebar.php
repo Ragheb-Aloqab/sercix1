@@ -47,7 +47,7 @@ class Sidebar extends Component
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect('/');
     }
 
     public function render()

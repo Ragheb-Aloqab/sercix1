@@ -23,16 +23,9 @@ class AttachmentsController extends Controller
 
     private function store(Request $request, Order $order, string $type)
     {
-        // ✅ مهم: خلّها واضحة guard:web
+        $this->authorize('manageAttachments', $order);
+
         $technician = Auth::guard('web')->user();
-        abort_unless($technician, 403);
-
-        // 🔒 تأكيد أن الطلب مسند لهذا الفني
-        abort_unless(
-            (int) $order->technician_id === (int) $technician->id,
-            403
-        );
-
         $validated = $request->validate([
             // ✅ خليه images مثل ما انت تستخدمه في الفورم
             'images'   => ['required', 'array', 'min:1', 'max:10'],
@@ -63,18 +56,12 @@ class AttachmentsController extends Controller
 
     public function destroy(Order $order, Attachment $attachment)
     {
-        $technician = Auth::guard('web')->user();
-        abort_unless($technician, 403);
-
-        // 🔒 تأكيد الملكية
-        abort_unless(
-            (int) $order->technician_id === (int) $technician->id,
-            403
-        );
+        $this->authorize('manageAttachments', $order);
 
         abort_unless(
             (int) $attachment->order_id === (int) $order->id,
-            404
+            404,
+            'Attachment does not belong to this order.'
         );
 
         // حذف الملف من التخزين

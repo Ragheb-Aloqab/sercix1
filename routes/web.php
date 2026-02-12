@@ -12,10 +12,10 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/login');
+    return redirect('/');
 })->name('logout');
 
-Route::get('/', fn () => view('index'));
+Route::get('/', \App\Http\Controllers\IndexController::class);
 
 Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('set-locale');
 
@@ -26,9 +26,13 @@ Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('
 */
 Route::prefix('sign-in')->name('sign-in.')->group(function () {
     Route::get('/', [\App\Http\Controllers\UnifiedAuthController::class, 'showLogin'])->name('index');
-    Route::post('/send-otp', [\App\Http\Controllers\UnifiedAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::post('/send-otp', [\App\Http\Controllers\UnifiedAuthController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('send_otp');
     Route::get('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'showVerify'])->name('verify');
-    Route::post('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'verifyOtp'])->name('verify_otp');
+    Route::post('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('verify_otp');
 });
 
 /*
@@ -38,7 +42,9 @@ Route::prefix('sign-in')->name('sign-in.')->group(function () {
 */
 Route::prefix('driver')->name('driver.')->group(function () {
     Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
-    Route::post('/send-otp', [\App\Http\Controllers\DriverAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::post('/send-otp', [\App\Http\Controllers\DriverAuthController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('send_otp');
     Route::get('/verify', [\App\Http\Controllers\DriverAuthController::class, 'showVerify'])->name('verify');
     Route::post('/verify', [\App\Http\Controllers\DriverAuthController::class, 'verifyOtp'])->name('verify_otp');
     Route::post('/logout', [\App\Http\Controllers\DriverAuthController::class, 'logout'])->name('logout');
@@ -57,9 +63,13 @@ Route::prefix('driver')->name('driver.')->group(function () {
 */
 Route::prefix('company')->name('company.')->group(function () {
     Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
-    Route::post('/login/send-otp', [OtpAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::post('/login/send-otp', [OtpAuthController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('send_otp');
     Route::get('/login/verify', [OtpAuthController::class, 'showVerifyForm'])->name('verify');
-    Route::post('/login/verify', [OtpAuthController::class, 'verifyOtp'])->name('verify_otp');
+    Route::post('/login/verify', [OtpAuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('verify_otp');
 
     // Register
     Route::get('/register', [OtpAuthController::class, 'showRegisterForm'])->name('register');

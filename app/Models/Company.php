@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class Company extends Authenticatable
 {
@@ -77,7 +78,11 @@ class Company extends Authenticatable
     /** Sum of all order totals (maintenance/service cost) for this company */
     public function maintenanceCost(): float
     {
-        return (float) $this->orders()->with('services')->get()->sum(fn ($order) => $order->total_amount);
+        return (float) DB::table('order_services')
+            ->join('orders', 'orders.id', '=', 'order_services.order_id')
+            ->where('orders.company_id', $this->id)
+            ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
+            ->value('total') ?: 0;
     }
 
     /** Fuel cost – no fuel data in app yet; stub for future */
@@ -136,11 +141,12 @@ class Company extends Authenticatable
             $date = now()->subMonths($i);
             $start = $date->copy()->startOfMonth();
             $end = $date->copy()->endOfMonth();
-            $total = $this->orders()
-                ->whereBetween('created_at', [$start, $end])
-                ->with('services')
-                ->get()
-                ->sum(fn ($o) => $o->total_amount);
+            $total = DB::table('order_services')
+                ->join('orders', 'orders.id', '=', 'order_services.order_id')
+                ->where('orders.company_id', $this->id)
+                ->whereBetween('orders.created_at', [$start, $end])
+                ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
+                ->value('total') ?: 0;
             $out[] = [
                 'month' => $date->month,
                 'year' => $date->year,
@@ -169,12 +175,23 @@ class Company extends Authenticatable
     /** Top vehicles by service consumption and cost (for table) */
     public function getTopVehiclesByServiceConsumptionAndCost()
     {
-        $vehicles = $this->vehicles()->with(['orders' => fn ($q) => $q->with('services')])->get();
         $totalCompany = $this->totalActualCost();
-        $list = $vehicles->map(function ($v) use ($totalCompany) {
-            $orders = $v->orders ?? collect();
-            $total = $orders->sum(fn ($o) => $o->total_amount);
-            $servicesCount = $orders->sum(fn ($o) => ($o->services ?? collect())->count());
+        $rows = DB::table('order_services')
+            ->join('orders', 'orders.id', '=', 'order_services.order_id')
+            ->where('orders.company_id', $this->id)
+            ->whereNotNull('orders.vehicle_id')
+            ->select('orders.vehicle_id')
+            ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
+            ->selectRaw('COUNT(*) as services_count')
+            ->groupBy('orders.vehicle_id')
+            ->get()
+            ->keyBy('vehicle_id');
+
+        $vehicles = $this->vehicles()->get(['id', 'make', 'model', 'plate_number']);
+        $list = $vehicles->map(function ($v) use ($rows, $totalCompany) {
+            $row = $rows[$v->id] ?? null;
+            $total = $row ? (float) $row->total : 0;
+            $servicesCount = $row ? (int) $row->services_count : 0;
             $percentage = $totalCompany > 0 ? ($total / $totalCompany) * 100 : 0;
             return (object) [
                 'id' => $v->id,

@@ -1,162 +1,82 @@
-{{-- resources/views/admin/orders/invoice.blade.php --}}
+{{-- Admin invoice: same as customer when invoice exists --}}
+@extends('admin.layouts.app')
 
-@extends('admin.layouts.print')
+@section('page_title', 'الفاتورة')
+@section('subtitle', 'Invoice')
 
 @section('content')
-    <div class="max-w-6xl mx-auto p-6" dir="rtl">
+<div class="space-y-6">
 
-        {{-- Header --}}
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-black">فاتورة الطلب #{{ $order->id }}</h1>
-                <p class="text-sm text-gray-500 mt-1">
-                    {{ $order->invoice?->number ? 'رقم الفاتورة: ' . $order->invoice->number : 'لا توجد فاتورة بعد' }}
-                </p>
-            </div>
+    @if ($invoice)
+        {{-- عرض الفاتورة (نفس ما يراه العميل) --}}
+        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                    <p class="font-black text-xl">فاتورة #{{ $invoice->invoice_number ?? $invoice->id }}</p>
+                    @php
+                        $barcodeData = $invoice->invoice_number ?? 'INV-' . $invoice->id;
+                        $barcodeGen = new \Picqer\Barcode\BarcodeGeneratorSVG();
+                        $barcodeImg = $barcodeGen->getBarcode($barcodeData, $barcodeGen::TYPE_CODE_128, 2, 40);
+                    @endphp
+                    <div class="mt-2 flex items-center gap-3">
+                        <div class="inline-block p-2 bg-white border border-slate-200 rounded-lg">
+                            {!! $barcodeImg !!}
+                        </div>
+                        <span class="text-xs font-mono text-slate-600">{{ $barcodeData }}</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-1">الحالة: {{ ucfirst($invoice->status ?? 'unpaid') }}</p>
+                    <p class="text-sm text-slate-500 mt-1">التاريخ: {{ optional($invoice->created_at)->format('Y-m-d H:i') }}</p>
+                </div>
 
-            <div class="flex items-center gap-2">
-                @if (!$order->invoice)
-                    <form method="POST" action="{{ route('admin.orders.invoice.store', $order) }}">
-                        @csrf
-                        <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
-                            إنشاء فاتورة
-                        </button>
-                    </form>
-                @endif
-
-                <button onclick="window.print()"
-                    class="px-4 py-2 rounded-xl bg-gray-900 text-white font-semibold hover:bg-black">
-                    طباعة
-                </button>
-
-                <a href="{{ route('admin.orders.show', $order) }}"
-                    class="px-4 py-2 rounded-xl bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200">
-                    رجوع للطلب
-                </a>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('admin.orders.invoice.pdf', $order) }}"
+                       class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                        <i class="fa-solid fa-file-pdf me-1"></i> تحميل PDF
+                    </a>
+                    <button onclick="window.print()"
+                        class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold">
+                        <i class="fa-solid fa-print me-1"></i> طباعة
+                    </button>
+                    <a href="{{ route('admin.orders.show', $order) }}"
+                       class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
+                        رجوع للطلب
+                    </a>
+                </div>
             </div>
         </div>
 
-        {{-- Alerts --}}
-        @if (session('success'))
-            <div class="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">
-                {{ session('success') }}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+                <p class="text-sm text-slate-500">الإجمالي</p>
+                <p class="text-2xl font-black">{{ number_format($invoice->total ?? 0, 2) }} ر.س</p>
             </div>
-        @endif
+            <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+                <p class="text-sm text-slate-500">المدفوع</p>
+                <p class="text-2xl font-black text-emerald-600">{{ number_format($paidAmount ?? 0, 2) }} ر.س</p>
+            </div>
+            <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+                <p class="text-sm text-slate-500">المتبقي</p>
+                <p class="text-2xl font-black text-rose-600">{{ number_format($remainingAmount ?? 0, 2) }} ر.س</p>
+            </div>
+        </div>
 
-        {{-- Invoice Card --}}
-        <div class="mt-6 bg-white border rounded-2xl p-6 print:border-0 print:shadow-none">
-
-            {{-- Top info --}}
-            <div class="grid md:grid-cols-2 gap-6">
-                {{-- Company / Customer --}}
-                <div class="border rounded-2xl p-4">
-                    <h2 class="font-black text-lg mb-3">بيانات الشركة</h2>
-
-                    <div class="text-sm space-y-2">
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">الاسم</span>
-                            <span class="font-semibold">{{ $order->company?->name ?? '-' }}</span>
-                        </div>
-
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">المدينة</span>
-                            <span class="font-semibold">{{ $order->city ?? '-' }}</span>
-                        </div>
-
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">العنوان</span>
-                            <span class="font-semibold text-left" dir="ltr">{{ $order->address ?? '-' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Invoice meta --}}
-                <div class="border rounded-2xl p-4">
-                    <h2 class="font-black text-lg mb-3">بيانات الفاتورة</h2>
-
-                    <div class="text-sm space-y-2">
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">رقم الفاتورة</span>
-                            <span class="font-semibold">{{ $order->invoice?->number ?? '-' }}</span>
-                        </div>
-
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">تاريخ الإصدار</span>
-                            <span class="font-semibold">
-                                {{ $order->invoice?->issued_at ? \Carbon\Carbon::parse($order->invoice->issued_at)->format('Y-m-d H:i') : '-' }}
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">حالة الطلب</span>
-                            <span class="font-semibold">
-                                {{ $order->status ?? '-' }}
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between gap-3">
-                            <span class="text-gray-500">موعد الخدمة</span>
-                            <span class="font-semibold">
-                                {{ $order->scheduled_at ? \Carbon\Carbon::parse($order->scheduled_at)->format('Y-m-d H:i') : '-' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+        @if($invoice->order)
+        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+            <h2 class="font-black text-lg mb-4">تفاصيل الطلب</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="flex justify-between"><span class="text-slate-500">رقم الطلب</span><span class="font-bold">#{{ $invoice->order->id }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">حالة الطلب</span><span class="font-bold">{{ $invoice->order->status }}</span></div>
+                @if($invoice->order->vehicle)
+                <div class="flex justify-between"><span class="text-slate-500">المركبة</span><span class="font-bold">{{ $invoice->order->vehicle->make ?? '' }} {{ $invoice->order->vehicle->model ?? '' }} — {{ $invoice->order->vehicle->plate_number ?? '-' }}</span></div>
+                @endif
             </div>
 
-            {{-- Vehicle --}}
-            <div class="mt-6 border rounded-2xl p-4">
-                <h2 class="font-black text-lg mb-3">بيانات المركبة</h2>
-
-                <div class="grid md:grid-cols-4 gap-3 text-sm">
-                    <div class="bg-gray-50 rounded-xl p-3">
-                        <div class="text-gray-500">النوع</div>
-                        <div class="font-semibold mt-1">{{ $order->vehicle?->make ?? '-' }}</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-3">
-                        <div class="text-gray-500">الموديل</div>
-                        <div class="font-semibold mt-1">{{ $order->vehicle?->model ?? '-' }}</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-3">
-                        <div class="text-gray-500">السنة</div>
-                        <div class="font-semibold mt-1">{{ $order->vehicle?->year ?? '-' }}</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-3">
-                        <div class="text-gray-500">اللوحة</div>
-                        <div class="font-semibold mt-1">{{ $order->vehicle?->plate_number ?? '-' }}</div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Services table --}}
-            @php
-                $items = $order->services ?? collect();
-
-                $subtotal = $items->sum(function ($s) {
-                    return (float) ($s->pivot->total_price ??
-                        (float) ($s->pivot->qty ?? 0) * (float) ($s->pivot->unit_price ?? 0));
-                });
-
-                // إذا عندك خصم/ضريبة لاحقاً عدّل هنا:
-                $discount = 0;
-                $tax = 0;
-
-                $grandTotal = max(0, $subtotal - $discount + $tax);
-
-                // المدفوع (لو payment علاقة واحدة فيها amount)
-                $paid = (float) ($order->payment?->amount ?? 0);
-
-                // المتبقي
-                $due = max(0, $grandTotal - $paid);
-            @endphp
-
-            <div class="mt-6">
-                <h2 class="font-black text-lg mb-3">{{ __('common.services') }}</h2>
-
+            @if($invoice->order->services && $invoice->order->services->count())
+            <div class="mt-5">
+                <h3 class="font-black mb-3">{{ __('common.services') }}</h3>
                 <div class="overflow-x-auto border rounded-2xl">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-50">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-50 dark:bg-slate-800/50">
                             <tr class="text-right">
                                 <th class="p-3 font-bold">الخدمة</th>
                                 <th class="p-3 font-bold">الكمية</th>
@@ -164,120 +84,53 @@
                                 <th class="p-3 font-bold">الإجمالي</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y">
-                            @forelse($items as $service)
-                                @php
-                                    $qty = (float) ($service->pivot->qty ?? 0);
-                                    $unit = (float) ($service->pivot->unit_price ?? 0);
-                                    $total = (float) ($service->pivot->total_price ?? $qty * $unit);
-                                @endphp
-
-                                <tr>
-                                    <td class="p-3 font-semibold">{{ $service->name ?? '#' . $service->id }}</td>
-                                    <td class="p-3">{{ $qty }}</td>
-                                    <td class="p-3">{{ number_format($unit, 2) }}</td>
-                                    <td class="p-3 font-semibold">{{ number_format($total, 2) }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="p-6 text-center text-gray-500">
-                                        لا توجد خدمات ضمن هذا الطلب.
-                                    </td>
-                                </tr>
-                            @endforelse
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                            @foreach($invoice->order->services as $svc)
+                            @php
+                                $qty = (float) ($svc->pivot->qty ?? 1);
+                                $unit = (float) ($svc->pivot->unit_price ?? $svc->pivot->total_price ?? 0);
+                                $rowTotal = (float) ($svc->pivot->total_price ?? ($qty * $unit));
+                            @endphp
+                            <tr>
+                                <td class="p-3 font-semibold">{{ $svc->name }}</td>
+                                <td class="p-3">{{ $qty }}</td>
+                                <td class="p-3">{{ number_format($unit, 2) }} ر.س</td>
+                                <td class="p-3 font-semibold">{{ number_format($rowTotal, 2) }} ر.س</td>
+                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            {{-- Notes --}}
-            @if ($order->notes)
-                <div class="mt-6 border rounded-2xl p-4">
-                    <h2 class="font-black text-lg mb-2">ملاحظات</h2>
-                    <p class="text-sm text-gray-700 leading-relaxed">{{ $order->notes }}</p>
-                </div>
             @endif
-
-            {{-- Totals + Payment --}}
-            <div class="mt-6 grid md:grid-cols-2 gap-6">
-                <div class="border rounded-2xl p-4">
-                    <h2 class="font-black text-lg mb-3">الدفع</h2>
-
-                    <div class="text-sm space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">حالة الدفع</span>
-                            <span class="font-semibold">{{ $order->payment?->status ?? '-' }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">طريقة الدفع</span>
-                            <span class="font-semibold">{{ $order->payment?->method ?? '-' }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">المدفوع</span>
-                            <span class="font-semibold">{{ number_format($paid, 2) }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">المتبقي</span>
-                            <span class="font-semibold {{ $due > 0 ? 'text-rose-600' : 'text-emerald-600' }}">
-                                {{ number_format($due, 2) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border rounded-2xl p-4">
-                    <h2 class="font-black text-lg mb-3">ملخص المبالغ</h2>
-
-                    <div class="text-sm space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">المجموع الفرعي</span>
-                            <span class="font-semibold">{{ number_format($subtotal, 2) }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">الخصم</span>
-                            <span class="font-semibold">{{ number_format($discount, 2) }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">الضريبة</span>
-                            <span class="font-semibold">{{ number_format($tax, 2) }}</span>
-                        </div>
-
-                        <div class="h-px bg-gray-200 my-2"></div>
-
-                        <div class="flex justify-between text-base">
-                            <span class="font-black">الإجمالي النهائي</span>
-                            <span class="font-black">{{ number_format($grandTotal, 2) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Footer --}}
-            <div class="mt-8 text-center text-xs text-gray-500">
-                <p>تم إنشاء هذه الفاتورة بواسطة النظام — {{ now()->format('Y-m-d H:i') }}</p>
-            </div>
         </div>
-    </div>
+        @endif
 
-    {{-- Print styles --}}
-    <style>
-        @media print {
-            body {
-                background: white !important;
-            }
+    @else
+        {{-- لا توجد فاتورة: نموذج إنشاء --}}
+        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-black">فاتورة الطلب #{{ $order->id }}</h1>
+                    <p class="text-sm text-slate-500 mt-1">لا توجد فاتورة لهذا الطلب بعد</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('admin.orders.invoice.store', $order) }}">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+                            إنشاء فاتورة
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.orders.show', $order) }}" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">
+                        رجوع للطلب
+                    </a>
+                </div>
+            </div>
+            @if (session('success'))
+            <div class="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">{{ session('success') }}</div>
+            @endif
+        </div>
+    @endif
 
-            .print\:border-0 {
-                border: 0 !important;
-            }
-
-            .print\:shadow-none {
-                box-shadow: none !important;
-            }
-        }
-    </style>
+</div>
 @endsection

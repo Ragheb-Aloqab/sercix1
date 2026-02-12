@@ -31,11 +31,15 @@ class AppServiceProvider extends ServiceProvider
         Invoice::observe(InvoiceObserver::class);
         Order::observe(OrderObserver::class);
 
-        // Site branding (name + logo) for all views — admin can change in Settings
-        View::composer('*', function ($view) {
+        // Site branding (name + logo) — cached, scoped to views that need it
+        $brandingViews = [
+            'index', 'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*',
+            'livewire.dashboard.*', 'components.*',
+        ];
+        View::composer($brandingViews, function ($view) {
             try {
                 $siteName = Setting::get('site_name', 'SERV.X');
-                $siteLogoUrl = $this->siteLogoUrl();
+                $siteLogoUrl = cache()->remember('site_logo_url', 300, fn () => $this->siteLogoUrl());
             } catch (\Throwable $e) {
                 $siteName = 'SERV.X';
                 $siteLogoUrl = null;

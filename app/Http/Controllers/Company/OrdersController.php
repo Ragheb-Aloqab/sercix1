@@ -19,10 +19,9 @@ class OrdersController extends Controller
 
     public function show(Order $order)
     {
+        $this->authorize('view', $order);
+
         $company = auth('company')->user();
-
-        abort_unless((int) $order->company_id === (int) $company->id, 403);
-
         $order->load([
             'technician:id,name,phone',
             'attachments',
@@ -138,8 +137,7 @@ class OrdersController extends Controller
     }
     public function cancel(Order $order)
     {
-        $company = auth('company')->user();
-        abort_unless((int) $order->company_id === (int) $company->id, 403);
+        $this->authorize('cancel', $order);
 
         if ($order->technician_id) {
             return back()->with('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');

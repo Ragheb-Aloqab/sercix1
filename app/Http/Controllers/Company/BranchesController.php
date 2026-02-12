@@ -92,10 +92,9 @@ class BranchesController extends Controller
      */
     public function edit(CompanyBranch $branch)
     {
+        $this->authorize('update', $branch);
+
         $company = auth('company')->user();
-
-        abort_unless((int) $branch->company_id === (int) $company->id, 403);
-
         return view('company.branches.edit', compact('company', 'branch'));
     }
 
@@ -105,9 +104,9 @@ class BranchesController extends Controller
      */
     public function update(Request $request, CompanyBranch $branch)
     {
-        $company = auth('company')->user();
-        abort_unless((int) $branch->company_id === (int) $company->id, 403);
+        $this->authorize('update', $branch);
 
+        $company = auth('company')->user();
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:190'],
             'contact_person' => ['nullable', 'string', 'max:190'],

@@ -17,10 +17,7 @@ class OrderStatusController extends Controller
      */
     public function update(Request $request, Order $order): RedirectResponse
     {
-        $technician = Auth::guard('web')->user();
-
-        // حماية: الطلب لازم يكون مسند لنفس الفني
-        abort_unless((int) $order->technician_id === (int) $technician->id, 403);
+        $this->authorize('changeStatus', $order);
 
         // الحالات المسموحة للفني (عدّلها حسب نظامك)
         $allowed = [

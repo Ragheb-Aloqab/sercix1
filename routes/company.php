@@ -23,7 +23,7 @@ use App\Livewire\Company\Settings;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:company'])
+Route::middleware(['auth:company', 'guard.for.gate:company'])
     ->prefix('company')
     ->name('company.')
     ->group(function () {

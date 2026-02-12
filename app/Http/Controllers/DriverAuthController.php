@@ -91,7 +91,7 @@ class DriverAuthController extends Controller
     {
         $request->session()->forget('driver_phone');
         $request->session()->regenerateToken();
-        return redirect()->route('driver.login');
+        return redirect('/');
     }
 
     private function normalizePhone(string $phone): string

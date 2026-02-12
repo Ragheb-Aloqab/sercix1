@@ -12,6 +12,8 @@ class OrderAssignmentController extends Controller
 {
     public function store(AssignTechnicianRequest $request, Order $order)
     {
+        $this->authorize('assignTechnician', $order);
+
         $tech = User::query()
             ->where('id', $request->technician_id)
             ->where('role', 'technician')

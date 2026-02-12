@@ -11,8 +11,9 @@ class OrderPaymentController extends Controller
 {
     public function store(StorePaymentRequest $request, Order $order)
     {
-        // ✅ سجّل الدفع في جدول payments فقط (لا علاقة له بحالة الطلب)
-        // جدول payments عندك: order_id, company_id, method(tap|cash), status(pending|paid|failed|refunded), amount, ... , paid_at
+        $this->authorize('managePayment', $order);
+
+       
         $order->payment()->updateOrCreate(
             ['order_id' => $order->id],
             [
@@ -24,8 +25,7 @@ class OrderPaymentController extends Controller
             ]
         );
 
-        // ✅ لا تضع orders.status = paid لأنه غير مسموح
-        // إذا حبيت تربط الدفع بتغيير حالة الطلب استخدم حالة مسموحة مثل completed (اختياري)
+      
         if ($request->status === 'paid' && $order->status !== OrderStatus::COMPLETED) {
             $from = $order->status;
             $to = OrderStatus::COMPLETED; // ✅ مسموحة ضمن CHECK

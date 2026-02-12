@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class InvoicesController extends Controller
 {
@@ -52,17 +51,16 @@ class InvoicesController extends Controller
             return $invoice;
         });
 
-        $statuses = ['pending', 'paid', 'cancelled'];
+        $statuses = ['unpaid', 'partial', 'paid', 'void'];
 
         return view('company.invoices.index', compact('company', 'invoices', 'q', 'status', 'statuses'));
     }
 
     public function show(Invoice $invoice)
     {
+        $this->authorize('view', $invoice);
+
         $company = auth('company')->user();
-
-        abort_unless((int) $invoice->company_id === (int) $company->id, 403);
-
         $invoice->load([
             'order.services',
             'order.vehicle',
@@ -87,17 +85,25 @@ class InvoicesController extends Controller
 
     public function downloadPdf(Invoice $invoice)
     {
-        $company = auth('company')->user();
+        $this->authorize('view', $invoice);
 
-        abort_unless((int) $invoice->company_id === (int) $company->id, 403);
-
-        if ($invoice->pdf_path && Storage::disk('public')->exists($invoice->pdf_path)) {
-            return response()->download(Storage::disk('public')->path($invoice->pdf_path));
+        try {
+            $pdf = app(\App\Services\InvoicePdfService::class)->getPdfContent($invoice);
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()
+                ->route('company.invoices.show', $invoice->id)
+                ->with('error', 'حدث خطأ أثناء إنشاء PDF.');
         }
 
-        return redirect()
-            ->route('company.invoices.show', $invoice->id)
-            ->with('error', 'No PDF available for this invoice.');
+        $filename = 'invoice-' . ($invoice->invoice_number ?? $invoice->id) . '.pdf';
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf;
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
    
 }

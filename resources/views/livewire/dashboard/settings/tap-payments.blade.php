@@ -1,40 +1,39 @@
-<div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+<div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5 sm:p-6">
 
-    <h2 class="text-lg font-black">إعدادات طرق الدفع</h2>
-    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-        فعّل أو عطّل طرق الدفع، واضبط Tap والتحويل البنكي.
-    </p>
+    <div class="mb-6">
+        <h2 class="text-lg font-black text-slate-900 dark:text-white">إعدادات طرق الدفع</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            فعّل أو عطّل طرق الدفع، واضبط Tap والتحويل البنكي.
+        </p>
+    </div>
 
     {{-- Success --}}
     @if (session()->has('success_tap'))
-        <div class="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold">
+        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm font-semibold">
             {{ session('success_tap') }}
         </div>
     @endif
 
     {{-- Form --}}
-    <form wire:submit.prevent="save" class="mt-6 space-y-6">
+    <form wire:submit.prevent="save" class="space-y-6">
 
         {{-- Payment Methods Toggles --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
             {{-- Cash --}}
-            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4">
+            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
                 <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <p class="font-black">💵 الدفع كاش</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-slate-900 dark:text-white">💵 الدفع كاش</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             الدفع عند تقديم الخدمة.
                         </p>
                     </div>
 
-                    <label class="inline-flex items-center cursor-pointer select-none">
+                    <label class="inline-flex items-center cursor-pointer select-none shrink-0">
                         <input type="checkbox" wire:model="enable_cash_payment" class="sr-only peer">
-                        <div
-                            class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-800 peer-checked:bg-emerald-600 relative transition">
-                            <span
-                                class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow
-                                transition-all peer-checked:translate-x-5"></span>
+                        <div class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 relative transition-colors duration-200">
+                            <span class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-md transition-all duration-200 peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5"></span>
                         </div>
                     </label>
                 </div>
@@ -44,22 +43,19 @@
             </div>
 
             {{-- Online (Tap) --}}
-            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4">
+            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
                 <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <p class="font-black">💳 الدفع أونلاين</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-slate-900 dark:text-white">💳 الدفع أونلاين</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Visa / MasterCard / Mada عبر Tap.
                         </p>
                     </div>
 
-                    <label class="inline-flex items-center cursor-pointer select-none">
+                    <label class="inline-flex items-center cursor-pointer select-none shrink-0">
                         <input type="checkbox" wire:model="enable_online_payment" class="sr-only peer">
-                        <div
-                            class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-800 peer-checked:bg-emerald-600 relative transition">
-                            <span
-                                class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow
-                                transition-all peer-checked:translate-x-5"></span>
+                        <div class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 relative transition-colors duration-200">
+                            <span class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-md transition-all duration-200 peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5"></span>
                         </div>
                     </label>
                 </div>
@@ -69,22 +65,19 @@
             </div>
 
             {{-- Bank Transfer --}}
-            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4">
+            <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 hover:border-slate-300 dark:hover:border-slate-700 transition-colors sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <p class="font-black">🏦 التحويل البنكي</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-slate-900 dark:text-white">🏦 التحويل البنكي</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             عرض بيانات الحساب وإرفاق إيصال التحويل.
                         </p>
                     </div>
 
-                    <label class="inline-flex items-center cursor-pointer select-none">
+                    <label class="inline-flex items-center cursor-pointer select-none shrink-0">
                         <input type="checkbox" wire:model="enable_bank_payment" class="sr-only peer">
-                        <div
-                            class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-800 peer-checked:bg-emerald-600 relative transition">
-                            <span
-                                class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow
-                                transition-all peer-checked:translate-x-5"></span>
+                        <div class="w-12 h-7 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 relative transition-colors duration-200">
+                            <span class="absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-md transition-all duration-200 peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5"></span>
                         </div>
                     </label>
                 </div>
@@ -96,18 +89,17 @@
         </div>
 
         {{-- Tap Settings --}}
-        <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4">
-            <div class="flex items-center justify-between">
+        <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h3 class="font-black">إعدادات Tap Payments</h3>
+                    <h3 class="font-black text-slate-900 dark:text-white">إعدادات Tap Payments</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         تظهر وتُستخدم فقط عند تفعيل الدفع الأونلاين.
                     </p>
                 </div>
 
-                <span
-                    class="text-xs px-3 py-1 rounded-full border
-                    {{ $enable_online_payment ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300' }}">
+                <span class="text-xs px-3 py-1.5 rounded-full border shrink-0
+                    {{ $enable_online_payment ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400' }}">
                     {{ $enable_online_payment ? 'مفعّل' : 'غير مفعّل' }}
                 </span>
             </div>
@@ -116,9 +108,9 @@
 
                 {{-- Mode --}}
                 <div>
-                    <label class="text-sm font-bold">وضع التشغيل</label>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">وضع التشغيل</label>
                     <select wire:model="tap_mode"
-                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition">
                         <option value="sandbox">Sandbox (اختبار)</option>
                         <option value="live">Live (إنتاج)</option>
                     </select>
@@ -129,12 +121,12 @@
 
                 {{-- API Key --}}
                 <div>
-                    <label class="text-sm font-bold">
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">
                         Tap API Key
                         <span class="text-xs text-slate-500">(حسب وضع التشغيل)</span>
                     </label>
                     <input wire:model.defer="tap_api_key" type="text" placeholder="sk_test_xxx أو sk_live_xxx"
-                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent" />
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition" />
                     @error('tap_api_key')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
@@ -142,9 +134,9 @@
 
                 {{-- Webhook Secret --}}
                 <div>
-                    <label class="text-sm font-bold">Webhook Secret</label>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Webhook Secret</label>
                     <input wire:model.defer="tap_webhook_secret" type="text" placeholder="whsec_xxx"
-                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent" />
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition" />
                     @error('tap_webhook_secret')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
@@ -162,18 +154,17 @@
         </div>
 
         {{-- Bank Settings --}}
-        <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4">
-            <div class="flex items-center justify-between">
+        <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h3 class="font-black">التحويل البنكي</h3>
+                    <h3 class="font-black text-slate-900 dark:text-white">التحويل البنكي</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         فعّل التحويل البنكي ثم أضف/عدّل الحسابات البنكية من صفحة الحسابات.
                     </p>
                 </div>
 
-                <span
-                    class="text-xs px-3 py-1 rounded-full border
-            {{ $enable_bank_payment ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300' }}">
+                <span class="text-xs px-3 py-1.5 rounded-full border shrink-0
+                    {{ $enable_bank_payment ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400' }}">
                     {{ $enable_bank_payment ? 'مفعّل' : 'غير مفعّل' }}
                 </span>
             </div>
@@ -184,7 +175,8 @@
                 </div>
 
                 <a href="{{ route('admin.settings.bank-accounts') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-sm">
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-sm text-slate-900 dark:text-white transition-colors">
+                    <i class="fa-solid fa-landmark"></i>
                     إدارة الحسابات البنكية
                 </a>
             </div>
@@ -204,8 +196,12 @@
 
 
         {{-- Save --}}
-        <div class="pt-2 flex items-center justify-end gap-2">
-            <button class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+        <div class="pt-4 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-end gap-2">
+            <button type="submit"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-soft transition-colors disabled:opacity-50"
+                wire:loading.attr="disabled">
+                <i class="fa-solid fa-check-circle" wire:loading.remove wire:target="save"></i>
+                <i class="fa-solid fa-spinner fa-spin" wire:loading wire:target="save"></i>
                 حفظ الإعدادات
             </button>
         </div>

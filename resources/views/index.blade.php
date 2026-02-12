@@ -5,6 +5,11 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>{{ $siteName ?? 'SERV.X' }} — إدارة أساطيل الشركات (زيوت وفلاتر)</title>
+    @if($siteLogoUrl ?? null)
+        <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    @endif
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,13 +64,19 @@
 <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
         <!-- Logo -->
-        <a href="#home" class="flex items-center gap-3">
-            <div class="flex items-center justify-center h-12 w-32 rounded-2xl shadow-soft bg-white overflow-hidden">
-                <img src="{{ $siteLogoUrl ?? asset('logo.png') }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-10 w-auto object-contain"/>
+        <a href="#home" class="flex items-center gap-3 group">
+            <div class="flex items-center justify-center h-12 w-12 rounded-full shadow-soft overflow-hidden shrink-0 border border-slate-100">
+                @if($siteLogoUrl ?? null)
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-full w-full object-cover"/>
+                @else
+                    <div class="h-full w-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-black text-lg">
+                        {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}
+                    </div>
+                @endif
             </div>
-            <div>
-                <div class="text-lg font-extrabold leading-5" id="brandName">{{ $siteName ?? 'SERV.X' }}</div>
-                <div class="text-xs text-slate-500" id="brandTag">حلول صيانة الأساطيل للشركات</div>
+            <div class="min-w-0">
+                <div class="text-lg font-extrabold leading-5 truncate group-hover:text-slate-900" id="brandName">{{ $siteName ?? 'SERV.X' }}</div>
+                <div class="text-xs text-slate-500 truncate" id="brandTag">حلول صيانة الأساطيل للشركات</div>
             </div>
         </a>
 
@@ -782,9 +793,9 @@
             <div>
                 <div class="flex items-center gap-3">
                     @if($siteLogoUrl ?? null)
-                        <img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-2xl object-cover shadow-soft">
+                        <img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-full object-cover shadow-soft">
                     @else
-                        <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 shadow-soft"></div>
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 shadow-soft"></div>
                     @endif
                     <div>
                         <div class="text-lg font-extrabold">{{ $siteName ?? 'SERV.X' }}</div>
@@ -808,10 +819,16 @@
             <div>
                 <div class="font-extrabold mb-3" id="footerContact">تواصل</div>
                 <div class="text-sm text-white/70 space-y-2">
-                    <div><i class="fa-brands fa-whatsapp me-2"></i>WhatsApp: <span
-                                class="font-bold">05xxxxxxxx</span></div>
-                    <div><i class="fa-regular fa-envelope me-2"></i>Email: <span
-                                class="font-bold">b2b@oilgo.com</span></div>
+                    @php
+    $waNumber = preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '');
+    if (str_starts_with($waNumber, '0')) {
+        $waNumber = '966' . substr($waNumber, 1);
+    } elseif (!str_starts_with($waNumber, '966') && strlen($waNumber) <= 10) {
+        $waNumber = '966' . ltrim($waNumber, '0');
+    }
+@endphp
+                    <div><i class="fa-brands fa-whatsapp me-2"></i>WhatsApp: <a href="https://wa.me/{{ $waNumber ?: '966512345678' }}" target="_blank" rel="noopener" class="font-bold hover:text-white transition">{{ $contactWhatsapp ?? '05xxxxxxxx' }}</a></div>
+                    <div><i class="fa-regular fa-envelope me-2"></i>Email: <a href="mailto:{{ $contactEmail ?? 'b2b@oilgo.com' }}" class="font-bold hover:text-white transition">{{ $contactEmail ?? 'b2b@oilgo.com' }}</a></div>
                     <div class="text-xs text-white/50" id="footerNote">* بيانات تجريبية للعرض</div>
                 </div>
             </div>
@@ -819,8 +836,14 @@
 
         <div
                 class="mt-10 pt-6 border-t border-white/10 text-xs text-white/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div>© <span id="year"></span> {{ $siteName ?? 'SERV.X' }} — Demo UI</div>
-            <div id="buildNote">Tailwind + JavaScript + FontAwesome (RTL/LTR)</div>
+            <div>© <span id="year"></span> {{ $siteName ?? 'SERV.X' }}</div>
+            
+        </div>
+        <div class="mt-4 text-center text-xs text-white/60" id="footerCredits">
+            <span id="footerCreditsText">Designed and developed by</span>
+            <a href="mailto:raghebammar201@gmail.com" class="text-white/80 hover:text-white underline font-semibold transition">Ragheb Aloqab</a>
+            <span id="footerCreditsAnd"> and </span>
+            <a href="mailto:abdullahskander8@gmail.com" class="text-white/80 hover:text-white underline font-semibold transition">Abdullah Eskander</a>
         </div>
     </div>
 </footer>

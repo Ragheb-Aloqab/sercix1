@@ -20,13 +20,12 @@
             @if ($role === 'admin')
                 <button wire:click="setTab('branding')"
                     class="{{ $btn }} {{ $tab === 'branding' ? $active : $normal }}">اسم/شعار الموقع</button>
+                <button wire:click="setTab('invoice')"
+                    class="{{ $btn }} {{ $tab === 'invoice' ? $active : $normal }}">بيانات الفاتورة</button>
                 <button wire:click="setTab('otp')" class="{{ $btn }} {{ $tab === 'otp' ? $active : $normal }}">OTP
                     Provider</button>
                 <button wire:click="setTab('tap')"
                     class="{{ $btn }} {{ $tab === 'tap' ? $active : $normal }}">Tap Payments</button>
-                <button wire:click="setTab('notifications')"
-                    class="{{ $btn }} {{ $tab === 'notifications' ? $active : $normal }}">إشعارات
-                    النظام</button>
             @endif
         @endif
 
@@ -47,12 +46,12 @@
             <livewire:dashboard.settings.user-password />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'branding')
             <livewire:dashboard.settings.system-branding />
+        @elseif($actorType === 'user' && $role === 'admin' && $tab === 'invoice')
+            <livewire:dashboard.settings.invoice-settings />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'otp')
             <livewire:dashboard.settings.otp-provider />
         @elseif($actorType === 'user' && $role === 'admin' && $tab === 'tap')
             <livewire:dashboard.settings.tap-payments />
-        @elseif($actorType === 'user' && $role === 'admin' && $tab === 'notifications')
-            <livewire:dashboard.settings.notifications />
         @elseif($actorType === 'company' && $tab === 'company_profile')
             <livewire:dashboard.settings.company-profile />
         @elseif($actorType === 'company' && $tab === 'company_password')

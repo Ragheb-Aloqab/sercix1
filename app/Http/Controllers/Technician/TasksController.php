@@ -29,10 +29,9 @@ class TasksController extends Controller
      */
     public function show(Order $order)
     {
+        $this->authorize('view', $order);
+
         $technician = Auth::guard('web')->user();
-
-        abort_unless((int) $order->technician_id === (int) $technician->id, 403);
-
         $order->load([
             'company:id,company_name,phone',
             'vehicle:id,plate_number,make,model',
@@ -48,20 +47,16 @@ class TasksController extends Controller
      */
     public function confirmComplete(Order $order): RedirectResponse
     {
+        $this->authorize('changeStatus', $order);
+
         $technician = Auth::guard('web')->user();
-        
+
         /* ارسال اشعار للمدير ان الفني انجز المهمة */
-        
-        
         $admins = User::where('role', 'admin')->get();
-        
         foreach ($admins as $admin) {
             $admin->notify(new OrderCompletedNotification($order));
         }
         /**/
-        
-        // حماية: الطلب لازم يكون تابع لهذا الفني
-        abort_unless((int) $order->technician_id === (int) $technician->id, 403);
 
         // (اختياري) امنع التأكيد إذا الطلب مكتمل أصلاً
         if ($order->status === 'completed') {
@@ -79,20 +74,7 @@ class TasksController extends Controller
     public function accept($id )
 {
     $order = Order::find($id);
-    //$order->update(['status' => 'accepted']);
-    /*$services = $order->services()->first();
     
-    $inventory = $services->inventory;
-    dd($inventory);
-    if ($inventory->qty <= 0) {
-        return back()->with('error', 'الكمية غير متوفرة');
-    }
-
-    $inventory->qty -= 1;
-    $inventory->save();
-
-    $order->status = 'accepted';
-    $order->save();*/
     $admin = User::where('role', 'admin')->first();
 
     $admin->notify(
