@@ -264,6 +264,49 @@
             </div>
         </div>
 
+        {{-- Recent Invoices --}}
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">{{ __('company.recent_invoices') }}</h2>
+                <a href="{{ route('company.invoices.index') }}" class="text-sm font-semibold text-sky-600 hover:text-sky-700">
+                    {{ __('common.view_all') }} <i class="fa-solid fa-arrow-left ms-1"></i>
+                </a>
+            </div>
+            @if($company->invoices->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                                <th class="pb-3 text-start font-medium">#</th>
+                                <th class="pb-3 text-start font-medium">{{ __('company.invoice_number') }}</th>
+                                <th class="pb-3 text-start font-medium">{{ __('company.total') }}</th>
+                                <th class="pb-3 text-start font-medium">{{ __('company.date') }}</th>
+                                <th class="pb-3 text-start font-medium"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($company->invoices as $inv)
+                                <tr class="border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                    <td class="py-3 font-bold">{{ $inv->id }}</td>
+                                    <td class="py-3">{{ $inv->invoice_number ?? '-' }}</td>
+                                    <td class="py-3 font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} SAR</td>
+                                    <td class="py-3 text-slate-500">{{ $inv->created_at?->format('Y-m-d') }}</td>
+                                    <td class="py-3">
+                                        <a href="{{ route('company.invoices.show', $inv) }}" class="text-sky-600 hover:text-sky-700 font-semibold me-2">{{ __('common.view') }}</a>
+                                        <a href="{{ route('company.invoices.pdf', $inv) }}" download="invoice-{{ $inv->invoice_number ?? $inv->id }}.pdf" class="text-emerald-600 hover:text-emerald-700 font-semibold">
+                                            <i class="fa-solid fa-file-pdf"></i> {{ __('common.download') }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="text-slate-500 dark:text-slate-400 py-6 text-center">{{ __('company.no_invoices_yet') }}</p>
+            @endif
+        </div>
+
         <footer class="text-center text-slate-500 dark:text-slate-400 text-sm py-4">
             {{ __('company.last_update') }}: {{ now()->format('Y-m-d') }}
         </footer>

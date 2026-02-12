@@ -4,10 +4,12 @@ namespace App\Observers;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Payment;
 use App\Events\OrderCreated;
 use App\Events\OrderAssignedToTechnician;
 use App\Notifications\DriverServiceRequestNotification;
 use App\Notifications\NewOrderForAdmin;
+use App\Services\InvoicePdfService;
 
 class OrderObserver
 {
@@ -38,6 +40,11 @@ class OrderObserver
             foreach ($admins as $admin) {
                 $admin->notify(new NewOrderForAdmin($order));
             }
+        }
+
+        // Auto-create invoice when order is completed
+        if ($order->wasChanged('status') && $order->status === 'completed') {
+            $this->createInvoiceForOrder($order);
         }
 
         if (
@@ -75,5 +82,43 @@ class OrderObserver
     public function forceDeleted(Order $order): void
     {
         //
+    }
+
+    private function createInvoiceForOrder(Order $order): void
+    {
+        if ($order->invoice()->exists()) {
+            return;
+        }
+
+        $order->load(['services', 'payments']);
+        $subtotal = (float) $order->total_amount;
+        $tax = (float) ($order->tax_amount ?? 0);
+        $paid = (float) $order->payments()->where('status', 'paid')->sum('amount');
+
+        $invoice = $order->invoice()->create([
+            'company_id' => $order->company_id,
+            'invoice_number' => 'INV-' . $order->id . '-' . now()->format('Ymd'),
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'paid_amount' => $paid,
+        ]);
+
+        try {
+            app(InvoicePdfService::class)->generate($invoice);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        $total = $subtotal + $tax;
+        $remaining = max(0, $total - $paid);
+        if ($remaining > 0 && $order->payments()->where('status', 'pending')->count() === 0) {
+            Payment::create([
+                'order_id' => $order->id,
+                'company_id' => $order->company_id,
+                'method' => null,
+                'status' => 'pending',
+                'amount' => $remaining,
+            ]);
+        }
     }
 }

@@ -57,7 +57,7 @@
           </div>
           
           <div class="flex gap-2">
-              <button class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold">حفظ</button>
+              <button class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold">{{ __('common.save') }}</button>
               <a href="{{ route('admin.customers.index') }}" class="px-4 py-2 rounded-xl border border-slate-200 font-bold">رجوع</a>
           </div>
            {{--End Partisal Form--}}

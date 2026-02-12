@@ -7,6 +7,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', __('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'SERV.X'))</title>
+    @if($siteLogoUrl ?? null)
+        <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    @endif
 
     {{-- Tailwind CDN (للمعاينة فقط) --}}
     <script src="https://cdn.tailwindcss.com"></script>

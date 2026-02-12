@@ -6,6 +6,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        @if($siteLogoUrl ?? null)
+            <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+        @else
+            <link rel="icon" href="{{ asset('favicon.ico') }}" />
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

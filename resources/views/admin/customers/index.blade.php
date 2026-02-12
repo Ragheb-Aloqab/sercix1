@@ -9,7 +9,7 @@
             <input name="q" value="{{ $q }}"
                 class="w-72 max-w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 placeholder="بحث بالاسم/الإيميل/الجوال..." />
-            <button class="px-3 py-2 rounded-xl border border-slate-200 text-sm font-semibold">بحث</button>
+            <button class="px-3 py-2 rounded-xl border border-slate-200 text-sm font-semibold">{{ __('common.search') }}</button>
         </form>
         <!--
         <a href="{{ route('admin.customers.create') }}"

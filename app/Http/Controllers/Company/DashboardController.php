@@ -14,9 +14,11 @@ class DashboardController extends Controller
     public function index()
     {
         $company = Auth::guard('company')->user();
-
-        // لاحقًا تقدر تضيف إحصائيات:
-        // $ordersCount = $company->orders()->count();
+        $company->load([
+            'orders',
+            'invoices' => fn ($q) => $q->with('order')->latest()->limit(10),
+            'branches',
+        ]);
 
         return view('company.dashboard.index', compact('company'));
     }

@@ -77,6 +77,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{order}/payments', [OrderPaymentController::class, 'store'])->name('orders.payments.store');
 
             Route::get('/{order}/invoice', [OrderInvoiceController::class, 'show'])->name('orders.invoice.show');
+            Route::get('/{order}/invoice/pdf', [OrderInvoiceController::class, 'downloadPdf'])->name('orders.invoice.pdf');
             Route::post('/{order}/invoice', [OrderInvoiceController::class, 'store'])->name('orders.invoice.store');
         });
 

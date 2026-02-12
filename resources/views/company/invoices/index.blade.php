@@ -86,14 +86,11 @@
                                          <i class="fa-solid fa-eye"></i>
                                     </a>
 
-                                    @if (!empty($invoice->pdf_path))
-                                        <a href="{{ route('company.invoices.pdf', $invoice) }}"
-                                        target="_blank"
-                                            class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold ">
-                                            تحميل PDF
-                                            <i class="fa-solid fa-file-pdf"></i>
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('company.invoices.pdf', $invoice) }}"
+                                        download="invoice-{{ $invoice->invoice_number ?? $invoice->id }}.pdf"
+                                        class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
+                                        <i class="fa-solid fa-file-pdf me-1"></i> تحميل PDF
+                                    </a>
 
                                     @if (($invoice->remaining_amount ?? 0) > 0 && $invoice->order_id)
 

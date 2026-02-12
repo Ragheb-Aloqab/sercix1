@@ -4,6 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{{ __('login.verify_title') }} — {{ $siteName ?? 'SERV.X' }}</title>
+    @if($siteLogoUrl ?? null)
+        <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style> body { font-family: "Tajawal", system-ui, sans-serif; } .shadow-soft { box-shadow: 0 18px 60px rgba(0,0,0,.12); } </style>

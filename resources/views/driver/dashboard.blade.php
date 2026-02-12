@@ -4,6 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>لوحة السائق — {{ $siteName ?? 'SERV.X' }}</title>
+    @if($siteLogoUrl ?? null)
+        <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">

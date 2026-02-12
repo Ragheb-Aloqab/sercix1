@@ -12,6 +12,17 @@
                 <p class="font-black text-xl">
                     فاتورة #{{ $invoice->invoice_number ?? $invoice->id }}
                 </p>
+                @php
+                    $barcodeData = $invoice->invoice_number ?? 'INV-' . $invoice->id;
+                    $barcodeGen = new \Picqer\Barcode\BarcodeGeneratorSVG();
+                    $barcodeImg = $barcodeGen->getBarcode($barcodeData, $barcodeGen::TYPE_CODE_128, 2, 40);
+                @endphp
+                <div class="mt-2 flex items-center gap-3">
+                    <div class="inline-block p-2 bg-white border border-slate-200 rounded-lg">
+                        {!! $barcodeImg !!}
+                    </div>
+                    <span class="text-xs font-mono text-slate-600">{{ $barcodeData }}</span>
+                </div>
                 <p class="text-sm text-slate-500 mt-1">
                     الحالة: {{ ucfirst($invoice->status) }}
                 </p>
@@ -21,15 +32,11 @@
             </div>
 
             <div class="flex flex-wrap gap-2">
-                @if(!empty($invoice->pdf_path))
-
-                    <a href="{{ route('company.invoices.pdf', $invoice) }}"
-
-                       class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                        تحميل PDF
-                        <i class="fa-solid fa-file-pdf"></i>
-                    </a>
-                @endif
+                <a href="{{ route('company.invoices.pdf', $invoice) }}"
+                   download="invoice-{{ $invoice->invoice_number ?? $invoice->id }}.pdf"
+                   class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                    <i class="fa-solid fa-file-pdf me-1"></i> تحميل PDF
+                </a>
 
                 <a href="{{ route('company.invoices.index') }}"
                    class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
