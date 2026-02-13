@@ -18,7 +18,7 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
        return [
-            // order_id + company_id نمررهم من Seeder
+            // order_id نمرره من Seeder
             'method' => $this->faker->randomElement(['cash', 'tap']),
             'status' => $this->faker->randomElement(['pending', 'paid', 'failed', 'refunded']),
             'amount' => $this->faker->randomFloat(2, 20, 800),

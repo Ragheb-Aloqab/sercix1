@@ -26,9 +26,12 @@ class Invoice extends Model
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Payments for this invoice's order (shared order_id).
+     */
     public function payments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class, 'order_id', 'order_id');
     }
 
     public function attachments()

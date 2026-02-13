@@ -62,11 +62,9 @@ class GlobalSearch extends Component
             }
 
             if ($role === 'technician') {
-                // ✅ عدّل اسم العمود حسب مشروعك: technician_id أو assigned_to ...
                 $ordersQuery->where('technician_id', $user->getKey());
             }
 
-            // admin => بدون فلترة
             $orders = $ordersQuery->limit(5)->get();
 
             // -------------------------

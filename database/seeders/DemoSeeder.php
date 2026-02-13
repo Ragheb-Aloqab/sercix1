@@ -201,27 +201,11 @@ class DemoSeeder extends Seeder
                 // Payment
                 Payment::factory()->create([
                     'order_id' => $order->id,
-                    'company_id' => $company->id,
                     'amount' => $subtotal,
                     'paid_at' => now(),
                 ]);
 
-                // Invoice
-                /*
                 $tax   = round($subtotal * 0.15, 2);
-                $total = $subtotal + $tax;
-
-                Invoice::factory()->create([
-                    'order_id' => $order->id,
-                    'company_id' => $company->id,
-                    'invoice_number' => 'INV-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6)),
-                    'subtotal' => $subtotal,
-                    'tax' => $tax,
-                    'total' => $total,
-                    'status' => 'paid',
-                ]);
-                  */
-                  $tax   = round($subtotal * 0.15, 2);
                   $total = $subtotal + $tax;
                   
                   $paidAmount = rand(0, 1)

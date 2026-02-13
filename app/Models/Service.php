@@ -24,7 +24,7 @@ class Service extends Model
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'order_services')
-            ->withPivot(['qty', 'price']) // حسب أعمدتك
+            ->withPivot(['qty', 'unit_price', 'total_price'])
             ->withTimestamps();
     }
     public function companies()

@@ -44,7 +44,6 @@ class Settings extends Component
             ],
         ]);
 
-        // حسب أسماء الأعمدة عندك
         if (isset($company->company_name)) {
             $company->company_name = $this->name;
         } else {
@@ -54,7 +53,7 @@ class Settings extends Component
         $company->email = $this->email;
         $company->save();
 
-        session()->flash('success', 'تم تحديث بيانات الشركة ✅');
+        session()->flash('success', 'تم تحديث بيانات الشركة ');
     }
 
     public function changePassword()
@@ -72,13 +71,13 @@ class Settings extends Component
 
         $this->reset(['current_password', 'password', 'password_confirmation']);
 
-        session()->flash('success', 'تم تغيير كلمة المرور ✅');
+        session()->flash('success', 'تم تغيير كلمة المرور ');
     }
 
     public function render()
     {
         return view('livewire.company.settings')
-            ->extends('admin.layouts.app') // نفس Layout لوحة التحكم
+            ->extends('admin.layouts.app') 
             ->section('content');
     }
 }

@@ -143,7 +143,6 @@ class OrderShow extends Component
         $this->order->payment()->updateOrCreate(
             ['order_id' => $this->order->id],
             [
-                'company_id' => $this->order->company_id,
                 'method'     => $this->payment_method,
                 'status'     => $this->payment_status,
                 'amount'     => (float) $this->payment_amount,
@@ -189,8 +188,7 @@ class OrderShow extends Component
         if ($remaining > 0 && $this->order->payments()->where('status', 'pending')->count() === 0) {
             Payment::create([
                 'order_id'   => $this->order->id,
-                'company_id' => $this->order->company_id,
-                'method'     => null,
+                'method'     => 'cash',
                 'status'     => 'pending',
                 'amount'     => $remaining,
             ]);

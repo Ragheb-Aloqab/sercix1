@@ -12,7 +12,7 @@
         ->count();
     $completed = Order::query()->where('company_id', $company->id)->where('status', 'completed')->count();
 
-    $paidTotal = Payment::query()->where('company_id', $company->id)->where('status', 'paid')->sum('amount');
+    $paidTotal = Payment::query()->whereHas('order', fn ($q) => $q->where('company_id', $company->id))->where('status', 'paid')->sum('amount');
 
     $latestOrders = Order::query()->where('company_id', $company->id)->latest()->take(6)->get();
 

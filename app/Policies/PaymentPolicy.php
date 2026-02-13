@@ -14,7 +14,7 @@ class PaymentPolicy
 
     public function view(Company $company, Payment $payment): bool
     {
-        return (int) $payment->company_id === (int) $company->id;
+        return (int) $payment->order->company_id === (int) $company->id;
     }
 
     public function create(Company $company): bool
@@ -24,11 +24,11 @@ class PaymentPolicy
 
     public function update(Company $company, Payment $payment): bool
     {
-        return (int) $payment->company_id === (int) $company->id;
+        return (int) $payment->order->company_id === (int) $company->id;
     }
 
     public function delete(Company $company, Payment $payment): bool
     {
-        return (int) $payment->company_id === (int) $company->id;
+        return (int) $payment->order->company_id === (int) $company->id;
     }
 }

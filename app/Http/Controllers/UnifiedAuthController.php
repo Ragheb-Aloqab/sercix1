@@ -3,21 +3,153 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
- * Single sign-in for Company and Driver. User enters phone; we detect role and redirect to the right dashboard after OTP.
+ * Unified sign-in: one input (email or phone). Auto-detect:
+ * - Phone → Company or Driver (OTP)
+ * - Email → Admin or Technician (password)
  */
 class UnifiedAuthController extends Controller
 {
     public function showLogin()
     {
         return view('auth.unified-login');
+    }
+
+    /**
+     * Step 1: User enters email or phone. Auto-detect and route accordingly.
+     */
+    public function identify(Request $request)
+    {
+        $data = $request->validate([
+            'identifier' => ['required', 'string', 'max:255'],
+        ]);
+        $identifier = trim($data['identifier']);
+
+        if ($this->looksLikeEmail($identifier)) {
+            return $this->handleEmailIdentifier($identifier);
+        }
+
+        return $this->handlePhoneIdentifier($identifier);
+    }
+
+    private function looksLikeEmail(string $value): bool
+    {
+        return str_contains($value, '@') && filter_var($value, FILTER_VALIDATE_EMAIL);
+    }
+
+    private function handleEmailIdentifier(string $email)
+    {
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return back()->withErrors([
+                'identifier' => __('login.email_not_found'),
+            ])->withInput();
+        }
+
+        if (!in_array($user->role ?? '', ['admin', 'technician'])) {
+            return back()->withErrors([
+                'identifier' => __('login.email_not_staff'),
+            ])->withInput();
+        }
+
+        Session::put('login_email', $email);
+        Session::put('login_user_role', $user->role);
+
+        return redirect()->route('sign-in.password');
+    }
+
+    private function handlePhoneIdentifier(string $phone)
+    {
+        $normalized = $this->normalizePhone($phone);
+        $variants = $this->phoneVariants($normalized);
+
+        $company = Company::whereIn('phone', $variants)->first();
+        $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+
+        if ($company) {
+            return $this->sendOtpCompany($company->phone ?: $normalized);
+        }
+        if ($vehicle) {
+            return $this->sendOtpDriver($normalized);
+        }
+
+        return back()->withErrors([
+            'identifier' => __('login.phone_not_found'),
+        ])->withInput();
+    }
+
+    /**
+     * Step 2 for email: show password form.
+     */
+    public function showPasswordForm()
+    {
+        $email = Session::get('login_email');
+        if (!$email) {
+            return redirect()->route('sign-in.index')->with('error', __('login.session_expired'));
+        }
+
+        return view('auth.unified-password', compact('email'));
+    }
+
+    /**
+     * Step 2 for email: authenticate with password.
+     */
+    public function authenticatePassword(Request $request)
+    {
+        $email = Session::get('login_email');
+        if (!$email) {
+            return redirect()->route('sign-in.index')->withErrors(['password' => __('login.session_expired')]);
+        }
+
+        $data = $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        $this->ensureEmailRateLimited($email);
+
+        if (!Auth::guard('web')->attempt(['email' => $email, 'password' => $data['password']], $request->boolean('remember'))) {
+            RateLimiter::hit($this->emailThrottleKey($email));
+            throw ValidationException::withMessages([
+                'password' => trans('auth.failed'),
+            ]);
+        }
+
+        RateLimiter::clear($this->emailThrottleKey($email));
+        Session::forget(['login_email', 'login_user_role']);
+        Session::regenerate();
+
+        return redirect()->intended(route('dashboard'));
+    }
+
+    private function ensureEmailRateLimited(string $email): void
+    {
+        if (!RateLimiter::tooManyAttempts($this->emailThrottleKey($email), 5)) {
+            return;
+        }
+        $seconds = RateLimiter::availableIn($this->emailThrottleKey($email));
+        throw ValidationException::withMessages([
+            'password' => trans('auth.throttle', [
+                'seconds' => $seconds,
+                'minutes' => ceil($seconds / 60),
+            ]),
+        ]);
+    }
+
+    private function emailThrottleKey(string $email): string
+    {
+        return Str::transliterate(Str::lower($email) . '|' . request()->ip());
     }
 
     public function sendOtp(Request $request)

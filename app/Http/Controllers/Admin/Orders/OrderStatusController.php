@@ -23,24 +23,23 @@ class OrderStatusController extends Controller
 
         $isAllowed = OrderStatus::canTransition($from, $to);
 
-        // ✅ غير الأدمن: ممنوع أي انتقال غير مسموح
+       
         if (!$isAdmin && !$isAllowed) {
             return back()->withErrors([
                 'to_status' => "انتقال غير مسموح: {$from} → {$to}",
             ]);
         }
 
-        // ✅ الأدمن: إذا الانتقال غير مسموح (تجاوز) لازم سبب
+       
         if ($isAdmin && !$isAllowed && !$request->filled('note')) {
             return back()->withErrors([
                 'note' => 'هذا انتقال غير قياسي (تجاوز). الرجاء كتابة سبب التغيير.',
             ]);
         }
 
-        // ✅ نفّذ التغيير
         $order->update(['status' => $to]);
 
-        // ✅ سجّل اللوج
+      
         $note = $request->input('note');
 
         if ($isAdmin && !$isAllowed) {
@@ -53,7 +52,7 @@ class OrderStatusController extends Controller
             'note'        => $note,
             'changed_by'  => $user->id,
         ]);
-        /*ارسال اشعار للمدير انه تم تعليق الطلب*/
+      
         $admin = User::where('role', 'admin')->first();
         
         if ($admin) {

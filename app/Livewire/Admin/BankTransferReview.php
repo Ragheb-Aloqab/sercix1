@@ -48,7 +48,7 @@ class BankTransferReview extends Component
         $payments = Payment::query()
             ->where('method', 'bank')
             ->where('status', 'pending')
-            ->with(['order:id,company_id,status', 'company:id,company_name,phone', 'bankAccount'])
+            ->with(['order:id,company_id,status', 'order.company:id,company_name,phone', 'bankAccount'])
             ->latest()
             ->paginate(10);
 

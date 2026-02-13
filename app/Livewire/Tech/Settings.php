@@ -66,14 +66,11 @@ public function changePassword()
     ]);
     
 
-    // تحديث كلمة المرور
     $user->password = Hash::make($this->password);
     $user->save();
 
-    // 🔔 إرسال إشعار لنفس الفني
     $user->notify(new PasswordChangedNotification());
 
-    // تفريغ الحقول
     $this->reset(['current_password', 'password', 'password_confirmation']);
 
     session()->flash('success', 'تم تغيير كلمة المرور ✅');

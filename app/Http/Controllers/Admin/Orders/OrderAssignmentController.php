@@ -21,7 +21,7 @@ class OrderAssignmentController extends Controller
 
         $from = $order->status;
 
-        // ✅ status المسموح (بدل assigned)
+      
         $to = 'in_progress';
 
         $order->update([
@@ -29,16 +29,14 @@ class OrderAssignmentController extends Controller
             'status' => $to,
         ]);
 
-        // ✅ جدول order_status_logs عندك عموده changed_by وليس changed_by_admin_id
+     
         $order->statusLogs()->create([
             'from_status' => $from,
             'to_status' => $to,
             'note' => $request->note,
             'changed_by' => auth()->id(),
         ]);
-        /*
-        ارسال اشعار لاعلام الفني بالطلب
-        */
+      
         $order->technician_id = $tech->id;
         $order->save();
         

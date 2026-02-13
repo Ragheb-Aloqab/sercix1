@@ -13,8 +13,6 @@
 
         $webUser = auth('web')->user();
         $webRole = $webUser->role ?? null;
-
-        // final role (web guard FIRST)
         $role = match (true) {
             auth('web')->check() && $webRole === 'admin' => 'admin',
             auth('web')->check() && $webRole === 'technician' => 'technician',
@@ -339,8 +337,8 @@
                 @endif
             </div>
 
-            
-            <form method="POST" action="{{ request()->is('company/*') ? route('company.logout') : route('logout') }}">
+
+            <form method="POST" action="{{ $isCompany ? route('company.logout') : route('logout') }}" class="inline">
                 @csrf
                 <button type="submit"
                     class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">

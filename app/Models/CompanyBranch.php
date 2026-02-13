@@ -42,16 +42,9 @@ class CompanyBranch extends Model
         return $this->belongsTo(Company::class);
     }
 
-    // المركبات التابعة للفرع
     public function vehicles()
     {
         return $this->hasMany(Vehicle::class, 'company_branch_id');
-    }
-
-    // الطلبات التابعة للفرع
-    public function orders()
-    {
-        return $this->hasMany(Order::class, 'company_branch_id');
     }
   
 }

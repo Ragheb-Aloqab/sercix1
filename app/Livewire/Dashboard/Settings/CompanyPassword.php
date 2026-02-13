@@ -30,7 +30,6 @@ class CompanyPassword extends Component
 
         $c->update(['password' => Hash::make($this->password)]);
 
-        // إشعار للأدمن
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             $admin->notify(new AdminUserChanged(

@@ -31,7 +31,7 @@ class UserPassword extends Component
 
         $u->update(['password' => Hash::make($this->password)]);
 
-        // Notify admins لو الفني غيّر باسورد
+       
         if ($u->role === 'technician') {
             User::where('role', 'admin')
                 ->each(fn($admin) => $admin->notify(new AdminUserChanged(

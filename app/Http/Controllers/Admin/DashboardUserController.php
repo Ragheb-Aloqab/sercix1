@@ -43,9 +43,6 @@ class DashboardUserController extends Controller
     public function store(StoreTechnicianRequest $request)
     {
         $data = $request->validated();
-        
-        // ✅ status allowed only: active | suspended
-        // ندعم checkbox قديم باسم is_active إن وُجد
         $status = $data['status']
             ?? ($request->has('is_active')
                 ? ($request->boolean('is_active') ? 'active' : 'suspended')
@@ -83,10 +80,6 @@ class DashboardUserController extends Controller
         $user->email = $data['email'];
         $user->phone = $data['phone'] ?? null;
 
-        // ✅ status allowed only: active | suspended
-        // يدعم:
-        // - status من الفورم
-        // - أو is_active checkbox قديم
         if (isset($data['status'])) {
             $user->status = $data['status']; // active|suspended
         } elseif ($request->has('is_active')) {
@@ -118,12 +111,12 @@ class DashboardUserController extends Controller
     }
     public function destroy(User $user)
     {
-        // حماية: لا تحذف الأدمن
+       
         if ($user->role === 'admin') {
             return back()->withErrors('لا يمكن حذف مدير النظام.');
         }
 
-        // (اختياري) فك العلاقات لو عندك
+      
         // $user->orders()->update(['technician_id' => null]);
 
         $user->delete();

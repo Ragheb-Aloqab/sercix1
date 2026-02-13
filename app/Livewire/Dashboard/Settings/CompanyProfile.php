@@ -46,12 +46,12 @@ class CompanyProfile extends Component
             'contact_person' => ['nullable','string','max:255'],
             'city'           => ['nullable','string','max:255'],
             'address'        => ['nullable','string','max:2000'],
-            'logo'           => ['nullable','image','max:2048'], // 2MB
+            'logo'           => ['nullable','image','max:2048'],
         ]);
 
         $before = $c->only(['company_name','email','phone','contact_person','city','address','logo_path']);
 
-        // رفع الشعار (اختياري)
+      
         if ($this->logo) {
             if ($c->logo_path) {
                 Storage::disk('public')->delete($c->logo_path);

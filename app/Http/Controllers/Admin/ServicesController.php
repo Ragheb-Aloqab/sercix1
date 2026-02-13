@@ -17,20 +17,17 @@ class ServicesController extends Controller
         $companyId = session('admin_company_id');
         $company = null;
 
-        // فلاتر
+       
         $q = trim((string) $request->get('q'));
         $status = $request->get('status', 'all'); // active | inactive | all
 
-        // Query أساسي
         $servicesQuery = Service::query();
 
-        // لو في شركة مختارة: فلتر خدمات الشركة عبر pivot company_services
+      
         if ($companyId) {
             $company = Company::query()
                 ->select('id', 'company_name')
                 ->find($companyId);
-
-            // إذا الشركة غير موجودة (مثلاً انحذفت) نظّف السيشن
             if (!$company) {
                 session()->forget('admin_company_id');
             } else {
@@ -40,12 +37,11 @@ class ServicesController extends Controller
             }
         }
 
-        // بحث بالاسم
+       
         if ($q !== '') {
             $servicesQuery->where('name', 'like', "%{$q}%");
         }
 
-        // فلتر الحالة
         if ($status === 'active') {
             $servicesQuery->where('is_active', true);
         } elseif ($status === 'inactive') {
@@ -96,12 +92,12 @@ class ServicesController extends Controller
 
     public function destroy(Service $service)
     {
-        // لو عندك علاقة شركات
+      
         if (method_exists($service, 'companies')) {
             $service->companies()->detach();
         }
 
-        // لو عندك علاقة طلبات (مثال: orders)
+     
         if (method_exists($service, 'orders')) {
             $service->orders()->detach();
         }

@@ -15,15 +15,8 @@ class IndexOrdersRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'string'],
-
             'company_id' => ['nullable', 'integer', 'exists:companies,id'],
-
-            // لا يوجد branch_id في جدول orders الحالي
-            // 'branch_id' => ['nullable', 'integer'],
-
             'technician_id' => ['nullable', 'integer', 'exists:users,id'],
-
-            // هذا فلتر على payments.method وليس على orders
             'payment_method' => ['nullable', 'in:cash,tap'],
 
             'from' => ['nullable', 'date'],

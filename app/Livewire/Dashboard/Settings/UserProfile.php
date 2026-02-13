@@ -16,8 +16,6 @@ class UserProfile extends Component
     public function mount()
     {
         $u = Auth::user();
-
-        // لو ما فيه مستخدم (احتياط)
         abort_unless($u, 401);
 
         $this->name  = $u->name;
@@ -40,7 +38,6 @@ class UserProfile extends Component
 
         $u->update($data);
 
-        // Notify admins لو اللي عدل مو أدمن
         if ($u->role === 'technician') {
             $after   = $u->only(['name', 'email', 'phone']);
             $changes = array_diff_assoc($after, $before);

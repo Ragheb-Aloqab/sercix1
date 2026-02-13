@@ -35,9 +35,9 @@ class PaymentPaidNotification extends Notification
             }
         }
 
-        $company = $this->payment->relationLoaded('company')
-            ? $this->payment->company
-            : $this->payment->company()->first();
+        $company = $this->payment->relationLoaded('order')
+            ? $this->payment->order->company
+            : $this->payment->order->company;
         $companyName = $company?->company_name ?? '—';
 
         $methodLabel = match ($this->payment->method ?? '') {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{{ __('login.title') }} — {{ $siteName ?? 'SERV.X' }}</title>
+    <title>{{ __('login.password_title') }} — {{ $siteName ?? 'SERV.X' }}</title>
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -28,32 +28,32 @@
         </a>
 
         <div class="bg-white rounded-2xl shadow-soft border border-slate-200/80 p-6 sm:p-8">
-            <h1 class="text-xl font-semibold text-slate-900">{{ __('login.title') }}</h1>
-            <p class="mt-1 text-sm text-slate-500 mb-6">{{ __('login.unified_subtitle') }}</p>
+            <h1 class="text-xl font-semibold text-slate-900">{{ __('login.password_title') }}</h1>
+            <p class="mt-1 text-sm text-slate-500 mb-6">{{ __('login.password_subtitle') }}: <span class="font-semibold text-slate-700">{{ $email }}</span></p>
 
-            @if (session('success'))<div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">{{ session('success') }}</div>@endif
-            @if (session('error'))<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{{ session('error') }}</div>@endif
-            @if ($errors->any())<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"><ul class="list-disc ms-5 space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+            @if ($errors->any())
+                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                    <ul class="list-disc ms-5 space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                </div>
+            @endif
 
-            <form method="POST" action="{{ route('sign-in.identify') }}" class="space-y-4">
+            <form method="POST" action="{{ route('sign-in.authenticate_password') }}" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">{{ __('login.identifier_label') }}</label>
-                    <input name="identifier" value="{{ old('identifier') }}" placeholder="{{ __('login.identifier_placeholder') }}"
-                        class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
-                        autocomplete="username" autofocus />
+                    <label class="block text-sm font-medium text-slate-700">{{ __('login.password_label') }}</label>
+                    <input name="password" type="password" required autocomplete="current-password"
+                        class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200" />
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="remember" id="remember" class="h-4 w-4 rounded border-slate-300 text-slate-800 focus:ring-slate-400" />
+                    <label for="remember" class="text-sm text-slate-600">{{ __('login.remember_me') }}</label>
                 </div>
                 <button type="submit" class="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
-                    {{ __('login.continue') }}
+                    {{ __('login.sign_in') }}
                 </button>
             </form>
-
-            <p class="mt-4 text-xs text-slate-500 text-center">
-                {{ __('login.identifier_hint') }}
-            </p>
-
-            <a href="{{ route('company.register') }}" class="mt-4 block w-full text-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
-                {{ __('login.create_company_account') }}
+            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-medium text-slate-600 hover:text-slate-800">
+                {{ __('login.change_email') }}
             </a>
         </div>
         <div class="mt-6 flex items-center justify-center gap-3 text-xs text-slate-500">

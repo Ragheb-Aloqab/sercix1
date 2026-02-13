@@ -11,7 +11,6 @@ class Payment extends Model
 
     protected $fillable = [
         'order_id',
-        'company_id',
         'method',
         'status',
         'amount',
@@ -46,9 +45,12 @@ class Payment extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function company()
+    /**
+     * @return \App\Models\Company|null
+     */
+    public function getCompanyAttribute()
     {
-        return $this->belongsTo(Company::class);
+        return $this->order?->company;
     }
 
     public function invoice()

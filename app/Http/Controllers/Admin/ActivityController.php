@@ -9,7 +9,7 @@ class ActivityController extends Controller
 {
     public function index()
     {
-        // عرض أحدث الأنشطة
+        
         $activities = Activity::latest()->paginate(20);
 
         return view('admin.activities.index', compact('activities'));

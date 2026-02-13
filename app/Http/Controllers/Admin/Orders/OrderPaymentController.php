@@ -17,7 +17,6 @@ class OrderPaymentController extends Controller
         $order->payment()->updateOrCreate(
             ['order_id' => $order->id],
             [
-                'company_id' => $order->company_id,
                 'method' => $request->method,       // cash|tap
                 'status' => $request->status,       // pending|paid|failed|refunded
                 'amount' => $request->amount,
@@ -28,7 +27,7 @@ class OrderPaymentController extends Controller
       
         if ($request->status === 'paid' && $order->status !== OrderStatus::COMPLETED) {
             $from = $order->status;
-            $to = OrderStatus::COMPLETED; // ✅ مسموحة ضمن CHECK
+            $to = OrderStatus::COMPLETED; 
 
             $order->update(['status' => $to]);
 

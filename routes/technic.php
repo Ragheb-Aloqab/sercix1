@@ -26,12 +26,12 @@ Route::middleware(['auth:web', 'role:technician'])
             ->name('tasks.show')
             ->whereNumber('order');
 
-        // Alias (لو بعض الواجهات تستخدم orders.show)
+        // Alias ( orders.show)
         Route::get('/orders/{order}', [TasksController::class, 'show'])
             ->name('orders.show')
             ->whereNumber('order');
 
-        // ✅ Accept / Reject (أفضل تكون PATCH)
+        //  Accept / Reject ( PATCH)
         Route::patch('/tasks/{order}/accept', [TasksController::class, 'accept'])
             ->name('tasks.accept')
             ->whereNumber('order');

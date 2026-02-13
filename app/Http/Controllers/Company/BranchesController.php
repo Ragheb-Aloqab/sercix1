@@ -74,7 +74,7 @@ class BranchesController extends Controller
         $data['is_active']   = (bool) ($data['is_active'] ?? true);
         $data['is_default']  = (bool) ($data['is_default'] ?? false);
 
-        // لو هذا الفرع default: خلّي أي فرع آخر للشركة false
+        
         if ($data['is_default']) {
             CompanyBranch::where('company_id', $company->id)->update(['is_default' => false]);
         }

@@ -41,7 +41,7 @@ class TaskShow extends Component
         }
 
         $this->order = $this->order->fresh(['company', 'vehicle', 'services', 'beforePhotos', 'afterPhotos']);
-        session()->flash('success', 'تم تأكيد إنجاز المهمة بنجاح ✅');
+        session()->flash('success', 'تم تأكيد إنجاز المهمة بنجاح ');
     }
 
     public function render(): View

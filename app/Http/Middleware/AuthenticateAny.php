@@ -14,7 +14,7 @@ class AuthenticateAny
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                Auth::shouldUse($guard); // مهم جدًا حتى Auth::user() يشتغل صح
+                Auth::shouldUse($guard); 
                 return $next($request);
             }
         }

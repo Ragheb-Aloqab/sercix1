@@ -75,8 +75,6 @@ class VehiclesController extends Controller
             'driver_name'  => ['nullable', 'string', 'max:100'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
-
-        // ✅ حماية: لا تختار فرع ليس للشركة
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);
             $this->authorize('view', $branch);
@@ -97,7 +95,6 @@ class VehiclesController extends Controller
 
     /**
      * GET /company/vehicles/{vehicle}
-     * company.vehicles.show — تفاصيل المركبة + كل الطلبات والخدمات والمدفوعات
      */
     public function show(Vehicle $vehicle)
     {
@@ -155,7 +152,6 @@ class VehiclesController extends Controller
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        // ✅ حماية: لا تختار فرع ليس للشركة
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);
             $this->authorize('view', $branch);
@@ -173,7 +169,6 @@ class VehiclesController extends Controller
             ->with('success', 'تم تحديث المركبة بنجاح ✅');
     }
 
-    /** Normalize Saudi phone to +966XXXXXXXXX so driver login matches. */
     private function normalizePhone(string $phone): string
     {
         $phone = trim($phone);

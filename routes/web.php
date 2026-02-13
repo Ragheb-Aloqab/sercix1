@@ -8,10 +8,8 @@ use Illuminate\Http\Request;
 
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();
-
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-
     return redirect('/');
 })->name('logout');
 
@@ -26,6 +24,13 @@ Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('
 */
 Route::prefix('sign-in')->name('sign-in.')->group(function () {
     Route::get('/', [\App\Http\Controllers\UnifiedAuthController::class, 'showLogin'])->name('index');
+    Route::post('/identify', [\App\Http\Controllers\UnifiedAuthController::class, 'identify'])
+        ->middleware('throttle:5,1')
+        ->name('identify');
+    Route::get('/password', [\App\Http\Controllers\UnifiedAuthController::class, 'showPasswordForm'])->name('password');
+    Route::post('/password', [\App\Http\Controllers\UnifiedAuthController::class, 'authenticatePassword'])
+        ->middleware('throttle:5,1')
+        ->name('authenticate_password');
     Route::post('/send-otp', [\App\Http\Controllers\UnifiedAuthController::class, 'sendOtp'])
         ->middleware('throttle:5,1')
         ->name('send_otp');
@@ -94,16 +99,6 @@ Route::redirect('/admin', 'dashboard');
 Route::middleware(['auth:web'])->group(function () {
     Route::view('/profile', 'profile')->name('profile');
 });
-
-/*
-|--------------------------------------------------------------------------
-|  Dashboard Entry (ONE)
-| اسمها: dashboard
-| وظيفتها: تحول للمكان الصحيح حسب الـ guard
-|--------------------------------------------------------------------------
-*/
-
-
 Route::get('/dashboard', function () {
 
     if (Auth::guard('company')->check()) {
@@ -120,7 +115,7 @@ Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     }
 
-    return redirect()->route('login');
+    return redirect()->route('sign-in.index');
 
 })->name('dashboard');
 

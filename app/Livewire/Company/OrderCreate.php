@@ -124,7 +124,6 @@ class OrderCreate extends Component
 
             Payment::create([
                 'order_id' => $order->id,
-                'company_id' => $company->id,
                 'method' => $this->payment_method,
                 'status' => 'pending',
                 'amount' => $amount,

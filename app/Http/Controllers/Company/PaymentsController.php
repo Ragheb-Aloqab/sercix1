@@ -24,7 +24,7 @@ class PaymentsController extends Controller
         $orderId  = $request->integer('order_id');
 
         $payments = Payment::query()
-            ->where('company_id', $company->id)
+            ->whereHas('order', fn ($q) => $q->where('company_id', $company->id))
             ->when($orderId > 0, fn($qq) => $qq->where('order_id', $orderId))
             ->when($status && $status !== 'all', fn($qq) => $qq->where('status', $status))
             ->when($method && $method !== 'all', fn($qq) => $qq->where('method', $method))
@@ -35,7 +35,6 @@ class PaymentsController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        // إعدادات طرق الدفع العامة (من settings)
         $enabled = [
             'cash' => (bool) Setting::get('enable_cash_payment', 1),
             'tap'  => (bool) Setting::get('enable_online_payment', 1),
@@ -63,7 +62,7 @@ class PaymentsController extends Controller
         return view('company.payments.show', compact('payment', 'enabled', 'bankAccounts'));
     }
 
-    // ====== (اختياري) بدء الدفع عبر Tap ======
+
     public function payWithTap(Payment $payment)
     {
         $this->authorize('update', $payment);
@@ -72,17 +71,8 @@ class PaymentsController extends Controller
         if ($payment->status === 'paid') {
             return back()->with('error', 'هذه الدفعة مدفوعة بالفعل.');
         }
-        /*
-        ارسالاشعار للمدير ان العميل قام بالدفع
-        */
-           
-                
-        // 1. جلب الطلب
+       
         $order = Order::findOrFail($payment->order_id);
-        
-        // 2. تحديث مبلغ الدفع
-       // $order->paid_amount += $order->paid_amount;
-      //  $order->save();
         
         // 3. إرسال إشعار للمدير عند وصول مبلغ معين
         $admin = User::where('role', 'admin')->first();
@@ -92,16 +82,10 @@ class PaymentsController extends Controller
                 new PaymentPaidNotification($payment)
             );
         }
-        /**/ 
-        // هنا تربط كود Tap الحقيقي (create charge) وتعيد redirect إلى رابط Tap
-        // مثال: return redirect($tapUrl);
-        
-
         
         return back()->with('error', 'ربط Tap لم يُنفّذ بعد في هذا الكنترولر.');
     }
 
-    // ====== (اختياري) رفع إيصال التحويل البنكي ======
     public function uploadBankReceipt(Request $request, Payment $payment)
     {
         $this->authorize('update', $payment);

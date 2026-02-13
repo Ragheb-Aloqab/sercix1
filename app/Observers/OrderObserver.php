@@ -59,7 +59,6 @@ class OrderObserver
             );
         }
     }
-
     /**
      * Handle the Order "deleted" event.
      */
@@ -114,8 +113,7 @@ class OrderObserver
         if ($remaining > 0 && $order->payments()->where('status', 'pending')->count() === 0) {
             Payment::create([
                 'order_id' => $order->id,
-                'company_id' => $order->company_id,
-                'method' => null,
+                'method' => 'cash',
                 'status' => 'pending',
                 'amount' => $remaining,
             ]);
