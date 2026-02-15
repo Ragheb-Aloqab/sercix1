@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('page_title', 'الفاتورة')
-@section('subtitle', 'Invoice')
+@section('page_title', __('invoice.invoice'))
+@section('subtitle', __('invoice.invoice'))
 
 @section('content')
     <div class="space-y-6">
@@ -12,7 +12,7 @@
                 class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
                 <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div>
-                        <p class="font-black text-xl">فاتورة #{{ $invoice->invoice_number ?? $invoice->id }}</p>
+                        <p class="font-black text-xl">{{ __('invoice.invoice') }} #{{ $invoice->invoice_number ?? $invoice->id }}</p>
                         @php
                             $barcodeData = $invoice->invoice_number ?? 'INV-' . $invoice->id;
                             $barcodeGen = new \Picqer\Barcode\BarcodeGeneratorSVG();
@@ -24,23 +24,23 @@
                             </div>
                             <span class="text-xs font-mono text-slate-600">{{ $barcodeData }}</span>
                         </div>
-                        <p class="text-sm text-slate-500 mt-1">الحالة: {{ ucfirst($invoice->status ?? 'unpaid') }}</p>
-                        <p class="text-sm text-slate-500 mt-1">التاريخ:
+                        <p class="text-sm text-slate-500 mt-1">{{ __('invoice.status') }}: {{ ucfirst($invoice->status ?? 'unpaid') }}</p>
+                        <p class="text-sm text-slate-500 mt-1">{{ __('invoice.date') }}:
                             {{ optional($invoice->created_at)->format('Y-m-d H:i') }}</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route('admin.orders.invoice.pdf', $order) }}"
                             class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                            <i class="fa-solid fa-file-pdf me-1"></i> تحميل PDF
+                            <i class="fa-solid fa-file-pdf me-1"></i> {{ __('invoice.download_pdf') }}
                         </a>
                         <button onclick="window.print()"
                             class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold">
-                            <i class="fa-solid fa-print me-1"></i> طباعة
+                            <i class="fa-solid fa-print me-1"></i> {{ __('invoice.print') }}
                         </button>
                         <a href="{{ route('admin.orders.show', $order) }}"
                             class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
-                            رجوع للطلب
+                            {{ __('invoice.back_to_order') }}
                         </a>
                     </div>
                 </div>
@@ -48,30 +48,30 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-                    <p class="text-sm text-slate-500">الإجمالي</p>
-                    <p class="text-2xl font-black">{{ number_format($invoice->total ?? 0, 2) }} ر.س</p>
+                    <p class="text-sm text-slate-500">{{ __('invoice.total') }}</p>
+                    <p class="text-2xl font-black">{{ number_format($invoice->total ?? 0, 2) }} {{ __('company.sar') }}</p>
                 </div>
                 <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-                    <p class="text-sm text-slate-500">المدفوع</p>
-                    <p class="text-2xl font-black text-emerald-600">{{ number_format($paidAmount ?? 0, 2) }} ر.س</p>
+                    <p class="text-sm text-slate-500">{{ __('invoice.paid') }}</p>
+                    <p class="text-2xl font-black text-emerald-600">{{ number_format($paidAmount ?? 0, 2) }} {{ __('company.sar') }}</p>
                 </div>
                 <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-                    <p class="text-sm text-slate-500">المتبقي</p>
-                    <p class="text-2xl font-black text-rose-600">{{ number_format($remainingAmount ?? 0, 2) }} ر.س</p>
+                    <p class="text-sm text-slate-500">{{ __('invoice.remaining') }}</p>
+                    <p class="text-2xl font-black text-rose-600">{{ number_format($remainingAmount ?? 0, 2) }} {{ __('company.sar') }}</p>
                 </div>
             </div>
 
             @if ($invoice->order)
                 <div
                     class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                    <h2 class="font-black text-lg mb-4">تفاصيل الطلب</h2>
+                    <h2 class="font-black text-lg mb-4">{{ __('invoice.order_details') }}</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="flex justify-between"><span class="text-slate-500">رقم الطلب</span><span
+                        <div class="flex justify-between"><span class="text-slate-500">{{ __('invoice.order_number') }}</span><span
                                 class="font-bold">#{{ $invoice->order->id }}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">حالة الطلب</span><span
-                                class="font-bold">{{ $invoice->order->status }}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">{{ __('invoice.order_status') }}</span><span
+                                class="font-bold">{{ \Illuminate\Support\Str::startsWith(__('common.status_' . $invoice->order->status), 'common.') ? $invoice->order->status : __('common.status_' . $invoice->order->status) }}</span></div>
                         @if ($invoice->order->vehicle)
-                            <div class="flex justify-between"><span class="text-slate-500">المركبة</span><span
+                            <div class="flex justify-between"><span class="text-slate-500">{{ __('invoice.vehicle') }}</span><span
                                     class="font-bold">{{ $invoice->order->vehicle->make ?? '' }}
                                     {{ $invoice->order->vehicle->model ?? '' }} —
                                     {{ $invoice->order->vehicle->plate_number ?? '-' }}</span></div>
@@ -85,10 +85,10 @@
                                 <table class="w-full text-sm">
                                     <thead class="bg-slate-50 dark:bg-slate-800/50">
                                         <tr class="text-right">
-                                            <th class="p-3 font-bold">الخدمة</th>
-                                            <th class="p-3 font-bold">الكمية</th>
-                                            <th class="p-3 font-bold">سعر الوحدة</th>
-                                            <th class="p-3 font-bold">الإجمالي</th>
+                                            <th class="p-3 font-bold">{{ __('invoice.service') }}</th>
+                                            <th class="p-3 font-bold">{{ __('invoice.quantity') }}</th>
+                                            <th class="p-3 font-bold">{{ __('invoice.unit_price') }}</th>
+                                            <th class="p-3 font-bold">{{ __('invoice.total') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
@@ -103,8 +103,8 @@
                                             <tr>
                                                 <td class="p-3 font-semibold">{{ $svc->name }}</td>
                                                 <td class="p-3">{{ $qty }}</td>
-                                                <td class="p-3">{{ number_format($unit, 2) }} ر.س</td>
-                                                <td class="p-3 font-semibold">{{ number_format($rowTotal, 2) }} ر.س</td>
+                                                <td class="p-3">{{ number_format($unit, 2) }} {{ __('company.sar') }}</td>
+                                                <td class="p-3 font-semibold">{{ number_format($rowTotal, 2) }} {{ __('company.sar') }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -119,20 +119,20 @@
                 class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-black">فاتورة الطلب #{{ $order->id }}</h1>
-                        <p class="text-sm text-slate-500 mt-1">لا توجد فاتورة لهذا الطلب بعد</p>
+                        <h1 class="text-2xl font-black">{{ __('invoice.order_invoice') }} #{{ $order->id }}</h1>
+                        <p class="text-sm text-slate-500 mt-1">{{ __('invoice.no_invoice_yet') }}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <form method="POST" action="{{ route('admin.orders.invoice.store', $order) }}">
                             @csrf
                             <button type="submit"
                                 class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
-                                إنشاء فاتورة
+                                {{ __('invoice.create_invoice') }}
                             </button>
                         </form>
                         <a href="{{ route('admin.orders.show', $order) }}"
                             class="px-4 py-2 rounded-xl bg-slate-100 text-slate-800 font-semibold hover:bg-slate-200">
-                            رجوع للطلب
+                            {{ __('invoice.back_to_order') }}
                         </a>
                     </div>
                 </div>

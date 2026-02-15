@@ -63,7 +63,7 @@ class OrderShow extends Component
 
         $tech = User::query()->where('id', $this->technician_id)->where('role', 'technician')->firstOrFail();
         $from = $this->order->status;
-        $to = 'in_progress';
+        $to = OrderStatus::ASSIGNED_TO_TECHNICIAN;
 
         $this->order->update([
             'technician_id' => $tech->id,

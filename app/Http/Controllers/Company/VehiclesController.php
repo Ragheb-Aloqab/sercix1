@@ -90,7 +90,7 @@ class VehiclesController extends Controller
 
         return redirect()
             ->route('company.vehicles.index')
-            ->with('success', 'تم إضافة المركبة بنجاح ✅');
+            ->with('success', __('messages.vehicle_added'));
     }
 
     /**
@@ -105,6 +105,7 @@ class VehiclesController extends Controller
             'branch:id,name',
             'orders' => fn ($q) => $q->with(['services', 'payments', 'technician:id,name,phone'])
                 ->latest(),
+            'fuelRefills' => fn ($q) => $q->latest('refilled_at'),
         ]);
 
         return view('company.vehicles.show', compact('company', 'vehicle'));
@@ -166,7 +167,7 @@ class VehiclesController extends Controller
 
         return redirect()
             ->route('company.vehicles.index')
-            ->with('success', 'تم تحديث المركبة بنجاح ✅');
+            ->with('success', __('messages.vehicle_updated'));
     }
 
     private function normalizePhone(string $phone): string

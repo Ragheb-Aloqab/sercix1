@@ -85,10 +85,10 @@ class Company extends Authenticatable
             ->value('total') ?: 0;
     }
 
-    /** Fuel cost – no fuel data in app yet; stub for future */
+    /** Fuel cost – sum from fuel_refills */
     public function fuelsCost(): float
     {
-        return 0.0;
+        return (float) \App\Models\FuelRefill::where('company_id', $this->id)->sum('cost');
     }
 
     /** Other costs – stub for future */
@@ -172,11 +172,11 @@ class Company extends Authenticatable
         return round((($current - $prevAvg) / $prevAvg) * 100, 2);
     }
 
-    /** Top vehicles by service consumption and cost (for table) */
+    /** Top vehicles by service + fuel cost (for table) */
     public function getTopVehiclesByServiceConsumptionAndCost()
     {
         $totalCompany = $this->totalActualCost();
-        $rows = DB::table('order_services')
+        $serviceRows = DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
             ->where('orders.company_id', $this->id)
             ->whereNotNull('orders.vehicle_id')
@@ -187,22 +187,33 @@ class Company extends Authenticatable
             ->get()
             ->keyBy('vehicle_id');
 
+        $fuelRows = \App\Models\FuelRefill::where('company_id', $this->id)
+            ->selectRaw('vehicle_id, COALESCE(SUM(cost), 0) as total')
+            ->groupBy('vehicle_id')
+            ->get()
+            ->keyBy('vehicle_id');
+
         $vehicles = $this->vehicles()->get(['id', 'make', 'model', 'plate_number']);
-        $list = $vehicles->map(function ($v) use ($rows, $totalCompany) {
-            $row = $rows[$v->id] ?? null;
-            $total = $row ? (float) $row->total : 0;
-            $servicesCount = $row ? (int) $row->services_count : 0;
+        $list = $vehicles->map(function ($v) use ($serviceRows, $fuelRows, $totalCompany) {
+            $sRow = $serviceRows[$v->id] ?? null;
+            $fRow = $fuelRows[$v->id] ?? null;
+            $serviceCost = $sRow ? (float) $sRow->total : 0;
+            $fuelCost = $fRow ? (float) $fRow->total : 0;
+            $total = $serviceCost + $fuelCost;
+            $servicesCount = $sRow ? (int) $sRow->services_count : 0;
             $percentage = $totalCompany > 0 ? ($total / $totalCompany) * 100 : 0;
             return (object) [
                 'id' => $v->id,
                 'make' => $v->make,
                 'model' => $v->model,
                 'plate_number' => $v->plate_number,
-                'total_service_cost' => round($total, 2),
+                'total_service_cost' => round($serviceCost, 2),
+                'total_fuel_cost' => round($fuelCost, 2),
+                'total_cost' => round($total, 2),
                 'services_count' => $servicesCount,
                 'percentage' => round($percentage, 1),
             ];
-        })->filter(fn ($i) => $i->total_service_cost > 0)->sortByDesc('total_service_cost')->values();
+        })->filter(fn ($i) => $i->total_cost > 0)->sortByDesc('total_cost')->values();
 
         return $list;
     }
@@ -211,7 +222,7 @@ class Company extends Authenticatable
     public function getTop5VehiclesSummary(): array
     {
         $top = $this->getTopVehiclesByServiceConsumptionAndCost()->take(5);
-        $topTotal = $top->sum('total_service_cost');
+        $topTotal = $top->sum('total_cost');
         $grand = $this->totalActualCost();
         $ui_percentage = $grand > 0 ? round(($topTotal / $grand) * 100, 1) : 0;
         return [
@@ -234,10 +245,42 @@ class Company extends Authenticatable
         return ['direction' => $direction, 'percent' => round(abs($pct), 1)];
     }
 
-    /** Fuel indicator – stub (no fuel data) */
+    /** Fuel indicator – current month vs avg of previous 6 months */
     public function fuelConsumptionIndicator(): array
     {
-        return ['direction' => 'stable', 'percent' => 0];
+        $rows = $this->fuelCostByMonth();
+        if (count($rows) < 2) {
+            return ['direction' => 'stable', 'percent' => 0];
+        }
+        $current = (float) ($rows[6]['total_cost'] ?? 0);
+        $prevSum = array_sum(array_column(array_slice($rows, 0, 6), 'total_cost'));
+        $prevAvg = $prevSum / 6;
+        if ($prevAvg == 0) {
+            return ['direction' => $current > 0 ? 'up' : 'stable', 'percent' => $current > 0 ? 100 : 0];
+        }
+        $pct = (($current - $prevAvg) / $prevAvg) * 100;
+        $direction = $pct > 5 ? 'up' : ($pct < -5 ? 'down' : 'stable');
+        return ['direction' => $direction, 'percent' => round(abs($pct), 1)];
+    }
+
+    /** Fuel cost by month (last 7 months) for indicators */
+    public function fuelCostByMonth(): array
+    {
+        $out = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $start = $date->copy()->startOfMonth();
+            $end = $date->copy()->endOfMonth();
+            $total = \App\Models\FuelRefill::where('company_id', $this->id)
+                ->whereBetween('refilled_at', [$start, $end])
+                ->sum('cost');
+            $out[] = [
+                'month' => $date->month,
+                'year' => $date->year,
+                'total_cost' => round((float) $total, 2),
+            ];
+        }
+        return $out;
     }
 
     /** Operating cost indicator – same as maintenance for now */

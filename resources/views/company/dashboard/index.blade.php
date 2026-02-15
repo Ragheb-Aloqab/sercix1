@@ -156,8 +156,13 @@
                                         <div class="font-medium text-slate-900 dark:text-slate-100">{{ $v->make }} {{ $v->model }}</div>
                                         <div class="text-xs text-slate-500">{{ $v->plate_number }}</div>
                                     </td>
-                                    <td class="py-4 text-slate-600 dark:text-slate-400">{{ $v->services_count }} {{ __('company.service') }}</td>
-                                    <td class="py-4 font-bold text-slate-900 dark:text-slate-100">{{ number_format($v->total_service_cost, 2) }} {{ __('company.sar') }}</td>
+                                    <td class="py-4 text-slate-600 dark:text-slate-400">
+                                        {{ $v->services_count }} {{ __('company.service') }}
+                                        @if(($v->total_fuel_cost ?? 0) > 0)
+                                            <span class="text-amber-600">+ وقود</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-4 font-bold text-slate-900 dark:text-slate-100">{{ number_format($v->total_cost ?? $v->total_service_cost, 2) }} {{ __('company.sar') }}</td>
                                     <td class="py-4">
                                         <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-xs font-semibold px-2.5 py-0.5 rounded">
                                             {{ number_format($v->percentage, 1) }}%
@@ -317,6 +322,12 @@
             <div class="flex flex-wrap gap-2 sm:gap-3">
                 <a href="{{ route('company.orders.index') }}" class="px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold">
                     <i class="fa-solid fa-receipt me-2"></i> {{ __('company.orders') }}
+                </a>
+                <a href="{{ route('company.vehicles.index') }}" class="px-4 py-3 rounded-2xl bg-slate-700 hover:bg-slate-800 text-white font-bold">
+                    <i class="fa-solid fa-car me-2"></i> {{ __('company.vehicles') }}
+                </a>
+                <a href="{{ route('company.fuel.index') }}" class="px-4 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold">
+                    <i class="fa-solid fa-gas-pump me-2"></i> {{ __('company.fuel_report') }}
                 </a>
                 <a href="{{ route('company.invoices.index') }}" class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
                     <i class="fa-solid fa-file-invoice me-2"></i> {{ __('company.invoices') }}

@@ -11,7 +11,7 @@ class EnsureDriverSession
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->session()->has('driver_phone')) {
-            return redirect()->route('driver.login')->with('error', 'يجب تسجيل الدخول أولاً.');
+            return redirect()->route('sign-in.index')->with('error', __('messages.driver_login_required'));
         }
         return $next($request);
     }

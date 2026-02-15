@@ -38,7 +38,7 @@ class InventoryController extends Controller
 
         return redirect()
             ->route('admin.inventory.index')
-            ->with('success', 'تم إضافة عنصر للمخزون.');
+            ->with('success', __('messages.inventory_item_added'));
     }
 
     public function edit(InventoryItem $inventory) // resource name = inventory
@@ -53,13 +53,13 @@ class InventoryController extends Controller
 
         return redirect()
             ->route('admin.inventory.index')
-            ->with('success', 'تم تحديث عنصر المخزون.');
+            ->with('success', __('messages.inventory_item_updated'));
     }
 
     public function destroy(InventoryItem $inventory)
     {
         $inventory->delete();
 
-        return back()->with('success', 'تم حذف عنصر المخزون.');
+        return back()->with('success', __('messages.inventory_item_deleted'));
     }
 }

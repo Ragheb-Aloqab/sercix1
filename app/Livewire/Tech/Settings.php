@@ -11,6 +11,7 @@ class Settings extends Component
 {
     public string $name = '';
     public string $email = '';
+    public ?string $phone = null;
 
     public string $current_password = '';
     public string $password = '';
@@ -29,6 +30,7 @@ class Settings extends Component
 
         $this->name  = (string) ($user->name ?? '');
         $this->email = (string) ($user->email ?? '');
+        $this->phone = $user->phone ?? null;
     }
 
     public function saveProfile()
@@ -43,10 +45,12 @@ class Settings extends Component
                 'email',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
+            'phone' => ['nullable', 'string', 'max:30', Rule::unique('users', 'phone')->ignore($user->id)],
         ]);
 
         $user->name  = $this->name;
         $user->email = $this->email;
+        $user->phone = $this->phone ?: null;
         $user->save();
 
         session()->flash('success', 'تم تحديث البيانات ✅');

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin\Orders;
+use App\Notifications\OrderCompletedNotification;
 use App\Notifications\OrderUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\ChangeOrderStatusRequest;
@@ -26,14 +27,14 @@ class OrderStatusController extends Controller
        
         if (!$isAdmin && !$isAllowed) {
             return back()->withErrors([
-                'to_status' => "انتقال غير مسموح: {$from} → {$to}",
+                'to_status' => __('messages.order_transition_not_allowed', ['from' => $from, 'to' => $to]),
             ]);
         }
 
        
         if ($isAdmin && !$isAllowed && !$request->filled('note')) {
             return back()->withErrors([
-                'note' => 'هذا انتقال غير قياسي (تجاوز). الرجاء كتابة سبب التغيير.',
+                'note' => __('messages.order_override_note_required'),
             ]);
         }
 
@@ -54,17 +55,24 @@ class OrderStatusController extends Controller
         ]);
       
         $admin = User::where('role', 'admin')->first();
-        
-        if ($admin) {
-            $admin->notify(new OrderUpdate($order));
+
+        if ($to === 'completed') {
+            if ($admin) {
+                $admin->notify(new OrderCompletedNotification($order));
+            }
+            $order->company?->notify(new OrderCompletedNotification($order));
+        } else {
+            if ($admin) {
+                $admin->notify(new OrderUpdate($order));
+            }
+            $order->company?->notify(new OrderUpdate($order));
         }
-        $order->company->notify(new OrderUpdate($order));
         ActivityLogger::log(
             action: 'hold_order',
             subjectType: 'order',
             subjectId: $order->id,
             description: 'تم تعليق طلب العميل');
    
-        return back()->with('success', 'تم تحديث حالة الطلب بنجاح ✅');
+        return back()->with('success', __('messages.order_status_updated'));
     }
 }

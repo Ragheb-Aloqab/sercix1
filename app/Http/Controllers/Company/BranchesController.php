@@ -83,7 +83,7 @@ class BranchesController extends Controller
 
         return redirect()
             ->route('company.branches.index')
-            ->with('success', 'تم إضافة الفرع بنجاح ✅');
+            ->with('success', __('messages.branch_added'));
     }
 
     /**
@@ -137,6 +137,6 @@ class BranchesController extends Controller
 
         return redirect()
             ->route('company.branches.index')
-            ->with('success', 'تم تحديث الفرع بنجاح ✅');
+            ->with('success', __('messages.branch_updated'));
     }
 }

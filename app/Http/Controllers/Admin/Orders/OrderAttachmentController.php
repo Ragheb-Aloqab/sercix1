@@ -21,7 +21,7 @@ class OrderAttachmentController extends Controller
             'uploaded_by_admin_id' => auth()->id(),
         ]);
 
-        return back()->with('success', 'تم رفع المرفق.');
+        return back()->with('success', __('messages.attachment_uploaded'));
     }
 
     public function destroy(Attachment $attachment)
@@ -33,6 +33,6 @@ class OrderAttachmentController extends Controller
         }
         $attachment->delete();
 
-        return back()->with('success', 'تم حذف المرفق.');
+        return back()->with('success', __('messages.attachment_deleted'));
     }
 }

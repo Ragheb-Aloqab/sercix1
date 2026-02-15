@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
@@ -41,7 +42,7 @@ class DriverController extends Controller
             ])
             ->get();
         if ($vehicles->isEmpty()) {
-            return redirect()->route('driver.dashboard')->with('error', 'لا توجد مركبات مرتبطة بجوالك.');
+            return redirect()->route('driver.dashboard')->with('error', __('messages.driver_no_vehicles'));
         }
         // Fallback: when company has no enabled services, show all active services so driver always sees a list
         $fallbackServices = Service::where('is_active', true)->orderBy('name')->get(['id', 'name']);
@@ -63,7 +64,7 @@ class DriverController extends Controller
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
         if (!$vehicle) {
-            abort(403, 'المركبة غير مرتبطة بجوالك.');
+            abort(403, __('messages.driver_vehicle_not_linked'));
         }
 
         $company = $vehicle->company;
@@ -79,14 +80,14 @@ class DriverController extends Controller
             ->get();
 
         if ($services->count() !== count(array_unique($data['service_ids']))) {
-            return back()->withErrors(['service_ids' => 'بعض الخدمات المختارة غير صالحة.'])->withInput();
+            return back()->withErrors(['service_ids' => __('messages.driver_invalid_services')])->withInput();
         }
 
         $order = Order::create([
             'company_id' => $vehicle->company_id,
             'vehicle_id' => $vehicle->id,
-            'status' => OrderStatus::REQUESTED,
-            'requested_by_name' => $vehicle->driver_name ?? 'سائق',
+            'status' => OrderStatus::PENDING_COMPANY,
+            'requested_by_name' => $vehicle->driver_name ?? __('driver.driver'),
             'driver_phone' => $vehicle->driver_phone,
             'city' => $data['city'] ?? null,
             'address' => $data['address'] ?? null,
@@ -105,7 +106,69 @@ class DriverController extends Controller
         }
         $order->services()->sync($syncData);
 
-        return redirect()->route('driver.dashboard')->with('success', 'تم إرسال طلب الخدمة. ستتلقى الشركة إشعاراً وستوافق على الطلب.');
+        return redirect()->route('driver.dashboard')->with('success', __('messages.driver_request_sent'));
+    }
+
+    public function createFuelRefill()
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+            ->with('company:id,company_name')
+            ->where('is_active', true)
+            ->get();
+
+        if ($vehicles->isEmpty()) {
+            return redirect()->route('driver.dashboard')->with('error', __('messages.driver_no_vehicles'));
+        }
+
+        return view('driver.fuel-refill-create', compact('vehicles'));
+    }
+
+    public function storeFuelRefill(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'liters' => ['required', 'numeric', 'min:0.01', 'max:9999'],
+            'cost' => ['required', 'numeric', 'min:0', 'max:999999'],
+            'refilled_at' => ['required', 'date'],
+            'odometer_km' => ['nullable', 'integer', 'min:0', 'max:9999999'],
+            'fuel_type' => ['nullable', 'string', 'in:petrol,diesel,premium'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            'receipt' => ['nullable', 'image', 'max:5120'], // 5MB max
+        ]);
+
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
+        if (!$vehicle) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+
+        $pricePerLiter = $data['liters'] > 0 ? round($data['cost'] / $data['liters'], 2) : null;
+
+        $receiptPath = null;
+        if ($request->hasFile('receipt')) {
+            $receiptPath = $request->file('receipt')->store('fuel-receipts', 'public');
+        }
+
+        FuelRefill::create([
+            'vehicle_id' => $vehicle->id,
+            'company_id' => $vehicle->company_id,
+            'liters' => $data['liters'],
+            'cost' => $data['cost'],
+            'price_per_liter' => $pricePerLiter,
+            'refilled_at' => $data['refilled_at'],
+            'odometer_km' => $data['odometer_km'] ?? null,
+            'fuel_type' => $data['fuel_type'] ?? 'petrol',
+            'notes' => $data['notes'] ?? null,
+            'receipt_path' => $receiptPath,
+            'provider' => FuelRefill::PROVIDER_MANUAL,
+            'logged_by_phone' => $phone,
+        ]);
+
+        return redirect()->route('driver.dashboard')->with('success', __('messages.driver_fuel_success'));
     }
 
     /** Match DB whether company saved +966... or 05... */

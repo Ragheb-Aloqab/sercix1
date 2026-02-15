@@ -36,7 +36,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
      * ✅ كل لوحة الأدمن محمية: auth:web + role:admin
      * أي "تقني" يحاول يدخل /admin/dashboard بياخذ 403 مباشرة
      */
-    Route::middleware(['auth:web', 'role:admin'])->prefix('dashboard')->group(function () {
+    Route::middleware(['auth:web', 'active', 'role:admin'])->prefix('dashboard')->group(function () {
 
         // Admin Overview
         Route::view('/', 'admin.overview.index')->name('dashboard'); // admin.dashboard

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Company;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,7 +21,10 @@ class OrderCompletedNotification extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        $url = route('admin.orders.show', $this->order->id);
+        $url = $notifiable instanceof Company
+            ? route('company.orders.show', $this->order->id)
+            : route('admin.orders.show', $this->order->id);
+
         $technicianName = $this->order->technician ? $this->order->technician->name : null;
         return [
             'type' => 'order_completed',

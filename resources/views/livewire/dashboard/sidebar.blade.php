@@ -290,6 +290,16 @@
                     </div>
                 </a>
 
+                <a href="{{ route('company.fuel.index') }}"
+                    class="mt-2 {{ $is('company.fuel.*') ? $active : $link }}">
+                    <span class="{{ $is('company.fuel.*') ? $iconWrapActive : $iconWrap }}"><i
+                            class="fa-solid fa-gas-pump"></i></span>
+                    <div class="flex-1">
+                        <p class="font-bold leading-5">{{ __('dashboard.fuel_report') }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.fuel_report_desc') }}</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('company.branches.index') }}"
                     class="mt-2 {{ $is('company.branches.*') ? $active : $link }}">
                     <span class="{{ $is('company.branches.*') ? $iconWrapActive : $iconWrap }}"><i

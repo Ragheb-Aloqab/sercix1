@@ -13,7 +13,7 @@
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
 
-    {{-- Tailwind CDN (للمعاينة فقط) --}}
+    
     <script src="https://cdn.tailwindcss.com"></script>
 
     {{-- Font Awesome --}}
@@ -45,7 +45,6 @@
         }
     </style>
 
-    {{-- ✅ لازم داخل head --}}
     @livewireStyles
     @stack('styles')
 </head>
@@ -69,19 +68,17 @@
             @yield('content')
 
             <div class="mt-8 text-sm text-slate-500 dark:text-slate-400">
-                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }} • Prototype UI (Tailwind + JS + FontAwesome)
+                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
             </div>
         </section>
     </main>
 </div>
 
-{{-- ✅ لازم قبل نهاية body --}}
 @livewireScripts
 
 {{-- Modal --}}
 @include('admin.partials.modals.create-order')
 
-{{-- ✅ Events from Livewire (Theme + Direction) --}}
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('ui-theme-changed', ({ theme }) => {
@@ -95,7 +92,6 @@
     });
 </script>
 
-{{-- Scripts (Sidebar + Modal فقط) --}}
 <script>
     const $ = (id) => document.getElementById(id);
 

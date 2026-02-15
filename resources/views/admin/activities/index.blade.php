@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('title', 'سجل الأنشطة | SERV.X')
-@section('page_title', 'سجل الأنشطة')
+@section('title', __('activities.title') . ' | SERV.X')
+@section('page_title', __('activities.page_title'))
 
 @section('content')
 
@@ -10,7 +10,7 @@
         {{-- Header --}}
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-black tracking-tight">
-                سجل الأنشطة
+                {{ __('activities.page_title') }}
             </h2>
         </div>
 
@@ -21,11 +21,11 @@
                 <thead class="bg-slate-50 text-slate-600">
                     <tr>
                         <th class="p-3 text-start">#</th>
-                        <th class="p-3 text-start">الفاعل</th>
-                        <th class="p-3 text-start">العملية</th>
-                        <th class="p-3 text-start">على</th>
-                        <th class="p-3 text-start">الوصف</th>
-                        <th class="p-3 text-start">الوقت</th>
+                        <th class="p-3 text-start">{{ __('activities.actor') }}</th>
+                        <th class="p-3 text-start">{{ __('activities.action') }}</th>
+                        <th class="p-3 text-start">{{ __('activities.on') }}</th>
+                        <th class="p-3 text-start">{{ __('activities.description') }}</th>
+                        <th class="p-3 text-start">{{ __('activities.time') }}</th>
                     </tr>
                 </thead>
 
@@ -43,14 +43,14 @@
                             <td class="p-3">
                                 @php
                                     $actorMap = [
-                                        'admin' => ['مدير النظام', 'bg-sky-50 text-sky-700'],
-                                        'technician' => ['فني', 'bg-emerald-50 text-emerald-700'],
-                                        'company' => ['شركة', 'bg-indigo-50 text-indigo-700'],
-                                        'customer' => ['عميل', 'bg-amber-50 text-amber-700'],
-                                        'system' => ['النظام', 'bg-slate-100 text-slate-700'],
+                                        'admin' => [__('activities.actor_admin'), 'bg-sky-50 text-sky-700'],
+                                        'technician' => [__('activities.actor_technician'), 'bg-emerald-50 text-emerald-700'],
+                                        'company' => [__('activities.actor_company'), 'bg-indigo-50 text-indigo-700'],
+                                        'customer' => [__('activities.actor_customer'), 'bg-amber-50 text-amber-700'],
+                                        'system' => [__('activities.actor_system'), 'bg-slate-100 text-slate-700'],
                                     ];
                                     [$actorLabel, $actorClass] = $actorMap[$activity->actor_type] ?? [
-                                        'غير معروف',
+                                        __('activities.actor_unknown'),
                                         'bg-slate-100 text-slate-700',
                                     ];
                                 @endphp
@@ -63,28 +63,18 @@
                             {{-- Action --}}
                             <td class="p-3 font-semibold">
                                 @php
-                                    $actionMap = [
-                                        'order_created' => 'إنشاء طلب',
-                                        'order_assigned' => 'إسناد طلب',
-                                        'payment_paid' => 'دفع مبلغ',
-                                    ];
+                                    $actionKey = 'activities.action_' . $activity->action;
                                 @endphp
-
-                                {{ $actionMap[$activity->action] ?? $activity->action }}
+                                {{ \Illuminate\Support\Str::startsWith(__($actionKey), 'activities.') ? $activity->action : __($actionKey) }}
                             </td>
 
                             {{-- Subject --}}
                             <td class="p-3">
                                 @php
-                                    $subjectMap = [
-                                        'order' => 'طلب',
-                                        'payment' => 'دفعة',
-                                        'user' => 'مستخدم',
-                                    ];
+                                    $subjectKey = 'activities.subject_' . $activity->subject_type;
                                 @endphp
-
                                 <span class="font-bold">
-                                    {{ $subjectMap[$activity->subject_type] ?? $activity->subject_type }}
+                                    {{ \Illuminate\Support\Str::startsWith(__($subjectKey), 'activities.') ? $activity->subject_type : __($subjectKey) }}
                                 </span>
                                 <span class="text-slate-500">
                                     #{{ $activity->subject_id }}
@@ -105,7 +95,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="p-6 text-center text-slate-500">
-                                لا توجد أنشطة مسجلة
+                                {{ __('activities.no_activities') }}
                             </td>
                         </tr>
                     @endforelse

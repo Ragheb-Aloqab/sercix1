@@ -51,7 +51,7 @@ class AttachmentsController extends Controller
         // ✅ الأفضل: ارجع لصفحة المهمة نفسها
         return redirect()
             ->route('tech.tasks.show', $order->id)
-            ->with('success', $type === 'before_photo' ? 'تم رفع صور (قبل) بنجاح ✅' : 'تم رفع صور (بعد) بنجاح ✅');
+            ->with('success', $type === 'before_photo' ? __('messages.photos_before_uploaded') : __('messages.photos_after_uploaded'));
     }
 
     public function destroy(Order $order, Attachment $attachment)
@@ -73,6 +73,6 @@ class AttachmentsController extends Controller
 
         return redirect()
             ->route('tech.tasks.show', $order->id)
-            ->with('success', 'تم حذف المرفق ✅');
+            ->with('success', __('messages.attachment_deleted'));
     }
 }

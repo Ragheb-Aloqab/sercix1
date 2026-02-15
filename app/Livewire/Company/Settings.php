@@ -11,6 +11,7 @@ class Settings extends Component
 {
     public string $name = '';
     public string $email = '';
+    public string $phone = '';
 
     public string $current_password = '';
     public string $password = '';
@@ -28,6 +29,7 @@ class Settings extends Component
 
         $this->name  = (string) ($company->company_name ?? $company->name ?? '');
         $this->email = (string) ($company->email ?? '');
+        $this->phone = (string) ($company->phone ?? '');
     }
 
     public function saveProfile()
@@ -38,9 +40,15 @@ class Settings extends Component
         $this->validate([
             'name' => ['required', 'string', 'min:2', 'max:150'],
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 Rule::unique('companies', 'email')->ignore($company->id),
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'max:30',
+                Rule::unique('companies', 'phone')->ignore($company->id),
             ],
         ]);
 
@@ -50,7 +58,8 @@ class Settings extends Component
             $company->name = $this->name;
         }
 
-        $company->email = $this->email;
+        $company->email = $this->email ?: null;
+        $company->phone = $this->phone;
         $company->save();
 
         session()->flash('success', 'تم تحديث بيانات الشركة ');

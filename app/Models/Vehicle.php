@@ -37,4 +37,9 @@ class Vehicle extends Model
     {
         return $this->belongsTo(\App\Models\CompanyBranch::class, 'company_branch_id');
     }
+
+    public function fuelRefills()
+    {
+        return $this->hasMany(FuelRefill::class)->orderByDesc('refilled_at');
+    }
 }

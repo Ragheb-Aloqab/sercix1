@@ -60,7 +60,7 @@ class DashboardUserController extends Controller
 
         return redirect()
             ->route('admin.technicians.index')
-            ->with('success', 'تم إنشاء حساب الفني بنجاح.');
+            ->with('success', __('messages.technician_created'));
     }
 
     public function edit(User $user)
@@ -94,7 +94,7 @@ class DashboardUserController extends Controller
 
         return redirect()
             ->route('admin.technicians.index')
-            ->with('success', 'تم تحديث بيانات الفني.');
+            ->with('success', __('messages.technician_updated'));
     }
 
     public function toggle(User $user)
@@ -107,13 +107,13 @@ class DashboardUserController extends Controller
 
         $user->save();
 
-        return back()->with('success', 'تم تحديث حالة الفني.');
+        return back()->with('success', __('messages.technician_status_updated'));
     }
     public function destroy(User $user)
     {
        
         if ($user->role === 'admin') {
-            return back()->withErrors('لا يمكن حذف مدير النظام.');
+            return back()->withErrors(__('messages.cannot_delete_admin'));
         }
 
       
@@ -121,6 +121,6 @@ class DashboardUserController extends Controller
 
         $user->delete();
 
-        return back()->with('success', 'تم حذف الفني بنجاح.');
+        return back()->with('success', __('messages.technician_deleted'));
     }
 }

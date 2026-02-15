@@ -22,7 +22,7 @@ class OrderAssignmentController extends Controller
         $from = $order->status;
 
       
-        $to = 'in_progress';
+        $to = 'assigned_to_technician';
 
         $order->update([
             'technician_id' => $tech->id,
@@ -43,6 +43,6 @@ class OrderAssignmentController extends Controller
        /* $tech->notify(
             new OrderAssignedToTechnician($order)
         );*/
-        return back()->with('success', 'تم إسناد الطلب للفني بنجاح.');
+        return back()->with('success', __('messages.order_assigned'));
     }
 }

@@ -70,7 +70,7 @@ class ServicesController extends Controller
 
         return redirect()
             ->route('admin.services.index')
-            ->with('success', 'تم إنشاء الخدمة بنجاح');
+            ->with('success', __('messages.service_created'));
     }
 
     public function edit(Service $service)
@@ -87,7 +87,7 @@ class ServicesController extends Controller
 
         return redirect()
             ->route('admin.services.index')
-            ->with('success', 'تم تحديث الخدمة بنجاح');
+            ->with('success', __('messages.service_updated'));
     }
 
     public function destroy(Service $service)
@@ -104,7 +104,7 @@ class ServicesController extends Controller
 
         $service->delete();
 
-        return back()->with('success', 'تم حذف الخدمة نهائيًا.');
+        return back()->with('success', __('messages.service_deleted'));
     }
 
     public function toggle(Service $service)
@@ -113,6 +113,6 @@ class ServicesController extends Controller
             'is_active' => ! $service->is_active,
         ]);
 
-        return back()->with('success', $service->is_active ? 'تم تفعيل الخدمة.' : 'تم تعطيل الخدمة.');
+        return back()->with('success', $service->is_active ? __('messages.service_toggled') : __('messages.service_disabled'));
     }
 }

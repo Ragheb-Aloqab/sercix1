@@ -7,11 +7,11 @@
         $today = now()->toDateString();
 
         $todayOrders = Order::query()->whereDate('created_at', $today)->count();
-        $inProgress = Order::query()->whereIn('status', ['on_the_way', 'in_progress'])->count();
-        $pending = Order::query()->where('status', 'pending')->count();
+        $inProgress = Order::query()->whereIn('status', ['assigned_to_technician', 'in_progress'])->count();
+        $pending = Order::query()->whereIn('status', ['pending_company', 'approved_by_company', 'pending_assignment'])->count();
         $unassigned = Order::query()
             ->whereNull('technician_id')
-            ->whereIn('status', ['pending', 'accepted'])
+            ->whereIn('status', ['approved_by_company', 'pending_assignment'])
             ->count();
 
         $todayRevenue = Payment::query()->where('status', 'paid')->whereDate('created_at', $today)->sum('amount');

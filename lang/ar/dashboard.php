@@ -37,6 +37,8 @@ return [
     'vehicles_desc' => 'إدارة المركبات',
     'branches' => 'الفروع',
     'branches_desc' => 'إدارة الفروع',
+    'fuel_report' => 'تقرير الوقود',
+    'fuel_report_desc' => 'تكاليف الوقود واستهلاك المركبات',
     'company_orders_desc' => 'متابعة الطلبات',
     'company_settings_desc' => 'الحساب / الأمان',
     'tasks' => 'المهام',

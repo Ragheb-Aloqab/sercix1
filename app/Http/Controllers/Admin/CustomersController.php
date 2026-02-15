@@ -40,7 +40,7 @@ class CustomersController extends Controller
 
         return redirect()
             ->route('admin.customers.index')
-            ->with('success', 'تم إضافة العميل بنجاح.');
+            ->with('success', __('messages.customer_added'));
     }
 
     public function edit(Company $customer)
@@ -55,13 +55,13 @@ class CustomersController extends Controller
         
         return redirect()
             ->route('admin.customers.index')
-            ->with('success', 'تم تحديث بيانات العميل.');
+            ->with('success', __('messages.customer_updated'));
     }
 
     public function destroy(Company $customer)
     {
         $customer->delete();
 
-        return back()->with('success', 'تم حذف العميل.');
+        return back()->with('success', __('messages.customer_deleted'));
     }
 }

@@ -41,7 +41,7 @@ class OrderInvoiceController extends Controller
         if (!$invoice) {
             return redirect()
                 ->route('admin.orders.invoice.show', $order)
-                ->with('error', 'لا توجد فاتورة لهذا الطلب.');
+                ->with('error', __('messages.no_invoice_for_order'));
         }
 
         try {
@@ -50,7 +50,7 @@ class OrderInvoiceController extends Controller
             report($e);
             return redirect()
                 ->route('admin.orders.invoice.show', $order)
-                ->with('error', 'حدث خطأ أثناء إنشاء PDF.');
+                ->with('error', __('messages.invoice_pdf_error'));
         }
 
         $filename = 'invoice-' . ($invoice->invoice_number ?? $invoice->id) . '.pdf';
@@ -93,6 +93,6 @@ class OrderInvoiceController extends Controller
             ]);
         }
 
-        return back()->with('success', 'تم إنشاء الفاتورة.');
+        return back()->with('success', __('messages.invoice_created'));
     }
 }

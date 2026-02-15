@@ -30,9 +30,9 @@ class OrderShow extends Component
     {
         $company = auth('company')->user();
         abort_unless((int) $this->order->company_id === (int) $company->id, 403);
-        abort_unless($this->order->status === OrderStatus::REQUESTED, 403, 'هذا الطلب غير قيد الموافقة.');
+        abort_unless($this->order->status === OrderStatus::PENDING_COMPANY, 403, 'هذا الطلب غير قيد الموافقة.');
 
-        $this->order->update(['status' => OrderStatus::PENDING]);
+        $this->order->update(['status' => OrderStatus::APPROVED_BY_COMPANY]);
         $this->order->refresh();
         session()->flash('success', 'تمت الموافقة على الطلب. تم إخطار الإدارة لتعيين فني.');
     }

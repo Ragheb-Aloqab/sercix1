@@ -54,13 +54,13 @@ class OrdersController extends Controller
         abort_unless(
             $company->vehicles()->where('id', $data['vehicle_id'])->exists(),
             403,
-            'Invalid vehicle.'
+            __('messages.invalid_vehicle')
         );
         if (!empty($data['company_branch_id'])) {
             abort_unless(
                 $company->branches()->where('id', $data['company_branch_id'])->exists(),
                 403,
-                'Invalid branch.'
+                __('messages.invalid_branch')
             );
         }
 
@@ -84,7 +84,7 @@ class OrdersController extends Controller
         abort_unless(
             $services->count() === count($data['service_ids']),
             403,
-            'One or more services are not enabled.'
+            __('messages.invalid_services')
         );
 
         
@@ -96,7 +96,7 @@ class OrdersController extends Controller
                 'company_id'        => $company->id,
                 'vehicle_id'        => $data['vehicle_id'],
              
-                'status'            => 'pending',
+                'status'            => 'pending_assignment',
                 'notes'             => $data['notes'] ?? null,
             ]);
 
@@ -126,14 +126,14 @@ class OrdersController extends Controller
 
         return redirect()
             ->route('company.orders.show', $order->id)
-            ->with('success', 'Order created successfully.');
+            ->with('success', __('messages.order_created'));
     }
     public function cancel(Order $order)
     {
         $this->authorize('cancel', $order);
 
         if ($order->technician_id) {
-            return back()->with('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');
+            return back()->with('error', __('messages.order_in_progress_cancel'));
         }
 
         $admin = User::where('role', 'admin')->first();
@@ -141,6 +141,6 @@ class OrdersController extends Controller
             $admin->notify(new OrderCancelRequested($order));
         }
 
-        return back()->with('success', 'تم إرسال طلب الإلغاء للمدير.');
+        return back()->with('success', __('messages.order_cancel_requested'));
     }
 }

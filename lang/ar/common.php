@@ -56,6 +56,7 @@ return [
     'actions' => 'إجراءات',
     'apply' => 'تطبيق',
     'all' => 'الكل',
+    'optional' => 'اختياري',
     'done' => 'تمت',
     'not_done' => 'لم تتم',
     'paid' => 'مدفوع',
@@ -66,4 +67,16 @@ return [
     'payment_failed' => 'فشل الدفع',
     'admin' => 'Admin',
     'technician' => 'Technician',
+
+    // Order statuses
+    'status_pending_company' => 'بانتظار الشركة',
+    'status_approved_by_company' => 'موافق عليه من الشركة',
+    'status_pending_assignment' => 'بانتظار التعيين',
+    'status_assigned_to_technician' => 'معيّن لفني',
+    'status_in_progress' => 'قيد التنفيذ',
+    'status_completed' => 'مكتمل',
+    'status_cancelled' => 'ملغى',
+    'status_pending' => 'بانتظار',
+    'status_rejected' => 'مرفوضة',
+    'km' => 'كم',
 ];

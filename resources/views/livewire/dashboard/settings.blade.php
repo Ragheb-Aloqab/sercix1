@@ -13,28 +13,27 @@
         {{-- Admin/User --}}
         @if ($actorType === 'user')
             <button wire:click="setTab('profile')"
-                class="{{ $btn }} {{ $tab === 'profile' ? $active : $normal }}">حسابي</button>
+                class="{{ $btn }} {{ $tab === 'profile' ? $active : $normal }}">{{ __('settings.my_account') }}</button>
             <button wire:click="setTab('password')"
-                class="{{ $btn }} {{ $tab === 'password' ? $active : $normal }}">كلمة المرور</button>
+                class="{{ $btn }} {{ $tab === 'password' ? $active : $normal }}">{{ __('settings.password') }}</button>
 
             @if ($role === 'admin')
                 <button wire:click="setTab('branding')"
-                    class="{{ $btn }} {{ $tab === 'branding' ? $active : $normal }}">اسم/شعار الموقع</button>
+                    class="{{ $btn }} {{ $tab === 'branding' ? $active : $normal }}">{{ __('settings.site_branding') }}</button>
                 <button wire:click="setTab('invoice')"
-                    class="{{ $btn }} {{ $tab === 'invoice' ? $active : $normal }}">بيانات الفاتورة</button>
-                <button wire:click="setTab('otp')" class="{{ $btn }} {{ $tab === 'otp' ? $active : $normal }}">OTP
-                    Provider</button>
+                    class="{{ $btn }} {{ $tab === 'invoice' ? $active : $normal }}">{{ __('settings.invoice_data') }}</button>
+                <button wire:click="setTab('otp')" class="{{ $btn }} {{ $tab === 'otp' ? $active : $normal }}">{{ __('settings.otp_provider') }}</button>
                 <button wire:click="setTab('tap')"
-                    class="{{ $btn }} {{ $tab === 'tap' ? $active : $normal }}">Tap Payments</button>
+                    class="{{ $btn }} {{ $tab === 'tap' ? $active : $normal }}">{{ __('settings.tap_payments') }}</button>
             @endif
         @endif
 
         {{-- Company --}}
         @if ($actorType === 'company')
             <button wire:click="setTab('company_profile')"
-                class="{{ $btn }} {{ $tab === 'company_profile' ? $active : $normal }}">بيانات الشركة</button>
+                class="{{ $btn }} {{ $tab === 'company_profile' ? $active : $normal }}">{{ __('settings.company_data') }}</button>
             <button wire:click="setTab('company_password')"
-                class="{{ $btn }} {{ $tab === 'company_password' ? $active : $normal }}">كلمة المرور</button>
+                class="{{ $btn }} {{ $tab === 'company_password' ? $active : $normal }}">{{ __('settings.company_password') }}</button>
         @endif
     </div>
 

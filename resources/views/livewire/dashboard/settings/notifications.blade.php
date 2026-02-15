@@ -16,7 +16,7 @@
     wire:click="markAsRead('{{ $n->id }}')"
     class="p-4 rounded-2xl border cursor-pointer transition
     {{ $n->read_at ? 'border-slate-200 dark:border-slate-800' : 'border-blue-500/60 bg-blue-50/40 dark:bg-slate-800 hover:bg-blue-100/40' }}">
-                <p class="font-bold">{{ $n->data['title'] ?? 'إشعار' }}</p>
+                <p class="font-bold">{{ $n->data['title'] ?? {{ __('dashboard.notification') }} }}</p>
                 @if(!empty($n->data['body']))
     <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
         {{ $n->data['body'] }}

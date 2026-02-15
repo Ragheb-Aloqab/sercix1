@@ -50,7 +50,7 @@ class BankAccountController extends Controller
             ]);
         });
 
-        return back()->with('success_bank', 'تم إضافة الحساب البنكي بنجاح.');
+        return back()->with('success_bank', __('messages.bank_account_added'));
     }
 
     public function update(Request $request, BankAccount $bankAccount)
@@ -72,32 +72,31 @@ class BankAccountController extends Controller
 
         $bankAccount->update($data);
 
-        return back()->with('success_bank', 'تم تحديث الحساب البنكي.');
+        return back()->with('success_bank', __('messages.bank_account_updated'));
     }
 
     public function destroy(BankAccount $bankAccount)
     {
-        // لا تحذف الافتراضي إلا إذا تريد — هنا نمنع حذفه
         if ($bankAccount->is_default) {
-            return back()->with('error_bank', 'لا يمكن حذف الحساب الافتراضي. عيّن حسابًا آخر كافتراضي أولاً.');
+            return back()->with('error_bank', __('messages.cannot_delete_default_bank'));
         }
 
         $bankAccount->delete();
 
-        return back()->with('success_bank', 'تم حذف الحساب البنكي.');
+        return back()->with('success_bank', __('messages.bank_account_deleted'));
     }
 
     public function toggleActive(BankAccount $bankAccount)
     {
         $bankAccount->update(['is_active' => ! $bankAccount->is_active]);
 
-        return back()->with('success_bank', 'تم تحديث حالة الحساب.');
+        return back()->with('success_bank', __('messages.bank_account_status_updated'));
     }
 
     public function makeDefault(BankAccount $bankAccount)
     {
         BankAccount::makeDefault($bankAccount->id);
 
-        return back()->with('success_bank', 'تم تعيين الحساب كافتراضي.');
+        return back()->with('success_bank', __('messages.bank_account_default_set'));
     }
 }

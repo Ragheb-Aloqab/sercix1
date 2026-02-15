@@ -45,7 +45,7 @@ class NotificationsController extends Controller
             $notification->markAsRead();
         }
 
-        return back()->with('success', 'تم تعليم الإشعار كمقروء ');
+        return back()->with('success', __('messages.notification_marked_read'));
     }
 
     public function markAllRead(): RedirectResponse
@@ -54,6 +54,6 @@ class NotificationsController extends Controller
 
         $user->unreadNotifications->markAsRead();
 
-        return back()->with('success', 'تم تعليم جميع الإشعارات كمقروء ');
+        return back()->with('success', __('messages.all_notifications_marked_read'));
     }
 }

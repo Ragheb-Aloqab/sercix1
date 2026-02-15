@@ -28,10 +28,20 @@
             </div>
 
             <div>
-                <label class="text-sm font-bold">الإيميل</label>
+                <label class="text-sm font-bold">{{ __('livewire.email') }}</label>
                 <input wire:model.defer="email" type="email"
                     class="mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent px-4 py-3 outline-none">
                 @error('email')
+                    <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="text-sm font-bold">{{ __('livewire.phone_label') }}</label>
+                <input wire:model.defer="phone" type="text"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent px-4 py-3 outline-none"
+                    placeholder="{{ __('settings.phone_placeholder_optional') }}">
+                @error('phone')
                     <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>

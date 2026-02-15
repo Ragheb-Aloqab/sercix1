@@ -21,33 +21,6 @@ class OtpAuthController extends Controller
         return view('company.auth.login-phone');
     }
 
-//    public function sendOtp(Request $request)
-//    {
-//        $data = $request->validate([
-//            'phone' => ['required', 'string', 'max:20'],
-//        ]);
-//
-//        $phone = trim($data['phone']);
-//
-//        // ✅ OTP تجريبي
-//        $otp = (string) random_int(100000, 999999);
-//
-//        // نخزن OTP في السيشن لمدة مؤقتة (10 دقائق مثلاً)
-//        Session::put('otp.phone', $phone);
-//        Session::put('otp.code', $otp);
-//        Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
-//
-//        // ✅ سجل بالـ log للتجربة
-//        Log::info("[OTP-DEV] Company Login OTP", [
-//            'phone' => $phone,
-//            'otp' => $otp,
-//            'expires_at' => now()->addMinutes(10)->toDateTimeString(),
-//        ]);
-//
-//        return redirect()
-//            ->route('company.verify')
-//            ->with('success', 'تم إرسال رمز التحقق (تجريبي). تحقق من ملف اللوق ✅');
-//    }
     public function sendOtp(Request $request)
     {
         $data = $request->validate([
@@ -87,7 +60,7 @@ class OtpAuthController extends Controller
 
         return redirect()
             ->route('company.verify')
-            ->with('success', 'تم إرسال رمز التحقق إلى جوالك ✅');
+            ->with('success', __('messages.otp_sent'));
     }
 
     public function showRegisterForm()
@@ -129,7 +102,7 @@ class OtpAuthController extends Controller
             }
         } catch (\Exception $e) {
             Log::error("Failed to send OTP before registration: " . $e->getMessage());
-            return redirect()->back()->with('error', 'حدث خطأ أثناء إرسال رمز التحقق. حاول مرة أخرى.');
+            return redirect()->back()->with('error', __('messages.otp_send_error'));
         }
 
         // 4) حفظ OTP في الجلسة
@@ -156,7 +129,7 @@ class OtpAuthController extends Controller
         // 7) تحويل المستخدم لصفحة التحقق
         return redirect()
             ->route('company.verify')
-            ->with('success', 'تم إرسال رمز التحقق بنجاح ✅');
+            ->with('success', __('messages.otp_sent'));
     }
 
 
@@ -184,17 +157,17 @@ class OtpAuthController extends Controller
 
         if (!$savedPhone || !$savedOtp || !$expiresAt) {
             return redirect()->route('company.login')
-                ->withErrors(['otp' => 'لا يوجد رمز صالح. أعد المحاولة.']);
+                ->withErrors(['otp' => __('messages.otp_no_valid_code')]);
         }
 
         if (now()->timestamp > $expiresAt) {
             Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
             return redirect()->route('company.login')
-                ->withErrors(['otp' => 'انتهت صلاحية الرمز. أعد الإرسال.']);
+                ->withErrors(['otp' => __('messages.otp_expired_resend')]);
         }
 
         if ($data['otp'] !== $savedOtp) {
-            return back()->withErrors(['otp' => 'رمز غير صحيح. حاول مرة أخرى.']);
+            return back()->withErrors(['otp' => __('messages.otp_invalid_try_again')]);
         }
 
         // ✅ اجلب الشركة من قاعدة البيانات حسب رقم الجوال
@@ -203,7 +176,7 @@ class OtpAuthController extends Controller
         if (!$company) {
             Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
             return redirect()->route('company.login')
-                ->withErrors(['otp' => 'لا توجد شركة بهذا الرقم.']);
+                ->withErrors(['otp' => __('messages.no_company_for_phone')]);
         }
 
         // ✅ سجل دخول فعلي بالـ guard:company
@@ -215,7 +188,7 @@ class OtpAuthController extends Controller
         // ✅ وجّه إلى داشبورد الشركة
         return redirect()
             ->route('company.dashboard')
-            ->with('success', 'تم تسجيل الدخول بنجاح ✅');
+            ->with('success', __('messages.company_login_success'));
     }
 
     public function logout(Request $request)

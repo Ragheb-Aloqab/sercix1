@@ -106,7 +106,7 @@ class OrderCreate extends Component
             $order = Order::create([
                 'company_id' => $company->id,
                 'vehicle_id' => (int) $this->vehicle_id,
-                'status' => 'pending',
+                'status' => 'pending_assignment',
                 'notes' => $this->notes ?: null,
             ]);
 

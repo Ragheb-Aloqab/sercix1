@@ -34,11 +34,11 @@ class OrderPaymentController extends Controller
             $order->statusLogs()->create([
                 'from_status' => $from,
                 'to_status' => $to,
-                'note' => 'تم تسجيل الدفع من لوحة الأدمن.',
+                'note' => __('messages.payment_note_admin'),
                 'changed_by' => auth()->id(), // ✅ حسب جدول order_status_logs
             ]);
         }
 
-        return back()->with('success', 'تم تسجيل بيانات الدفع.');
+        return back()->with('success', __('messages.payment_recorded'));
     }
 }

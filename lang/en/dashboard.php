@@ -37,6 +37,8 @@ return [
     'vehicles_desc' => 'Manage vehicles',
     'branches' => 'Branches',
     'branches_desc' => 'Manage branches',
+    'fuel_report' => 'Fuel report',
+    'fuel_report_desc' => 'Fuel costs and vehicle consumption',
     'company_orders_desc' => 'Track orders',
     'company_settings_desc' => 'Account / security',
     'tasks' => 'Tasks',

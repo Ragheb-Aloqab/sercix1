@@ -30,6 +30,9 @@
         <div class="bg-white rounded-2xl shadow-soft border border-slate-200/80 p-6 sm:p-8">
             <h1 class="text-xl font-semibold text-slate-900">{{ __('login.password_title') }}</h1>
             <p class="mt-1 text-sm text-slate-500 mb-6">{{ __('login.password_subtitle') }}: <span class="font-semibold text-slate-700">{{ $email }}</span></p>
+            @if (!empty($requiresOtp) && !empty($phone))
+                <p class="mt-1 text-sm text-slate-500 mb-4">{{ __('login.verify_sent') }}: <span class="font-semibold text-slate-700">{{ $phone }}</span></p>
+            @endif
 
             @if ($errors->any())
                 <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -39,6 +42,13 @@
 
             <form method="POST" action="{{ route('sign-in.authenticate_password') }}" class="space-y-4">
                 @csrf
+                @if (!empty($requiresOtp))
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">{{ __('login.verify_otp_label') }}</label>
+                    <input name="otp" type="text" inputmode="numeric" maxlength="6" placeholder="{{ __('login.verify_otp_placeholder') }}"
+                        class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-center tracking-widest font-bold outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200" />
+                </div>
+                @endif
                 <div>
                     <label class="block text-sm font-medium text-slate-700">{{ __('login.password_label') }}</label>
                     <input name="password" type="password" required autocomplete="current-password"

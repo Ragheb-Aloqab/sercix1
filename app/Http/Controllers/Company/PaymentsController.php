@@ -69,7 +69,7 @@ class PaymentsController extends Controller
 
         $company = auth('company')->user();
         if ($payment->status === 'paid') {
-            return back()->with('error', 'هذه الدفعة مدفوعة بالفعل.');
+            return back()->with('error', __('messages.payment_already_paid'));
         }
        
         $order = Order::findOrFail($payment->order_id);
@@ -83,7 +83,7 @@ class PaymentsController extends Controller
             );
         }
         
-        return back()->with('error', 'ربط Tap لم يُنفّذ بعد في هذا الكنترولر.');
+        return back()->with('error', __('messages.tap_not_implemented'));
     }
 
     public function uploadBankReceipt(Request $request, Payment $payment)
@@ -92,7 +92,7 @@ class PaymentsController extends Controller
 
         $company = auth('company')->user();
         if ($payment->status === 'paid') {
-            return back()->with('error', 'هذه الدفعة مدفوعة بالفعل.');
+            return back()->with('error', __('messages.payment_already_paid'));
         }
 
         $data = $request->validate([
@@ -111,6 +111,6 @@ class PaymentsController extends Controller
             'receipt_path' => $path,
         ]);
 
-        return back()->with('success', 'تم رفع الإيصال بنجاح وسيتم مراجعته من الإدارة.');
+        return back()->with('success', __('messages.receipt_uploaded'));
     }
 }

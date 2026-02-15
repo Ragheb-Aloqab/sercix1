@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Technician;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Notifications\OrderTaskStartedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +22,7 @@ class OrderStatusController extends Controller
 
         // الحالات المسموحة للفني (عدّلها حسب نظامك)
         $allowed = [
-            'accepted',
-            'on_the_way',
+            'assigned_to_technician',
             'in_progress',
             'completed',
             'cancelled',
@@ -35,19 +35,22 @@ class OrderStatusController extends Controller
         // (اختياري) منع الرجوع للخلف أو تغيير غير منطقي
         // مثال: إذا مكتمل لا تسمح بالتغيير
         if ($order->status === 'completed') {
-            return back()->withErrors(['status' => 'لا يمكن تغيير طلب مكتمل.']);
+            return back()->withErrors(['status' => __('messages.order_completed_no_change')]);
         }
 
         // مثال: لا تسمح بالتغيير لو ملغي
         if ($order->status === 'cancelled') {
-            return back()->withErrors(['status' => 'لا يمكن تغيير طلب ملغي.']);
+            return back()->withErrors(['status' => __('messages.order_cancelled_no_change')]);
         }
 
-        // تحديث الحالة
         $order->update([
             'status' => $data['status'],
         ]);
 
-        return back()->with('success', 'تم تحديث حالة الطلب بنجاح ✅');
+        if (in_array($data['status'], ['assigned_to_technician', 'in_progress'])) {
+            $order->company?->notify(new OrderTaskStartedNotification($order, $data['status']));
+        }
+
+        return back()->with('success', __('messages.order_status_updated'));
     }
 }

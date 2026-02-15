@@ -51,16 +51,15 @@ class TasksController extends Controller
 
         $technician = Auth::guard('web')->user();
 
-        /* ارسال اشعار للمدير ان الفني انجز المهمة */
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             $admin->notify(new OrderCompletedNotification($order));
         }
-        /**/
+        $order->company?->notify(new OrderCompletedNotification($order));
 
         // (اختياري) امنع التأكيد إذا الطلب مكتمل أصلاً
         if ($order->status === 'completed') {
-            return back()->with('info', 'هذه المهمة مكتملة بالفعل.');
+            return back()->with('info', __('messages.task_already_completed'));
         }
 
         $order->update([
@@ -69,7 +68,7 @@ class TasksController extends Controller
 
         return redirect()
             ->route('tech.tasks.show', $order->id)
-            ->with('success', 'تم تأكيد إنجاز المهمة بنجاح ✅');
+            ->with('success', __('messages.task_completed_success'));
     }
     public function accept($id )
 {
@@ -97,7 +96,7 @@ class TasksController extends Controller
             subjectId: $order->id,
             description: 'تم قبول الطلب   '
     );
-    return back()->with('success', 'تم قبول الطلب');
+    return back()->with('success', __('messages.order_accepted'));
     }
     public function reject($id)
 {
@@ -121,6 +120,6 @@ class TasksController extends Controller
         description: 'تم رفض الطلب'
     );
 
-    return back()->with('success', 'تم رفض الطلب');
+    return back()->with('success', __('messages.order_rejected'));
 }
 }

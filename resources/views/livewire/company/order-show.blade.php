@@ -13,35 +13,35 @@
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="font-black text-xl">طلب #{{ $order->id }}</p>
-                <p class="text-sm text-slate-500 mt-1">الحالة: {{ $order->status }}</p>
-                @if ($order->status === 'requested' && $order->requested_by_name)
-                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">طلب من: {{ $order->requested_by_name }}</p>
+                <p class="font-black text-xl">{{ __('orders.order') }} #{{ $order->id }}</p>
+                <p class="text-sm text-slate-500 mt-1">{{ __('orders.status_label') }}: {{ \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status) }}</p>
+                @if ($order->status === 'pending_company' && $order->requested_by_name)
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('orders.requested_by') }}: {{ $order->requested_by_name }}</p>
                 @endif
                 @if ($order->technician)
                     <p class="text-sm text-slate-500 mt-1">
-                        الفني: {{ $order->technician->name }} @if ($order->technician->phone) — {{ $order->technician->phone }} @endif
+                        {{ __('orders.technician_label') }}: {{ $order->technician->name }} @if ($order->technician->phone) — {{ $order->technician->phone }} @endif
                     </p>
                 @else
-                    <p class="text-sm text-slate-500 mt-1">الفني: غير مُسنّد</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ __('orders.technician_label') }}: {{ __('orders.unassigned') }}</p>
                 @endif
             </div>
             <div>
                 <a href="{{ route('company.orders.index') }}"
                    class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
-                    رجوع
+                    {{ __('orders.back') }}
                 </a>
-                @if ($order->status === 'requested')
+                @if ($order->status === 'pending_company')
                     <button type="button" wire:click="approveRequest"
                             class="my-4 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                        موافقة على الطلب
+                        {{ __('orders.approve_request') }}
                     </button>
                 @endif
-                @if($order->status !== 'completed' && $order->status !== 'requested')
+                @if($order->status !== 'completed' && $order->status !== 'pending_company')
                     <button type="button" wire:click="cancelOrder"
-                            wire:confirm="طلب إلغاء الطلب وإرساله للمدير. متأكد؟"
+                            wire:confirm="{{ __('orders.cancel_confirm') }}"
                             class="my-4 px-4 py-2 rounded-xl border border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400 font-semibold">
-                        إلغاء الطلب
+                        {{ __('orders.cancel_order') }}
                     </button>
                 @endif
             </div>
@@ -57,22 +57,22 @@
     @endphp
 
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-        <h3 class="font-black text-lg mb-3">تفاصيل الطلب</h3>
+        <h3 class="font-black text-lg mb-3">{{ __('orders.order_details') }}</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div class="flex items-center justify-between">
-                <span class="text-slate-500">الخدمة</span>
+                <span class="text-slate-500">{{ __('orders.service') }}</span>
                 <span class="font-bold">{{ $serviceName }}</span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-slate-500">المبلغ المطلوب</span>
-                <span class="font-bold">{{ (float)$amount > 0 ? number_format((float) $amount, 2) . ' SAR' : '-' }}</span>
+                <span class="text-slate-500">{{ __('orders.amount_required') }}</span>
+                <span class="font-bold">{{ (float)$amount > 0 ? number_format((float) $amount, 2) . ' ' . __('company.sar') : '-' }}</span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-slate-500">حالة الدفع</span>
-                <span class="font-bold">{{ $payment?->status ?? 'no_payment' }}</span>
+                <span class="text-slate-500">{{ __('orders.payment_status') }}</span>
+                <span class="font-bold">{{ $payment?->status ?? __('orders.no_payment') }}</span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-slate-500">طريقة الدفع</span>
+                <span class="text-slate-500">{{ __('orders.payment_method') }}</span>
                 <span class="font-bold">{{ $payment?->method ? strtoupper($payment->method) : '-' }}</span>
             </div>
         </div>
@@ -80,7 +80,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <h3 class="font-black text-lg mb-3">صور قبل</h3>
+            <h3 class="font-black text-lg mb-3">{{ __('orders.before_photos') }}</h3>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 @forelse($before as $img)
                     <a href="{{ asset('storage/' . $img->file_path) }}" target="_blank"
@@ -88,12 +88,12 @@
                         <img src="{{ asset('storage/' . $img->file_path) }}" class="w-full h-28 object-cover" alt="">
                     </a>
                 @empty
-                    <p class="text-sm text-slate-500 col-span-full">لا توجد صور قبل حتى الآن.</p>
+                    <p class="text-sm text-slate-500 col-span-full">{{ __('orders.no_before_photos') }}</p>
                 @endforelse
             </div>
         </div>
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <h3 class="font-black text-lg mb-3">صور بعد</h3>
+            <h3 class="font-black text-lg mb-3">{{ __('orders.after_photos') }}</h3>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 @forelse($after as $img)
                     <a href="{{ asset('storage/' . $img->file_path) }}" target="_blank"
@@ -101,7 +101,7 @@
                         <img src="{{ asset('storage/' . $img->file_path) }}" class="w-full h-28 object-cover" alt="">
                     </a>
                 @empty
-                    <p class="text-sm text-slate-500 col-span-full">لا توجد صور بعد حتى الآن.</p>
+                    <p class="text-sm text-slate-500 col-span-full">{{ __('orders.no_after_photos') }}</p>
                 @endforelse
             </div>
         </div>
@@ -109,28 +109,28 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <h3 class="font-black text-lg mb-3">الفاتورة</h3>
+            <h3 class="font-black text-lg mb-3">{{ __('orders.invoice') }}</h3>
             @if ($order->invoice)
                 <div class="space-y-2 text-sm">
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-500">رقم الفاتورة</span>
+                        <span class="text-slate-500">{{ __('orders.invoice_number') }}</span>
                         <span class="font-bold">#{{ $order->invoice->id }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-500">الإجمالي</span>
-                        <span class="font-bold">{{ $order->invoice->total ? number_format((float)$order->invoice->total, 2) . ' SAR' : '-' }}</span>
+                        <span class="text-slate-500">{{ __('orders.total') }}</span>
+                        <span class="font-bold">{{ $order->invoice->total ? number_format((float)$order->invoice->total, 2) . ' ' . __('company.sar') : '-' }}</span>
                     </div>
                     <a href="{{ route('company.invoices.show', $order->invoice->id) }}"
                        class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold mt-2">
-                        عرض الفاتورة
+                        {{ __('orders.view_invoice') }}
                     </a>
                 </div>
             @else
-                <p class="text-sm text-slate-500">لا توجد فاتورة لهذا الطلب حالياً.</p>
+                <p class="text-sm text-slate-500">{{ __('orders.no_invoice') }}</p>
             @endif
         </div>
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <h3 class="font-black text-lg mb-3">المدفوعات</h3>
+            <h3 class="font-black text-lg mb-3">{{ __('orders.payments') }}</h3>
             @if ($order->payments && $order->payments->count())
                 <div class="space-y-3">
                     @foreach ($order->payments as $pay)
@@ -139,13 +139,13 @@
                                 <p class="font-bold">{{ $pay->method ?? 'payment' }}</p>
                                 <span class="text-xs font-bold px-3 py-1 rounded-xl {{ $pay->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800' }}">{{ $pay->status }}</span>
                             </div>
-                            <p class="text-sm text-slate-500 mt-1">المبلغ: {{ is_null($pay->amount) ? '-' : number_format((float) $pay->amount, 2) . ' SAR' }}</p>
+                            <p class="text-sm text-slate-500 mt-1">{{ __('orders.amount_label') }}: {{ is_null($pay->amount) ? '-' : number_format((float) $pay->amount, 2) . ' ' . __('company.sar') }}</p>
                             <p class="text-xs text-slate-500 mt-1">{{ $pay->created_at?->format('Y-m-d H:i') }}</p>
                         </div>
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-slate-500">لا توجد مدفوعات بعد.</p>
+                <p class="text-sm text-slate-500">{{ __('orders.no_payments') }}</p>
             @endif
         </div>
     </div>

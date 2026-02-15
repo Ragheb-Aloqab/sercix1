@@ -1,0 +1,17 @@
+<?php
+
+return [
+    'dashboard' => 'Driver Dashboard',
+    'driver' => 'Driver',
+    'my_vehicles_orders' => 'My vehicles and service requests',
+    'new_service_request' => 'New service request',
+    'vehicles_linked' => 'Vehicles linked to your phone',
+    'no_vehicles' => 'No vehicles. Contact your company to add your phone as a driver for a vehicle.',
+    'request_service' => 'Request service',
+    'latest_requests' => 'Latest requests',
+    'no_requests_yet' => 'You have not made any requests yet.',
+    'status' => 'Status',
+    'example_liters' => 'e.g. 45.5',
+    'example_cost' => 'e.g. 180.50',
+    'notes_placeholder' => 'Station, location, etc.',
+];

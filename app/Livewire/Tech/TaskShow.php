@@ -39,6 +39,7 @@ class TaskShow extends Component
         foreach ($admins as $admin) {
             $admin->notify(new OrderCompletedNotification($this->order));
         }
+        $this->order->company?->notify(new OrderCompletedNotification($this->order));
 
         $this->order = $this->order->fresh(['company', 'vehicle', 'services', 'beforePhotos', 'afterPhotos']);
         session()->flash('success', 'تم تأكيد إنجاز المهمة بنجاح ');

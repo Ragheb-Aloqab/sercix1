@@ -7,7 +7,7 @@
 
     @if ($errors->any())
         <div class="p-4 rounded-2xl bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-500/20">
-            <p class="font-bold mb-2">يوجد أخطاء:</p>
+            <p class="font-bold mb-2">{{ __('livewire.errors_title') }}</p>
             <ul class="list-disc ps-5">
                 @foreach ($errors->all() as $e)
                     <li>{{ $e }}</li>
@@ -19,26 +19,26 @@
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-                <p class="text-sm text-slate-500 dark:text-slate-400">تفاصيل الطلب</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('livewire.order_details') }}</p>
                 <h1 class="text-2xl font-black">#{{ $order->id }}</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    تم الإنشاء: {{ $order->created_at?->format('Y-m-d H:i') }}
+                    {{ __('livewire.created_at') }}: {{ $order->created_at?->format('Y-m-d H:i') }}
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 @include('admin.orders.partials._status_badge', ['status' => $order->status])
                 <a href="{{ route('admin.orders.index') }}"
                    class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold">
-                    رجوع للقائمة
+                    {{ __('livewire.back_to_list') }}
                 </a>
                 <a href="{{ route('admin.orders.invoice.show', $order) }}"
                    class="px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold">
-                    <i class="fa-solid fa-print me-2"></i> الفاتورة
+                    <i class="fa-solid fa-print me-2"></i> {{ __('livewire.invoice') }}
                 </a>
                 @if (!$order->invoice)
                     <button type="button" wire:click="createInvoice"
                             class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                        إنشاء فاتورة
+                        {{ __('livewire.create_invoice') }}
                     </button>
                 @endif
             </div>
@@ -54,21 +54,21 @@
             {{-- Attachments (Livewire) --}}
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft">
                 <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
-                    <h2 class="text-lg font-black">المرفقات</h2>
+                    <h2 class="text-lg font-black">{{ __('livewire.attachments') }}</h2>
                 </div>
                 <div class="p-5 space-y-4">
                     <form wire:submit="uploadAttachment" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <select wire:model="attachment_type"
                                 class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                            <option value="before_photo">before</option>
-                            <option value="after_photo">after</option>
-                            <option value="signature">signature</option>
-                            <option value="other">other</option>
+                            <option value="before_photo">{{ __('livewire.before') }}</option>
+                            <option value="after_photo">{{ __('livewire.after') }}</option>
+                            <option value="signature">{{ __('livewire.signature') }}</option>
+                            <option value="other">{{ __('livewire.other') }}</option>
                         </select>
                         <input type="file" wire:model="attachment_file" accept="image/*"
                                class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent" />
                         <button type="submit" class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-                            رفع
+                            {{ __('livewire.upload') }}
                         </button>
                     </form>
                     @php
@@ -77,7 +77,7 @@
                         $others = $order->attachments->whereIn('type', ['signature', 'other']);
                     @endphp
                     <div>
-                        <h3 class="font-black mb-3">صور قبل</h3>
+                        <h3 class="font-black mb-3">{{ __('livewire.photos_before') }}</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             @forelse($before as $att)
                                 <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
@@ -88,12 +88,12 @@
                                     </div>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-500 col-span-full">لا توجد صور قبل.</p>
+                                <p class="text-sm text-slate-500 col-span-full">{{ __('livewire.no_before_photos') }}</p>
                             @endforelse
                         </div>
                     </div>
                     <div>
-                        <h3 class="font-black mb-3">صور بعد</h3>
+                        <h3 class="font-black mb-3">{{ __('livewire.photos_after') }}</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             @forelse($after as $att)
                                 <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
@@ -104,12 +104,12 @@
                                     </div>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-500 col-span-full">لا توجد صور بعد.</p>
+                                <p class="text-sm text-slate-500 col-span-full">{{ __('livewire.no_after_photos') }}</p>
                             @endforelse
                         </div>
                     </div>
                     <div>
-                        <h3 class="font-black mb-3">توقيع / أخرى</h3>
+                        <h3 class="font-black mb-3">{{ __('livewire.signature_other') }}</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             @forelse($others as $att)
                                 <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -117,10 +117,10 @@
                                         <p class="font-bold">{{ $att->type }}</p>
                                         <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
                                     </div>
-                                    <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank" class="text-sky-600 font-semibold text-sm">فتح الملف</a>
+                                    <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank" class="text-sky-600 font-semibold text-sm">{{ __('livewire.open_file') }}</a>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-500">لا توجد مرفقات أخرى.</p>
+                                <p class="text-sm text-slate-500">{{ __('livewire.no_other_attachments') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -131,26 +131,26 @@
         <div class="space-y-4">
             {{-- Assign technician (Livewire) --}}
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                <h2 class="text-lg font-black mb-3">إسناد فني</h2>
-                <p class="text-sm text-slate-500 mb-3">الفني الحالي: <span class="font-bold">{{ $order->technician?->name ?? 'غير مسند' }}</span></p>
+                <h2 class="text-lg font-black mb-3">{{ __('livewire.assign_technician') }}</h2>
+                <p class="text-sm text-slate-500 mb-3">{{ __('livewire.current_technician') }}: <span class="font-bold">{{ $order->technician?->name ?? __('livewire.unassigned') }}</span></p>
                 <form wire:submit="assignTechnician" class="space-y-3">
                     <select wire:model="technician_id"
                             class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                        <option value="0">اختر فني</option>
+                        <option value="0">{{ __('livewire.select_technician') }}</option>
                         @foreach ($technicians as $t)
                             <option value="{{ $t->id }}">{{ $t->name }} {{ $t->phone ? "({$t->phone})" : '' }}</option>
                         @endforeach
                     </select>
                     <textarea wire:model="assign_note" rows="3"
                               class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                              placeholder="ملاحظة (اختياري)"></textarea>
-                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold">إسناد</button>
+                              placeholder="{{ __('livewire.reason_optional') }}"></textarea>
+                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold">{{ __('livewire.assign') }}</button>
                 </form>
             </div>
 
             {{-- Change status (Livewire) --}}
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                <h2 class="text-lg font-black mb-3">تغيير الحالة</h2>
+                <h2 class="text-lg font-black mb-3">{{ __('livewire.change_status') }}</h2>
                 <form wire:submit="changeStatus" class="space-y-3">
                     <select wire:model="to_status"
                             class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
@@ -160,8 +160,8 @@
                     </select>
                     <textarea wire:model="status_note" rows="3"
                               class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                              placeholder="سبب/ملاحظة (اختياري)"></textarea>
-                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold">تحديث</button>
+                              placeholder="{{ __('livewire.reason_optional') }}"></textarea>
+                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold">{{ __('livewire.update') }}</button>
                 </form>
             </div>
 
@@ -172,15 +172,15 @@
                 $method = $payment?->method;
                 $amount = (float) ($payment?->amount ?? 0);
                 $statusLabel = match ($status) {
-                    'paid' => 'مدفوع',
-                    'pending' => 'قيد الانتظار',
-                    'failed' => 'فشل الدفع',
+                    'paid' => __('livewire.paid'),
+                    'pending' => __('livewire.pending'),
+                    'failed' => __('livewire.payment_failed'),
                     default => '—',
                 };
                 $methodLabel = match ($method) {
-                    'cash' => 'كاش',
-                    'tap' => 'Tap',
-                    'bank' => 'تحويل بنكي',
+                    'cash' => __('livewire.cash'),
+                    'tap' => __('livewire.tap'),
+                    'bank' => __('livewire.bank_transfer'),
                     default => '—',
                 };
                 $badgeClass = match ($status) {
@@ -191,7 +191,7 @@
                 };
             @endphp
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                <h2 class="text-lg font-black mb-3">الدفع</h2>
+                <h2 class="text-lg font-black mb-3">{{ __('livewire.payment') }}</h2>
                 <div class="text-sm mb-4">
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <span class="px-3 py-1 rounded-full text-xs font-bold {{ $badgeClass }}">{{ $statusLabel }}</span>
@@ -202,18 +202,18 @@
                 </div>
                 @if ($payment && $payment->method === 'bank' && $payment->status === 'pending' && $payment->receipt_path)
                     <div class="mb-4 p-4 rounded-2xl border border-sky-200 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-900/20">
-                        <p class="font-bold text-sm mb-2">إيصال التحويل البنكي</p>
+                        <p class="font-bold text-sm mb-2">{{ __('livewire.bank_receipt') }}</p>
                         @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($payment->receipt_path))
                             <a href="{{ asset('storage/' . $payment->receipt_path) }}" target="_blank" class="block rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-2">
                                 <img src="{{ asset('storage/' . $payment->receipt_path) }}" alt="إيصال" class="w-full max-h-48 object-contain" />
                             </a>
                             <button type="button" wire:click="confirmBankPayment({{ $payment->id }})"
-                                    wire:confirm="تأكيد استلام التحويل؟"
+                                    wire:confirm="{{ __('livewire.confirm_receipt_question') }}"
                                     class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
-                                تأكيد الاستلام
+                                {{ __('livewire.confirm_receipt') }}
                             </button>
                         @else
-                            <p class="text-slate-500 text-sm">لا يوجد ملف مرفق.</p>
+                            <p class="text-slate-500 text-sm">{{ __('livewire.no_file_attached') }}</p>
                         @endif
                     </div>
                 @endif
@@ -232,7 +232,7 @@
                     </select>
                     <input type="number" step="0.01" wire:model="payment_amount"
                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                           placeholder="Amount SAR" />
+                           placeholder="{{ __('livewire.amount_sar') }}" />
                     <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">{{ __('common.save_payment') }}</button>
                 </form>
             </div>

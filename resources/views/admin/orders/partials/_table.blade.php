@@ -38,7 +38,7 @@
                         @endforeach
                     </div>
                     <p class="mt-1 text-xs text-slate-500">
-                        عدد الخدمات: {{ $order->services_count }}
+                        {{ __('orders.services_count') }}: {{ $order->services_count }}
                     </p>
                 @else
                     <span class="text-slate-400">—</span>
@@ -48,7 +48,7 @@
             {{-- Payment --}}
             <div class="mt-3 grid grid-cols-2 gap-3">
                 <div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">طريقة الدفع</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('orders.payment_method') }}</p>
                     <span
                         class="inline-flex px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
                         {{ $order->payment?->method ?? '—' }}
@@ -56,7 +56,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">حالة الدفع</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('orders.payment_status') }}</p>
                     @php($paymentStatus = $order->payment?->status)
                     @if ($paymentStatus === 'paid')
                         <span
@@ -103,10 +103,10 @@
                     <th class="py-3 px-4 font-semibold">{{ __('common.number') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.company') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.services') }}</th>
-                    <th class="py-3 px-4 font-semibold">تاريخ الطلب</th>
-                    <th class="py-3 px-4 font-semibold">الدفع</th>
-                    <th class="py-3 px-4 font-semibold">حالة الدفع</th>
-                    <th class="py-3 px-4 font-semibold">الحالة</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('orders.order_date') }}</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('orders.payment') }}</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('orders.payment_status') }}</th>
+                    <th class="py-3 px-4 font-semibold">{{ __('orders.status') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
@@ -134,7 +134,7 @@
                                     @endforeach
                                 </div>
                                 <p class="mt-1 text-xs text-slate-500">
-                                    عدد الخدمات: {{ $order->services_count }}
+                                    {{ __('orders.services_count') }}: {{ $order->services_count }}
                                 </p>
                             @else
                                 <span class="text-slate-400">—</span>

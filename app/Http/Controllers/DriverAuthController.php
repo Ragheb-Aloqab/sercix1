@@ -27,7 +27,7 @@ class DriverAuthController extends Controller
             ->orWhere('driver_phone', $phone)
             ->first();
         if (!$vehicle) {
-            return back()->withErrors(['phone' => 'رقم الجوال غير مسجّل كسائق لمركبة. تواصل مع شركتك لإضافة جوالك.']);
+            return back()->withErrors(['phone' => __('messages.driver_phone_not_registered')]);
         }
 
         $phone = $normalized;
@@ -52,13 +52,13 @@ class DriverAuthController extends Controller
             OtpService::send($phone, $otp);
         }
 
-        return redirect()->route('driver.verify')->with('success', 'تم إرسال رمز التحقق إلى جوالك.');
+        return redirect()->route('driver.verify')->with('success', __('messages.driver_otp_sent'));
     }
 
     public function showVerify()
     {
         if (!Session::has('driver_otp.phone')) {
-            return redirect()->route('sign-in.index')->with('error', 'انتهت الجلسة. أدخل جوالك مرة أخرى.');
+            return redirect()->route('sign-in.index')->with('error', __('messages.driver_session_expired'));
         }
         Session::put('login_role', 'driver');
         return redirect()->route('sign-in.verify');
@@ -73,18 +73,18 @@ class DriverAuthController extends Controller
 
         if (!$phone || !$code || time() > $expires) {
             Session::forget(['driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
-            return redirect()->route('driver.login')->withErrors(['otp' => 'انتهت صلاحية الرمز.']);
+            return redirect()->route('driver.login')->withErrors(['otp' => __('messages.driver_otp_expired')]);
         }
 
         if ($request->input('otp') !== $code) {
-            return back()->withErrors(['otp' => 'رمز التحقق غير صحيح.']);
+            return back()->withErrors(['otp' => __('messages.driver_otp_invalid')]);
         }
 
         Session::forget(['driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
         Session::put('driver_phone', $phone);
         Session::regenerate();
 
-        return redirect()->route('driver.dashboard')->with('success', 'تم تسجيل الدخول.');
+        return redirect()->route('driver.dashboard')->with('success', __('messages.driver_login_success'));
     }
 
     public function logout(Request $request)

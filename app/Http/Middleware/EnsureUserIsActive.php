@@ -18,11 +18,11 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user && (int)$user->is_active !== 1) {
+        if ($user && ($user->status ?? 'active') !== 'active') {
             Auth::logout();
-            return redirect()->route('login')->withErrors([
-                'email' => 'الحساب موقوف. تواصل مع الإدارة.',
-            ]);
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('sign-in.index')->with('error', __('messages.account_suspended'));
         }
 
         return $next($request);

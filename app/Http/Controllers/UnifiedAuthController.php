@@ -50,6 +50,20 @@ class UnifiedAuthController extends Controller
 
     private function handleEmailIdentifier(string $email)
     {
+        // Company login by email: send OTP to company's phone
+        $company = Company::where('email', $email)->first();
+        if ($company) {
+            $phone = $company->phone ?? null;
+            if (empty($phone)) {
+                return back()->withErrors([
+                    'identifier' => __('login.company_no_phone'),
+                ])->withInput();
+            }
+            $normalized = $this->normalizePhone($phone);
+            return $this->sendOtpCompany($normalized);
+        }
+
+        // Admin/Technician: password + OTP flow
         $user = User::where('email', $email)->first();
 
         if (!$user) {
@@ -64,8 +78,14 @@ class UnifiedAuthController extends Controller
             ])->withInput();
         }
 
-        Session::put('login_email', $email);
-        Session::put('login_user_role', $user->role);
+        $phone = $user->phone ?? null;
+        if (empty($phone)) {
+            return back()->withErrors([
+                'identifier' => __('login.staff_no_phone'),
+            ])->withInput();
+        }
+
+        $this->sendStaffOtpAndStoreSession($user->email, $user->role, $phone);
 
         return redirect()->route('sign-in.password');
     }
@@ -77,12 +97,20 @@ class UnifiedAuthController extends Controller
 
         $company = Company::whereIn('phone', $variants)->first();
         $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+        $user = User::whereIn('phone', $variants)
+            ->whereIn('role', ['admin', 'technician'])
+            ->first();
 
         if ($company) {
             return $this->sendOtpCompany($company->phone ?: $normalized);
         }
         if ($vehicle) {
             return $this->sendOtpDriver($normalized);
+        }
+        if ($user) {
+            $userPhone = $user->phone ?? $normalized;
+            $this->sendStaffOtpAndStoreSession($user->email, $user->role, $userPhone);
+            return redirect()->route('sign-in.password');
         }
 
         return back()->withErrors([
@@ -91,7 +119,7 @@ class UnifiedAuthController extends Controller
     }
 
     /**
-     * Step 2 for email: show password form.
+     * Step 2 for admin/technician: show password + OTP form.
      */
     public function showPasswordForm()
     {
@@ -100,11 +128,14 @@ class UnifiedAuthController extends Controller
             return redirect()->route('sign-in.index')->with('error', __('login.session_expired'));
         }
 
-        return view('auth.unified-password', compact('email'));
+        $phone = Session::get('staff_otp.phone');
+        $requiresOtp = Session::has('staff_otp.code');
+
+        return view('auth.unified-password', compact('email', 'phone', 'requiresOtp'));
     }
 
     /**
-     * Step 2 for email: authenticate with password.
+     * Step 2 for admin/technician: authenticate with password (+ OTP if required).
      */
     public function authenticatePassword(Request $request)
     {
@@ -113,9 +144,24 @@ class UnifiedAuthController extends Controller
             return redirect()->route('sign-in.index')->withErrors(['password' => __('login.session_expired')]);
         }
 
-        $data = $request->validate([
-            'password' => ['required', 'string'],
-        ]);
+        $requiresOtp = Session::has('staff_otp.code');
+        $rules = ['password' => ['required', 'string']];
+        if ($requiresOtp) {
+            $rules['otp'] = ['required', 'string', 'size:6'];
+        }
+        $data = $request->validate($rules);
+
+        if ($requiresOtp) {
+            $code = Session::get('staff_otp.code');
+            $expires = (int) Session::get('staff_otp.expires_at', 0);
+            if (!$code || time() > $expires) {
+                Session::forget(['login_email', 'login_user_role', 'staff_otp.phone', 'staff_otp.code', 'staff_otp.expires_at']);
+                return redirect()->route('sign-in.index')->withErrors(['otp' => __('messages.otp_expired_resend')]);
+            }
+            if (($data['otp'] ?? '') !== $code) {
+                return back()->withErrors(['otp' => __('messages.otp_invalid')])->withInput();
+            }
+        }
 
         $this->ensureEmailRateLimited($email);
 
@@ -127,7 +173,7 @@ class UnifiedAuthController extends Controller
         }
 
         RateLimiter::clear($this->emailThrottleKey($email));
-        Session::forget(['login_email', 'login_user_role']);
+        Session::forget(['login_email', 'login_user_role', 'staff_otp.phone', 'staff_otp.code', 'staff_otp.expires_at']);
         Session::regenerate();
 
         return redirect()->intended(route('dashboard'));
@@ -152,6 +198,23 @@ class UnifiedAuthController extends Controller
         return Str::transliterate(Str::lower($email) . '|' . request()->ip());
     }
 
+    /**
+     * Send OTP to admin/technician phone and store session for password+OTP flow.
+     */
+    private function sendStaffOtpAndStoreSession(string $email, string $role, string $phone): void
+    {
+        $otp = (string) random_int(100000, 999999);
+        $normalized = $this->normalizePhone($phone);
+
+        Session::put('login_email', $email);
+        Session::put('login_user_role', $role);
+        Session::put('staff_otp.phone', $normalized);
+        Session::put('staff_otp.code', $otp);
+        Session::put('staff_otp.expires_at', now()->addMinutes(10)->timestamp);
+
+        $this->logOrSendOtp($normalized, $otp, 'Staff');
+    }
+
     public function sendOtp(Request $request)
     {
         $data = $request->validate([
@@ -168,13 +231,13 @@ class UnifiedAuthController extends Controller
 
         if ($role === 'company') {
             if (!$company) {
-                return back()->withErrors(['phone' => 'رقم الجوال غير مسجّل كشركة. إنشاء حساب من الرابط أدناه.'])->withInput();
+                return back()->withErrors(['phone' => __('messages.phone_not_company')])->withInput();
             }
             return $this->sendOtpCompany($company->phone ?: $normalized);
         }
         if ($role === 'driver') {
             if (!$vehicle) {
-                return back()->withErrors(['phone' => 'رقم الجوال غير مسجّل كسائق لمركبة. تواصل مع شركتك لإضافة جوالك.'])->withInput();
+                return back()->withErrors(['phone' => __('messages.phone_not_driver')])->withInput();
             }
             return $this->sendOtpDriver($normalized);
         }
@@ -188,7 +251,7 @@ class UnifiedAuthController extends Controller
         }
 
         return back()->withErrors([
-            'phone' => 'رقم الجوال غير مسجّل كشركة أو كسائق. إنشاء حساب شركة من الرابط أدناه.',
+            'phone' => __('messages.phone_not_found'),
         ])->withInput();
     }
 
@@ -202,7 +265,7 @@ class UnifiedAuthController extends Controller
 
         $this->logOrSendOtp($phone, $otp, 'Company');
 
-        return redirect()->route('sign-in.verify')->with('success', 'تم إرسال رمز التحقق إلى جوالك.');
+        return redirect()->route('sign-in.verify')->with('success', __('messages.otp_sent'));
     }
 
     private function sendOtpDriver(string $phone): \Illuminate\Http\RedirectResponse
@@ -215,7 +278,7 @@ class UnifiedAuthController extends Controller
 
         $this->logOrSendOtp($phone, $otp, 'Driver');
 
-        return redirect()->route('sign-in.verify')->with('success', 'تم إرسال رمز التحقق إلى جوالك.');
+        return redirect()->route('sign-in.verify')->with('success', __('messages.otp_sent'));
     }
 
     private function logOrSendOtp(string $phone, string $otp, string $label): void
@@ -242,7 +305,7 @@ class UnifiedAuthController extends Controller
         $hasDriver = Session::has('driver_otp.phone');
 
         if (!$role || (!$hasCompany && !$hasDriver)) {
-            return redirect()->route('sign-in.index')->with('error', 'انتهت الجلسة. أدخل جوالك مرة أخرى.');
+            return redirect()->route('sign-in.index')->with('error', __('messages.session_expired_retry'));
         }
 
         $phone = $role === 'company' ? Session::get('otp.phone') : Session::get('driver_otp.phone');
@@ -263,7 +326,7 @@ class UnifiedAuthController extends Controller
         }
 
         Session::forget(['login_role', 'otp.phone', 'otp.code', 'otp.expires_at', 'driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
-        return redirect()->route('sign-in.index')->withErrors(['otp' => 'انتهت الجلسة. أعد تسجيل الدخول.']);
+        return redirect()->route('sign-in.index')->withErrors(['otp' => __('messages.session_expired_relogin')]);
     }
 
     private function verifyCompany(Request $request): \Illuminate\Http\RedirectResponse
@@ -274,24 +337,24 @@ class UnifiedAuthController extends Controller
 
         if (!$phone || !$code || time() > $expires) {
             Session::forget(['login_role', 'otp.phone', 'otp.code', 'otp.expires_at']);
-            return redirect()->route('sign-in.index')->withErrors(['otp' => 'انتهت صلاحية الرمز. أعد إرسال الرمز.']);
+            return redirect()->route('sign-in.index')->withErrors(['otp' => __('messages.otp_expired_resend')]);
         }
 
         if ($request->input('otp') !== $code) {
-            return back()->withErrors(['otp' => 'رمز التحقق غير صحيح.']);
+            return back()->withErrors(['otp' => __('messages.otp_invalid')]);
         }
 
         $company = Company::whereIn('phone', $this->phoneVariants($phone))->first();
         if (!$company) {
             Session::forget(['login_role', 'otp.phone', 'otp.code', 'otp.expires_at']);
-            return redirect()->route('sign-in.index')->withErrors(['otp' => 'لا توجد شركة بهذا الرقم.']);
+            return redirect()->route('sign-in.index')->withErrors(['otp' => __('messages.no_company_for_phone')]);
         }
 
         Auth::guard('company')->login($company, true);
         Session::forget(['login_role', 'otp.phone', 'otp.code', 'otp.expires_at']);
         Session::regenerate();
 
-        return redirect()->route('company.dashboard')->with('success', 'تم تسجيل الدخول بنجاح.');
+        return redirect()->route('company.dashboard')->with('success', __('messages.company_login_success'));
     }
 
     private function verifyDriver(Request $request): \Illuminate\Http\RedirectResponse
@@ -302,18 +365,18 @@ class UnifiedAuthController extends Controller
 
         if (!$phone || !$code || time() > $expires) {
             Session::forget(['login_role', 'driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
-            return redirect()->route('sign-in.index')->withErrors(['otp' => 'انتهت صلاحية الرمز. أعد إرسال الرمز.']);
+            return redirect()->route('sign-in.index')->withErrors(['otp' => __('messages.otp_expired_resend')]);
         }
 
         if ($request->input('otp') !== $code) {
-            return back()->withErrors(['otp' => 'رمز التحقق غير صحيح.']);
+            return back()->withErrors(['otp' => __('messages.otp_invalid')]);
         }
 
         Session::forget(['login_role', 'driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
         Session::put('driver_phone', $phone);
         Session::regenerate();
 
-        return redirect()->route('driver.dashboard')->with('success', 'تم تسجيل الدخول.');
+        return redirect()->route('driver.dashboard')->with('success', __('messages.driver_login_success'));
     }
 
     private function normalizePhone(string $phone): string

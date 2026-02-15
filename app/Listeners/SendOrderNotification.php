@@ -24,7 +24,7 @@ class SendOrderNotification
     public function handle(OrderCreated $event): void
     {
         // Only notify admin when order is pending (ready for assignment), not when driver just requested
-        if ($event->order->status === 'requested') {
+        if ($event->order->status === 'pending_company') {
             return;
         }
 

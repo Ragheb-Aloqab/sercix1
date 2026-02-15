@@ -56,6 +56,7 @@ return [
     'actions' => 'Actions',
     'apply' => 'Apply',
     'all' => 'All',
+    'optional' => 'optional',
     'done' => 'Done',
     'not_done' => 'Not done',
     'paid' => 'Paid',
@@ -66,4 +67,16 @@ return [
     'payment_failed' => 'Payment failed',
     'admin' => 'Admin',
     'technician' => 'Technician',
+
+    // Order statuses
+    'status_pending_company' => 'Pending company',
+    'status_approved_by_company' => 'Approved by company',
+    'status_pending_assignment' => 'Pending assignment',
+    'status_assigned_to_technician' => 'Assigned to technician',
+    'status_in_progress' => 'In progress',
+    'status_completed' => 'Completed',
+    'status_cancelled' => 'Cancelled',
+    'status_pending' => 'Pending',
+    'status_rejected' => 'Rejected',
+    'km' => 'km',
 ];

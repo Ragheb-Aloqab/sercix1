@@ -4,41 +4,32 @@ namespace App\Support;
 
 final class OrderStatus
 {
-    public const PENDING   = 'pending';
-    public const REQUESTED = 'requested';  // driver submitted, waiting company approval
-    public const ASSIGNED  = 'assigned';
-    public const ON_THE_WAY = 'on_the_way';
+    public const PENDING_COMPANY = 'pending_company';
+    public const APPROVED_BY_COMPANY = 'approved_by_company';
+    public const PENDING_ASSIGNMENT = 'pending_assignment';
+    public const ASSIGNED_TO_TECHNICIAN = 'assigned_to_technician';
     public const IN_PROGRESS = 'in_progress';
     public const COMPLETED = 'completed';
     public const CANCELLED = 'cancelled';
-    public const ON_HOLD = 'on_hold';
-    public const PAID      = 'paid';
 
     public const ALL = [
-        self::PENDING,
-        self::REQUESTED,
-        self::ASSIGNED,
-        self::ON_THE_WAY,
+        self::PENDING_COMPANY,
+        self::APPROVED_BY_COMPANY,
+        self::PENDING_ASSIGNMENT,
+        self::ASSIGNED_TO_TECHNICIAN,
         self::IN_PROGRESS,
         self::COMPLETED,
         self::CANCELLED,
-        self::ON_HOLD,
-        self::PAID,
     ];
 
-    // المسموح به من كل حالة إلى حالات أخرى
     public const TRANSITIONS = [
-        self::PENDING => [self::ASSIGNED, self::CANCELLED],
-        self::REQUESTED => [self::PENDING, self::CANCELLED],
-        self::ASSIGNED => [self::ON_THE_WAY, self::CANCELLED],
-        self::ON_THE_WAY => [self::IN_PROGRESS, self::CANCELLED],
+        self::PENDING_COMPANY => [self::APPROVED_BY_COMPANY, self::CANCELLED],
+        self::APPROVED_BY_COMPANY => [self::PENDING_ASSIGNMENT, self::ASSIGNED_TO_TECHNICIAN, self::CANCELLED],
+        self::PENDING_ASSIGNMENT => [self::ASSIGNED_TO_TECHNICIAN, self::CANCELLED],
+        self::ASSIGNED_TO_TECHNICIAN => [self::IN_PROGRESS, self::CANCELLED],
         self::IN_PROGRESS => [self::COMPLETED, self::CANCELLED],
-        self::COMPLETED => [self::PAID],
-        self::PAID => [],
-
-        // لو احتجتها
+        self::COMPLETED => [],
         self::CANCELLED => [],
-        self::ON_HOLD => [],
     ];
 
     public static function canTransition(?string $from, string $to): bool

@@ -93,7 +93,7 @@ class InvoicesController extends Controller
             report($e);
             return redirect()
                 ->route('company.invoices.show', $invoice->id)
-                ->with('error', 'حدث خطأ أثناء إنشاء PDF.');
+                ->with('error', __('messages.invoice_pdf_error'));
         }
 
         $filename = 'invoice-' . ($invoice->invoice_number ?? $invoice->id) . '.pdf';

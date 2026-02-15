@@ -55,4 +55,8 @@ return [
     'total' => 'Total',
     'date' => 'Date',
     'no_invoices_yet' => 'No invoices yet. Invoices are auto-created when an order is completed.',
+    'vehicles' => 'Vehicles',
+    'fuel_report' => 'Fuel report',
+    'fuel_report_desc' => 'Fuel costs and vehicle consumption',
+    'view' => 'View',
 ];

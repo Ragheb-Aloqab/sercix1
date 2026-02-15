@@ -19,6 +19,8 @@ return [
     'send_otp' => 'Send verification code',
     'create_company_account' => 'Create company account',
     'email_not_found' => 'No account found with this email.',
+    'company_no_phone' => 'No phone number linked to this account. Please contact support.',
+    'staff_no_phone' => 'No phone number linked to this admin/technician account. Please contact support.',
     'email_not_staff' => 'This email is not registered as admin or technician.',
     'phone_not_found' => 'This phone number is not registered as company or driver. Create a company account below.',
     'session_expired' => 'Session expired. Please enter your email or phone again.',

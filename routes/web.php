@@ -13,7 +13,7 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-Route::get('/', \App\Http\Controllers\IndexController::class);
+Route::get('/', \App\Http\Controllers\IndexController::class)->name('index');
 
 Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('set-locale');
 
@@ -58,6 +58,8 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DriverController::class, 'dashboard'])->name('dashboard');
         Route::get('/request', [\App\Http\Controllers\DriverController::class, 'createRequest'])->name('request.create');
         Route::post('/request', [\App\Http\Controllers\DriverController::class, 'storeRequest'])->name('request.store');
+        Route::get('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'createFuelRefill'])->name('fuel-refill.create');
+        Route::post('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'storeFuelRefill'])->name('fuel-refill.store');
     });
 });
 
@@ -96,13 +98,17 @@ Route::redirect('/admin', 'dashboard');
 | Profile (web guard)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:web'])->group(function () {
+Route::middleware(['auth:web', 'active'])->group(function () {
     Route::view('/profile', 'profile')->name('profile');
 });
 Route::get('/dashboard', function () {
 
     if (Auth::guard('company')->check()) {
         return redirect()->route('company.dashboard');
+    }
+
+    if (session()->has('driver_phone')) {
+        return redirect()->route('driver.dashboard');
     }
 
     if (Auth::check()) {

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Company\DashboardController;
 use App\Http\Controllers\Company\OrdersController;
 use App\Http\Controllers\Company\VehiclesController;
+use App\Http\Controllers\Company\FuelController;
 use App\Http\Controllers\Company\InvoicesController;
 use App\Http\Controllers\Company\PaymentsController;
 use App\Http\Controllers\Company\ServicesController;
@@ -86,6 +87,9 @@ Route::middleware(['auth:company', 'guard.for.gate:company'])
         // Vehicles
         Route::get('/vehicles', [VehiclesController::class, 'index'])
             ->name('vehicles.index');
+
+        Route::get('/fuel', [FuelController::class, 'index'])
+            ->name('fuel.index');
 
         Route::get('/vehicles/create', [VehiclesController::class, 'create'])
             ->name('vehicles.create');
