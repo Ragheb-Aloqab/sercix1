@@ -11,6 +11,8 @@ class TapPayments extends Component
      * Tap (Online)
      * ------------------------ */
     public string $tap_api_key = '';
+    public string $tap_publishable_key = '';
+    public string $tap_merchant_id = '';
     public string $tap_webhook_secret = '';
     public string $tap_mode = 'sandbox'; // sandbox|live
     public bool $enable_online_payment = true;
@@ -32,6 +34,8 @@ class TapPayments extends Component
     {
         // Tap
         $this->tap_api_key = Setting::get('tap_api_key', '');
+        $this->tap_publishable_key = Setting::get('tap_publishable_key', '');
+        $this->tap_merchant_id = Setting::get('tap_merchant_id', '599424');
         $this->tap_webhook_secret = Setting::get('tap_webhook_secret', '');
         $this->tap_mode = Setting::get('tap_mode', 'sandbox');
         $this->enable_online_payment = (bool) Setting::get('enable_online_payment', true);
@@ -51,6 +55,8 @@ class TapPayments extends Component
         $data = $this->validate([
             // Tap
             'tap_api_key' => ['nullable', 'string', 'max:500'],
+            'tap_publishable_key' => ['nullable', 'string', 'max:500'],
+            'tap_merchant_id' => ['nullable', 'string', 'max:100'],
             'tap_webhook_secret' => ['nullable', 'string', 'max:500'],
             'tap_mode' => ['required', 'in:sandbox,live'],
             'enable_online_payment' => ['boolean'],
@@ -67,6 +73,8 @@ class TapPayments extends Component
 
         // Tap
         Setting::put('tap_api_key', $data['tap_api_key']);
+        Setting::put('tap_publishable_key', $data['tap_publishable_key']);
+        Setting::put('tap_merchant_id', $data['tap_merchant_id'] ?? '599424');
         Setting::put('tap_webhook_secret', $data['tap_webhook_secret']);
         Setting::put('tap_mode', $data['tap_mode']);
         Setting::put('enable_online_payment', $data['enable_online_payment']);

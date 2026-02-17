@@ -50,9 +50,13 @@ return [
     // Payment
     'payment_recorded' => 'Payment recorded successfully.',
     'payment_note_admin' => 'Payment recorded from admin panel.',
+    'payment_note_tap' => 'Payment completed via Tap.',
     'payment_already_paid' => 'This payment is already paid.',
     'tap_not_implemented' => 'Tap integration is not yet implemented in this controller.',
     'receipt_uploaded' => 'Receipt uploaded successfully. It will be reviewed by admin.',
+    'payment_not_found' => 'Payment not found.',
+    'payment_success' => 'Payment completed successfully.',
+    'payment_pending_or_failed' => 'Payment is pending or was not completed. Check status below.',
 
     // Branches
     'branch_added' => 'Branch added successfully.',

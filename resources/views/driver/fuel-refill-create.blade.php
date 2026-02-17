@@ -75,7 +75,7 @@
             <div>
                 <label class="text-sm font-bold text-slate-700">{{ __('fuel.receipt_image') }} ({{ __('common.optional') }})</label>
                 <p class="text-xs text-slate-500 mt-1 mb-2">{{ __('fuel.receipt_hint') }}</p>
-                <input type="file" name="receipt" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-amber-100 file:me-2 file:rounded-xl file:border-0 file:bg-amber-100 file:px-4 file:py-2 file:font-bold file:text-amber-800" />
+                <input type="file" name="receipt" accept="image/*" capture="environment" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-amber-100 file:me-2 file:rounded-xl file:border-0 file:bg-amber-100 file:px-4 file:py-2 file:font-bold file:text-amber-800" />
                 @error('receipt')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
             </div>
             <div class="flex gap-3 pt-4">

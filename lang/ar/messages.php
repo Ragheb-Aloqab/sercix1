@@ -50,9 +50,13 @@ return [
     // Payment
     'payment_recorded' => 'تم تسجيل بيانات الدفع.',
     'payment_note_admin' => 'تم تسجيل الدفع من لوحة الأدمن.',
+    'payment_note_tap' => 'تم إتمام الدفع عبر Tap.',
     'payment_already_paid' => 'هذه الدفعة مدفوعة بالفعل.',
     'tap_not_implemented' => 'ربط Tap لم يُنفّذ بعد في هذا الكنترولر.',
     'receipt_uploaded' => 'تم رفع الإيصال بنجاح وسيتم مراجعته من الإدارة.',
+    'payment_not_found' => 'الدفعة غير موجودة.',
+    'payment_success' => 'تم إتمام الدفع بنجاح.',
+    'payment_pending_or_failed' => 'الدفع قيد الانتظار أو لم يكتمل. تحقق من الحالة أدناه.',
 
     // Branches
     'branch_added' => 'تم إضافة الفرع بنجاح',

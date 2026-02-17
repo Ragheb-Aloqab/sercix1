@@ -122,12 +122,33 @@
                 {{-- API Key --}}
                 <div>
                     <label class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Tap API Key
+                        Tap Secret API Key
                         <span class="text-xs text-slate-500">(حسب وضع التشغيل)</span>
                     </label>
                     <input wire:model.defer="tap_api_key" type="text" placeholder="sk_test_xxx أو sk_live_xxx"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition" />
                     @error('tap_api_key')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Publishable Key (for embedded card form) --}}
+                <div>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Publishable Key</label>
+                    <input wire:model.defer="tap_publishable_key" type="text" placeholder="pk_test_xxx أو pk_live_xxx"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition" />
+                    @error('tap_publishable_key')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-xs text-slate-500">مطلوب لعرض نموذج إدخال البطاقة في الصفحة.</p>
+                </div>
+
+                {{-- Merchant ID --}}
+                <div>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Merchant ID</label>
+                    <input wire:model.defer="tap_merchant_id" type="text" placeholder="599424"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 bg-transparent focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition" />
+                    @error('tap_merchant_id')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -148,10 +169,12 @@
                         <li>في وضع <b>Sandbox</b> يتم استخدام مفاتيح الاختبار فقط.</li>
                         <li>في وضع <b>Live</b> تأكد من تفعيل Webhook داخل لوحة Tap.</li>
                         <li>Webhook Secret للتحقق من صحة الإشعارات القادمة من Tap.</li>
+                        <li>Webhook URL: <code class="bg-slate-100 dark:bg-slate-800 px-1 rounded">{{ url('/payments/tap/webhook') }}</code> — Tap لا يرسل إلى localhost، استخدم ngrok أو استضافة فعلية للاختبار.</li>
                     </ul>
                 </div>
             </div>
         </div>
+        
 
         {{-- Bank Settings --}}
         <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 sm:p-5">

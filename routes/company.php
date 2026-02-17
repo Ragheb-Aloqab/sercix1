@@ -72,6 +72,10 @@ Route::middleware(['auth:company', 'guard.for.gate:company'])
             ->name('payments.tap')
             ->whereNumber('payment');
 
+        Route::post('/payments/{payment}/tap-charge', [PaymentsController::class, 'chargeWithToken'])
+            ->name('payments.tap.charge')
+            ->whereNumber('payment');
+
         Route::post('/payments/{payment}/cash', [PaymentsController::class, 'payCash'])
             ->name('payments.cash')
             ->whereNumber('payment');

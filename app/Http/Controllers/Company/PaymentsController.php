@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\BankAccount;
 use App\Models\Setting;
+use App\Services\TapService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
@@ -59,7 +60,10 @@ class PaymentsController extends Controller
             ? BankAccount::query()->where('is_active', true)->orderByDesc('is_default')->get()
             : collect();
 
-        return view('company.payments.show', compact('payment', 'enabled', 'bankAccounts'));
+        $tapPublishableKey = env('TAP_PUBLISHABLE_KEY') ?? Setting::get('tap_publishable_key', '');
+        $tapMerchantId = env('TAP_MERCHANT_ID') ?? Setting::get('tap_merchant_id', '599424');
+
+        return view('company.payments.show', compact('payment', 'enabled', 'bankAccounts', 'tapPublishableKey', 'tapMerchantId'));
     }
 
 
@@ -71,19 +75,50 @@ class PaymentsController extends Controller
         if ($payment->status === 'paid') {
             return back()->with('error', __('messages.payment_already_paid'));
         }
-       
-        $order = Order::findOrFail($payment->order_id);
-        
-        // 3. إرسال إشعار للمدير عند وصول مبلغ معين
-        $admin = User::where('role', 'admin')->first();
-      
-        if ($admin /*&& $order->paid_amount >= 100*/) {
-            $admin->notify(
-                new PaymentPaidNotification($payment)
-            );
+
+        if (!Setting::get('enable_online_payment', true)) {
+            return back()->with('error', __('messages.tap_not_implemented'));
         }
-        
-        return back()->with('error', __('messages.tap_not_implemented'));
+
+        $tap = new TapService();
+        $result = $tap->createCharge($payment);
+
+        if ($result['success']) {
+            return redirect()->away($result['redirect_url']);
+        }
+
+        return back()->with('error', $result['error'] ?? __('messages.tap_not_implemented'));
+    }
+
+    public function chargeWithToken(Request $request, Payment $payment)
+    {
+        $this->authorize('update', $payment);
+
+        if ($payment->status === 'paid') {
+            return response()->json(['success' => false, 'error' => __('messages.payment_already_paid')], 400);
+        }
+
+        if (!Setting::get('enable_online_payment', true)) {
+            return response()->json(['success' => false, 'error' => __('messages.tap_not_implemented')], 400);
+        }
+
+        $tokenId = $request->input('tap_token');
+        if (empty($tokenId) || !str_starts_with($tokenId, 'tok_')) {
+            return response()->json(['success' => false, 'error' => 'Invalid token.'], 400);
+        }
+
+        $tap = new TapService();
+        $result = $tap->createChargeWithToken($payment, $tokenId);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'redirect_url' => $result['redirect_url'],
+                'charge_id' => $result['charge_id'] ?? null,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'error' => $result['error'] ?? 'Payment failed.'], 400);
     }
 
     public function uploadBankReceipt(Request $request, Payment $payment)

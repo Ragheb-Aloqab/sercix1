@@ -19,6 +19,14 @@ Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('
 
 /*
 |--------------------------------------------------------------------------
+| Tap Payment (webhook + redirect - public, no auth)
+|--------------------------------------------------------------------------
+*/
+Route::post('/payments/tap/webhook', \App\Http\Controllers\TapWebhookController::class)->name('payments.tap.webhook');
+Route::get('/payments/tap/redirect', \App\Http\Controllers\TapRedirectController::class)->name('payments.tap.redirect');
+
+/*
+|--------------------------------------------------------------------------
 | Unified Sign-In (Company + Driver) — one form, redirect by role
 |--------------------------------------------------------------------------
 */

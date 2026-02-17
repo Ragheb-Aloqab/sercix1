@@ -23,6 +23,12 @@
         </div>
     @endif
 
+    @if (session('info'))
+        <div class="p-3 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 font-semibold text-sm">
+            {{ session('info') }}
+        </div>
+    @endif
+
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
@@ -76,7 +82,7 @@
 
             @if ($mode === 'online')
                 @if (!empty($enabled['tap']))
-                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="font-black">دفع اونلاين</p>
@@ -84,12 +90,14 @@
                             </div>
                         </div>
 
+                        {{-- Tap hosted page (works reliably — Tap's CDN for embedded form often fails) --}}
                         <form method="POST" action="{{ route('company.payments.tap', $payment) }}">
                             @csrf
-                            <button class="w-full px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black">
+                            <button type="submit" class="w-full px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black">
                                 دفع الان
                             </button>
                         </form>
+                        <p class="text-xs text-slate-500 mt-2">ستنتقل إلى صفحة Tap الآمنة لإدخال بيانات البطاقة.</p>
                     </div>
                 @else
                     <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 font-semibold text-sm">

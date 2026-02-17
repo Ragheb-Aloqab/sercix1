@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'payments/tap/webhook',
+        ]);
         $middleware->web(append: [\App\Http\Middleware\SetLocaleFromSession::class]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

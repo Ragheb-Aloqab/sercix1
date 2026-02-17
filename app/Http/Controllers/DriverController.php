@@ -138,7 +138,7 @@ class DriverController extends Controller
             'odometer_km' => ['nullable', 'integer', 'min:0', 'max:9999999'],
             'fuel_type' => ['nullable', 'string', 'in:petrol,diesel,premium'],
             'notes' => ['nullable', 'string', 'max:500'],
-            'receipt' => ['nullable', 'image', 'max:5120'], // 5MB max
+            'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max
         ]);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
