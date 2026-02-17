@@ -28,6 +28,7 @@ class DemoSeeder extends Seeder
         User::factory()->admin()->create([
             'name' => 'Admin',
             'email' => 'admin@servx.test',
+            'phone'=>'+966563223963',
             'password' => bcrypt('password'),
         ]);
 
