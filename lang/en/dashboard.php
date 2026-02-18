@@ -44,6 +44,8 @@ return [
     'tasks' => 'Tasks',
     'tasks_desc' => 'Assigned orders',
     'logout' => 'Log out',
+    'main_page' => 'Main page',
+    'main_page_desc' => 'Back to website',
     'admin' => 'Admin',
     'technician' => 'Technician',
     'company' => 'Company',

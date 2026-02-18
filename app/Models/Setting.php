@@ -36,5 +36,8 @@ class Setting extends Model
             ['value' => is_bool($value) ? (int) $value : $value]
         );
         Cache::forget("setting.{$key}");
+        if ($key === 'site_logo_path') {
+            Cache::forget('site_logo_url');
+        }
     }
 }

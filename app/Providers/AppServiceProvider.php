@@ -32,8 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Order::observe(OrderObserver::class);
 
         // Site branding (name + logo) — cached, scoped to views that need it
+        // Note: 'index' excluded — IndexController passes fresh data directly
         $brandingViews = [
-            'index', 'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*',
+            'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*',
             'livewire.dashboard.*', 'components.*',
         ];
         View::composer($brandingViews, function ($view) {
@@ -55,9 +56,15 @@ class AppServiceProvider extends ServiceProvider
     {
         try {
             $path = Setting::get('site_logo_path');
-            if ($path) {
-                return asset('storage/' . $path);
+            if (!$path) {
+                return null;
             }
+            $url = asset('storage/' . $path);
+            $fullPath = storage_path('app/public/' . $path);
+            if (file_exists($fullPath)) {
+                $url .= '?v=' . filemtime($fullPath);
+            }
+            return $url;
         } catch (\Throwable $e) {
             // Table may not exist in tests
         }

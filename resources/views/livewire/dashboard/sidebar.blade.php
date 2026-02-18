@@ -43,9 +43,9 @@
         };
     @endphp
 
-    {{-- Brand (Fixed Top) --}}
+    {{-- Brand (Fixed Top) — click to go to main page --}}
     <div class="px-6 py-6 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-3">
+        <a href="{{ route('index') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
             @if(($siteLogoUrl ?? null))
                 <img src="{{ $siteLogoUrl }}" alt="" class="w-11 h-11 rounded-2xl object-cover flex-shrink-0">
             @else
@@ -69,7 +69,7 @@
                 </p>
                 <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.dashboard_v1') }}</p>
             </div>
-        </div>
+        </a>
 
         <button id="closeSidebar"
             class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl
@@ -105,8 +105,17 @@
         <nav class="px-4 pb-6">
             <p class="px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">{{ __('dashboard.menu') }}</p>
 
+            {{-- Main page --}}
+            <a href="{{ route('index') }}" class="{{ $link }}">
+                <span class="{{ $iconWrap }}"><i class="fa-solid fa-house"></i></span>
+                <div class="flex-1">
+                    <p class="font-bold leading-5">{{ __('dashboard.main_page') }}</p>
+                    <p class="text-xs opacity-80">{{ __('dashboard.main_page_desc') }}</p>
+                </div>
+            </a>
+
             {{-- Overview --}}
-            <a href="{{ $overviewHref }}" class="{{ $overviewActive ? $active : $link }}">
+            <a href="{{ $overviewHref }}" class="mt-2 {{ $overviewActive ? $active : $link }}">
                 <span class="{{ $overviewActive ? $iconWrapActive : $iconWrap }}">
                     <i class="fa-solid fa-chart-line"></i>
                 </span>

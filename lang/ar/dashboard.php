@@ -44,6 +44,8 @@ return [
     'tasks' => 'المهام',
     'tasks_desc' => 'الطلبات الموكلة',
     'logout' => 'خروج',
+    'main_page' => 'الصفحة الرئيسية',
+    'main_page_desc' => 'العودة للموقع',
     'admin' => 'Admin',
     'technician' => 'Technician',
     'company' => 'Company',
