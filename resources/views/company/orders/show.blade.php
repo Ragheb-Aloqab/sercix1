@@ -5,5 +5,5 @@
 @section('subtitle', 'الطلب والفاتورة والمدفوعات')
 
 @section('content')
-    <livewire:company.order-show :order="$order" />
+    <livewire:company.order-show :order="$order" :key="'order-'.$order->id" />
 @endsection

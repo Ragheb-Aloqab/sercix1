@@ -1,0 +1,133 @@
+@extends('admin.layouts.app')
+
+@section('title', __('reports.service_report') . ' | ' . ($siteName ?? 'SERV.X'))
+@section('page_title', __('reports.service_report'))
+@section('subtitle', __('reports.service_report_subtitle'))
+
+@section('content')
+    <div class="space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <a href="{{ route('company.vehicles.index') }}"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-arrow-right"></i> {{ __('fuel.back_to_vehicles') }}
+            </a>
+            <div class="flex gap-2">
+                <a href="{{ route('company.fuel.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-amber-200 dark:border-amber-800 font-bold hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                    <i class="fa-solid fa-gas-pump"></i> {{ __('reports.fuel_report') }}
+                </a>
+                <a href="{{ route('company.reports.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-chart-pie"></i> {{ __('reports.all_reports') }}
+                </a>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ route('company.reports.service') }}" class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div>
+                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.from_date') }}</label>
+                    <input type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent" />
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.to_date') }}</label>
+                    <input type="date" name="to" value="{{ $to->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent" />
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.vehicle') }}</label>
+                    <select name="vehicle_id" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent">
+                        <option value="">{{ __('fuel.all_vehicles') }}</option>
+                        @foreach ($vehicles as $v)
+                            <option value="{{ $v->id }}" @selected($vehicleId == $v->id)>{{ $v->plate_number }} — {{ trim(($v->make ?? '') . ' ' . ($v->model ?? '')) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+                        <i class="fa-solid fa-filter me-2"></i>{{ __('fuel.apply_filter') }}
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        @php
+            $totalCost = (float) ($totals['total_cost'] ?? 0);
+            $orderCount = (int) ($totals['order_count'] ?? 0);
+        @endphp
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4">
+                <p class="text-emerald-700 dark:text-emerald-400 text-sm">{{ __('reports.total_service_cost') }}</p>
+                <p class="text-2xl font-black mt-1 text-emerald-700 dark:text-emerald-300">{{ number_format($totalCost, 2) }} {{ __('company.sar') }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
+                <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('reports.order_count') }}</p>
+                <p class="text-2xl font-black mt-1">{{ $orderCount }}</p>
+            </div>
+        </div>
+
+        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden">
+            <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
+                <h2 class="text-lg font-black">{{ __('reports.services_log') }}</h2>
+            </div>
+            <div class="p-5">
+                @if ($orders->count())
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-700">
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.date') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold">#</th>
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.vehicle') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('reports.services') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('company.cost') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('orders.status_label') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.view') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($orders as $order)
+                                    @php
+                                        $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
+                                        $firstService = $order->orderServices->first();
+                                        $serviceName = $firstService?->display_name ?? '-';
+                                    @endphp
+                                    <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="py-3 px-2">{{ $order->created_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                        <td class="py-3 px-2 font-mono">{{ $order->id }}</td>
+                                        <td class="py-3 px-2">
+                                            @if ($order->vehicle)
+                                                <a href="{{ route('company.vehicles.show', $order->vehicle) }}" class="text-emerald-600 dark:text-emerald-400 hover:underline">
+                                                    {{ $order->vehicle->plate_number }} — {{ trim(($order->vehicle->make ?? '') . ' ' . ($order->vehicle->model ?? '')) }}
+                                                </a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="py-3 px-2">{{ $serviceName }}{{ $order->orderServices->count() > 1 ? ' +' . ($order->orderServices->count() - 1) : '' }}</td>
+                                        <td class="py-3 px-2 font-bold">{{ number_format((float) $order->total_amount, 2) }} {{ __('company.sar') }}</td>
+                                        <td class="py-3 px-2">
+                                            <span class="px-2 py-1 rounded-xl text-xs font-semibold
+                                                @if($order->status === 'pending_approval') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
+                                                @elseif($order->status === 'rejected') bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400
+                                                @elseif($order->status === 'completed') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
+                                                @else bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 @endif">{{ $statusLabel }}</span>
+                                        </td>
+                                        <td class="py-3 px-2">
+                                            <a href="{{ route('company.orders.show', $order) }}" class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
+                                                <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $orders->links() }}</div>
+                @else
+                    <p class="text-slate-500 dark:text-slate-400">{{ __('reports.no_services') }}</p>
+                @endif
+            </div>
+        </div>
+    </div>
+@endsection

@@ -8,10 +8,15 @@ use App\Notifications\OrderCancelRequested;
 use App\Support\OrderStatus;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class OrderShow extends Component
 {
     public Order $order;
+
+    public string $rejection_reason = '';
+
+    public bool $showRejectModal = false;
 
     public function mount(Order $order): void
     {
@@ -21,20 +26,94 @@ class OrderShow extends Component
             'payments',
             'invoice',
             'services',
+            'orderServices',
             'vehicle',
         ]);
     }
 
-    /** Approve driver's service request so admin gets notified and can assign technician */
+    /** Approve driver's service request */
     public function approveRequest(): void
     {
+        $this->order->refresh();
+        $company = auth('company')->user();
+
+        if ((int) $this->order->company_id !== (int) $company->id) {
+            abort(403);
+        }
+        if ($this->order->status !== OrderStatus::PENDING_APPROVAL) {
+            session()->flash('error', __('orders.approve_only_pending'));
+            return;
+        }
+        if (!$this->order->hasQuotationInvoice()) {
+            session()->flash('error', __('orders.quotation_required_for_approval'));
+            return;
+        }
+
+        $from = $this->order->status;
+        $this->order->update(['status' => OrderStatus::APPROVED, 'rejection_reason' => null]);
+        $this->order->statusLogs()->create([
+            'from_status' => $from,
+            'to_status' => OrderStatus::APPROVED,
+            'note' => 'Company approved',
+        ]);
+        $this->order->refresh();
+        session()->flash('success', 'تمت الموافقة على الطلب. يمكن للسائق تنفيذ الخدمة الآن.');
+    }
+
+    #[On('open-reject-modal')]
+    public function openRejectModal(): void
+    {
+        $this->showRejectModal = true;
+    }
+
+    public function closeRejectModal(): void
+    {
+        $this->showRejectModal = false;
+        $this->rejection_reason = '';
+    }
+
+    /** Reject driver's service request */
+    public function rejectRequest(): void
+    {
+        $this->validate(['rejection_reason' => ['nullable', 'string', 'max:500']]);
+
         $company = auth('company')->user();
         abort_unless((int) $this->order->company_id === (int) $company->id, 403);
-        abort_unless($this->order->status === OrderStatus::PENDING_COMPANY, 403, 'هذا الطلب غير قيد الموافقة.');
+        abort_unless($this->order->status === OrderStatus::PENDING_APPROVAL, 403, 'هذا الطلب غير قيد الموافقة.');
 
-        $this->order->update(['status' => OrderStatus::APPROVED_BY_COMPANY]);
+        $from = $this->order->status;
+        $this->order->update([
+            'status' => OrderStatus::REJECTED,
+            'rejection_reason' => $this->rejection_reason ?: null,
+        ]);
+        $this->order->statusLogs()->create([
+            'from_status' => $from,
+            'to_status' => OrderStatus::REJECTED,
+            'note' => $this->rejection_reason ?: 'Company rejected',
+        ]);
         $this->order->refresh();
-        session()->flash('success', 'تمت الموافقة على الطلب. تم إخطار الإدارة لتعيين فني.');
+        $this->showRejectModal = false;
+        $this->rejection_reason = '';
+        session()->flash('success', 'تم رفض الطلب.');
+    }
+
+    /** Confirm completion after driver uploaded invoice */
+    public function confirmCompletion(): void
+    {
+        $this->order->refresh();
+        $company = auth('company')->user();
+        abort_unless((int) $this->order->company_id === (int) $company->id, 403);
+        abort_unless($this->order->status === OrderStatus::PENDING_CONFIRMATION, 403, 'الطلب غير قيد التأكيد.');
+
+        $from = $this->order->status;
+        $this->order->update(['status' => OrderStatus::COMPLETED]);
+        $this->order->statusLogs()->create([
+            'from_status' => $from,
+            'to_status' => OrderStatus::COMPLETED,
+            'note' => 'Company confirmed completion',
+        ]);
+        $this->order->refresh();
+        session()->flash('success', 'تم تأكيد إكمال الطلب.');
     }
 
     public function cancelOrder(): void
@@ -42,7 +121,7 @@ class OrderShow extends Component
         $company = auth('company')->user();
         abort_unless((int) $this->order->company_id === (int) $company->id, 403);
 
-        if ($this->order->technician_id) {
+        if ($this->order->technician_id && !in_array($this->order->status, [OrderStatus::PENDING_APPROVAL, OrderStatus::APPROVED], true)) {
             session()->flash('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');
             return;
         }

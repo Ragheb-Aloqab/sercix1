@@ -79,12 +79,12 @@
                 $totalPaid += (float) ($o->payments->sum('amount'));
             }
             $statusLabels = [
-                'pending_company' => __('common.status_pending_company'),
-                'approved_by_company' => __('common.status_approved_by_company'),
-                'pending_assignment' => __('common.status_pending_assignment'),
-                'assigned_to_technician' => __('common.status_assigned_to_technician'),
+                'pending_approval' => __('common.status_pending_approval'),
+                'approved' => __('common.status_approved'),
                 'in_progress' => __('common.status_in_progress'),
+                'pending_confirmation' => __('common.status_pending_confirmation'),
                 'completed' => __('common.status_completed'),
+                'rejected' => __('common.status_rejected'),
                 'cancelled' => __('common.status_cancelled'),
             ];
         @endphp
@@ -189,11 +189,10 @@
                                 $orderPaid = (float) ($order->payments->sum('amount'));
                                 $orderStatusClass = match($order->status ?? '') {
                                     'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'cancelled' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                    'pending_company' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    'approved_by_company' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'pending_assignment' => 'bg-sky-50 text-sky-700 border-sky-200',
-                                    'assigned_to_technician' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    'cancelled', 'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                    'pending_approval' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                    'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'pending_confirmation' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                     'in_progress' => 'bg-amber-50 text-amber-700 border-amber-200',
                                     default => 'bg-slate-100 text-slate-700 border-slate-200',
                                 };

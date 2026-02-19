@@ -15,14 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payments/tap/webhook',
         ]);
+        $middleware->redirectGuestsTo(fn () => route('dashboard'));
         $middleware->web(append: [\App\Http\Middleware\SetLocaleFromSession::class]);
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
-            'auth.any' => \App\Http\Middleware\AuthenticateAny::class,
-            'driver.session' => \App\Http\Middleware\EnsureDriverSession::class,
-            'guard.for.gate' => \App\Http\Middleware\SetAuthGuardForGate::class,
+            'technician' => \App\Http\Middleware\EnsureTechnician::class,
+            'company' => \App\Http\Middleware\EnsureCompany::class,
+            'driver' => \App\Http\Middleware\EnsureDriverSession::class,
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

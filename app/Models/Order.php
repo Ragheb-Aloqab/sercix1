@@ -19,6 +19,7 @@ class Order extends Model
         'lat',
         'lng',
         'notes',
+        'rejection_reason',
         'requested_by_name',
         'driver_phone',
     ];
@@ -66,7 +67,7 @@ class Order extends Model
     public function services()
     {
         return $this->belongsToMany(\App\Models\Service::class, 'order_services')
-            ->withPivot(['qty', 'unit_price', 'total_price'])
+            ->withPivot(['qty', 'unit_price', 'total_price', 'custom_service_name', 'custom_service_description'])
             ->withTimestamps();
     }
     public function attachments()
@@ -89,14 +90,38 @@ class Order extends Model
      */
     public function getTotalAmountAttribute(): float
     {
-        $items = $this->services ?? collect();
+        $items = $this->relationLoaded('orderServices') ? $this->orderServices : $this->orderServices()->get();
+        if ($items->isEmpty() && $this->relationLoaded('services')) {
+            $items = $this->services;
+        }
         if ($items->isEmpty()) {
             return 0.0;
         }
         return (float) $items->sum(function ($s) {
-            $qty  = (float) ($s->pivot->qty ?? 0);
-            $unit = (float) ($s->pivot->unit_price ?? 0) ?: (float) ($s->base_price ?? 0);
-            return (float) ($s->pivot->total_price ?: ($qty * $unit));
+            $qty = (float) ($s->qty ?? $s->pivot->qty ?? 0);
+            $unit = (float) ($s->unit_price ?? $s->pivot->unit_price ?? 0) ?: (float) ($s->base_price ?? 0);
+            return (float) ($s->total_price ?? $s->pivot->total_price ?? ($qty * $unit));
         });
+    }
+
+    public function orderServices()
+    {
+        return $this->hasMany(OrderService::class);
+    }
+
+    public function driverInvoice()
+    {
+        return $this->hasOne(Attachment::class)->where('type', 'driver_invoice');
+    }
+
+    /** Quotation invoice uploaded by driver at request submission (required for company approval) */
+    public function quotationInvoice()
+    {
+        return $this->hasOne(Attachment::class)->where('type', 'quotation_invoice');
+    }
+
+    public function hasQuotationInvoice(): bool
+    {
+        return $this->quotationInvoice()->exists();
     }
 }

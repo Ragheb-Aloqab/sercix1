@@ -7,13 +7,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureDriverSession
+class EnsureCompany
 {
+    /**
+     * Handle an incoming request.
+     * Ensures user is authenticated via company guard, active, and sets auth for Gate/Policy checks.
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->session()->has('driver_phone')) {
+        if (!Auth::guard('company')->check()) {
             return redirect()->to($this->dashboardForCurrentAuth());
         }
+
+        $company = Auth::guard('company')->user();
+
+        if (($company->status ?? 'active') !== 'active') {
+            Auth::guard('company')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('sign-in.index')->with('error', __('messages.account_suspended'));
+        }
+
+        Auth::shouldUse('company');
+
         return $next($request);
     }
 
@@ -21,6 +37,9 @@ class EnsureDriverSession
     {
         if (Auth::guard('company')->check()) {
             return route('company.dashboard');
+        }
+        if (session()->has('driver_phone')) {
+            return route('driver.dashboard');
         }
         if (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();

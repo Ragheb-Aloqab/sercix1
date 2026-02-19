@@ -62,10 +62,13 @@ Route::prefix('driver')->name('driver.')->group(function () {
     Route::post('/verify', [\App\Http\Controllers\DriverAuthController::class, 'verifyOtp'])->name('verify_otp');
     Route::post('/logout', [\App\Http\Controllers\DriverAuthController::class, 'logout'])->name('logout');
 
-    Route::middleware('driver.session')->group(function () {
+    Route::middleware('driver')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DriverController::class, 'dashboard'])->name('dashboard');
         Route::get('/request', [\App\Http\Controllers\DriverController::class, 'createRequest'])->name('request.create');
         Route::post('/request', [\App\Http\Controllers\DriverController::class, 'storeRequest'])->name('request.store');
+        Route::get('/request/{order}', [\App\Http\Controllers\DriverController::class, 'showRequest'])->name('request.show')->whereNumber('order');
+        Route::post('/request/{order}/start', [\App\Http\Controllers\DriverController::class, 'startRequest'])->name('request.start')->whereNumber('order');
+        Route::post('/request/{order}/invoice', [\App\Http\Controllers\DriverController::class, 'uploadInvoice'])->name('request.invoice')->whereNumber('order');
         Route::get('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'createFuelRefill'])->name('fuel-refill.create');
         Route::post('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'storeFuelRefill'])->name('fuel-refill.store');
     });

@@ -89,5 +89,7 @@ return [
         'company_name' => 'Company name',
         'plate_number' => 'Plate number',
         'address' => 'Address',
+        'quotation_invoice' => 'Quotation invoice',
+        'receipt' => 'Receipt image',
     ],
 ];

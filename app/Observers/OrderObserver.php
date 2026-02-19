@@ -18,7 +18,7 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        if ($order->status === 'pending_company') {
+        if ($order->status === 'pending_approval') {
             $company = $order->company;
             if ($company) {
                 $company->notify(new DriverServiceRequestNotification($order));
@@ -34,7 +34,7 @@ class OrderObserver
     public function updated(Order $order): void
     {
         // Company approved request: notify admin
-        if ($order->wasChanged('status') && $order->status === 'approved_by_company' && $order->getOriginal('status') === 'pending_company') {
+        if ($order->wasChanged('status') && $order->status === 'approved' && $order->getOriginal('status') === 'pending_approval') {
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
                 $admin->notify(new NewOrderForAdmin($order));

@@ -3,6 +3,7 @@
 namespace App\Livewire\Company;
 
 use App\Models\Order;
+use App\Support\OrderStatus;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -39,7 +40,7 @@ class OrdersList extends Component
     public function render()
     {
         $orders = $this->baseQuery()->paginate(15)->withQueryString();
-        $statuses = ['pending', 'accepted', 'on_the_way', 'in_progress', 'completed', 'cancelled'];
+        $statuses = OrderStatus::ALL;
 
         return view('livewire.company.orders-list', [
             'orders' => $orders,

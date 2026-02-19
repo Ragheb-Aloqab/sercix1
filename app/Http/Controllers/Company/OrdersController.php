@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Support\OrderStatus;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Service;
@@ -28,6 +29,7 @@ class OrdersController extends Controller
             'payments',
             'invoice',
             'services',
+            'orderServices',
             'vehicle',
         ]);
 
@@ -96,7 +98,7 @@ class OrdersController extends Controller
                 'company_id'        => $company->id,
                 'vehicle_id'        => $data['vehicle_id'],
              
-                'status'            => 'pending_assignment',
+                'status'            => OrderStatus::APPROVED,
                 'notes'             => $data['notes'] ?? null,
             ]);
 

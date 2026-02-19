@@ -89,5 +89,7 @@ return [
         'company_name' => 'اسم الشركة',
         'plate_number' => 'رقم اللوحة',
         'address' => 'العنوان',
+        'quotation_invoice' => 'عرض السعر / الفاتورة',
+        'receipt' => 'صورة الإيصال',
     ],
 ];

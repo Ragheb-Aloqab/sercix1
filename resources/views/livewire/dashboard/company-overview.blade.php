@@ -8,7 +8,7 @@
     $todayOrders = Order::query()->where('company_id', $company->id)->whereDate('created_at', $today)->count();
     $inProgress = Order::query()
         ->where('company_id', $company->id)
-        ->whereIn('status', ['assigned_to_technician', 'in_progress'])
+        ->where('status', 'in_progress')
         ->count();
     $completed = Order::query()->where('company_id', $company->id)->where('status', 'completed')->count();
 

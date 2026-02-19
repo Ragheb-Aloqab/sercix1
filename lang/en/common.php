@@ -69,14 +69,17 @@ return [
     'technician' => 'Technician',
 
     // Order statuses
-    'status_pending_company' => 'Pending company',
-    'status_approved_by_company' => 'Approved by company',
+    'status_pending_approval' => 'Pending approval',
+    'status_approved' => 'Approved',
+    'status_in_progress' => 'In progress',
+    'status_pending_confirmation' => 'Pending confirmation',
+    'status_completed' => 'Completed',
+    'status_rejected' => 'Rejected',
+    'status_cancelled' => 'Cancelled',
+    'status_pending_company' => 'Pending approval',
+    'status_approved_by_company' => 'Approved',
     'status_pending_assignment' => 'Pending assignment',
     'status_assigned_to_technician' => 'Assigned to technician',
-    'status_in_progress' => 'In progress',
-    'status_completed' => 'Completed',
-    'status_cancelled' => 'Cancelled',
     'status_pending' => 'Pending',
-    'status_rejected' => 'Rejected',
     'km' => 'km',
 ];

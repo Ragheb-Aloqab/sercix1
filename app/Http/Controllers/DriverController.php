@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attachment;
 use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Service;
@@ -53,40 +54,55 @@ class DriverController extends Controller
     {
         $phone = Session::get('driver_phone');
         $phoneVariants = $this->driverPhoneVariants($phone);
-        $data = $request->validate([
+
+        $serviceType = $request->input('service_type', 'existing');
+        $rules = [
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
-            'service_ids' => ['required', 'array', 'min:1'],
-            'service_ids.*' => ['integer', 'exists:services,id'],
+            'service_type' => ['required', 'in:existing,custom'],
+            'quotation_invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'], // 10MB, images + PDF
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:500'],
             'notes' => ['nullable', 'string', 'max:1000'],
-        ]);
+        ];
+
+        if ($serviceType === 'existing') {
+            $rules['service_id'] = ['required', 'integer', 'exists:services,id'];
+            $rules['service_price'] = ['required', 'numeric', 'gt:0'];
+        } else {
+            $rules['custom_service_name'] = ['required', 'string', 'max:255'];
+            $rules['custom_service_description'] = ['required', 'string', 'max:1000'];
+            $rules['custom_service_price'] = ['required', 'numeric', 'gt:0'];
+        }
+
+        $data = $request->validate($rules);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
 
-        $company = $vehicle->company;
-        // Allow company-enabled services (with pivot price) or any active global service (use base_price)
-        $services = Service::query()
-            ->select('services.*')
-            ->leftJoin('company_services as cs', function ($join) use ($company) {
-                $join->on('cs.service_id', '=', 'services.id')->where('cs.company_id', '=', $company->id);
-            })
-            ->addSelect(['cs.base_price as pivot_base_price', 'cs.is_enabled as pivot_is_enabled'])
-            ->whereIn('services.id', $data['service_ids'])
-            ->where('services.is_active', true)
-            ->get();
-
-        if ($services->count() !== count(array_unique($data['service_ids']))) {
-            return back()->withErrors(['service_ids' => __('messages.driver_invalid_services')])->withInput();
+        if ($serviceType === 'existing') {
+            $company = $vehicle->company;
+            $validService = Service::query()
+                ->select('services.id')
+                ->leftJoin('company_services as cs', function ($join) use ($company) {
+                    $join->on('cs.service_id', '=', 'services.id')->where('cs.company_id', '=', $company->id);
+                })
+                ->where('services.id', $data['service_id'])
+                ->where('services.is_active', true)
+                ->where(function ($q) {
+                    $q->where('cs.is_enabled', true)->orWhereNull('cs.is_enabled');
+                })
+                ->exists();
+            if (!$validService) {
+                return back()->withErrors(['service_id' => __('messages.driver_invalid_services')])->withInput();
+            }
         }
 
         $order = Order::create([
             'company_id' => $vehicle->company_id,
             'vehicle_id' => $vehicle->id,
-            'status' => OrderStatus::PENDING_COMPANY,
+            'status' => OrderStatus::PENDING_APPROVAL,
             'requested_by_name' => $vehicle->driver_name ?? __('driver.driver'),
             'driver_phone' => $vehicle->driver_phone,
             'city' => $data['city'] ?? null,
@@ -94,19 +110,97 @@ class DriverController extends Controller
             'notes' => $data['notes'] ?? null,
         ]);
 
-        $syncData = [];
-        foreach ($services as $s) {
-            $qty = 1;
-            $unitPrice = (float) ($s->pivot_base_price ?? $s->base_price ?? 0);
-            $syncData[$s->id] = [
-                'qty' => $qty,
-                'unit_price' => $unitPrice,
-                'total_price' => $qty * $unitPrice,
-            ];
+        if ($serviceType === 'existing') {
+            $service = Service::where('id', $data['service_id'])->where('is_active', true)->firstOrFail();
+            $price = (float) $data['service_price'];
+            $order->orderServices()->create([
+                'service_id' => $service->id,
+                'qty' => 1,
+                'unit_price' => $price,
+                'total_price' => $price,
+            ]);
+        } else {
+            $price = (float) $data['custom_service_price'];
+            $order->orderServices()->create([
+                'service_id' => null,
+                'custom_service_name' => $data['custom_service_name'],
+                'custom_service_description' => $data['custom_service_description'],
+                'qty' => 1,
+                'unit_price' => $price,
+                'total_price' => $price,
+            ]);
         }
-        $order->services()->sync($syncData);
+
+        // Store quotation invoice (required for company approval)
+        $file = $request->file('quotation_invoice');
+        $path = $file->store('quotation-invoices/' . $order->id, 'public');
+        $order->attachments()->create([
+            'type' => 'quotation_invoice',
+            'file_path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'uploaded_by' => null,
+        ]);
 
         return redirect()->route('driver.dashboard')->with('success', __('messages.driver_request_sent'));
+    }
+
+    public function showRequest(Order $order)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        $order->load(['orderServices.service', 'vehicle', 'company:id,company_name', 'attachments']);
+
+        if (!in_array($order->driver_phone, $phoneVariants)) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+
+        return view('driver.request-show', compact('order'));
+    }
+
+    public function startRequest(Request $request, Order $order)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        if (!in_array($order->driver_phone, $phoneVariants)) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+        if ($order->status !== OrderStatus::APPROVED) {
+            return back()->with('error', __('messages.driver_request_not_approved'));
+        }
+
+        $order->update(['status' => OrderStatus::IN_PROGRESS]);
+        return redirect()->route('driver.request.show', $order)->with('success', __('messages.driver_request_started'));
+    }
+
+    public function uploadInvoice(Request $request, Order $order)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        if (!in_array($order->driver_phone, $phoneVariants)) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+        if ($order->status !== OrderStatus::IN_PROGRESS) {
+            return back()->with('error', __('messages.driver_invoice_after_approval'));
+        }
+
+        $request->validate([
+            'invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'], // 10MB max
+        ]);
+
+        $path = $request->file('invoice')->store('driver-invoices/' . $order->id, 'public');
+        $file = $request->file('invoice');
+
+        $order->attachments()->create([
+            'type' => 'driver_invoice',
+            'file_path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'uploaded_by' => null,
+        ]);
+
+        $order->update(['status' => OrderStatus::PENDING_CONFIRMATION]);
+        return redirect()->route('driver.request.show', $order)->with('success', __('messages.driver_invoice_uploaded'));
     }
 
     public function createFuelRefill()
@@ -138,7 +232,7 @@ class DriverController extends Controller
             'odometer_km' => ['nullable', 'integer', 'min:0', 'max:9999999'],
             'fuel_type' => ['nullable', 'string', 'in:petrol,diesel,premium'],
             'notes' => ['nullable', 'string', 'max:500'],
-            'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max
+            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max
         ]);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();

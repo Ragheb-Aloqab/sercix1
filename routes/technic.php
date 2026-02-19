@@ -10,7 +10,7 @@ use App\Http\Controllers\Technician\LocationController;
 use App\Http\Controllers\Technician\NotificationsController;
 use App\Livewire\Tech\Settings;
 
-Route::middleware(['auth:web', 'active', 'role:technician'])
+Route::middleware(['auth:web', 'technician'])
     ->prefix('tech')
     ->name('tech.')
     ->group(function () {
