@@ -5,7 +5,6 @@
     bg-white/80 dark:bg-slate-900/70 backdrop-blur border-slate-200/70 dark:border-slate-800
     border-e shadow-soft lg:shadow-none
     h-dvh overflow-hidden">
-    {{-- Brand (Fixed Top) — click to go to main page --}}
     <div class="px-6 py-6 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
         <a href="{{ route('index') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
             @if(($siteLogoUrl ?? null))
@@ -42,23 +41,12 @@
         </button>
     </div>
 
-    {{-- Scrollable Content (role-specific quick actions + nav) --}}
     <div class="flex-1 overflow-y-auto overscroll-contain">
-        {{-- Quick actions (Admin only) — see partials/_sidebar-admin.blade.php --}}
         @include('livewire.dashboard.partials._sidebar-admin')
 
         {{-- Nav — shared items + role-specific links --}}
         <nav class="px-4 pb-6">
             <p class="px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">{{ __('dashboard.menu') }}</p>
-
-            {{-- Main page (all roles) --}}
-            <a href="{{ route('index') }}" class="{{ $link }}">
-                <span class="{{ $iconWrap }}"><i class="fa-solid fa-house"></i></span>
-                <div class="flex-1">
-                    <p class="font-bold leading-5">{{ __('dashboard.main_page') }}</p>
-                    <p class="text-xs opacity-80">{{ __('dashboard.main_page_desc') }}</p>
-                </div>
-            </a>
 
             {{-- Overview (role-specific href) --}}
             <a href="{{ $overviewHref }}" class="mt-2 {{ $overviewActive ? $active : $link }}">
