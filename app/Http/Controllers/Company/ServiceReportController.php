@@ -45,13 +45,26 @@ class ServiceReportController extends Controller
             ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId));
 
         $orderIds = (clone $totalsQuery)->pluck('id');
-        $totalCost = (float) DB::table('order_services')
+        $totalCost = (float) (DB::table('order_services')
             ->whereIn('order_id', $orderIds)
             ->selectRaw('COALESCE(SUM(COALESCE(total_price, qty * unit_price)), 0) as total')
-            ->value('total') ?: 0;
+            ->value('total') ?? 0);
         $orderCount = $orderIds->count();
 
         $totals = ['total_cost' => $totalCost, 'order_count' => $orderCount];
+
+        $ordersWithDisplay = $orders->map(function ($order) {
+            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
+            $firstService = $order->orderServices->first();
+            $serviceName = $firstService?->display_name ?? '-';
+            $orderServicesCount = $order->orderServices->count();
+            return (object) [
+                'order' => $order,
+                'statusLabel' => $statusLabel,
+                'serviceName' => $serviceName,
+                'orderServicesCount' => $orderServicesCount,
+            ];
+        });
 
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
@@ -62,6 +75,9 @@ class ServiceReportController extends Controller
             'company',
             'orders',
             'totals',
+            'totalCost',
+            'orderCount',
+            'ordersWithDisplay',
             'vehicles',
             'from',
             'to',

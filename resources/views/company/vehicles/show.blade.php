@@ -13,10 +13,16 @@
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
                 <i class="fa-solid fa-arrow-right"></i> {{ __('vehicles.back_to_vehicles') }}
             </a>
-            <a href="{{ route('company.vehicles.edit', $vehicle) }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold">
-                <i class="fa-solid fa-pen"></i> {{ __('vehicles.edit_vehicle') }}
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('company.vehicles.edit', $vehicle) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold">
+                    <i class="fa-solid fa-pen"></i> {{ __('vehicles.edit_vehicle') }}
+                </a>
+                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed"
+                    title="{{ __('vehicles.tracking_coming_soon') }}">
+                    <i class="fa-solid fa-location-dot"></i> {{ __('vehicles.tracking') }}
+                </span>
+            </div>
         </div>
 
         {{-- Vehicle details --}}
@@ -70,31 +76,7 @@
             </div>
         </div>
 
-        @php
-            $orders = $vehicle->orders ?? collect();
-            $totalOrdersAmount = 0;
-            $totalPaid = 0;
-            foreach ($orders as $o) {
-                $totalOrdersAmount += (float) ($o->total_amount ?? 0);
-                $totalPaid += (float) ($o->payments->sum('amount'));
-            }
-            $statusLabels = [
-                'pending_approval' => __('common.status_pending_approval'),
-                'approved' => __('common.status_approved'),
-                'in_progress' => __('common.status_in_progress'),
-                'pending_confirmation' => __('common.status_pending_confirmation'),
-                'completed' => __('common.status_completed'),
-                'rejected' => __('common.status_rejected'),
-                'cancelled' => __('common.status_cancelled'),
-            ];
-        @endphp
-
-        {{-- Summary --}}
-        @php
-            $fuelRefills = $vehicle->fuelRefills ?? collect();
-            $totalFuelCost = $fuelRefills->sum('cost');
-            $totalFuelLiters = $fuelRefills->sum('liters');
-        @endphp
+        {{-- Summary (data from controller) --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
                 <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('vehicles.orders_count') }}</p>
@@ -183,36 +165,24 @@
             <div class="p-5">
                 @if ($orders->count())
                     <div class="space-y-6">
-                        @foreach ($orders as $order)
-                            @php
-                                $orderTotal = (float) ($order->total_amount ?? 0);
-                                $orderPaid = (float) ($order->payments->sum('amount'));
-                                $orderStatusClass = match($order->status ?? '') {
-                                    'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'cancelled', 'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                    'pending_approval' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'pending_confirmation' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                                    'in_progress' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    default => 'bg-slate-100 text-slate-700 border-slate-200',
-                                };
-                            @endphp
+                        @foreach ($ordersWithDisplay as $row)
+                            @php $order = $row->order; @endphp
                             <div class="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex flex-wrap items-center justify-between gap-3">
                                     <div class="flex items-center gap-3 flex-wrap">
-                                        <a href="{{ route('company.orders.show', $order) }}" class="font-black text-lg hover:underline">
-                                            {{ __('vehicles.order') }} #{{ $order->id }}
+                                        <a href="{{ route('company.orders.show', $row->order) }}" class="font-black text-lg hover:underline">
+                                            {{ __('vehicles.order') }} #{{ $row->order->id }}
                                         </a>
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $orderStatusClass }}">
-                                            {{ $statusLabels[$order->status ?? ''] ?? $order->status }}
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $row->orderStatusClass }}">
+                                            {{ $row->statusLabel }}
                                         </span>
                                         <span class="text-slate-500 dark:text-slate-400 text-sm">
-                                            {{ $order->created_at?->translatedFormat('d M Y، H:i') ?? $order->created_at }}
+                                            {{ $row->order->created_at?->translatedFormat('d M Y، H:i') ?? $row->order->created_at }}
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold">{{ number_format($orderTotal, 2) }} {{ __('company.sar') }}</span>
-                                        <a href="{{ route('company.orders.show', $order) }}"
+                                        <span class="font-bold">{{ number_format($row->orderTotal, 2) }} {{ __('company.sar') }}</span>
+                                        <a href="{{ route('company.orders.show', $row->order) }}"
                                             class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800">
                                             {{ __('vehicles.view_order') }}
                                         </a>
@@ -221,9 +191,9 @@
                                 <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p class="text-slate-500 dark:text-slate-400 font-bold mb-2">{{ __('common.services') }}</p>
-                                        @if ($order->services && $order->services->count())
+                                        @if ($row->order->services && $row->order->services->count())
                                             <ul class="space-y-1">
-                                                @foreach ($order->services as $s)
+                                                @foreach ($row->order->services as $s)
                                                     <li class="flex justify-between gap-2">
                                                         <span>{{ $s->name }}</span>
                                                         <span>{{ $s->pivot->qty ?? 1 }} × {{ number_format((float)($s->pivot->unit_price ?? 0), 2) }} = {{ number_format((float)($s->pivot->total_price ?? 0), 2) }} {{ __('company.sar') }}</span>
@@ -236,9 +206,9 @@
                                     </div>
                                     <div>
                                         <p class="text-slate-500 dark:text-slate-400 font-bold mb-2">{{ __('vehicles.payments') }}</p>
-                                        @if ($order->payments && $order->payments->count())
+                                        @if ($row->order->payments && $row->order->payments->count())
                                             <ul class="space-y-1">
-                                                @foreach ($order->payments as $pay)
+                                                @foreach ($row->order->payments as $pay)
                                                     <li class="flex justify-between gap-2">
                                                         <span>
                                                             {{ number_format((float)$pay->amount, 2) }} {{ __('company.sar') }}

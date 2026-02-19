@@ -47,6 +47,10 @@ class FuelController extends Controller
             ->selectRaw('SUM(cost) as total_cost, SUM(liters) as total_liters, COUNT(*) as refill_count')
             ->first();
 
+        $totalCost = (float) ($totals->total_cost ?? 0);
+        $totalLiters = (float) ($totals->total_liters ?? 0);
+        $refillCount = (int) ($totals->refill_count ?? 0);
+
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
             ->orderBy('plate_number')
@@ -56,6 +60,9 @@ class FuelController extends Controller
             'company',
             'refills',
             'totals',
+            'totalCost',
+            'totalLiters',
+            'refillCount',
             'vehicles',
             'from',
             'to',

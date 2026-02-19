@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="{{ __('index.pageTitle') }} — {{ __('index.brandTag') }}" />
     <title>{{ $siteName ?? 'SERV.X' }} — {{ __('index.pageTitle') }}</title>
     @if ($siteLogoUrl ?? null)
@@ -34,6 +34,9 @@
         [dir="rtl"] .hero-gradient { background: linear-gradient(to right, rgb(185 28 28 / .5), rgb(127 29 29 / .2), transparent); }
         .stat-bar { background: linear-gradient(to right, rgb(255 255 255 / .8), rgb(239 68 68)); }
         [dir="rtl"] .stat-bar { background: linear-gradient(to left, rgb(255 255 255 / .8), rgb(239 68 68)); }
+        @media (max-width: 639px) {
+            html { font-size: 15px; }
+        }
     </style>
 
     <script>
@@ -49,7 +52,7 @@
     </script>
 </head>
 
-<body class="bg-slate-50 text-slate-900 antialiased">
+<body class="bg-slate-50 text-slate-900 antialiased overflow-x-hidden min-h-screen">
     <a href="#home" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus-start-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-red-600 focus:text-white focus:rounded-xl">{{ __('index.skipToContent') }}</a>
 
     <!-- Header -->
@@ -81,7 +84,6 @@
                 <a href="#faq" class="text-white/80 hover:text-white" id="navFaq">{{ __('index.navFaq') }}</a>
 
                 <!-- Language Menu -->
-                @php $currentLocale = app()->getLocale(); @endphp
                 <div class="relative" id="langMenuWrap">
                     <button type="button" id="langMenuBtn" aria-expanded="false" aria-haspopup="true"
                         class="inline-flex items-center gap-2 text-white/80 hover:text-white">
@@ -102,25 +104,7 @@
                     </div>
                 </div>
 
-                <!-- User Authentication -->
-                @php
-                    $user = null;
-                    $dashboardRoute = '#';
-                    $logoutRoute = route('logout');
-                    if (Auth::guard('company')->check()) {
-                        $user = Auth::guard('company')->user();
-                        $dashboardRoute = route('company.dashboard');
-                    } elseif (session()->has('driver_phone')) {
-                        $user = (object) ['name' => __('driver.driver'), 'is_driver' => true];
-                        $dashboardRoute = route('driver.dashboard');
-                        $logoutRoute = route('driver.logout');
-                    } elseif (Auth::guard('web')->check()) {
-                        $user = Auth::guard('web')->user();
-                        $dashboardRoute =
-                            ($user->role ?? null) === 'technician' ? route('tech.dashboard') : route('admin.dashboard');
-                    }
-                @endphp
-
+                <!-- User Authentication (data from IndexController) -->
                 @if ($user)
                     <!-- User Menu -->
                     <div class="relative" id="userMenuWrap">
@@ -161,20 +145,20 @@
                     {{ __('index.ctaBookTop') }}
                 </a>
 
-                <button id="btnMobile"
-                    class="md:hidden inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20 transition">
+                <button id="btnMobile" type="button" aria-label="{{ __('common.menu') }}"
+                    class="md:hidden inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 min-w-[44px] min-h-[44px] px-3 py-2 text-sm font-semibold text-white hover:bg-white/20 transition active:scale-95">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="md:hidden hidden border-t border-white/10 bg-slate-900">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-2 text-sm font-medium text-white">
-                <a href="#offers" class="py-2" id="mNavOffers">{{ __('index.navOffers') }}</a>
-                <a href="#why" class="py-2" id="mNavWhy">{{ __('index.navWhy') }}</a>
-                <a href="#workflow" class="py-2" id="mNavHow">{{ __('index.navHow') }}</a>
-                <a href="#faq" class="py-2" id="mNavFaq">{{ __('index.mNavFaq') }}</a>
+        <div id="mobileMenu" class="md:hidden hidden border-t border-white/10 bg-slate-900 overflow-x-hidden">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-1 text-sm font-medium text-white">
+                <a href="#offers" class="py-3 min-h-[44px] flex items-center active:bg-white/5 rounded-lg px-2 -mx-2" id="mNavOffers">{{ __('index.navOffers') }}</a>
+                <a href="#why" class="py-3 min-h-[44px] flex items-center active:bg-white/5 rounded-lg px-2 -mx-2" id="mNavWhy">{{ __('index.navWhy') }}</a>
+                <a href="#workflow" class="py-3 min-h-[44px] flex items-center active:bg-white/5 rounded-lg px-2 -mx-2" id="mNavHow">{{ __('index.navHow') }}</a>
+                <a href="#faq" class="py-3 min-h-[44px] flex items-center active:bg-white/5 rounded-lg px-2 -mx-2" id="mNavFaq">{{ __('index.mNavFaq') }}</a>
 
                 <div class="flex items-center gap-3 py-2 border-t border-white/10 mt-2 pt-3">
                     <span class="text-white/60 text-xs">{{ __('index.language') }}:</span>
@@ -189,16 +173,16 @@
                 </div>
 
                 @if ($user)
-                    <a href="{{ $dashboardRoute }}" class="py-2 font-extrabold"
+                    <a href="{{ $dashboardRoute }}" class="py-3 min-h-[44px] flex items-center font-extrabold active:bg-white/5 rounded-lg px-2 -mx-2"
                         data-i18n="navDashboard">{{ __('index.navDashboard') }}</a>
                     <form method="POST" action="{{ $logoutRoute }}">
                         @csrf
-                        <button type="submit" class="w-full text-start py-2 font-extrabold"
+                        <button type="submit" class="w-full text-start py-3 min-h-[44px] flex items-center font-extrabold active:bg-white/5 rounded-lg px-2 -mx-2"
                             data-i18n="navLogout">{{ __('index.navLogout') }}</button>
                     </form>
                 @else
                     <a href="{{ route('sign-in.index') }}"
-                        class="py-2 font-extrabold">{{ __('index.navLogin') }}</a>
+                        class="py-3 min-h-[44px] flex items-center font-extrabold active:bg-white/5 rounded-lg px-2 -mx-2">{{ __('index.navLogin') }}</a>
                 @endif
             </div>
         </div>
@@ -458,16 +442,8 @@
                 <div class="text-start order-3 rtl:md:order-1">
                     <div class="font-extrabold mb-3" id="footerContact">{{ __('index.footerContact') }}</div>
                     <div class="text-sm text-white/70 space-y-2">
-                        @php
-                            $waNumber = preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '');
-                            if (str_starts_with($waNumber, '0')) {
-                                $waNumber = '966' . substr($waNumber, 1);
-                            } elseif (!str_starts_with($waNumber, '966') && strlen($waNumber) <= 10) {
-                                $waNumber = '966' . ltrim($waNumber, '0');
-                            }
-                        @endphp
                         <div class="flex items-center gap-2 rtl:flex-row-reverse"><i class="fa-brands fa-whatsapp shrink-0"></i>WhatsApp: <a
-                                href="https://wa.me/{{ $waNumber ?: '966512345678' }}" target="_blank"
+                                href="https://wa.me/{{ $waNumber ?? '966512345678' }}" target="_blank"
                                 rel="noopener"
                                 class="font-bold hover:text-white transition">{{ $contactWhatsapp ?? '05xxxxxxxx' }}</a>
                         </div>

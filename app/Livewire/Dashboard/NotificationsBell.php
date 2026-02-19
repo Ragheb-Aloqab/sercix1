@@ -59,12 +59,20 @@ class NotificationsBell extends Component
             ->limit(10)
             ->get(['id', 'data', 'read_at', 'created_at'])
             ->map(function ($n) {
+                $data = (array) ($n->data ?? []);
                 return [
                     'id'            => (string) $n->id,
-                    'data'          => (array) ($n->data ?? []),
+                    'data'          => $data,
                     'read_at'       => $n->read_at?->toISOString(),
                     'created_at'    => $n->created_at?->toISOString(),
                     'created_human' => $n->created_at?->shortRelativeDiffForHumans(),
+                    'title'         => data_get($data, 'title', __('dashboard.notification')),
+                    'message'       => data_get($data, 'message'),
+                    'companyName'   => data_get($data, 'company_name'),
+                    'orderId'       => data_get($data, 'order_id'),
+                    'methodLabel'   => data_get($data, 'method_label'),
+                    'amount'        => data_get($data, 'amount'),
+                    'isUnread'      => empty($n->read_at),
                 ];
             })
             ->all();

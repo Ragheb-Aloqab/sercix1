@@ -124,7 +124,6 @@ Route::middleware(['company'])
         Route::patch('/vehicles/{vehicle}', [VehiclesController::class, 'update'])
             ->name('vehicles.update')
             ->whereNumber('vehicle');
-
         // Branches
         Route::get('/branches', [BranchesController::class, 'index'])
             ->name('branches.index');
@@ -142,7 +141,6 @@ Route::middleware(['company'])
         Route::patch('/branches/{branch}', [BranchesController::class, 'update'])
             ->name('branches.update')
             ->whereNumber('branch');
-
         // Notifications
         Route::get('/notifications', [NotificationsController::class, 'index'])
             ->name('notifications.index');

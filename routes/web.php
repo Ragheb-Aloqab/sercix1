@@ -112,29 +112,41 @@ Route::redirect('/admin', 'dashboard');
 Route::middleware(['auth:web', 'active'])->group(function () {
     Route::view('/profile', 'profile')->name('profile');
 });
+/*
+|--------------------------------------------------------------------------
+| Dashboard redirect hub (used by auth middleware redirectGuardsTo)
+|--------------------------------------------------------------------------
+| No auth required - redirects to appropriate dashboard or sign-in.
+*/
 Route::get('/dashboard', function () {
-
     if (Auth::guard('company')->check()) {
         return redirect()->route('company.dashboard');
     }
-
     if (session()->has('driver_phone')) {
         return redirect()->route('driver.dashboard');
     }
-
-    if (Auth::check()) {
-        $user = Auth::user();
-
-        if ($user->role === 'technician') {
-            return redirect()->route('tech.dashboard');
+    if (Auth::guard('web')->check()) {
+        $user = Auth::guard('web')->user();
+        if (in_array($user->role ?? '', ['admin', 'technician'])) {
+            return redirect()->route($user->role === 'technician' ? 'tech.dashboard' : 'admin.dashboard');
         }
-
-        return redirect()->route('admin.dashboard');
     }
-
     return redirect()->route('sign-in.index');
-
 })->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| Companies Dashboard - Placeholder pages (Tracking, Fuel Balance)
+|--------------------------------------------------------------------------
+| Routes under /dashboard/companies for company-authenticated users.
+*/
+Route::middleware(['company'])
+    ->prefix('dashboard/companies')
+    ->name('company.')
+    ->group(function () {
+        Route::get('/tracking', fn () => view('company.dashboard.tracking'))->name('tracking');
+        Route::get('/fuel-balance', fn () => view('company.dashboard.fuel_balance'))->name('fuel_balance');
+    });
 
 /*
 |--------------------------------------------------------------------------

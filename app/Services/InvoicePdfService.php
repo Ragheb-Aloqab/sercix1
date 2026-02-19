@@ -57,6 +57,37 @@ class InvoicePdfService
             ->sum(fn ($p) => (float) $p->amount) ?? 0);
         $remaining = max(0, $total - $paid);
 
+        $company = $invoice->order?->company ?? $invoice->fuelRefill?->company ?? $invoice->company;
+
+        $ordStatus = $invoice->order?->status ?? '';
+        $ordStatusLabel = $ordStatus
+            ? (\Illuminate\Support\Str::startsWith(__('common.status_' . $ordStatus), 'common.') ? $ordStatus : __('common.status_' . $ordStatus))
+            : ($invoice->isFuel() ? __('common.status_completed') : '-');
+
+        $orderItems = collect();
+        if ($invoice->order?->orderServices) {
+            $orderItems = $invoice->order->orderServices->map(function ($os) {
+                $qty = (float) ($os->qty ?? 1);
+                $unit = (float) ($os->unit_price ?? $os->total_price ?? 0);
+                $rowTotal = (float) ($os->total_price ?? ($qty * $unit));
+                $name = $os->display_name ?? $os->custom_service_name ?? $os->service?->name ?? '-';
+                return (object) ['qty' => $qty, 'unit' => $unit, 'rowTotal' => $rowTotal, 'name' => $name];
+            });
+        }
+
+        $invoiceImagePath = null;
+        if ($invoice->order_id) {
+            $att = $invoice->order->attachments()->where('type', 'driver_invoice')->first();
+            $invoiceImagePath = $att?->file_path ? storage_path('app/public/' . $att->file_path) : null;
+        } elseif ($invoice->fuel_refill_id && $invoice->fuelRefill?->receipt_path) {
+            $invoiceImagePath = storage_path('app/public/' . $invoice->fuelRefill->receipt_path);
+        }
+        if ($invoiceImagePath && file_exists($invoiceImagePath)) {
+            $invoiceImagePath = str_replace('\\', '/', realpath($invoiceImagePath));
+        } else {
+            $invoiceImagePath = null;
+        }
+
         $config = [
             'format' => 'A4',
             'default_font' => 'xbriyaz',
@@ -73,6 +104,10 @@ class InvoicePdfService
             'paidAmount' => $paid,
             'remainingAmount' => $remaining,
             'invoiceSettings' => $invoiceSettings,
+            'company' => $company,
+            'ordStatusLabel' => $ordStatusLabel,
+            'orderItems' => $orderItems,
+            'invoiceImagePath' => $invoiceImagePath,
         ])->render();
 
         $html = preg_replace('/<\?xml[^?]*\?>\s*/i', '', $html);

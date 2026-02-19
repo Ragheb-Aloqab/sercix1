@@ -12,11 +12,6 @@
                 <p class="font-black text-xl">
                     فاتورة #{{ $invoice->invoice_number ?? $invoice->id }}
                 </p>
-                @php
-                    $barcodeData = $invoice->invoice_number ?? 'INV-' . $invoice->id;
-                    $barcodeGen = new \Picqer\Barcode\BarcodeGeneratorSVG();
-                    $barcodeImg = $barcodeGen->getBarcode($barcodeData, $barcodeGen::TYPE_CODE_128, 2, 40);
-                @endphp
                 <div class="mt-2 flex items-center gap-3">
                     <div class="inline-block p-2 bg-white border border-slate-200 rounded-lg">
                         {!! $barcodeImg !!}
@@ -154,8 +149,7 @@
                 </div>
             @endif
 
-            @php $driverInvoiceAtt = $invoice->order->attachments->where('type', 'driver_invoice')->first(); @endphp
-            @if($driverInvoiceAtt)
+            @if($driverInvoiceAtt ?? null)
                 <div class="mt-5">
                     <span class="text-slate-500 block mb-2">{{ __('invoice.uploaded_invoice') }}</span>
                     <a href="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" target="_blank" class="inline-block">

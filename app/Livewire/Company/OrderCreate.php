@@ -139,8 +139,14 @@ class OrderCreate extends Component
 
     public function render()
     {
+        $servicesWithDisplay = $this->services->map(function ($service) {
+            $price = $service->pivot_base_price ?? $service->base_price ?? null;
+            $minutes = $service->pivot_estimated_minutes ?? null;
+            return (object) ['service' => $service, 'price' => $price, 'minutes' => $minutes];
+        });
+
         return view('livewire.company.order-create', [
-            'services' => $this->services,
+            'servicesWithDisplay' => $servicesWithDisplay,
             'branches' => $this->branches,
             'vehicles' => $this->vehicles,
         ]);

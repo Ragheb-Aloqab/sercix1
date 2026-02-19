@@ -6,14 +6,6 @@
 <div class="max-w-2xl mx-auto w-full">
     <h1 class="text-2xl font-black mb-6">طلب #{{ $order->id }}</h1>
 
-    @php
-        $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
-        $firstService = $order->orderServices->first();
-        $serviceName = $firstService?->display_name ?? '-';
-        $amount = $order->total_amount;
-        $driverInvoice = $order->attachments->where('type', 'driver_invoice')->first();
-    @endphp
-
     <div class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6 space-y-4">
         <div class="flex items-center justify-between">
             <span class="text-slate-500">{{ __('orders.status_label') }}</span>

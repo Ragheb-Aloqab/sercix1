@@ -6,17 +6,21 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Middleware\LogUnauthorizedAccess;
 
 class EnsureCompany
 {
     /**
      * Handle an incoming request.
      * Ensures user is authenticated via company guard, active, and sets auth for Gate/Policy checks.
+     * Aborts 403 with logging when drivers or web users (admin/technician) try to access company pages.
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('company')->check()) {
-            return redirect()->to($this->dashboardForCurrentAuth());
+            $actual = $this->detectActualContext($request);
+            LogUnauthorizedAccess::log($request, 'company', $actual);
+            abort(403, __('errors.forbidden_message'));
         }
 
         $company = Auth::guard('company')->user();
@@ -33,22 +37,18 @@ class EnsureCompany
         return $next($request);
     }
 
-    private function dashboardForCurrentAuth(): string
+    private function detectActualContext(Request $request): string
     {
         if (Auth::guard('company')->check()) {
-            return route('company.dashboard');
+            return 'company';
         }
-        if (session()->has('driver_phone')) {
-            return route('driver.dashboard');
+        if ($request->session()->has('driver_phone')) {
+            return 'driver';
         }
         if (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
-            return match ($user->role ?? null) {
-                'technician' => route('tech.dashboard'),
-                'admin' => route('admin.dashboard'),
-                default => route('dashboard'),
-            };
+            return 'web:' . ($user->role ?? 'unknown');
         }
-        return route('sign-in.index');
+        return 'guest';
     }
 }

@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
         // Note: 'index' excluded — IndexController passes fresh data directly
         $brandingViews = [
             'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*',
-            'livewire.dashboard.*', 'components.*',
+            'livewire.dashboard.*', 'components.*', 'errors.*',
         ];
         View::composer($brandingViews, function ($view) {
             try {
@@ -56,7 +56,43 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        // Driver layout: driver name from first linked vehicle
+        // Admin order partials: _services and _attachments — compute display data from $order
+        View::composer('admin.orders.partials._services', function ($view) {
+            $order = $view->getData()['order'] ?? null;
+            if (!$order) {
+                return;
+            }
+            $items = $order->services ?? collect();
+            $subtotal = $items->sum(function ($service) {
+                $qty = (float) ($service->pivot->qty ?? 0);
+                $unit = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
+                return (float) ($service->pivot->total_price ?: ($qty * $unit));
+            });
+            $discount = (float) ($order->discount_amount ?? 0);
+            $tax = (float) ($order->tax_amount ?? 0);
+            $grandTotal = max(0, $subtotal - $discount + $tax);
+            $itemsWithTotals = $items->map(function ($service) {
+                $qty = (float) ($service->pivot->qty ?? 0);
+                $unit = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
+                $total = (float) ($service->pivot->total_price ?: ($qty * $unit));
+                return (object) ['service' => $service, 'qty' => $qty, 'unit' => $unit, 'total' => $total];
+            });
+            $view->with(compact('items', 'subtotal', 'discount', 'tax', 'grandTotal', 'itemsWithTotals'));
+        });
+
+        View::composer('admin.orders.partials._attachments', function ($view) {
+            $order = $view->getData()['order'] ?? null;
+            if (!$order) {
+                return;
+            }
+            $attachments = $order->attachments ?? collect();
+            $before = $attachments->where('type', 'before_photo');
+            $after = $attachments->where('type', 'after_photo');
+            $others = $attachments->whereIn('type', ['signature', 'other']);
+            $view->with(compact('before', 'after', 'others'));
+        });
+
+        // Driver layout: driver name and initial from first linked vehicle
         View::composer('layouts.driver', function ($view) {
             $driverName = __('driver.driver');
             $phone = Session::get('driver_phone');
@@ -67,7 +103,8 @@ class AppServiceProvider extends ServiceProvider
                     $driverName = $vehicle->driver_name;
                 }
             }
-            $view->with('driverName', $driverName);
+            $driverInitial = mb_substr($driverName, 0, 1);
+            $view->with(compact('driverName', 'driverInitial'));
         });
     }
 

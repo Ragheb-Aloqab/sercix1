@@ -59,4 +59,27 @@ return [
     'fuel_report' => 'تقرير الوقود',
     'fuel_report_desc' => 'تكاليف الوقود واستهلاك المركبات',
     'view' => 'عرض',
+
+    // Financial summary
+    'financial_summary' => 'ملخص مالي',
+    'financial_summary_desc' => 'فلترة حسب الفترة أو المركبة لتحديث الإحصائيات',
+    'total_fuel_costs' => 'إجمالي تكلفة الوقود',
+    'avg_fuel_cost' => 'متوسط تكلفة الوقود لكل تعبئة',
+    'total_maintenance_costs' => 'إجمالي تكلفة الصيانة',
+    'avg_maintenance_cost' => 'متوسط تكلفة الصيانة لكل طلب',
+    'from_date' => 'من تاريخ',
+    'to_date' => 'إلى تاريخ',
+    'vehicle' => 'المركبة',
+    'all_vehicles' => 'جميع المركبات',
+    'apply_filter' => 'تطبيق الفلتر',
+    'refills_count' => 'التعبئات',
+    'orders_count_label' => 'الطلبات',
+
+    // Placeholder pages (Coming Soon)
+    'tracking_page' => 'صفحة التتبع',
+    'tracking_coming_soon' => 'صفحة التتبع - قريباً',
+    'tracking_placeholder_desc' => 'هذه الصفحة للعرض والتخطيط فقط. سيتم إضافة تتبع المركبات والموقع في إصدار لاحق.',
+    'fuel_balance_page' => 'صفحة رصيد الوقود',
+    'fuel_balance_coming_soon' => 'صفحة رصيد الوقود - قريباً',
+    'fuel_balance_placeholder_desc' => 'ستعرض هذه الصفحة رصيد الوقود لكل مركبة. قريباً في إصدار لاحق.',
 ];

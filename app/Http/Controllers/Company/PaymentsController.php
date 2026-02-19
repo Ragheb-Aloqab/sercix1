@@ -45,7 +45,7 @@ class PaymentsController extends Controller
         return view('company.payments.index', compact('payments', 'enabled', 'status', 'method', 'q'));
     }
 
-    public function show(Payment $payment)
+    public function show(Request $request, Payment $payment)
     {
         $this->authorize('view', $payment);
 
@@ -63,7 +63,9 @@ class PaymentsController extends Controller
         $tapPublishableKey = env('TAP_PUBLISHABLE_KEY') ?? Setting::get('tap_publishable_key', '');
         $tapMerchantId = env('TAP_MERCHANT_ID') ?? Setting::get('tap_merchant_id', '599424');
 
-        return view('company.payments.show', compact('payment', 'enabled', 'bankAccounts', 'tapPublishableKey', 'tapMerchantId'));
+        $mode = $request->string('mode')->toString();
+
+        return view('company.payments.show', compact('payment', 'enabled', 'bankAccounts', 'tapPublishableKey', 'tapMerchantId', 'mode'));
     }
 
 

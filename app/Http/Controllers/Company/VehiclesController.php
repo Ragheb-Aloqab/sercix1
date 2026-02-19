@@ -108,7 +108,61 @@ class VehiclesController extends Controller
             'fuelRefills' => fn ($q) => $q->latest('refilled_at'),
         ]);
 
-        return view('company.vehicles.show', compact('company', 'vehicle'));
+        $orders = $vehicle->orders ?? collect();
+        $totalOrdersAmount = 0;
+        $totalPaid = 0;
+        foreach ($orders as $o) {
+            $totalOrdersAmount += (float) ($o->total_amount ?? 0);
+            $totalPaid += (float) ($o->payments->sum('amount'));
+        }
+
+        $fuelRefills = $vehicle->fuelRefills ?? collect();
+        $totalFuelCost = $fuelRefills->sum('cost');
+        $totalFuelLiters = $fuelRefills->sum('liters');
+
+        $statusLabels = [
+            'pending_approval' => __('common.status_pending_approval'),
+            'approved' => __('common.status_approved'),
+            'in_progress' => __('common.status_in_progress'),
+            'pending_confirmation' => __('common.status_pending_confirmation'),
+            'completed' => __('common.status_completed'),
+            'rejected' => __('common.status_rejected'),
+            'cancelled' => __('common.status_cancelled'),
+        ];
+
+        $ordersWithDisplay = $orders->map(function ($order) use ($statusLabels) {
+            $orderTotal = (float) ($order->total_amount ?? 0);
+            $orderPaid = (float) ($order->payments->sum('amount'));
+            $orderStatusClass = match ($order->status ?? '') {
+                'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                'cancelled', 'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
+                'pending_approval' => 'bg-amber-50 text-amber-700 border-amber-200',
+                'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                'pending_confirmation' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                'in_progress' => 'bg-amber-50 text-amber-700 border-amber-200',
+                default => 'bg-slate-100 text-slate-700 border-slate-200',
+            };
+            return (object) [
+                'order' => $order,
+                'orderTotal' => $orderTotal,
+                'orderPaid' => $orderPaid,
+                'orderStatusClass' => $orderStatusClass,
+                'statusLabel' => $statusLabels[$order->status ?? ''] ?? $order->status,
+            ];
+        });
+
+        return view('company.vehicles.show', compact(
+            'company',
+            'vehicle',
+            'orders',
+            'fuelRefills',
+            'totalOrdersAmount',
+            'totalPaid',
+            'totalFuelCost',
+            'totalFuelLiters',
+            'statusLabels',
+            'ordersWithDisplay'
+        ));
     }
 
     /**

@@ -23,11 +23,13 @@ use App\Http\Controllers\Admin\Settings\BankAccountController;
 use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\InventoryMovementExportController;
-// Webhooks خارج auth (لو تحتاج)
 // use App\Http\Controllers\Payments\TapWebhookController;
 // Route::post('/webhooks/tap', [TapWebhookController::class, 'handle'])->name('webhooks.tap');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
     // /admin -> /admin/dashboard
     Route::redirect('/', '/admin/dashboard');
@@ -35,7 +37,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     /**
      * Admin dashboard: auth:web + admin (active + role check)
      */
-    Route::middleware(['auth:web', 'admin'])->prefix('dashboard')->group(function () {
+    Route::prefix('dashboard')->group(function () {
 
         // Admin Overview
         Route::view('/', 'admin.overview.index')->name('dashboard'); // admin.dashboard

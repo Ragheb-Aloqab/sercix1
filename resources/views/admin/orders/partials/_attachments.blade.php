@@ -6,12 +6,6 @@
         </div>
     </div>
 
-    @php
-        $before = $order->attachments->where('type', 'before_photo');
-        $after = $order->attachments->where('type', 'after_photo');
-        $others = $order->attachments->whereIn('type', ['signature', 'other']);
-    @endphp
-
     <div class="p-5 space-y-6">
 
 

@@ -19,6 +19,8 @@ return [
     'status' => 'الحالة',
     'actions' => 'إجراءات',
     'details' => 'تفاصيل',
+    'tracking' => 'التتبع',
+    'tracking_coming_soon' => 'قريباً',
     'no_vehicles' => 'لا توجد مركبات حالياً.',
 
     // Vehicle info fields

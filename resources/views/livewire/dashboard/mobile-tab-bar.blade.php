@@ -1,9 +1,3 @@
-@php
-    $visibleTabs = $this->getVisibleTabs();
-    $moreItems = $this->getMoreItems();
-    $hasMore = count($moreItems) > 0;
-    $hasNav = count($visibleTabs) > 0 || $hasMore;
-@endphp
 <div>
 @if ($hasNav)
 {{-- Mobile bottom tab bar - visible only on lg breakpoint and below --}}

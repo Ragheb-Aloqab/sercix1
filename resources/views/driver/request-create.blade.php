@@ -14,11 +14,10 @@
         <input type="hidden" name="service_type" id="service_type" value="existing">
         <div>
             <label class="text-sm font-bold text-slate-700">المركبة *</label>
-            <select name="vehicle_id" required class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" id="vehicle_id">
+            <select name="vehicle_id" required class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 min-h-[44px] outline-none focus:ring-4 focus:ring-emerald-100" id="vehicle_id">
                 <option value="">— اختر المركبة —</option>
                 @foreach($vehicles as $v)
-                    @php $selected = old('vehicle_id') == $v->id || request('vehicle') == $v->id || (count($vehicles) === 1 && !old('vehicle_id')); @endphp
-                    <option value="{{ $v->id }}" @selected($selected)>{{ $v->plate_number }} — {{ $v->make ?? '' }} {{ $v->model ?? '' }}</option>
+                    <option value="{{ $v->id }}" @selected(($selectedVehicleId ?? null) == $v->id)>{{ $v->plate_number }} — {{ $v->make ?? '' }} {{ $v->model ?? '' }}</option>
                 @endforeach
             </select>
         </div>
@@ -27,13 +26,13 @@
         <div>
             <label class="text-sm font-bold text-slate-700">نوع الخدمة *</label>
             <div class="mt-2 flex gap-2">
-                <label class="flex-1 p-3 rounded-2xl border cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 active:scale-[0.99]">
                     <input type="radio" name="service_type_radio" value="existing" checked class="sr-only" id="type_existing">
-                    <span class="font-bold">خدمة من القائمة</span>
+                    <span class="font-bold text-center">خدمة من القائمة</span>
                 </label>
-                <label class="flex-1 p-3 rounded-2xl border cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 active:scale-[0.99]">
                     <input type="radio" name="service_type_radio" value="custom" class="sr-only" id="type_custom">
-                    <span class="font-bold">خدمة أخرى (مخصصة)</span>
+                    <span class="font-bold text-center">خدمة أخرى (مخصصة)</span>
                 </label>
             </div>
         </div>
@@ -104,19 +103,6 @@
         </div>
     </form>
 </div>
-@php
-    $vehicleServicesForJs = [];
-    $fallbackList = isset($fallbackServices) ? $fallbackServices->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray() : [];
-    foreach ($vehicles as $v) {
-        $list = [];
-        if ($v->company && $v->company->relationLoaded('services') && $v->company->services->isNotEmpty()) {
-            foreach ($v->company->services as $s) {
-                $list[] = ['id' => $s->id, 'name' => $s->name];
-            }
-        }
-        $vehicleServicesForJs[$v->id] = !empty($list) ? $list : $fallbackList;
-    }
-@endphp
 @push('scripts')
 <script>
 (function () {

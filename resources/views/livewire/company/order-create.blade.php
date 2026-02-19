@@ -42,20 +42,16 @@
                 <div class="md:col-span-2">
                     <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ __('common.services') }}</label>
                     <div class="mt-2 space-y-2">
-                        @foreach ($services as $service)
-                            @php
-                                $price = $service->pivot_base_price ?? $service->base_price ?? null;
-                                $minutes = $service->pivot_estimated_minutes ?? null;
-                            @endphp
+                        @foreach ($servicesWithDisplay as $row)
                             <label class="flex items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer">
                                 <div class="flex items-center gap-3">
-                                    <input type="checkbox" wire:model="service_ids" value="{{ $service->id }}"
+                                    <input type="checkbox" wire:model="service_ids" value="{{ $row->service->id }}"
                                            class="h-5 w-5 rounded border-slate-300">
                                     <div>
-                                        <div class="font-bold">{{ $service->name }}</div>
+                                        <div class="font-bold">{{ $row->service->name }}</div>
                                         <div class="text-xs text-slate-500">
-                                            @if ($price !== null) {{ number_format((float) $price, 2) }} SAR @else - @endif
-                                            @if ($minutes !== null) <span class="mx-2">•</span> {{ (int) $minutes }} {{ __('livewire.minutes') }} @endif
+                                            @if ($row->price !== null) {{ number_format((float) $row->price, 2) }} SAR @else - @endif
+                                            @if ($row->minutes !== null) <span class="mx-2">•</span> {{ (int) $row->minutes }} {{ __('livewire.minutes') }} @endif
                                         </div>
                                     </div>
                                 </div>

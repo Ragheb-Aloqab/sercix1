@@ -50,11 +50,6 @@
             </div>
         </form>
 
-        @php
-            $totalCost = (float) ($totals['total_cost'] ?? 0);
-            $orderCount = (int) ($totals['order_count'] ?? 0);
-        @endphp
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4">
                 <p class="text-emerald-700 dark:text-emerald-400 text-sm">{{ __('reports.total_service_cost') }}</p>
@@ -86,35 +81,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($orders as $order)
-                                    @php
-                                        $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
-                                        $firstService = $order->orderServices->first();
-                                        $serviceName = $firstService?->display_name ?? '-';
-                                    @endphp
+                                @foreach ($ordersWithDisplay as $row)
                                     <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                        <td class="py-3 px-2">{{ $order->created_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
-                                        <td class="py-3 px-2 font-mono">{{ $order->id }}</td>
+                                        <td class="py-3 px-2">{{ $row->order->created_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                        <td class="py-3 px-2 font-mono">{{ $row->order->id }}</td>
                                         <td class="py-3 px-2">
-                                            @if ($order->vehicle)
-                                                <a href="{{ route('company.vehicles.show', $order->vehicle) }}" class="text-emerald-600 dark:text-emerald-400 hover:underline">
-                                                    {{ $order->vehicle->plate_number }} — {{ trim(($order->vehicle->make ?? '') . ' ' . ($order->vehicle->model ?? '')) }}
+                                            @if ($row->order->vehicle)
+                                                <a href="{{ route('company.vehicles.show', $row->order->vehicle) }}" class="text-emerald-600 dark:text-emerald-400 hover:underline">
+                                                    {{ $row->order->vehicle->plate_number }} — {{ trim(($row->order->vehicle->make ?? '') . ' ' . ($row->order->vehicle->model ?? '')) }}
                                                 </a>
                                             @else
                                                 —
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2">{{ $serviceName }}{{ $order->orderServices->count() > 1 ? ' +' . ($order->orderServices->count() - 1) : '' }}</td>
-                                        <td class="py-3 px-2 font-bold">{{ number_format((float) $order->total_amount, 2) }} {{ __('company.sar') }}</td>
+                                        <td class="py-3 px-2">{{ $row->serviceName }}{{ $row->orderServicesCount > 1 ? ' +' . ($row->orderServicesCount - 1) : '' }}</td>
+                                        <td class="py-3 px-2 font-bold">{{ number_format((float) $row->order->total_amount, 2) }} {{ __('company.sar') }}</td>
                                         <td class="py-3 px-2">
                                             <span class="px-2 py-1 rounded-xl text-xs font-semibold
-                                                @if($order->status === 'pending_approval') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
-                                                @elseif($order->status === 'rejected') bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400
-                                                @elseif($order->status === 'completed') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
-                                                @else bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 @endif">{{ $statusLabel }}</span>
+                                                @if($row->order->status === 'pending_approval') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
+                                                @elseif($row->order->status === 'rejected') bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400
+                                                @elseif($row->order->status === 'completed') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
+                                                @else bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 @endif">{{ $row->statusLabel }}</span>
                                         </td>
                                         <td class="py-3 px-2">
-                                            <a href="{{ route('company.orders.show', $order) }}" class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
+                                            <a href="{{ route('company.orders.show', $row->order) }}" class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
                                                 <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
                                             </a>
                                         </td>

@@ -4,22 +4,6 @@
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('common.services_in_order') }}</p>
     </div>
 
-    @php
-        $items = $order->services ?? collect();
-
-        $subtotal = $items->sum(function ($service) {
-            $qty  = (float) ($service->pivot->qty ?? 0);
-            $unit = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
-            $row  = (float) ($service->pivot->total_price ?: ($qty * $unit));
-            return $row;
-        });
-        // عدّلها لاحقاً لو عندك
-        $discount = (float) ($order->discount_amount ?? 0);
-        $tax      = (float) ($order->tax_amount ?? 0);
-
-        $grandTotal = max(0, $subtotal - $discount + $tax);
-    @endphp
-
     <div class="p-5 overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="text-slate-500 dark:text-slate-400">
@@ -32,26 +16,20 @@
             </thead>
 
             <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800">
-                @forelse($items as $service)
-                    @php
-                        $qty   = (float) ($service->pivot->qty ?? 0);
-                        $unit  = (float) ($service->pivot->unit_price ?? 0) ?: (float) ($service->base_price ?? 0);
-                        $total = (float) ($service->pivot->total_price ?: ($qty * $unit));
-                    @endphp
-
+                @forelse($itemsWithTotals ?? [] as $row)
                     <tr>
                         <td class="py-4">
-                            <p class="font-bold">{{ $service->name ?? ('#'.$service->id) }}</p>
-                            @if(!empty($service->description))
+                            <p class="font-bold">{{ $row->service->name ?? ('#'.$row->service->id) }}</p>
+                            @if(!empty($row->service->description))
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    {{ \Illuminate\Support\Str::limit($service->description, 60) }}
+                                    {{ \Illuminate\Support\Str::limit($row->service->description, 60) }}
                                 </p>
                             @endif
                         </td>
 
-                        <td class="py-4">{{ $qty }}</td>
-                        <td class="py-4">{{ number_format($unit, 2) }} <span class="text-xs text-slate-500">SAR</span></td>
-                        <td class="py-4 font-bold">{{ number_format($total, 2) }} <span class="text-xs text-slate-500">SAR</span></td>
+                        <td class="py-4">{{ $row->qty }}</td>
+                        <td class="py-4">{{ number_format($row->unit, 2) }} <span class="text-xs text-slate-500">SAR</span></td>
+                        <td class="py-4 font-bold">{{ number_format($row->total, 2) }} <span class="text-xs text-slate-500">SAR</span></td>
                     </tr>
                 @empty
                     <tr>
@@ -61,7 +39,7 @@
             </tbody>
 
             {{-- ملخص --}}
-            @if($items->count())
+            @if(($itemsWithTotals ?? collect())->count())
                 <tfoot class="border-t border-slate-200/70 dark:border-slate-800">
                     <tr>
                         <td colspan="3" class="py-3 text-end text-slate-500 font-semibold">المجموع الفرعي</td>

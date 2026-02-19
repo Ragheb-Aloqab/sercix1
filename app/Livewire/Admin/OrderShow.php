@@ -267,9 +267,45 @@ class OrderShow extends Component
 
     public function render(): View
     {
+        $attachments = $this->order->attachments ?? collect();
+        $before = $attachments->where('type', 'before_photo');
+        $after = $attachments->where('type', 'after_photo');
+        $others = $attachments->whereIn('type', ['signature', 'other']);
+
+        $payment = $this->order->payment;
+        $status = $payment?->status;
+        $method = $payment?->method;
+        $amount = (float) ($payment?->amount ?? 0);
+        $statusLabel = match ($status) {
+            'paid' => __('livewire.paid'),
+            'pending' => __('livewire.pending'),
+            'failed' => __('livewire.payment_failed'),
+            default => '—',
+        };
+        $methodLabel = match ($method) {
+            'cash' => __('livewire.cash'),
+            'tap' => __('livewire.tap'),
+            'bank' => __('livewire.bank_transfer'),
+            default => '—',
+        };
+        $badgeClass = match ($status) {
+            'paid' => 'bg-emerald-100 text-emerald-700',
+            'pending' => 'bg-amber-100 text-amber-700',
+            'failed' => 'bg-red-100 text-red-700',
+            default => 'bg-slate-100 text-slate-700',
+        };
+
         return view('livewire.admin.order-show', [
             'order'       => $this->order,
             'technicians' => $this->technicians,
+            'before'      => $before,
+            'after'       => $after,
+            'others'      => $others,
+            'payment'     => $payment,
+            'statusLabel' => $statusLabel,
+            'methodLabel' => $methodLabel,
+            'amount'      => $amount,
+            'badgeClass'  => $badgeClass,
         ]);
     }
 }

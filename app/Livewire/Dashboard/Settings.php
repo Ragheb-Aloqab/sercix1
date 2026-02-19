@@ -38,6 +38,10 @@ class Settings extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.settings');
+        $btn = 'px-4 py-2 rounded-2xl border text-sm font-bold';
+        $active = 'bg-slate-900 text-white border-slate-900';
+        $normal = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800';
+
+        return view('livewire.dashboard.settings', compact('btn', 'active', 'normal'));
     }
 }

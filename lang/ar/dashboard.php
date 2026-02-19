@@ -49,6 +49,7 @@ return [
     'admin' => 'Admin',
     'technician' => 'Technician',
     'company' => 'Company',
+    'driver' => 'السائق',
     'guest' => 'Guest',
     'dashboard_v1' => 'Dashboard v1',
 

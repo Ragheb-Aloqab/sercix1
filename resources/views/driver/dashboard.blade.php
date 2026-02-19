@@ -42,21 +42,20 @@
             <p class="text-slate-500">{{ __('driver.no_requests_yet') }}</p>
         @else
             <ul class="space-y-3">
-                @foreach($requests as $r)
+                @foreach($requestsWithDisplay as $row)
                     <li class="flex items-center justify-between p-4 rounded-2xl border border-slate-100">
                         <div>
-                            <span class="font-bold">طلب #{{ $r->id }}</span>
-                            <span class="text-slate-500 text-sm ms-2">— {{ $r->vehicle ? $r->vehicle->plate_number : '-' }}</span>
-                            @php $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $r->status), 'common.') ? $r->status : __('common.status_' . $r->status); @endphp
-                            <p class="text-xs text-slate-500 mt-1">{{ __('driver.status') }}: {{ $statusLabel }} — {{ $r->created_at->format('Y-m-d H:i') }}</p>
+                            <span class="font-bold">طلب #{{ $row->request->id }}</span>
+                            <span class="text-slate-500 text-sm ms-2">— {{ $row->request->vehicle ? $row->request->vehicle->plate_number : '-' }}</span>
+                            <p class="text-xs text-slate-500 mt-1">{{ __('driver.status') }}: {{ $row->statusLabel }} — {{ $row->request->created_at->format('Y-m-d H:i') }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('driver.request.show', $r) }}" class="px-3 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold">{{ __('common.view') }}</a>
+                            <a href="{{ route('driver.request.show', $row->request) }}" class="px-3 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold">{{ __('common.view') }}</a>
                             <span class="px-3 py-1 rounded-xl text-sm font-semibold
-                                @if($r->status === 'pending_approval') bg-amber-100 text-amber-800
-                                @elseif($r->status === 'rejected') bg-rose-100 text-rose-800
-                                @elseif($r->status === 'completed') bg-emerald-100 text-emerald-800
-                                @else bg-slate-100 text-slate-700 @endif">{{ $statusLabel }}</span>
+                                @if($row->request->status === 'pending_approval') bg-amber-100 text-amber-800
+                                @elseif($row->request->status === 'rejected') bg-rose-100 text-rose-800
+                                @elseif($row->request->status === 'completed') bg-emerald-100 text-emerald-800
+                                @else bg-slate-100 text-slate-700 @endif">{{ $row->statusLabel }}</span>
                         </div>
                     </li>
                 @endforeach

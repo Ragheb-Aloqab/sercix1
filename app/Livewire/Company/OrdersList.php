@@ -42,6 +42,13 @@ class OrdersList extends Component
         $orders = $this->baseQuery()->paginate(15)->withQueryString();
         $statuses = OrderStatus::ALL;
 
+        $ordersWithDisplay = $orders->getCollection()->map(function ($order) {
+            $payment = $order->payments?->first();
+            $amount = $payment?->amount ?? $order->total_amount;
+            return (object) ['order' => $order, 'payment' => $payment, 'amount' => $amount];
+        });
+        $orders->setCollection($ordersWithDisplay);
+
         return view('livewire.company.orders-list', [
             'orders' => $orders,
             'statuses' => $statuses,

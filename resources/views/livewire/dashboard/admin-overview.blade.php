@@ -1,36 +1,11 @@
 <div class="space-y-6">
-    @php
-        use App\Models\Order;
-        use App\Models\Payment;
-        use App\Models\User;
-
-        $today = now()->toDateString();
-
-        $todayOrders = Order::query()->whereDate('created_at', $today)->count();
-        $inProgress = Order::query()->whereIn('status', ['in_progress'])->count();
-        $pending = Order::query()->whereIn('status', ['pending_approval', 'approved', 'pending_confirmation'])->count();
-        $unassigned = Order::query()
-            ->whereNull('technician_id')
-            ->where('status', 'approved')
-            ->count();
-
-        $todayRevenue = Payment::query()->where('status', 'paid')->whereDate('created_at', $today)->sum('amount');
-        $pendingPayments = Payment::query()->where('status', 'pending')->count();
-        $activeTechs = User::query()->where('role', 'technician')->where('status', 'active')->count();
-
-        $latestOrders = Order::query()
-            ->with(['company:id,company_name,phone', 'technician:id,name,phone'])
-            ->latest()
-            ->take(8)
-            ->get();
-    @endphp
     {{-- KPI cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('dashboard.today_orders') }}</p>
-                    <p class="text-3xl font-black mt-1">{{ $todayOrders }}</p>
+                    <p class="text-3xl font-black mt-1">{{ $todayOrders ?? 0 }}</p>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center">
                     <i class="fa-solid fa-receipt"></i>
@@ -85,7 +60,7 @@
             <h2 class="text-lg font-black">{{ __('dashboard.latest_orders') }}</h2>
 
             <div class="mt-4 space-y-3">
-                @foreach ($latestOrders as $o)
+                @forelse($latestOrders as $o)
                     <div class="p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div class="min-w-0">
                             <p class="font-bold truncate">{{ __('dashboard.order') }} #{{ $o->id }} — {{ $o->status }}</p>
@@ -95,11 +70,13 @@
                         </div>
 
                         <a href="{{ route('admin.orders.show', $o) }}"
-                           class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
+                           class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold shrink-0">
                             {{ __('dashboard.view') }}
                         </a>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-sm text-slate-500 dark:text-slate-400 py-4">{{ __('dashboard.no_results') }}</p>
+                @endforelse
             </div>
         </div>
 

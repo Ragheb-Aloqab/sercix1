@@ -104,14 +104,20 @@
                                             @endif
                                         </td>
                                         <td class="py-3 text-end">
-                                            <a href="{{ route('company.vehicles.show', $v) }}"
-                                                class="px-3 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold inline-flex items-center gap-2 me-2">
-                                                <i class="fa-solid fa-list"></i> {{ __('vehicles.details') }}
-                                            </a>
-                                            <a href="{{ route('company.vehicles.edit', $v->id) }}"
-                                                class="px-3 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 inline-flex items-center gap-2">
-                                                <i class="fa-solid fa-pen"></i> {{ __('common.edit') }}
-                                            </a>
+                                            <div class="flex flex-wrap gap-2 justify-end">
+                                                <a href="{{ route('company.vehicles.show', $v) }}"
+                                                    class="px-3 py-2 min-h-[44px] rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold inline-flex items-center justify-center gap-2 active:scale-[0.98]">
+                                                    <i class="fa-solid fa-list shrink-0"></i> {{ __('vehicles.details') }}
+                                                </a>
+                                                <a href="{{ route('company.vehicles.edit', $v->id) }}"
+                                                    class="px-3 py-2 min-h-[44px] rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 inline-flex items-center justify-center gap-2 active:scale-[0.98]">
+                                                    <i class="fa-solid fa-pen shrink-0"></i> {{ __('common.edit') }}
+                                                </a>
+                                                <span class="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-2xl border border-slate-200 dark:border-slate-800 font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed"
+                                                    title="{{ __('vehicles.tracking_coming_soon') }}">
+                                                    <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('vehicles.tracking') }}
+                                                </span>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

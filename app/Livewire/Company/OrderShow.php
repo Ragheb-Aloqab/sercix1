@@ -136,6 +136,39 @@ class OrderShow extends Component
 
     public function render(): View
     {
-        return view('livewire.company.order-show', ['order' => $this->order]);
+        $attachments = $this->order->attachments ?? collect();
+        $quotationInvoice = $attachments->where('type', 'quotation_invoice')->first();
+        $hasQuotation = $quotationInvoice !== null;
+
+        $payment = $this->order->payments?->first();
+        $amount = $payment?->amount ?? $this->order->total_amount;
+        $firstService = $this->order->orderServices->first() ?? $this->order->services->first();
+        $serviceName = $firstService?->display_name ?? $firstService?->name ?? '-';
+        $before = $attachments->where('type', 'before_photo');
+        $after = $attachments->where('type', 'after_photo');
+        $driverInvoice = $attachments->where('type', 'driver_invoice')->first();
+
+        $isQuotationImage = $quotationInvoice && in_array(
+            strtolower(pathinfo($quotationInvoice->file_path ?? '', PATHINFO_EXTENSION)),
+            ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        );
+        $isDriverInvoiceImage = $driverInvoice && in_array(
+            strtolower(pathinfo($driverInvoice->file_path ?? '', PATHINFO_EXTENSION)),
+            ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        );
+
+        return view('livewire.company.order-show', [
+            'order' => $this->order,
+            'quotationInvoice' => $quotationInvoice,
+            'hasQuotation' => $hasQuotation,
+            'payment' => $payment,
+            'amount' => $amount,
+            'serviceName' => $serviceName,
+            'before' => $before,
+            'after' => $after,
+            'driverInvoice' => $driverInvoice,
+            'isQuotationImage' => $isQuotationImage,
+            'isDriverInvoiceImage' => $isDriverInvoiceImage,
+        ]);
     }
 }

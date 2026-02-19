@@ -71,11 +71,6 @@
                             {{ __('livewire.upload') }}
                         </button>
                     </form>
-                    @php
-                        $before = $order->attachments->where('type', 'before_photo');
-                        $after = $order->attachments->where('type', 'after_photo');
-                        $others = $order->attachments->whereIn('type', ['signature', 'other']);
-                    @endphp
                     <div>
                         <h3 class="font-black mb-3">{{ __('livewire.photos_before') }}</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -166,30 +161,6 @@
             </div>
 
             {{-- Payment (Livewire) + Bank receipt --}}
-            @php
-                $payment = $order->payment;
-                $status = $payment?->status;
-                $method = $payment?->method;
-                $amount = (float) ($payment?->amount ?? 0);
-                $statusLabel = match ($status) {
-                    'paid' => __('livewire.paid'),
-                    'pending' => __('livewire.pending'),
-                    'failed' => __('livewire.payment_failed'),
-                    default => '—',
-                };
-                $methodLabel = match ($method) {
-                    'cash' => __('livewire.cash'),
-                    'tap' => __('livewire.tap'),
-                    'bank' => __('livewire.bank_transfer'),
-                    default => '—',
-                };
-                $badgeClass = match ($status) {
-                    'paid' => 'bg-emerald-100 text-emerald-700',
-                    'pending' => 'bg-amber-100 text-amber-700',
-                    'failed' => 'bg-red-100 text-red-700',
-                    default => 'bg-slate-100 text-slate-700',
-                };
-            @endphp
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
                 <h2 class="text-lg font-black mb-3">{{ __('livewire.payment') }}</h2>
                 <div class="text-sm mb-4">

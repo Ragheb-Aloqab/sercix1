@@ -78,12 +78,48 @@ class TasksList extends Component
             ->latest();
     }
 
+    private function getStatusDisplay(string $status): array
+    {
+        $status = strtolower((string) $status);
+        $map = [
+            'pending'     => [__('common.status_pending'),   'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300', 'w-2 bg-amber-400'],
+            'in_progress' => [__('common.status_in_progress'),'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300',     'w-2 bg-sky-400'],
+            'completed'   => [__('common.status_completed'),    'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-slate-300','w-2 bg-emerald-400'],
+            'cancelled'   => [__('common.status_cancelled'),     'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',  'w-2 bg-rose-400'],
+            'rejected'    => [__('common.status_rejected'),    'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',  'w-2 bg-rose-400'],
+        ];
+        $label = $map[$status][0] ?? $status;
+        $badge = $map[$status][1] ?? 'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-white';
+        $bar = $map[$status][2] ?? 'w-2 bg-slate-300';
+        $progress = match ($status) {
+            'pending' => 20,
+            'in_progress' => 60,
+            'completed' => 100,
+            default => 35,
+        };
+        return ['label' => $label, 'badge' => $badge, 'bar' => $bar, 'progress' => $progress];
+    }
+
     public function render()
     {
         $tasks = $this->baseQuery()
             ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))
             ->paginate(12)
             ->withQueryString();
+
+        $tasksWithDisplay = $tasks->getCollection()->map(function ($o) {
+            $display = $this->getStatusDisplay($o->status ?? '');
+            return (object) [
+                'order' => $o,
+                'label' => $display['label'],
+                'badge' => $display['badge'],
+                'bar' => $display['bar'],
+                'progress' => $display['progress'],
+                'companyName' => $o->company?->company_name ?? '-',
+                'companyPhone' => $o->company?->phone ?? null,
+            ];
+        });
+        $tasks->setCollection($tasksWithDisplay);
 
         $statuses = ['pending', 'accepted', 'on_the_way', 'in_progress', 'completed', 'cancelled'];
 

@@ -19,6 +19,8 @@ return [
     'status' => 'Status',
     'actions' => 'Actions',
     'details' => 'Details',
+    'tracking' => 'Tracking',
+    'tracking_coming_soon' => 'Coming soon',
     'no_vehicles' => 'No vehicles at the moment.',
 
     // Vehicle info fields

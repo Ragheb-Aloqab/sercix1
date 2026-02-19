@@ -28,7 +28,12 @@ class DriverController extends Controller
             ->take(10)
             ->get();
 
-        return view('driver.dashboard', compact('vehicles', 'requests'));
+        $requestsWithDisplay = $requests->map(function ($r) {
+            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $r->status), 'common.') ? $r->status : __('common.status_' . $r->status);
+            return (object) ['request' => $r, 'statusLabel' => $statusLabel];
+        });
+
+        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay'));
     }
 
     public function createRequest()
@@ -47,7 +52,22 @@ class DriverController extends Controller
         }
         // Fallback: when company has no enabled services, show all active services so driver always sees a list
         $fallbackServices = Service::where('is_active', true)->orderBy('name')->get(['id', 'name']);
-        return view('driver.request-create', compact('vehicles', 'fallbackServices'));
+        $fallbackList = $fallbackServices->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray();
+
+        $vehicleServicesForJs = [];
+        foreach ($vehicles as $v) {
+            $list = [];
+            if ($v->company && $v->company->relationLoaded('services') && $v->company->services->isNotEmpty()) {
+                foreach ($v->company->services as $s) {
+                    $list[] = ['id' => $s->id, 'name' => $s->name];
+                }
+            }
+            $vehicleServicesForJs[$v->id] = !empty($list) ? $list : $fallbackList;
+        }
+
+        $selectedVehicleId = old('vehicle_id') ?: (request('vehicle') ?: ($vehicles->count() === 1 ? $vehicles->first()->id : null));
+
+        return view('driver.request-create', compact('vehicles', 'fallbackServices', 'vehicleServicesForJs', 'selectedVehicleId'));
     }
 
     public function storeRequest(Request $request)
@@ -155,7 +175,13 @@ class DriverController extends Controller
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
 
-        return view('driver.request-show', compact('order'));
+        $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
+        $firstService = $order->orderServices->first();
+        $serviceName = $firstService?->display_name ?? '-';
+        $amount = $order->total_amount;
+        $driverInvoice = $order->attachments->where('type', 'driver_invoice')->first();
+
+        return view('driver.request-show', compact('order', 'statusLabel', 'serviceName', 'amount', 'driverInvoice'));
     }
 
     public function startRequest(Request $request, Order $order)

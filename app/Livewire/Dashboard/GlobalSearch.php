@@ -11,6 +11,26 @@ class GlobalSearch extends Component
 {
     public string $q = '';
 
+    private function getOrderShowRoute(?string $role, Order $order): ?string
+    {
+        if ($role === 'admin') {
+            return \Illuminate\Support\Facades\Route::has('admin.orders.show')
+                ? route('admin.orders.show', $order)
+                : null;
+        }
+        if ($role === 'company') {
+            return \Illuminate\Support\Facades\Route::has('company.orders.show')
+                ? route('company.orders.show', $order)
+                : null;
+        }
+        if ($role === 'technician') {
+            return \Illuminate\Support\Facades\Route::has('tech.orders.show')
+                ? route('tech.orders.show', $order)
+                : null;
+        }
+        return null;
+    }
+
     private function actor(): array
     {
         // company guard
@@ -57,7 +77,7 @@ class GlobalSearch extends Component
             }
 
             if ($role === 'company') {
-                // ✅ عدّل اسم العمود حسب مشروعك: company_id أو customer_id ...
+                
                 $ordersQuery->where('company_id', $user->getKey());
             }
 
@@ -83,9 +103,21 @@ class GlobalSearch extends Component
             }
         }
 
+        $ordersWithRoutes = $orders->map(function ($order) use ($role) {
+            $orderShowRoute = $this->getOrderShowRoute($role, $order);
+            return (object) ['order' => $order, 'orderShowRoute' => $orderShowRoute];
+        });
+
+        $companiesWithRoutes = $companies->map(function ($company) {
+            $companyShowRoute = \Illuminate\Support\Facades\Route::has('admin.customers.edit')
+                ? route('admin.customers.edit', $company)
+                : null;
+            return (object) ['company' => $company, 'companyShowRoute' => $companyShowRoute];
+        });
+
         return view('livewire.dashboard.global-search', [
-            'orders' => $orders,
-            'companies' => $companies,
+            'ordersWithRoutes' => $ordersWithRoutes,
+            'companiesWithRoutes' => $companiesWithRoutes,
             'role' => $role,
         ]);
     }

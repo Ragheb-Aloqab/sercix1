@@ -59,4 +59,27 @@ return [
     'fuel_report' => 'Fuel report',
     'fuel_report_desc' => 'Fuel costs and vehicle consumption',
     'view' => 'View',
+
+    // Financial summary
+    'financial_summary' => 'Financial summary',
+    'financial_summary_desc' => 'Filter by date range or vehicle to update statistics',
+    'total_fuel_costs' => 'Total fuel costs',
+    'avg_fuel_cost' => 'Avg fuel cost per refill',
+    'total_maintenance_costs' => 'Total maintenance costs',
+    'avg_maintenance_cost' => 'Avg maintenance cost per order',
+    'from_date' => 'From date',
+    'to_date' => 'To date',
+    'vehicle' => 'Vehicle',
+    'all_vehicles' => 'All vehicles',
+    'apply_filter' => 'Apply filter',
+    'refills_count' => 'Refills',
+    'orders_count_label' => 'Orders',
+
+    // Placeholder pages (Coming Soon)
+    'tracking_page' => 'Tracking Page',
+    'tracking_coming_soon' => 'Tracking Page - Coming Soon',
+    'tracking_placeholder_desc' => 'This page is for preview/layout purposes. Vehicle and location tracking will be added in a future release.',
+    'fuel_balance_page' => 'Fuel Balance Page',
+    'fuel_balance_coming_soon' => 'Fuel Balance Page - Coming Soon',
+    'fuel_balance_placeholder_desc' => 'This page will display fuel balance for each vehicle. Coming in a future release.',
 ];

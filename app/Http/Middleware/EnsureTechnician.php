@@ -6,12 +6,14 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Middleware\LogUnauthorizedAccess;
 
 class EnsureTechnician
 {
     /**
      * Handle an incoming request.
      * Requires: auth:web. Ensures user is active and has technician role.
+     * Aborts 403 with logging for unauthorized access.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -29,7 +31,8 @@ class EnsureTechnician
         }
 
         if ($user->role !== 'technician') {
-            return redirect()->route($user->role === 'admin' ? 'admin.dashboard' : 'sign-in.index');
+            LogUnauthorizedAccess::log($request, 'technician', 'web:' . ($user->role ?? 'unknown'));
+            abort(403, __('errors.forbidden_message'));
         }
 
         return $next($request);

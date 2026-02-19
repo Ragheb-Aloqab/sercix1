@@ -50,12 +50,6 @@
             </div>
         </form>
 
-        @php
-            $totalCost = (float) ($totals->total_cost ?? 0);
-            $totalLiters = (float) ($totals->total_liters ?? 0);
-            $refillCount = (int) ($totals->refill_count ?? 0);
-        @endphp
-
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
                 <p class="text-amber-700 dark:text-amber-400 text-sm">{{ __('fuel.total_fuel_cost') }}</p>

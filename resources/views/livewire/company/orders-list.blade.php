@@ -61,37 +61,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($orders as $order)
-                        @php
-                            $payment = $order->payments?->first();
-                            $amount = $payment?->amount ?? $order->total_amount;
-                        @endphp
+                    @forelse($orders as $row)
                         <tr class="border-t border-slate-200/70 dark:border-slate-800">
-                            <td class="p-4 font-bold">#{{ $order->id }}</td>
+                            <td class="p-4 font-bold">#{{ $row->order->id }}</td>
                             <td class="p-4 font-bold">
-                                {{ (float)$amount > 0 ? number_format((float) $amount, 2) . ' ' . __('company.sar') : '-' }}
+                                {{ (float)$row->amount > 0 ? number_format((float) $row->amount, 2) . ' ' . __('company.sar') : '-' }}
                             </td>
                             <td class="p-4">
                                 <span class="px-3 py-1 rounded-xl text-xs font-bold
-                                    {{ in_array($order->status, ['completed']) ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                    {{ in_array($order->status, ['cancelled']) ? 'bg-rose-100 text-rose-700' : '' }}
-                                    {{ in_array($order->status, ['pending_approval', 'approved', 'pending_confirmation']) ? 'bg-amber-100 text-amber-800' : '' }}
-                                    {{ in_array($order->status, ['in_progress']) ? 'bg-sky-100 text-sky-700' : '' }}
-                                    {{ in_array($order->status, ['rejected']) ? 'bg-rose-100 text-rose-800' : '' }}">
-                                    {{ \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status) }}
+                                    {{ in_array($row->order->status, ['completed']) ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                    {{ in_array($row->order->status, ['cancelled']) ? 'bg-rose-100 text-rose-700' : '' }}
+                                    {{ in_array($row->order->status, ['pending_approval', 'approved', 'pending_confirmation']) ? 'bg-amber-100 text-amber-800' : '' }}
+                                    {{ in_array($row->order->status, ['in_progress']) ? 'bg-sky-100 text-sky-700' : '' }}
+                                    {{ in_array($row->order->status, ['rejected']) ? 'bg-rose-100 text-rose-800' : '' }}">
+                                    {{ \Illuminate\Support\Str::startsWith(__('common.status_' . $row->order->status), 'common.') ? $row->order->status : __('common.status_' . $row->order->status) }}
                                 </span>
                             </td>
                             <td class="p-4">
-                                @if ($order->technician)
-                                    <div class="font-semibold">{{ $order->technician->name }}</div>
-                                    <div class="text-xs text-slate-500">{{ $order->technician->phone ?? '' }}</div>
+                                @if ($row->order->technician)
+                                    <div class="font-semibold">{{ $row->order->technician->name }}</div>
+                                    <div class="text-xs text-slate-500">{{ $row->order->technician->phone ?? '' }}</div>
                                 @else
                                     <span class="text-slate-500">{{ __('orders.unassigned') }}</span>
                                 @endif
                             </td>
-                            <td class="p-4 text-slate-500">{{ $order->created_at?->format('Y-m-d H:i') }}</td>
+                            <td class="p-4 text-slate-500">{{ $row->order->created_at?->format('Y-m-d H:i') }}</td>
                             <td class="p-4">
-                                <a href="{{ route('company.orders.show', $order->id) }}"
+                                <a href="{{ route('company.orders.show', $row->order->id) }}"
                                     class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
                                     {{ __('orders.view') }}
                                 </a>

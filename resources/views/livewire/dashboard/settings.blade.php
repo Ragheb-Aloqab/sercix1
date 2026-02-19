@@ -3,13 +3,6 @@
 
     {{-- Tabs --}}
     <div class="flex flex-wrap gap-2">
-        @php
-            $btn = 'px-4 py-2 rounded-2xl border text-sm font-bold';
-            $active = 'bg-slate-900 text-white border-slate-900';
-            $normal =
-                'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800';
-        @endphp
-
         {{-- Admin/User --}}
         @if ($actorType === 'user')
             <button wire:click="setTab('profile')"

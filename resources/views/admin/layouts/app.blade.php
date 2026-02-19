@@ -51,6 +51,8 @@
         @media (max-width: 639px) {
             body { font-size: 15px; }
         }
+        /* Table scroll containers: smooth scroll on touch devices */
+        .overflow-x-auto { -webkit-overflow-scrolling: touch; }
     </style>
 
     @livewireStyles

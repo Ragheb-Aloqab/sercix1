@@ -97,6 +97,72 @@ class Company extends Authenticatable
         return 0.0;
     }
 
+    /**
+     * Fuel costs summary with optional filters (date range, vehicle).
+     * Returns: ['total' => float, 'avg' => float, 'count' => int]
+     */
+    public function getFuelCostsSummary(?\Carbon\Carbon $dateFrom = null, ?\Carbon\Carbon $dateTo = null, ?int $vehicleId = null): array
+    {
+        $q = DB::table('fuel_refills')
+            ->where('company_id', $this->id);
+
+        if ($dateFrom) {
+            $q->where('refilled_at', '>=', $dateFrom->copy()->startOfDay());
+        }
+        if ($dateTo) {
+            $q->where('refilled_at', '<=', $dateTo->copy()->endOfDay());
+        }
+        if ($vehicleId) {
+            $q->where('vehicle_id', $vehicleId);
+        }
+
+        $row = $q->selectRaw('COALESCE(SUM(cost), 0) as total, COALESCE(AVG(cost), 0) as avg, COUNT(*) as count')
+            ->first();
+
+        return [
+            'total' => round((float) ($row->total ?? 0), 2),
+            'avg'   => round((float) ($row->avg ?? 0), 2),
+            'count' => (int) ($row->count ?? 0),
+        ];
+    }
+
+    /**
+     * Maintenance/service costs summary with optional filters (date range, vehicle).
+     * Returns: ['total' => float, 'avg' => float, 'count' => int] (avg = per order)
+     */
+    public function getMaintenanceCostsSummary(?\Carbon\Carbon $dateFrom = null, ?\Carbon\Carbon $dateTo = null, ?int $vehicleId = null): array
+    {
+        $baseQuery = function () use ($dateFrom, $dateTo, $vehicleId) {
+            $q = DB::table('order_services')
+                ->join('orders', 'orders.id', '=', 'order_services.order_id')
+                ->where('orders.company_id', $this->id);
+            if ($dateFrom) {
+                $q->where('orders.created_at', '>=', $dateFrom->copy()->startOfDay());
+            }
+            if ($dateTo) {
+                $q->where('orders.created_at', '<=', $dateTo->copy()->endOfDay());
+            }
+            if ($vehicleId) {
+                $q->where('orders.vehicle_id', $vehicleId);
+            }
+            return $q;
+        };
+
+        $total = (float) ($baseQuery()
+            ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
+            ->value('total') ?? 0);
+
+        $count = (int) ($baseQuery()
+            ->selectRaw('COUNT(DISTINCT orders.id) as cnt')
+            ->value('cnt') ?? 0);
+
+        return [
+            'total' => round($total, 2),
+            'avg'   => $count > 0 ? round($total / $count, 2) : 0,
+            'count' => $count,
+        ];
+    }
+
     /** Total actual cost (maintenance + fuel + other) */
     public function totalActualCost(): float
     {
@@ -133,24 +199,32 @@ class Company extends Authenticatable
         return min(100, max(0, ($this->monthlyCost() / $target) * 100));
     }
 
-    /** Last 7 months: [{ month, year, total_cost }, ...] */
+    /** Last 7 months: [{ month, year, total_cost }, ...] - single aggregated query */
     public function lastSevenMonthsComparison(): array
     {
+        $start = now()->subMonths(6)->startOfMonth();
+        $end = now()->endOfMonth();
+
+        $rows = DB::table('order_services')
+            ->join('orders', 'orders.id', '=', 'order_services.order_id')
+            ->where('orders.company_id', $this->id)
+            ->whereBetween('orders.created_at', [$start, $end])
+            ->selectRaw('YEAR(orders.created_at) as year, MONTH(orders.created_at) as month')
+            ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total_cost')
+            ->groupByRaw('YEAR(orders.created_at), MONTH(orders.created_at)')
+            ->orderByRaw('year, month')
+            ->get()
+            ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
+
         $out = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $start = $date->copy()->startOfMonth();
-            $end = $date->copy()->endOfMonth();
-            $total = DB::table('order_services')
-                ->join('orders', 'orders.id', '=', 'order_services.order_id')
-                ->where('orders.company_id', $this->id)
-                ->whereBetween('orders.created_at', [$start, $end])
-                ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
-                ->value('total') ?: 0;
+            $key = "{$date->year}-{$date->month}";
+            $row = $rows[$key] ?? null;
             $out[] = [
                 'month' => $date->month,
                 'year' => $date->year,
-                'total_cost' => round((float) $total, 2),
+                'total_cost' => round((float) ($row->total_cost ?? 0), 2),
             ];
         }
         return $out;
@@ -263,21 +337,31 @@ class Company extends Authenticatable
         return ['direction' => $direction, 'percent' => round(abs($pct), 1)];
     }
 
-    /** Fuel cost by month (last 7 months) for indicators */
+    /** Fuel cost by month (last 7 months) for indicators - single aggregated query */
     public function fuelCostByMonth(): array
     {
+        $start = now()->subMonths(6)->startOfMonth();
+        $end = now()->endOfMonth();
+
+        $rows = DB::table('fuel_refills')
+            ->where('company_id', $this->id)
+            ->whereBetween('refilled_at', [$start, $end])
+            ->selectRaw('YEAR(refilled_at) as year, MONTH(refilled_at) as month')
+            ->selectRaw('COALESCE(SUM(cost), 0) as total_cost')
+            ->groupByRaw('YEAR(refilled_at), MONTH(refilled_at)')
+            ->orderByRaw('year, month')
+            ->get()
+            ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
+
         $out = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $start = $date->copy()->startOfMonth();
-            $end = $date->copy()->endOfMonth();
-            $total = \App\Models\FuelRefill::where('company_id', $this->id)
-                ->whereBetween('refilled_at', [$start, $end])
-                ->sum('cost');
+            $key = "{$date->year}-{$date->month}";
+            $row = $rows[$key] ?? null;
             $out[] = [
                 'month' => $date->month,
                 'year' => $date->year,
-                'total_cost' => round((float) $total, 2),
+                'total_cost' => round((float) ($row->total_cost ?? 0), 2),
             ];
         }
         return $out;

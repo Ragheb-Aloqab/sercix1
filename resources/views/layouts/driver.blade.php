@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>@yield('title', __('driver.dashboard')) — {{ $siteName ?? 'SERV.X' }}</title>
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
@@ -19,11 +19,14 @@
         @media (min-width: 1024px) {
             .pb-tabbar { padding-bottom: 0; }
         }
+        @media (max-width: 639px) {
+            body { font-size: 15px; }
+        }
         .driver-avatar { font-size: 1rem; font-weight: 700; }
     </style>
     @stack('styles')
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden min-h-screen">
 <div class="min-h-screen flex flex-col pb-tabbar">
     {{-- Top bar (always visible) --}}
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 w-full">
@@ -42,8 +45,7 @@
                 <div class="relative" id="driver-menu-wrap">
                     <button type="button" id="driver-menu-btn"
                         class="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-full sm:rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold text-sm transition-colors">
-                        @php $initial = mb_substr($driverName ?? __('driver.driver'), 0, 1); @endphp
-                        <span class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 driver-avatar" title="{{ $driverName ?? __('driver.driver') }}">{{ $initial }}</span>
+                        <span class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 driver-avatar" title="{{ $driverName ?? __('driver.driver') }}">{{ $driverInitial ?? mb_substr($driverName ?? __('driver.driver'), 0, 1) }}</span>
                         <span class="max-w-[80px] sm:max-w-[120px] truncate hidden sm:inline">{{ $driverName ?? __('driver.driver') }}</span>
                         <i class="fa-solid fa-chevron-down text-xs transition-transform hidden sm:inline" id="driver-menu-chevron"></i>
                     </button>

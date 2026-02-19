@@ -15,11 +15,40 @@ class IndexController extends Controller
         $siteName = Setting::get('site_name', 'SERV.X');
         $siteLogoUrl = $this->siteLogoUrl();
 
+        $currentLocale = app()->getLocale();
+        $user = null;
+        $dashboardRoute = '#';
+        $logoutRoute = route('logout');
+        if (Auth::guard('company')->check()) {
+            $user = Auth::guard('company')->user();
+            $dashboardRoute = route('company.dashboard');
+            $logoutRoute = route('company.logout');
+        } elseif (session()->has('driver_phone')) {
+            $user = (object) ['name' => __('driver.driver'), 'is_driver' => true];
+            $dashboardRoute = route('driver.dashboard');
+            $logoutRoute = route('driver.logout');
+        } elseif (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            $dashboardRoute = ($user->role ?? null) === 'technician' ? route('tech.dashboard') : route('admin.dashboard');
+        }
+
+        $waNumber = preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '');
+        if (str_starts_with($waNumber, '0')) {
+            $waNumber = '966' . substr($waNumber, 1);
+        } elseif (!str_starts_with($waNumber, '966') && strlen($waNumber) <= 10) {
+            $waNumber = '966' . ltrim($waNumber, '0');
+        }
+
         return view('index', [
             'contactEmail' => $contactEmail,
             'contactWhatsapp' => $contactWhatsapp,
             'siteName' => $siteName,
             'siteLogoUrl' => $siteLogoUrl,
+            'currentLocale' => $currentLocale,
+            'user' => $user,
+            'dashboardRoute' => $dashboardRoute,
+            'logoutRoute' => $logoutRoute,
+            'waNumber' => $waNumber ?: '966512345678',
         ]);
     }
 

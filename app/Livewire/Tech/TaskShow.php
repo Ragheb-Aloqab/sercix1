@@ -47,6 +47,20 @@ class TaskShow extends Component
 
     public function render(): View
     {
-        return view('livewire.tech.task-show', ['order' => $this->order]);
+        $waUrl = null;
+        if ($this->order->driver_phone) {
+            $wa = preg_replace('/[^0-9]/', '', $this->order->driver_phone);
+            if (str_starts_with($wa, '0')) {
+                $wa = '966' . substr($wa, 1);
+            } elseif (!str_starts_with($wa, '966')) {
+                $wa = '966' . $wa;
+            }
+            $waUrl = 'https://wa.me/' . $wa;
+        }
+
+        return view('livewire.tech.task-show', [
+            'order' => $this->order,
+            'waUrl' => $waUrl,
+        ]);
     }
 }

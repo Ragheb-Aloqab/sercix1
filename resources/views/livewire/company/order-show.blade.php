@@ -1,7 +1,3 @@
-@php
-    $quotationInvoice = $order->attachments?->where('type', 'quotation_invoice')->first();
-    $hasQuotation = $quotationInvoice !== null;
-@endphp
 <div class="space-y-6">
     @if (session('success'))
         <div class="p-4 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300">
@@ -68,23 +64,12 @@
         </div>
     </div>
 
-    @php
-        $payment = $order->payments?->first();
-        $amount = $payment?->amount ?? $order->total_amount;
-        $firstService = $order->orderServices->first() ?? $order->services->first();
-        $serviceName = $firstService?->display_name ?? $firstService?->name ?? '-';
-        $before = $order->attachments?->where('type', 'before_photo') ?? collect();
-        $after = $order->attachments?->where('type', 'after_photo') ?? collect();
-        $driverInvoice = $order->attachments?->where('type', 'driver_invoice')->first();
-    @endphp
-
     {{-- Quotation invoice (required for approval) --}}
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
         <h3 class="font-black text-lg mb-3">{{ __('orders.quotation_invoice') }}</h3>
         @if ($quotationInvoice)
             <div class="space-y-2 text-sm p-4 rounded-2xl {{ $hasQuotation ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800/50' }}">
                 <p class="font-bold">{{ __('orders.quotation_invoice') }}</p>
-                @php $isQuotationImage = $quotationInvoice && in_array(strtolower(pathinfo($quotationInvoice->file_path ?? '', PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp']); @endphp
                 @if ($isQuotationImage)
                     <a href="{{ asset('storage/' . $quotationInvoice->file_path) }}" target="_blank" class="block mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs">
                         <img src="{{ asset('storage/' . $quotationInvoice->file_path) }}" alt="{{ $quotationInvoice->original_name ?? 'Quotation' }}" class="w-full h-40 object-contain bg-white">
@@ -164,14 +149,13 @@
                 @if ($driverInvoice)
                 <div class="space-y-2 text-sm mb-3 p-4 rounded-2xl {{ $order->status === 'pending_confirmation' ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800/50' }}">
                     <p class="font-bold">{{ __('orders.driver_invoice') }}</p>
-                    @php $isImage = in_array(strtolower(pathinfo($driverInvoice->file_path ?? '', PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp']); @endphp
-                    @if ($isImage)
+                    @if ($isDriverInvoiceImage)
                         <a href="{{ asset('storage/' . $driverInvoice->file_path) }}" target="_blank" class="block mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs">
                             <img src="{{ asset('storage/' . $driverInvoice->file_path) }}" alt="{{ $driverInvoice->original_name ?? 'Invoice' }}" class="w-full h-40 object-contain bg-white">
                         </a>
                     @endif
                     <a href="{{ asset('storage/' . $driverInvoice->file_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sky-600 hover:underline mt-2">
-                        <i class="fa-solid {{ $isImage ? 'fa-image' : 'fa-file-pdf' }}"></i> {{ $driverInvoice->original_name ?? __('orders.view_invoice') }}
+                        <i class="fa-solid {{ $isDriverInvoiceImage ? 'fa-image' : 'fa-file-pdf' }}"></i> {{ $driverInvoice->original_name ?? __('orders.view_invoice') }}
                     </a>
                 </div>
             @endif

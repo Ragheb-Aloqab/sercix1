@@ -62,10 +62,6 @@
         </div>
     </div>
 
-    @php
-        $mode = request()->string('mode')->toString(); // '' | 'online' | 'bank'
-    @endphp
-
     @if ($payment->status !== 'paid')
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-6 space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

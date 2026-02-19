@@ -34,21 +34,20 @@
     <tr>
         <td class="header-cell" style="width: 50%;">
             <div class="header-label">{{ __('invoice.issuer') }}</div>
-            @php $s = $invoiceSettings ?? []; @endphp
             <table cellpadding="0" cellspacing="0" style="width:100%;">
                 <tr>
-                    @if(!empty($s['logo_path']))
+                    @if(!empty($invoiceSettings['logo_path']))
                     <td style="width:56px; vertical-align:top; padding-left:10px;">
-                        <img src="{{ $s['logo_path'] }}" alt="" class="logo-img" />
+                        <img src="{{ $invoiceSettings['logo_path'] }}" alt="" class="logo-img" />
                     </td>
                     @endif
                     <td style="vertical-align:top;">
-                        <div class="company-name">{{ $s['company_name'] ?? '' }}</div>
-                        @if(!empty($s['address']))<div class="detail-line">{{ $s['address'] }}</div>@endif
-                        @if(!empty($s['phone']))<div class="detail-line">{{ __('invoice.phone') }}: {{ $s['phone'] }}</div>@endif
-                        @if(!empty($s['tax_number']))<div class="detail-line">{{ __('invoice.vat_number') }}: {{ $s['tax_number'] }}</div>@endif
-                        @if(!empty($s['email']))<div class="detail-line">{{ $s['email'] }}</div>@endif
-                        @if(!empty($s['website']))<div class="detail-line">{{ $s['website'] }}</div>@endif
+                        <div class="company-name">{{ $invoiceSettings['company_name'] ?? '' }}</div>
+                        @if(!empty($invoiceSettings['address']))<div class="detail-line">{{ $invoiceSettings['address'] }}</div>@endif
+                        @if(!empty($invoiceSettings['phone']))<div class="detail-line">{{ __('invoice.phone') }}: {{ $invoiceSettings['phone'] }}</div>@endif
+                        @if(!empty($invoiceSettings['tax_number']))<div class="detail-line">{{ __('invoice.vat_number') }}: {{ $invoiceSettings['tax_number'] }}</div>@endif
+                        @if(!empty($invoiceSettings['email']))<div class="detail-line">{{ $invoiceSettings['email'] }}</div>@endif
+                        @if(!empty($invoiceSettings['website']))<div class="detail-line">{{ $invoiceSettings['website'] }}</div>@endif
                     </td>
                 </tr>
             </table>
@@ -58,8 +57,7 @@
                 <tr>
                     <td style="vertical-align:top; padding-left:12px;">
                         <div class="header-label">{{ __('invoice.customer') }}</div>
-                        @php $company = $invoice->order?->company ?? $invoice->fuelRefill?->company ?? $invoice->company; @endphp
-                        @if($company)
+                        @if($company ?? null)
                         <div class="company-name">{{ $company->company_name ?? '-' }}</div>
                         @if(!empty($company->phone))<div class="detail-line">{{ __('invoice.phone') }}: {{ $company->phone }}</div>@endif
                         @if(!empty($company->email))<div class="detail-line">{{ $company->email }}</div>@endif
@@ -92,7 +90,7 @@
     <tr>
         <td class="meta-cell"><strong>{{ __('invoice.invoice_number_label') }}:</strong> {{ $invoice->invoice_number ?? 'INV-' . $invoice->id }}</td>
         <td class="meta-cell"><strong>{{ __('invoice.date_label') }}:</strong> {{ $invoice->created_at?->format('d-m-Y') ?? '-' }}</td>
-        <td class="meta-cell"><strong>{{ __('invoice.status') }}:</strong> @php $ordStatus = $invoice->order?->status ?? ''; @endphp {{ $ordStatus ? (\Illuminate\Support\Str::startsWith(__('common.status_' . $ordStatus), 'common.') ? $ordStatus : __('common.status_' . $ordStatus)) : ($invoice->isFuel() ? __('common.status_completed') : '-') }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.status') }}:</strong> {{ $ordStatusLabel ?? '-' }}</td>
     </tr>
     <tr>
         <td class="meta-cell"><strong>{{ __('invoice.service') }}:</strong> {{ $invoice->service_type_label }}</td>
@@ -127,19 +125,12 @@
                 <td>{{ number_format($invoice->fuelRefill->cost, 2) }}</td>
             </tr>
         @else
-            @php $orderItems = $invoice->order?->orderServices ?? collect(); @endphp
             @forelse($orderItems as $os)
-                @php
-                    $qty = (float) ($os->qty ?? 1);
-                    $unit = (float) ($os->unit_price ?? $os->total_price ?? 0);
-                    $rowTotal = (float) ($os->total_price ?? ($qty * $unit));
-                    $name = $os->display_name ?? $os->custom_service_name ?? $os->service?->name ?? '-';
-                @endphp
                 <tr>
-                    <td>{{ $name }}</td>
-                    <td>{{ $qty }}</td>
-                    <td>{{ number_format($unit, 2) }}</td>
-                    <td>{{ number_format($rowTotal, 2) }}</td>
+                    <td>{{ $os->name }}</td>
+                    <td>{{ $os->qty }}</td>
+                    <td>{{ number_format($os->unit, 2) }}</td>
+                    <td>{{ number_format($os->rowTotal, 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4" style="text-align: center; padding: 15px;">{{ __('invoice.no_services') }}</td></tr>
@@ -172,17 +163,7 @@
     </tr>
 </table>
 
-@php
-    $invoiceImagePath = null;
-    if ($invoice->order_id) {
-        $att = $invoice->order->attachments()->where('type', 'driver_invoice')->first();
-        $invoiceImagePath = $att?->file_path ? storage_path('app/public/' . $att->file_path) : null;
-    } elseif ($invoice->fuel_refill_id && $invoice->fuelRefill?->receipt_path) {
-        $invoiceImagePath = storage_path('app/public/' . $invoice->fuelRefill->receipt_path);
-    }
-    $invoiceImagePath = $invoiceImagePath && file_exists($invoiceImagePath) ? str_replace('\\', '/', realpath($invoiceImagePath)) : null;
-@endphp
-@if($invoiceImagePath)
+@if($invoiceImagePath ?? null)
 <div style="margin-top: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
     <strong>{{ __('invoice.uploaded_invoice') }}:</strong><br>
     <img src="{{ $invoiceImagePath }}" alt="Invoice" class="invoice-img" style="margin-top:8px;" />

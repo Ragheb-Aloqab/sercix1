@@ -13,11 +13,12 @@ class MobileTabBar extends Component
 
     public function getRole(): string
     {
+        // Order matters: company first, then web roles (prevents cross-role menu leakage)
         if (auth('company')->check()) {
             return 'company';
         }
         $user = auth('web')->user();
-        return $user?->role ?? 'admin';
+        return $user?->role ?? 'guest';
     }
 
     public function getNavItems(): array
@@ -90,6 +91,16 @@ class MobileTabBar extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.mobile-tab-bar');
+        $visibleTabs = $this->getVisibleTabs();
+        $moreItems = $this->getMoreItems();
+        $hasMore = count($moreItems) > 0;
+        $hasNav = count($visibleTabs) > 0 || $hasMore;
+
+        return view('livewire.dashboard.mobile-tab-bar', [
+            'visibleTabs' => $visibleTabs,
+            'moreItems' => $moreItems,
+            'hasMore' => $hasMore,
+            'hasNav' => $hasNav,
+        ]);
     }
 }
