@@ -6,11 +6,21 @@
 
 @section('content')
     <div class="space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3">
             <a href="{{ route('company.vehicles.index') }}"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
                 <i class="fa-solid fa-arrow-right"></i> {{ __('fuel.back_to_vehicles') }}
             </a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('company.invoices.index', ['invoice_type' => 'fuel']) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-file-invoice"></i> {{ __('invoice.fuel_invoice') }}
+                </a>
+                <a href="{{ route('company.reports.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-chart-pie"></i> {{ __('reports.all_reports') }}
+                </a>
+            </div>
         </div>
 
         <form method="GET" action="{{ route('company.fuel.index') }}" class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4">
@@ -67,8 +77,8 @@
             </div>
             <div class="p-5">
                 @if ($refills->count())
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <table class="w-full text-sm min-w-[640px]">
                             <thead>
                                 <tr class="border-b border-slate-200 dark:border-slate-700">
                                     <th class="text-start py-3 px-2 font-bold">{{ __('fuel.date') }}</th>
@@ -103,11 +113,26 @@
                                                 <span class="text-xs text-slate-500">{{ __('fuel.manual') }}</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2">
-                                            @if ($fr->receipt_path)
+                                        <td class="py-3 px-2 min-w-[140px]">
+                                            @if ($fr->invoice)
+                                                <div class="flex flex-wrap gap-2">
+                                                    <a href="{{ route('company.invoices.show', $fr->invoice) }}" class="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline text-sm font-bold">
+                                                        <i class="fa-solid fa-eye"></i> {{ __('invoice.view_details') }}
+                                                    </a>
+                                                    <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
+                                                        <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_invoice') }}
+                                                    </a>
+                                                </div>
+                                            @elseif ($fr->receipt_path)
                                                 <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
                                                     <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
                                                 </a>
+                                                <form method="POST" action="{{ route('company.fuel.generate-invoice', $fr) }}" class="inline mt-1">
+                                                    @csrf
+                                                    <button type="submit" class="text-amber-600 dark:text-amber-400 hover:underline text-xs font-bold">
+                                                        {{ __('invoice.create_invoice') }}
+                                                    </button>
+                                                </form>
                                             @else
                                                 <span class="text-xs text-slate-400">—</span>
                                             @endif

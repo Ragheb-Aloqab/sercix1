@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use App\Models\FuelRefill;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\Vehicle;
+use App\Observers\FuelRefillObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\OrderObserver;
 
@@ -30,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
 
         Invoice::observe(InvoiceObserver::class);
         Order::observe(OrderObserver::class);
+        FuelRefill::observe(FuelRefillObserver::class);
 
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly
@@ -50,6 +55,36 @@ class AppServiceProvider extends ServiceProvider
                 'siteLogoUrl' => $siteLogoUrl,
             ]);
         });
+
+        // Driver layout: driver name from first linked vehicle
+        View::composer('layouts.driver', function ($view) {
+            $driverName = __('driver.driver');
+            $phone = Session::get('driver_phone');
+            if ($phone) {
+                $variants = $this->driverPhoneVariants($phone);
+                $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+                if ($vehicle && $vehicle->driver_name) {
+                    $driverName = $vehicle->driver_name;
+                }
+            }
+            $view->with('driverName', $driverName);
+        });
+    }
+
+    private function driverPhoneVariants(?string $phone): array
+    {
+        if ($phone === null || $phone === '') {
+            return [];
+        }
+        $variants = [trim($phone)];
+        if (str_starts_with($phone, '+966')) {
+            $variants[] = '0' . substr($phone, 4);
+        }
+        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
+            $digits = preg_replace('/[^0-9]/', '', $phone);
+            $variants[] = '+966' . substr($digits, 1, 9);
+        }
+        return array_unique(array_filter($variants));
     }
 
     private function siteLogoUrl(): ?string

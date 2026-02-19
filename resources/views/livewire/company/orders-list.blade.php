@@ -10,20 +10,20 @@
         </div>
     @endif
 
-    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft">
-        <div class="p-5 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
-            <div>
+    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-200/70 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="min-w-0">
                 <h2 class="text-lg font-black">{{ __('orders.orders_list') }}</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('orders.orders_list_desc') }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ __('orders.orders_list_desc') }}</p>
             </div>
             <a href="{{ route('company.orders.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+               class="inline-flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shrink-0">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('orders.new_service_request') }}
             </a>
         </div>
-        <div class="p-5">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="p-4 sm:p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="md:col-span-2">
                     <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ __('orders.status') }}</label>
                     <select wire:model.live="status"
@@ -48,8 +48,8 @@
         <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
             <h2 class="text-lg font-black">{{ __('dashboard.orders') }}</h2>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+        <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table class="w-full text-sm min-w-[600px]">
                 <thead class="bg-slate-50 dark:bg-slate-950/40">
                     <tr class="text-slate-600 dark:text-slate-300">
                         <th class="text-start p-4 font-bold">#</th>
@@ -75,8 +75,9 @@
                                 <span class="px-3 py-1 rounded-xl text-xs font-bold
                                     {{ in_array($order->status, ['completed']) ? 'bg-emerald-100 text-emerald-700' : '' }}
                                     {{ in_array($order->status, ['cancelled']) ? 'bg-rose-100 text-rose-700' : '' }}
-                                    {{ in_array($order->status, ['pending_company', 'approved_by_company', 'pending_assignment']) ? 'bg-amber-100 text-amber-800' : '' }}
-                                    {{ in_array($order->status, ['assigned_to_technician', 'in_progress']) ? 'bg-sky-100 text-sky-700' : '' }}">
+                                    {{ in_array($order->status, ['pending_approval', 'approved', 'pending_confirmation']) ? 'bg-amber-100 text-amber-800' : '' }}
+                                    {{ in_array($order->status, ['in_progress']) ? 'bg-sky-100 text-sky-700' : '' }}
+                                    {{ in_array($order->status, ['rejected']) ? 'bg-rose-100 text-rose-800' : '' }}">
                                     {{ \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status) }}
                                 </span>
                             </td>

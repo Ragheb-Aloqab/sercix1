@@ -1,7 +1,7 @@
 <div class="relative" x-data="{ open: @entangle('open').live }" @click.away="$wire.close(); open=false" wire:poll.visible.20s="refreshUnread">
 
     <button type="button"
-        class="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
         wire:click="toggle">
         <i class="fa-regular fa-bell"></i>
 
@@ -20,7 +20,7 @@
             <div class="font-black">{{ __('dashboard.notifications') }}</div>
 
             <button type="button" wire:click="markAllAsRead"
-                class="text-xs font-bold px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+                class="text-xs font-bold px-3 py-2 min-h-[40px] rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
                 {{ __('dashboard.mark_all_read') }}
             </button>
         </div>
@@ -38,7 +38,7 @@
                 @endphp
 
                 <button type="button" wire:click="openNotification('{{ $n['id'] }}')"
-                    class="w-full text-start px-5 py-4 border-b border-slate-200/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    class="w-full text-start px-5 py-4 min-h-[56px] border-b border-slate-200/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700">
 
                     <div class="flex items-start gap-3">
                         <div

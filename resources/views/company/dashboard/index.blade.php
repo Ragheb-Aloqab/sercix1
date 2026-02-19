@@ -33,7 +33,7 @@
 
         {{-- Fleet overview cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-e-4 border-e-sky-500 min-w-0">
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-s-4 border-s-sky-500 min-w-0 [dir="rtl"]:border-s-0 [dir="rtl"]:border-e-4 [dir="rtl"]:border-e-sky-500">
                 <div class="flex flex-col sm:flex-row justify-between items-start gap-3">
                     <div class="min-w-0">
                         <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('company.vehicles_count') }}</p>
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-e-4 border-e-orange-500 min-w-0">
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-s-4 border-s-orange-500 min-w-0 [dir="rtl"]:border-s-0 [dir="rtl"]:border-e-4 [dir="rtl"]:border-e-orange-500">
                 <div class="flex flex-col sm:flex-row justify-between items-start gap-3">
                     <div>
                         <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('company.total_maintenance_cost') }}</p>
@@ -66,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-e-4 border-e-emerald-500 min-w-0">
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-s-4 border-s-emerald-500 min-w-0 [dir="rtl"]:border-s-0 [dir="rtl"]:border-e-4 [dir="rtl"]:border-e-emerald-500">
                 <div class="flex flex-col sm:flex-row justify-between items-start gap-3">
                     <div>
                         <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('company.total_fuel_cost') }}</p>
@@ -88,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-e-4 border-e-violet-500 min-w-0">
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 border-s-4 border-s-violet-500 min-w-0 [dir="rtl"]:border-s-0 [dir="rtl"]:border-e-4 [dir="rtl"]:border-e-violet-500">
                 <div>
                     <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('company.cost_comparison') }}</p>
                     <div class="mt-4 space-y-4">
@@ -139,31 +139,31 @@
             {{-- Top 5 vehicles by cost --}}
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800 min-w-0 overflow-hidden">
                 <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6">{{ __('company.top_5_vehicles') }}</h2>
-                <div class="overflow-x-auto -mx-4 sm:mx-0 sm:overflow-visible">
-                    <table class="w-full min-w-[320px] text-end text-sm sm:text-base">
+                <div class="overflow-x-auto -mx-4 sm:mx-0 sm:overflow-visible min-w-0">
+                    <table class="w-full min-w-[280px] text-sm sm:text-base">
                         <thead>
                             <tr class="border-b border-slate-200 dark:border-slate-700">
-                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium">{{ __('company.vehicle_number') }}</th>
-                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium">{{ __('company.type') }}</th>
-                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium">{{ __('company.cost') }}</th>
-                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium">{{ __('company.percentage') }}</th>
+                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium text-start">{{ __('company.vehicle_number') }}</th>
+                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium text-start">{{ __('company.type') }}</th>
+                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium text-end">{{ __('company.cost') }}</th>
+                                <th class="pb-3 text-slate-600 dark:text-slate-400 font-medium text-end">{{ __('company.percentage') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($company->getTopVehiclesByServiceConsumptionAndCost() as $v)
                                 <tr class="border-b border-slate-100 dark:border-slate-800 last:border-0">
-                                    <td class="py-4">
+                                    <td class="py-4 text-start">
                                         <div class="font-medium text-slate-900 dark:text-slate-100">{{ $v->make }} {{ $v->model }}</div>
                                         <div class="text-xs text-slate-500">{{ $v->plate_number }}</div>
                                     </td>
-                                    <td class="py-4 text-slate-600 dark:text-slate-400">
+                                    <td class="py-4 text-slate-600 dark:text-slate-400 text-start">
                                         {{ $v->services_count }} {{ __('company.service') }}
                                         @if(($v->total_fuel_cost ?? 0) > 0)
-                                            <span class="text-amber-600">+ وقود</span>
+                                            <span class="text-amber-600">+ {{ __('company.fuel_report') }}</span>
                                         @endif
                                     </td>
-                                    <td class="py-4 font-bold text-slate-900 dark:text-slate-100">{{ number_format($v->total_cost ?? $v->total_service_cost, 2) }} {{ __('company.sar') }}</td>
-                                    <td class="py-4">
+                                    <td class="py-4 font-bold text-slate-900 dark:text-slate-100 text-end">{{ number_format($v->total_cost ?? $v->total_service_cost, 2) }} {{ __('company.sar') }}</td>
+                                    <td class="py-4 text-end">
                                         <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-xs font-semibold px-2.5 py-0.5 rounded">
                                             {{ number_format($v->percentage, 1) }}%
                                         </span>
@@ -273,13 +273,13 @@
         <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md p-4 sm:p-6 border border-slate-200/70 dark:border-slate-800">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">{{ __('company.recent_invoices') }}</h2>
-                <a href="{{ route('company.invoices.index') }}" class="text-sm font-semibold text-sky-600 hover:text-sky-700">
-                    {{ __('common.view_all') }} <i class="fa-solid fa-arrow-left ms-1"></i>
+                <a href="{{ route('company.invoices.index') }}" class="text-sm font-semibold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1">
+                    {{ __('common.view_all') }} <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}"></i>
                 </a>
             </div>
             @if($company->invoices->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table class="w-full text-sm min-w-[480px]">
                         <thead>
                             <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                                 <th class="pb-3 text-start font-medium">#</th>
@@ -297,10 +297,12 @@
                                     <td class="py-3 font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} SAR</td>
                                     <td class="py-3 text-slate-500">{{ $inv->created_at?->format('Y-m-d') }}</td>
                                     <td class="py-3">
-                                        <a href="{{ route('company.invoices.show', $inv) }}" class="text-sky-600 hover:text-sky-700 font-semibold me-2">{{ __('common.view') }}</a>
-                                        <a href="{{ route('company.invoices.pdf', $inv) }}" download="invoice-{{ $inv->invoice_number ?? $inv->id }}.pdf" class="text-emerald-600 hover:text-emerald-700 font-semibold">
-                                            <i class="fa-solid fa-file-pdf"></i> {{ __('common.download') }}
-                                        </a>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="{{ route('company.invoices.show', $inv) }}" class="text-sky-600 hover:text-sky-700 font-semibold">{{ __('common.view') }}</a>
+                                            <a href="{{ route('company.invoices.pdf', $inv) }}" download="invoice-{{ $inv->invoice_number ?? $inv->id }}.pdf" class="text-emerald-600 hover:text-emerald-700 font-semibold">
+                                                <i class="fa-solid fa-file-pdf"></i> {{ __('common.download') }}
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

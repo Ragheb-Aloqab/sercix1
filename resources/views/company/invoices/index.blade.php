@@ -6,18 +6,32 @@
 @section('content')
     <div class="space-y-6">
 
-        <form method="GET" class="flex flex-wrap gap-3">
-            <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="رقم الفاتورة..."
-                class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent">
-
-            <select name="status" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                <option value="">كل الحالات </option>
-                @foreach ($statuses as $s)
-                    <option value="{{ $s }}" @selected($status === $s)>{{ ucfirst($s) }}</option>
-                @endforeach
-            </select>
-
-            <button class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold">{{ __('common.search') }}</button>
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ __('common.search') }}</label>
+                <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="{{ __('invoice.invoice_number_label') }}..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent min-h-[44px]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ __('invoice.filter_by_plate') }}</label>
+                <select name="vehicle_id" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent min-h-[44px]">
+                    <option value="">{{ __('fuel.all_vehicles') }}</option>
+                    @foreach ($vehicles ?? [] as $v)
+                        <option value="{{ $v->id }}" @selected(($vehicleId ?? 0) == $v->id)>{{ $v->plate_number }} — {{ trim(($v->make ?? '') . ' ' . ($v->model ?? '')) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ __('invoice.service') }}</label>
+                <select name="invoice_type" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent min-h-[44px]">
+                    <option value="">{{ __('invoice.all_types') }}</option>
+                    <option value="service" @selected(($invoiceType ?? '') === 'service')>{{ __('invoice.service_invoice') }}</option>
+                    <option value="fuel" @selected(($invoiceType ?? '') === 'fuel')>{{ __('invoice.fuel_invoice') }}</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-1">
+                <button type="submit" class="w-full px-4 py-3 min-h-[44px] rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold">{{ __('common.search') }}</button>
+            </div>
         </form>
 
         @if (session('error'))
@@ -28,84 +42,41 @@
 
         <div
             class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+            <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                <table class="w-full text-sm min-w-[500px]">
                     <thead class="bg-slate-100 dark:bg-slate-800">
                         <tr>
-                            <th class="p-4 text-start">رقم الفاتورة</th>
-                            <th class="p-4 text-start">فاتورة</th>
-                            <th class="p-4 text-start">الاجمالي</th>
-                            <th class="p-4 text-start">المدفوع</th>
-                            <th class="p-4 text-start">المتبقي</th>
-                            <th class="p-4 text-start">حالة الدفع</th>
-                            <th class="p-4 text-start">التاريخ</th>
-                            <th class="p-4 text-start">اجراء</th>
+                            <th class="p-4 text-start">{{ __('invoice.invoice_number_label') }}</th>
+                            <th class="p-4 text-start">{{ __('invoice.driver_name') }}</th>
+                            <th class="p-4 text-start">{{ __('invoice.date_label') }}</th>
+                            <th class="p-4 text-start">{{ __('invoice.total') }}</th>
+                            <th class="p-4 text-start">{{ __('common.actions') ?? 'إجراء' }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($invoices as $invoice)
-                            
                             <tr class="border-t border-slate-200 dark:border-slate-800">
-
-                                <td class="p-4 font-bold">#{{ $invoice->id }}</td>
-
-                                <td class="p-4">{{ $invoice->invoice_number ?? '-' }}</td>
-
-                                <td class="p-4 font-semibold">{{ number_format((float) ($invoice->total ?? 0), 2) }} SAR</td>
-                                <td class="p-4 font-semibold text-emerald-700">
-                                    {{ number_format((float) ($invoice->paid_amount ?? 0), 2) }} SAR</td>
-                                <td class="p-4 font-semibold text-amber-700">
-                                    {{ number_format((float) ($invoice->remaining_amount ?? 0), 2) }} SAR</td>
-
-                                <td class="p-4">
-                                    @php
-                                        $isPaid = ($invoice->remaining_amount ?? 0) <= 0 && (float)($invoice->total ?? 0) > 0;
-                                        $isPartial = (float)($invoice->paid_amount ?? 0) > 0 && ($invoice->remaining_amount ?? 0) > 0;
-                                    @endphp
-                                    @if ($isPaid)
-                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700">
-                                            <i class="fa-solid fa-check-circle me-1"></i> مدفوع
-                                        </span>
-                                    @elseif ($isPartial)
-                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
-                                            <i class="fa-solid fa-clock me-1"></i> مدفوع جزئياً
-                                        </span>
-                                    @else
-                                        <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700">
-                                            <i class="fa-solid fa-times-circle me-1"></i> غير مدفوع
-                                        </span>
-                                    @endif
-                                </td>
-
+                                <td class="p-4 font-bold">{{ $invoice->invoice_number ?? '#' . $invoice->id }}</td>
+                                <td class="p-4">{{ $invoice->driver_name ?? '-' }}</td>
                                 <td class="p-4 text-slate-500">{{ optional($invoice->created_at)->format('Y-m-d') }}</td>
-
-                                <td class="p-4 flex flex-wrap gap-2">
-                                    <a href="{{ route('company.invoices.show', $invoice) }}"
-                                        class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
-                                        عرض
-                                         <i class="fa-solid fa-eye"></i>
-                                    </a>
-
-                                    <a href="{{ route('company.invoices.pdf', $invoice) }}"
-                                        download="invoice-{{ $invoice->invoice_number ?? $invoice->id }}.pdf"
-                                        class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
-                                        <i class="fa-solid fa-file-pdf me-1"></i> تحميل PDF
-                                    </a>
-
-                                    @if (($invoice->remaining_amount ?? 0) > 0 && $invoice->order_id)
-
-                                        <a href="{{ route('company.payments.index', ['order_id' => $invoice->order_id]) }}"
-                                        target="_blank"
-                                            class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                                            Pay
-                                            <i class="fa-solid fa-credit-card"></i>
+                                <td class="p-4 font-semibold">{{ number_format((float) ($invoice->total ?? 0), 2) }} SAR</td>
+                                <td class="p-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="{{ route('company.invoices.show', $invoice) }}"
+                                            class="inline-flex items-center gap-1 px-3 py-2 min-h-[40px] rounded-xl border border-slate-200 dark:border-slate-800 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800">
+                                            <i class="fa-solid fa-eye"></i>{{ __('invoice.view_details') }}
                                         </a>
-                                    @endif
+                                        <a href="{{ route('company.invoices.pdf', $invoice) }}"
+                                            download="invoice-{{ $invoice->invoice_number ?? $invoice->id }}.pdf"
+                                            class="inline-flex items-center gap-1 px-3 py-2 min-h-[40px] rounded-xl border border-slate-200 dark:border-slate-800 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800">
+                                            <i class="fa-solid fa-file-pdf"></i>{{ __('invoice.download_invoice') }}
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="p-6 text-center text-slate-500"> لا يوجد فواتير </td>
+                                <td colspan="5" class="p-6 text-center text-slate-500"> لا يوجد فواتير </td>
                             </tr>
                         @endforelse
                     </tbody>

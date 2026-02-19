@@ -9,7 +9,7 @@
 
         {{-- Header actions --}}
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-            <form method="GET" action="{{ route('company.vehicles.index') }}" class="flex items-center gap-2">
+            <form method="GET" action="{{ route('company.vehicles.index') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
                 <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('vehicles.search_placeholder') }}"
                     class="w-full lg:w-96 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900" />
                 <button class="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold">
@@ -23,7 +23,7 @@
                 @endif
             </form>
 
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
                 <a href="{{ route('company.fuel.index') }}" class="px-4 py-3 rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 font-bold hover:bg-amber-100 dark:hover:bg-amber-900/40">
                     <i class="fa-solid fa-gas-pump me-2"></i>{{ __('company.fuel_report') }}
                 </a>
@@ -58,8 +58,8 @@
 
             <div class="p-5">
                 @if ($vehicles->count())
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <table class="w-full text-sm min-w-[520px]">
                             <thead>
                                 <tr class="text-slate-500 dark:text-slate-400">
                                     <th class="text-start py-2">{{ __('vehicles.plate') }}</th>

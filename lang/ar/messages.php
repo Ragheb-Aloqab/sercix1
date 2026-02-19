@@ -7,6 +7,10 @@ return [
     'driver_vehicle_not_linked' => 'المركبة غير مرتبطة بجوالك.',
     'driver_invalid_services' => 'بعض الخدمات المختارة غير صالحة.',
     'driver_request_sent' => 'تم إرسال طلب الخدمة. ستتلقى الشركة إشعاراً وستوافق على الطلب.',
+    'driver_request_not_approved' => 'يجب أن توافق الشركة على الطلب أولاً.',
+    'driver_request_started' => 'تم وضع الخدمة قيد التنفيذ. ارفع الفاتورة عند الانتهاء.',
+    'driver_invoice_after_approval' => 'يمكن رفع الفاتورة فقط بعد الموافقة وبدء الخدمة.',
+    'driver_invoice_uploaded' => 'تم رفع الفاتورة. بانتظار تأكيد الشركة.',
     'driver_fuel_success' => 'تم تسجيل تعبئة الوقود بنجاح.',
     'driver_otp_sent' => 'تم إرسال رمز التحقق إلى جوالك.',
     'driver_session_expired' => 'انتهت الجلسة. أدخل جوالك مرة أخرى.',
@@ -46,6 +50,8 @@ return [
     'no_invoice_for_order' => 'لا توجد فاتورة لهذا الطلب.',
     'invoice_pdf_error' => 'حدث خطأ أثناء إنشاء PDF.',
     'invoice_created' => 'تم إنشاء الفاتورة.',
+    'invoice_already_exists' => 'الفاتورة موجودة بالفعل.',
+    'fuel_invoice_requires_receipt' => 'يجب رفع صورة الإيصال أولاً لإنشاء فاتورة وقود.',
 
     // Payment
     'payment_recorded' => 'تم تسجيل بيانات الدفع.',

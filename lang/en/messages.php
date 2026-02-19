@@ -7,6 +7,10 @@ return [
     'driver_vehicle_not_linked' => 'Vehicle is not linked to your phone.',
     'driver_invalid_services' => 'Some selected services are invalid.',
     'driver_request_sent' => 'Service request sent. The company will receive a notification and approve the request.',
+    'driver_request_not_approved' => 'Request must be approved by company first.',
+    'driver_request_started' => 'Service marked as in progress. Upload invoice when done.',
+    'driver_invoice_after_approval' => 'Invoice can only be uploaded after approval and starting the service.',
+    'driver_invoice_uploaded' => 'Invoice uploaded. Waiting for company confirmation.',
     'driver_fuel_success' => 'Fuel refill registered successfully.',
     'driver_otp_sent' => 'Verification code sent to your phone.',
     'driver_session_expired' => 'Session expired. Enter your phone again.',
@@ -46,6 +50,8 @@ return [
     'no_invoice_for_order' => 'No invoice for this order.',
     'invoice_pdf_error' => 'An error occurred while creating the PDF.',
     'invoice_created' => 'Invoice created successfully.',
+    'invoice_already_exists' => 'Invoice already exists.',
+    'fuel_invoice_requires_receipt' => 'Receipt image must be uploaded first to generate a fuel invoice.',
 
     // Payment
     'payment_recorded' => 'Payment recorded successfully.',

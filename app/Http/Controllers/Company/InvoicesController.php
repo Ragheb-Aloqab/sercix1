@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
 class InvoicesController extends Controller
@@ -13,7 +14,8 @@ class InvoicesController extends Controller
         $company = auth('company')->user();
 
         $q = $request->string('q')->toString();
-        $status = $request->string('status')->toString();
+        $invoiceType = $request->string('invoice_type')->toString();
+        $vehicleId = $request->integer('vehicle_id', 0);
 
         $invoices = Invoice::query()
             ->where('company_id', $company->id)
@@ -23,14 +25,22 @@ class InvoicesController extends Controller
                         ->orWhere('invoice_number', 'like', "%{$q}%");
                 });
             })
-            ->when($status !== '', function ($query) use ($status) {
-                $query->where('status', $status);
+            ->when($invoiceType !== '', function ($query) use ($invoiceType) {
+                $query->where('invoice_type', $invoiceType);
+            })
+            ->when($vehicleId > 0, function ($query) use ($vehicleId) {
+                $query->where(function ($q) use ($vehicleId) {
+                    $q->whereHas('order', fn ($o) => $o->where('vehicle_id', $vehicleId))
+                        ->orWhereHas('fuelRefill', fn ($f) => $f->where('vehicle_id', $vehicleId));
+                });
             })
             ->with([
                 'order.payments' => function ($q) {
                     $q->select('id', 'order_id', 'status', 'amount', 'method', 'paid_at', 'created_at');
                 },
                 'order.services',
+                'order.vehicle',
+                'fuelRefill.vehicle',
             ])
             ->latest()
             ->paginate(12)
@@ -39,9 +49,9 @@ class InvoicesController extends Controller
         $invoices->getCollection()->transform(function ($invoice) {
             $total = (float) ($invoice->total ?? 0);
 
-            $paid = (float) ($invoice->order?->payments
-                ?->where('status', 'paid')
-                ->sum(fn ($p) => (float) $p->amount) ?? 0);
+            $paid = $invoice->order_id
+                ? (float) ($invoice->order?->payments?->where('status', 'paid')->sum(fn ($p) => (float) $p->amount) ?? 0)
+                : 0.0;
 
             $remaining = max(0, $total - $paid);
 
@@ -51,9 +61,15 @@ class InvoicesController extends Controller
             return $invoice;
         });
 
-        $statuses = ['unpaid', 'partial', 'paid', 'void'];
+        $vehicles = Vehicle::where('company_id', $company->id)
+            ->where('is_active', true)
+            ->orderBy('plate_number')
+            ->get(['id', 'plate_number', 'make', 'model']);
 
-        return view('company.invoices.index', compact('company', 'invoices', 'q', 'status', 'statuses'));
+        return view('company.invoices.index', compact(
+            'company', 'invoices', 'q',
+            'invoiceType', 'vehicleId', 'vehicles'
+        ));
     }
 
     public function show(Invoice $invoice)
@@ -65,13 +81,15 @@ class InvoicesController extends Controller
             'order.services',
             'order.vehicle',
             'order.payments',
+            'order.attachments',
+            'fuelRefill.vehicle',
         ]);
 
         $total = (float) ($invoice->total ?? 0);
 
-        $paid = (float) ($invoice->order?->payments
-            ?->where('status', 'paid')
-            ->sum(fn ($p) => (float) $p->amount) ?? 0);
+        $paid = $invoice->order_id
+            ? (float) ($invoice->order?->payments?->where('status', 'paid')->sum(fn ($p) => (float) $p->amount) ?? 0)
+            : 0.0;
 
         $remaining = max(0, $total - $paid);
 

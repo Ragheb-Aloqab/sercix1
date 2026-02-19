@@ -4,8 +4,8 @@
     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
         <button type="button"
             @click="open = ! open"
-            class="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800
-                   hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold inline-flex items-center gap-2"
+            class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800
+                   hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold inline-flex items-center justify-center gap-2"
             title="{{ __('index.language') ?? 'Language' }}">
             <i class="fa-solid fa-globe"></i>
             <span class="hidden sm:inline">{{ app()->getLocale() === 'ar' ? __('dashboard.lang_ar') : __('dashboard.lang_en') }}</span>
@@ -21,11 +21,11 @@
              class="absolute end-0 mt-2 w-40 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft py-1 z-50"
              style="display: none;">
             <a href="{{ route('set-locale', ['lang' => 'ar']) }}"
-               class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'ar' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
+               class="block px-4 py-3 min-h-[44px] flex items-center text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'ar' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
                 {{ __('dashboard.lang_ar') }}
             </a>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}"
-               class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'en' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
+               class="block px-4 py-3 min-h-[44px] flex items-center text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'en' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
                 {{ __('dashboard.lang_en') }}
             </a>
         </div>
@@ -34,7 +34,7 @@
     {{-- Toggle Theme --}}
     <button
         wire:click="toggleTheme"
-        class="p-2 sm:px-3 sm:py-2 rounded-xl
+        class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl flex items-center justify-center
                {{ $theme === 'dark'
                     ? 'bg-white text-slate-900'
                     : 'bg-slate-900 text-white'

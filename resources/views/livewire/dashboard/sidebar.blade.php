@@ -1,11 +1,9 @@
 <aside id="sidebar"
-    class="fixed inset-y-0 z-50 w-80 max-w-[90vw]
+    class="hidden lg:flex flex-col fixed inset-y-0 z-50 w-80 max-w-[90vw]
     left-0
     bg-white/80 dark:bg-slate-900/70 backdrop-blur border-slate-200/70 dark:border-slate-800
-    border-e lg:border-e shadow-soft lg:shadow-none
-    translate-x-full lg:translate-x-0
-    transition-transform duration-300 ease-out
-    flex flex-col h-dvh overflow-hidden">
+    border-e shadow-soft lg:shadow-none
+    h-dvh overflow-hidden">
     @php
         //  Source of truth: guards
         $isCompany = auth('company')->check();
@@ -269,26 +267,6 @@
                     </div>
                 </a>
 
-                <a href="{{ route('company.payments.index') }}"
-                    class="mt-2 {{ $is('company.payments.*') ? $active : $link }}">
-                    <span class="{{ $is('company.payments.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-credit-card"></i></span>
-                    <div class="flex-1">
-                        <p class="font-bold leading-5">{{ __('dashboard.payments') }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.payments_desc') }}</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('company.services.index') }}"
-                    class="mt-2 {{ $is('company.services.*') ? $active : $link }}">
-                    <span class="{{ $is('company.services.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-screwdriver-wrench"></i></span>
-                    <div class="flex-1">
-                        <p class="font-bold leading-5">{{ __('dashboard.services') }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.company_services_desc') }}</p>
-                    </div>
-                </a>
-
                 <a href="{{ route('company.vehicles.index') }}"
                     class="mt-2 {{ $is('company.vehicles.*') ? $active : $link }}">
                     <span class="{{ $is('company.vehicles.*') ? $iconWrapActive : $iconWrap }}"><i
@@ -299,13 +277,29 @@
                     </div>
                 </a>
 
-                <a href="{{ route('company.fuel.index') }}"
-                    class="mt-2 {{ $is('company.fuel.*') ? $active : $link }}">
-                    <span class="{{ $is('company.fuel.*') ? $iconWrapActive : $iconWrap }}"><i
-                            class="fa-solid fa-gas-pump"></i></span>
+                <p class="px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mt-4 mb-2">{{ __('reports.reports') }}</p>
+                <a href="{{ route('company.reports.index') }}"
+                    class="mt-1 {{ $is('company.reports.index') ? $active : $link }}">
+                    <span class="{{ $is('company.reports.index') ? $iconWrapActive : $iconWrap }}"><i class="fa-solid fa-chart-pie"></i></span>
                     <div class="flex-1">
-                        <p class="font-bold leading-5">{{ __('dashboard.fuel_report') }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.fuel_report_desc') }}</p>
+                        <p class="font-bold leading-5">{{ __('reports.all_reports') }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('reports.reports_subtitle') }}</p>
+                    </div>
+                </a>
+                <a href="{{ route('company.fuel.index') }}"
+                    class="mt-1 {{ $is('company.fuel.*') ? $active : $link }}">
+                    <span class="{{ $is('company.fuel.*') ? $iconWrapActive : $iconWrap }}"><i class="fa-solid fa-gas-pump"></i></span>
+                    <div class="flex-1">
+                        <p class="font-bold leading-5">{{ __('reports.fuel_report') }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('reports.fuel_report_desc') }}</p>
+                    </div>
+                </a>
+                <a href="{{ route('company.reports.service') }}"
+                    class="mt-1 {{ $is('company.reports.service') ? $active : $link }}">
+                    <span class="{{ $is('company.reports.service') ? $iconWrapActive : $iconWrap }}"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                    <div class="flex-1">
+                        <p class="font-bold leading-5">{{ __('reports.service_report') }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('reports.service_report_desc') }}</p>
                     </div>
                 </a>
 

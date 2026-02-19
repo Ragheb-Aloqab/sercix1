@@ -6,6 +6,8 @@ use App\Http\Controllers\Company\DashboardController;
 use App\Http\Controllers\Company\OrdersController;
 use App\Http\Controllers\Company\VehiclesController;
 use App\Http\Controllers\Company\FuelController;
+use App\Http\Controllers\Company\ReportsController;
+use App\Http\Controllers\Company\ServiceReportController;
 use App\Http\Controllers\Company\InvoicesController;
 use App\Http\Controllers\Company\PaymentsController;
 use App\Http\Controllers\Company\ServicesController;
@@ -24,7 +26,7 @@ use App\Livewire\Company\Settings;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:company', 'guard.for.gate:company'])
+Route::middleware(['company'])
     ->prefix('company')
     ->name('company.')
     ->group(function () {
@@ -94,6 +96,16 @@ Route::middleware(['auth:company', 'guard.for.gate:company'])
 
         Route::get('/fuel', [FuelController::class, 'index'])
             ->name('fuel.index');
+
+        Route::post('/fuel/{fuelRefill}/generate-invoice', [FuelController::class, 'generateInvoice'])
+            ->name('fuel.generate-invoice')
+            ->whereNumber('fuelRefill');
+
+        // Reports
+        Route::get('/reports', [ReportsController::class, 'index'])
+            ->name('reports.index');
+        Route::get('/reports/service', [ServiceReportController::class, 'index'])
+            ->name('reports.service');
 
         Route::get('/vehicles/create', [VehiclesController::class, 'create'])
             ->name('vehicles.create');

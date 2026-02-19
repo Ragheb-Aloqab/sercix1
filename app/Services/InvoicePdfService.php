@@ -34,14 +34,18 @@ class InvoicePdfService
     {
         $invoice->load([
             'order.services',
+            'order.orderServices.service',
             'order.vehicle',
             'order.company',
             'order.payments',
             'order.technician:id,name',
+            'order.attachments',
+            'fuelRefill.vehicle',
+            'fuelRefill.company',
         ]);
 
-        if (!$invoice->order) {
-            throw new \RuntimeException('لا يمكن إنشاء PDF: الفاتورة غير مرتبطة بطلب.');
+        if (!$invoice->order && !$invoice->fuelRefill) {
+            throw new \RuntimeException('لا يمكن إنشاء PDF: الفاتورة غير مرتبطة بطلب أو تعبئة وقود.');
         }
 
         $barcodeData = $invoice->invoice_number ?? 'INV-' . $invoice->id;

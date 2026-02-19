@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ __('login.title') }} — {{ $siteName ?? config('app.name', 'SERV.X') }}</title>
@@ -26,7 +26,7 @@
         body { font-family: 'Inter', system-ui, sans-serif; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800 antialiased">
+<body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800 antialiased overflow-x-hidden">
     <div class="min-h-screen flex flex-col justify-center items-center px-4 py-10 sm:py-14">
         {{-- Card container --}}
         <div class="w-full max-w-sm">

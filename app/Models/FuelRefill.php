@@ -51,6 +51,11 @@ class FuelRefill extends Model
         return $this->belongsTo(User::class, 'logged_by_user_id');
     }
 
+    public function invoice(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Invoice::class);
+    }
+
     /** Whether this refill was synced from an external fuel provider API */
     public function isFromExternalProvider(): bool
     {

@@ -21,6 +21,7 @@
         th { background: #f1f5f9; font-weight: bold; }
         .total-row { font-weight: bold; background: #f8fafc; }
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 10px; color: #64748b; }
+        .invoice-img { max-width: 100%; max-height: 200px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -57,17 +58,20 @@
                 <tr>
                     <td style="vertical-align:top; padding-left:12px;">
                         <div class="header-label">{{ __('invoice.customer') }}</div>
-                        @if($invoice->order && $invoice->order->company)
-                        @php $c = $invoice->order->company; @endphp
-                        <div class="company-name">{{ $c->company_name ?? '-' }}</div>
-                        @if(!empty($c->phone))<div class="detail-line">{{ __('invoice.phone') }}: {{ $c->phone }}</div>@endif
-                        @if(!empty($c->email))<div class="detail-line">{{ $c->email }}</div>@endif
-                        @if(!empty($c->address))<div class="detail-line">{{ $c->address }}</div>@endif
-                        @if(!empty($c->city))<div class="detail-line">{{ $c->city }}</div>@endif
-                        @if(!empty($c->contact_person))<div class="detail-line">{{ __('invoice.contact_person') }}: {{ $c->contact_person }}</div>@endif
+                        @php $company = $invoice->order?->company ?? $invoice->fuelRefill?->company ?? $invoice->company; @endphp
+                        @if($company)
+                        <div class="company-name">{{ $company->company_name ?? '-' }}</div>
+                        @if(!empty($company->phone))<div class="detail-line">{{ __('invoice.phone') }}: {{ $company->phone }}</div>@endif
+                        @if(!empty($company->email))<div class="detail-line">{{ $company->email }}</div>@endif
+                        @if(!empty($company->address))<div class="detail-line">{{ $company->address }}</div>@endif
+                        @if(!empty($company->city))<div class="detail-line">{{ $company->city }}</div>@endif
+                        @if(!empty($company->contact_person))<div class="detail-line">{{ __('invoice.contact_person') }}: {{ $company->contact_person }}</div>@endif
                         @else
                         <div class="detail-line">—</div>
                         @endif
+                        <div class="header-label" style="margin-top:12px;">{{ __('invoice.driver_name') }}</div>
+                        <div class="detail-line">{{ $invoice->driver_name ?? '-' }}</div>
+                        <div class="detail-line">{{ __('invoice.driver_phone') }}: {{ $invoice->driver_phone ?? '-' }}</div>
                     </td>
                     @if($barcodeHtml ?? null)
                     <td style="width:130px; vertical-align:middle; text-align:center;">
@@ -88,13 +92,18 @@
     <tr>
         <td class="meta-cell"><strong>{{ __('invoice.invoice_number_label') }}:</strong> {{ $invoice->invoice_number ?? 'INV-' . $invoice->id }}</td>
         <td class="meta-cell"><strong>{{ __('invoice.date_label') }}:</strong> {{ $invoice->created_at?->format('d-m-Y') ?? '-' }}</td>
-        <td class="meta-cell"><strong>{{ __('invoice.status') }}:</strong> @php $ordStatus = $invoice->order?->status ?? ''; @endphp {{ $ordStatus ? (\Illuminate\Support\Str::startsWith(__('common.status_' . $ordStatus), 'common.') ? $ordStatus : __('common.status_' . $ordStatus)) : '-' }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.status') }}:</strong> @php $ordStatus = $invoice->order?->status ?? ''; @endphp {{ $ordStatus ? (\Illuminate\Support\Str::startsWith(__('common.status_' . $ordStatus), 'common.') ? $ordStatus : __('common.status_' . $ordStatus)) : ($invoice->isFuel() ? __('common.status_completed') : '-') }}</td>
     </tr>
-    @if($invoice->order && $invoice->order->vehicle)
     <tr>
-        <td class="meta-cell"><strong>{{ __('invoice.vehicle') }}:</strong> {{ $invoice->order->vehicle->make ?? '' }} {{ $invoice->order->vehicle->model ?? '-' }}</td>
-        <td class="meta-cell"><strong>{{ __('invoice.plate') }}:</strong> {{ $invoice->order->vehicle->plate_number ?? '-' }}</td>
-        <td class="meta-cell"></td>
+        <td class="meta-cell"><strong>{{ __('invoice.service') }}:</strong> {{ $invoice->service_type_label }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.vehicle') }}:</strong> {{ $invoice->vehicle ? trim(($invoice->vehicle->make ?? '') . ' ' . ($invoice->vehicle->model ?? '')) : '-' }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.plate') }}:</strong> {{ $invoice->vehicle?->plate_number ?? '-' }}</td>
+    </tr>
+    @if($invoice->vehicle)
+    <tr>
+        <td class="meta-cell"><strong>{{ __('invoice.vehicle_type') }}:</strong> {{ $invoice->vehicle->type ?? '-' }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.vehicle_year') }}:</strong> {{ $invoice->vehicle->year ?? '-' }}</td>
+        <td class="meta-cell"><strong>{{ __('invoice.vehicle_color') }}:</strong> {{ $invoice->vehicle->color ?? '-' }}</td>
     </tr>
     @endif
 </table>
@@ -110,21 +119,32 @@
         </tr>
     </thead>
     <tbody>
-        @forelse(($invoice->order && $invoice->order->services) ? $invoice->order->services : [] as $svc)
-            @php
-                $qty = (float) ($svc->pivot->qty ?? 1);
-                $unit = (float) ($svc->pivot->unit_price ?? $svc->pivot->total_price ?? 0);
-                $rowTotal = (float) ($svc->pivot->total_price ?? ($qty * $unit));
-            @endphp
+        @if($invoice->isFuel() && $invoice->fuelRefill)
             <tr>
-                <td>{{ $svc->name ?? 'خدمة #' . $svc->id }}</td>
-                <td>{{ $qty }}</td>
-                <td>{{ number_format($unit, 2) }}</td>
-                <td>{{ number_format($rowTotal, 2) }}</td>
+                <td>{{ $invoice->service_type_label }} — {{ number_format($invoice->fuelRefill->liters, 1) }} {{ __('fuel.quantity') }}</td>
+                <td>1</td>
+                <td>{{ number_format($invoice->fuelRefill->cost, 2) }}</td>
+                <td>{{ number_format($invoice->fuelRefill->cost, 2) }}</td>
             </tr>
-        @empty
-            <tr><td colspan="4" style="text-align: center; padding: 15px;">{{ __('invoice.no_services') }}</td></tr>
-        @endforelse
+        @else
+            @php $orderItems = $invoice->order?->orderServices ?? collect(); @endphp
+            @forelse($orderItems as $os)
+                @php
+                    $qty = (float) ($os->qty ?? 1);
+                    $unit = (float) ($os->unit_price ?? $os->total_price ?? 0);
+                    $rowTotal = (float) ($os->total_price ?? ($qty * $unit));
+                    $name = $os->display_name ?? $os->custom_service_name ?? $os->service?->name ?? '-';
+                @endphp
+                <tr>
+                    <td>{{ $name }}</td>
+                    <td>{{ $qty }}</td>
+                    <td>{{ number_format($unit, 2) }}</td>
+                    <td>{{ number_format($rowTotal, 2) }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="4" style="text-align: center; padding: 15px;">{{ __('invoice.no_services') }}</td></tr>
+            @endforelse
+        @endif
     </tbody>
 </table>
 
@@ -152,9 +172,32 @@
     </tr>
 </table>
 
+@php
+    $invoiceImagePath = null;
+    if ($invoice->order_id) {
+        $att = $invoice->order->attachments()->where('type', 'driver_invoice')->first();
+        $invoiceImagePath = $att?->file_path ? storage_path('app/public/' . $att->file_path) : null;
+    } elseif ($invoice->fuel_refill_id && $invoice->fuelRefill?->receipt_path) {
+        $invoiceImagePath = storage_path('app/public/' . $invoice->fuelRefill->receipt_path);
+    }
+    $invoiceImagePath = $invoiceImagePath && file_exists($invoiceImagePath) ? str_replace('\\', '/', realpath($invoiceImagePath)) : null;
+@endphp
+@if($invoiceImagePath)
+<div style="margin-top: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
+    <strong>{{ __('invoice.uploaded_invoice') }}:</strong><br>
+    <img src="{{ $invoiceImagePath }}" alt="Invoice" class="invoice-img" style="margin-top:8px;" />
+</div>
+@endif
+
 @if($invoice->order && $invoice->order->notes)
 <div style="margin-top: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
     <strong>{{ __('invoice.notes') }}:</strong> {{ $invoice->order->notes }}
+</div>
+@endif
+
+@if($invoice->fuelRefill && $invoice->fuelRefill->notes)
+<div style="margin-top: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
+    <strong>{{ __('invoice.notes') }}:</strong> {{ $invoice->fuelRefill->notes }}
 </div>
 @endif
 

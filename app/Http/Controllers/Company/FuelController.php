@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\FuelRefill;
+use App\Models\Invoice;
 use App\Models\Vehicle;
+use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
 
 class FuelController extends Controller
@@ -27,7 +29,7 @@ class FuelController extends Controller
         $query = FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
-            ->with('vehicle:id,plate_number,make,model');
+            ->with(['vehicle:id,plate_number,make,model', 'invoice']);
 
         if ($vehicleId > 0) {
             $vehicle = Vehicle::where('company_id', $company->id)->find($vehicleId);
@@ -59,5 +61,44 @@ class FuelController extends Controller
             'to',
             'vehicleId'
         ));
+    }
+
+    /**
+     * Generate invoice for a fuel refill (from fuel reports section).
+     * Used for refills with receipt that don't have an invoice yet.
+     */
+    public function generateInvoice(FuelRefill $fuelRefill)
+    {
+        $company = auth('company')->user();
+        if ((int) $fuelRefill->company_id !== (int) $company->id) {
+            abort(403);
+        }
+        if (!$fuelRefill->receipt_path) {
+            return back()->with('error', __('messages.fuel_invoice_requires_receipt'));
+        }
+        if ($fuelRefill->invoice()->exists()) {
+            return redirect()->route('company.invoices.show', $fuelRefill->invoice)
+                ->with('success', __('messages.invoice_already_exists'));
+        }
+
+        $invoice = Invoice::create([
+            'company_id' => $fuelRefill->company_id,
+            'fuel_refill_id' => $fuelRefill->id,
+            'invoice_type' => Invoice::TYPE_FUEL,
+            'invoice_number' => 'INV-F-' . $fuelRefill->id . '-' . now()->format('Ymd'),
+            'subtotal' => (float) $fuelRefill->cost,
+            'tax' => 0,
+            'paid_amount' => 0,
+        ]);
+
+        try {
+            app(InvoicePdfService::class)->generate($invoice);
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->with('error', __('messages.invoice_pdf_error'));
+        }
+
+        return redirect()->route('company.invoices.show', $invoice)
+            ->with('success', __('messages.invoice_created'));
     }
 }

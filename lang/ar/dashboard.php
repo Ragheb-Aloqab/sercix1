@@ -96,4 +96,5 @@ return [
     'theme_dark' => 'داكن',
     'lang_ar' => 'العربية',
     'lang_en' => 'English',
+    'more' => 'المزيد',
 ];

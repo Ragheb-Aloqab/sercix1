@@ -24,10 +24,16 @@
                     <span class="text-xs font-mono text-slate-600">{{ $barcodeData }}</span>
                 </div>
                 <p class="text-sm text-slate-500 mt-1">
-                    الحالة: {{ ucfirst($invoice->status) }}
+                    التاريخ: {{ optional($invoice->created_at)->format('Y-m-d H:i') }}
                 </p>
                 <p class="text-sm text-slate-500 mt-1">
-                    التاريخ: {{ optional($invoice->created_at)->format('Y-m-d H:i') }}
+                    {{ __('invoice.service') }}: {{ $invoice->service_type_label }}
+                </p>
+                <p class="text-sm text-slate-500 mt-1">
+                    {{ __('invoice.driver_name') }}: {{ $invoice->driver_name ?? '-' }}
+                </p>
+                <p class="text-sm text-slate-500 mt-1">
+                    {{ __('invoice.driver_phone') }}: {{ $invoice->driver_phone ?? '-' }}
                 </p>
             </div>
 
@@ -46,26 +52,50 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-            <p class="text-sm text-slate-500">الاجمالي</p>
-            <p class="text-2xl font-black">
-                {{ number_format($invoice->getTotalAttribute(), 2) }} SAR
-            </p>
-        </div>
+    <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+        <p class="text-sm text-slate-500">{{ __('invoice.total') }}</p>
+        <p class="text-2xl font-black">
+            {{ number_format($invoice->getTotalAttribute(), 2) }} SAR
+        </p>
+    </div>
 
-        <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-            <p class="text-sm text-slate-500">المدفوع</p>
-            <p class="text-2xl font-black text-emerald-600">
-                {{ number_format($paidAmount ?? 0, 2) }} SAR
-            </p>
-        </div>
+    {{-- Vehicle & details (order or fuel) --}}
+    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+        <h2 class="font-black text-lg mb-4">{{ $invoice->isFuel() ? __('fuel.refills_log') : __('invoice.order_details') }}</h2>
 
-        <div class="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-            <p class="text-sm text-slate-500">المتبقي</p>
-            <p class="text-2xl font-black text-rose-600">
-                {{ number_format($remainingAmount ?? 0, 2) }} SAR
-            </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            @if($invoice->vehicle)
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">{{ __('invoice.vehicle') }}</span>
+                    <span class="font-bold">{{ trim(($invoice->vehicle->make ?? '') . ' ' . ($invoice->vehicle->model ?? '')) ?: $invoice->vehicle->plate_number }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">{{ __('invoice.plate') }}</span>
+                    <span class="font-bold">{{ $invoice->vehicle->plate_number ?? '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">{{ __('invoice.vehicle_type') }}</span>
+                    <span class="font-bold">{{ $invoice->vehicle->type ?? '-' }}</span>
+                </div>
+            @endif
+            @if($invoice->fuelRefill)
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">{{ __('fuel.quantity') }}</span>
+                    <span class="font-bold">{{ number_format($invoice->fuelRefill->liters, 1) }} L</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">{{ __('fuel.refilled_at') }}</span>
+                    <span class="font-bold">{{ $invoice->fuelRefill->refilled_at?->format('Y-m-d H:i') ?? '-' }}</span>
+                </div>
+                @if($invoice->fuelRefill->receipt_path)
+                    <div class="md:col-span-2">
+                        <span class="text-slate-500 block mb-2">{{ __('invoice.uploaded_invoice') }}</span>
+                        <a href="{{ asset('storage/' . $invoice->fuelRefill->receipt_path) }}" target="_blank" class="inline-block">
+                            <img src="{{ asset('storage/' . $invoice->fuelRefill->receipt_path) }}" alt="Receipt" class="max-w-xs rounded-xl border border-slate-200" />
+                        </a>
+                    </div>
+                @endif
+            @endif
         </div>
     </div>
 
@@ -83,15 +113,6 @@
                     <span class="text-slate-500">حالة الطلب</span>
                     <span class="font-bold">{{ $invoice->order->status }}</span>
                 </div>
-
-                @if($invoice->order->vehicle)
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">المركبة</span>
-                        <span class="font-bold">
-                            {{ $invoice->order->vehicle->name ?? $invoice->order->vehicle->plate_number ?? ('Vehicle #' . $invoice->order->vehicle->id) }}
-                        </span>
-                    </div>
-                @endif
 
                 <div class="flex items-center justify-between">
                     <span class="text-slate-500"> تاريخ الانشاء</span>
@@ -132,73 +153,22 @@
                     </div>
                 </div>
             @endif
-        </div>
-    @endif
 
-    @if($invoice->order && $invoice->order->payments && $invoice->order->payments->count())
-        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="font-black text-lg">المدفوعات</h2>
-                <a href="{{ route('company.payments.index', ['order_id' => $invoice->order->id]) }}"
-                   class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold">
-                    عرض الكل
-                </a>
-            </div>
-
-            <div class="space-y-3">
-                @foreach($invoice->order->payments->sortByDesc('id') as $pay)
-                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                        <div class="flex items-center justify-between">
-                            <div class="font-bold">
-                                {{ $pay->method ? strtoupper($pay->method) : 'PAYMENT' }}
-                            </div>
-                            <span class="text-xs font-bold px-3 py-1 rounded-xl
-                                {{ $pay->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800' }}">
-                                {{ $pay->status }}
+            @php $driverInvoiceAtt = $invoice->order->attachments->where('type', 'driver_invoice')->first(); @endphp
+            @if($driverInvoiceAtt)
+                <div class="mt-5">
+                    <span class="text-slate-500 block mb-2">{{ __('invoice.uploaded_invoice') }}</span>
+                    <a href="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" target="_blank" class="inline-block">
+                        @if(str_ends_with(strtolower($driverInvoiceAtt->file_path ?? ''), '.pdf'))
+                            <span class="px-4 py-2 rounded-xl bg-sky-100 text-sky-700 font-semibold">
+                                <i class="fa-solid fa-file-pdf me-2"></i>{{ $driverInvoiceAtt->original_name ?? __('invoice.view_details') }}
                             </span>
-                        </div>
-                        <div class="mt-2 text-sm text-slate-500">
-                            المبلغ: <span class="font-semibold text-slate-900 dark:text-white">{{ number_format((float)($pay->amount ?? 0), 2) }} SAR</span>
-                        </div>
-                        <div class="text-xs text-slate-500 mt-1">
-                            {{ optional($pay->created_at)->format('Y-m-d H:i') }}
-                            @if(!empty($pay->paid_at))
-                                <span class="mx-2">|</span>
-                                 تاريخ الدفع: {{ \Illuminate\Support\Carbon::parse($pay->paid_at)->format('Y-m-d H:i') }}
-                            @endif
-                        </div>
-
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="{{ route('company.payments.show', $pay) }}"
-                               class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                                عرض
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    @php
-        $remaining = (float)($remainingAmount ?? 0);
-    @endphp
-
-    @if($invoice->order && $remaining > 0)
-        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div>
-                    <p class="font-black text-lg">دفع المبلغ المتبقي </p>
-                    <p class="text-sm text-slate-500 mt-1">
-                        المتبقي: {{ number_format($remaining, 2) }} SAR
-                    </p>
+                        @else
+                            <img src="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" alt="Invoice" class="max-w-xs rounded-xl border border-slate-200" />
+                        @endif
+                    </a>
                 </div>
-
-                <a href="{{ route('company.payments.index', ['order_id' => $invoice->order->id]) }}"
-                   class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center">
-                    <i class="fa-solid fa-credit-card me-2"></i> الذهاب للدفع
-                </a>
-            </div>
+            @endif
         </div>
     @endif
 

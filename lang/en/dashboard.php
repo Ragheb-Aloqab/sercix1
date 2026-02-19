@@ -96,4 +96,5 @@ return [
     'theme_dark' => 'Dark',
     'lang_ar' => 'Arabic',
     'lang_en' => 'English',
+    'more' => 'More',
 ];
