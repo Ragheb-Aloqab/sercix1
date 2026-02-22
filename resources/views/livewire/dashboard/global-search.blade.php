@@ -1,9 +1,9 @@
 <div class="relative hidden sm:block">
-    <div class="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl border border-slate-200 dark:border-slate-800">
-        <i class="fa-solid fa-magnifying-glass text-slate-500 dark:text-slate-400 shrink-0"></i>
+    <div class="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl {{ auth('company')->check() ? 'border border-slate-500/50' : 'border border-slate-200 dark:border-slate-800' }}">
+        <i class="fa-solid fa-magnifying-glass shrink-0 {{ auth('company')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}"></i>
 
         <input type="text" wire:model.live.debounce.400ms="q"
-            class="bg-transparent outline-none placeholder:text-slate-400 text-sm w-40 sm:w-56 min-w-0"
+            class="bg-transparent outline-none text-sm w-40 sm:w-56 min-w-0 {{ auth('company')->check() ? 'placeholder:text-slate-500 text-slate-200' : 'placeholder:text-slate-400' }}"
             placeholder="{{ __('dashboard.search_placeholder') }}" />
     </div>
 

@@ -31,6 +31,16 @@ class DashboardController extends Controller
 
         $top5Summary = $top5Summary ?? ['top_total' => 0, 'ui_percentage' => 0];
 
+        $vehiclesCount = $company->vehicles()->count();
+        $dailyCost = round($company->dailyCost(), 0);
+        $monthlyCost = round($company->monthlyCost(), 1);
+        $sevenMonthPercent = $company->lastSevenMonthsPercentage();
+
+        // KPI trend: for costs, 'down' = good (green), 'up' = bad (red). For vehicles, 'up' = good.
+        $maintenanceTrend = ($maintenanceIndicator['direction'] ?? 'stable') === 'down' ? 'up' : 'down';
+        $fuelTrend = ($fuelIndicator['direction'] ?? 'stable') === 'down' ? 'up' : 'down';
+        $vehiclesTrend = 'up';
+
         $indicatorUI = fn (string $direction) => match ($direction) {
             'up' => ['textClass' => 'text-green-600', 'barClass' => 'bg-green-600', 'text' => __('company.above_normal'), 'icon' => '↑'],
             'down' => ['textClass' => 'text-red-600', 'barClass' => 'bg-red-600', 'text' => __('company.below_normal'), 'icon' => '↓'],
@@ -52,7 +62,15 @@ class DashboardController extends Controller
             'maintenanceSummary',
             'maintenanceUI',
             'fuelUI',
-            'operatingUI'
+            'operatingUI',
+            'vehiclesCount',
+            'totalCost',
+            'dailyCost',
+            'monthlyCost',
+            'sevenMonthPercent',
+            'maintenanceTrend',
+            'fuelTrend',
+            'vehiclesTrend'
         ));
     }
 }

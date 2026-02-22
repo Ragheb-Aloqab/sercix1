@@ -30,6 +30,12 @@ return [
     'vin' => 'VIN',
     'driver_name' => 'Driver name',
     'driver_phone' => 'Driver phone',
+    'mobile_number' => 'Mobile number',
+    'license_plate' => 'License plate',
+    'location' => 'Location',
+    'maintenance_requests_count' => 'Number of maintenance requests',
+    'car_image' => 'Car image',
+    'upload_image' => 'Upload image',
     'notes' => 'Notes',
 
     // Status

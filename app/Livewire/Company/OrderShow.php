@@ -3,8 +3,6 @@
 namespace App\Livewire\Company;
 
 use App\Models\Order;
-use App\Models\User;
-use App\Notifications\OrderCancelRequested;
 use App\Support\OrderStatus;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -23,7 +21,6 @@ class OrderShow extends Component
         $this->order = $order->load([
             'technician:id,name,phone',
             'attachments',
-            'payments',
             'invoice',
             'services',
             'orderServices',
@@ -126,10 +123,7 @@ class OrderShow extends Component
             return;
         }
 
-        $admin = User::where('role', 'admin')->first();
-        if ($admin) {
-            $admin->notify(new OrderCancelRequested($this->order));
-        }
+        // Admin notifications removed - only Company ↔ Driver
 
         session()->flash('success', 'تم إرسال طلب الإلغاء للمدير.');
     }
@@ -140,12 +134,9 @@ class OrderShow extends Component
         $quotationInvoice = $attachments->where('type', 'quotation_invoice')->first();
         $hasQuotation = $quotationInvoice !== null;
 
-        $payment = $this->order->payments?->first();
-        $amount = $payment?->amount ?? $this->order->total_amount;
+        $amount = (float) ($this->order->total_amount ?? 0);
         $firstService = $this->order->orderServices->first() ?? $this->order->services->first();
         $serviceName = $firstService?->display_name ?? $firstService?->name ?? '-';
-        $before = $attachments->where('type', 'before_photo');
-        $after = $attachments->where('type', 'after_photo');
         $driverInvoice = $attachments->where('type', 'driver_invoice')->first();
 
         $isQuotationImage = $quotationInvoice && in_array(
@@ -161,11 +152,8 @@ class OrderShow extends Component
             'order' => $this->order,
             'quotationInvoice' => $quotationInvoice,
             'hasQuotation' => $hasQuotation,
-            'payment' => $payment,
             'amount' => $amount,
             'serviceName' => $serviceName,
-            'before' => $before,
-            'after' => $after,
             'driverInvoice' => $driverInvoice,
             'isQuotationImage' => $isQuotationImage,
             'isDriverInvoiceImage' => $isDriverInvoiceImage,

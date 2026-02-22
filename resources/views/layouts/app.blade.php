@@ -5,7 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        @include('components.seo-meta', [
+            'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: config('app.name', 'Laravel'),
+            'description' => config('seo.default_description'),
+            'noindex' => request()->is('profile') || request()->is('dashboard*'),
+        ])
         @if($siteLogoUrl ?? null)
             <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
         @else

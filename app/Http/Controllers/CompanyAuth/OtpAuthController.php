@@ -29,20 +29,17 @@ class OtpAuthController extends Controller
 
         $phone = trim($data['phone']);
 
-        // تحويل الرقم إلى صيغة دولية لو كان يبدأ بـ 0
+        // 
         if (str_starts_with($phone, '0')) {
             $phone = '+966' . substr($phone, 1);
         }
 
-        // توليد OTP
         $otp = (string)random_int(100000, 999999);
 
-        // تخزين OTP في السيشن
         Session::put('otp.phone', $phone);
         Session::put('otp.code', $otp);
         Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
 
-        // إرسال OTP: إذا لا يوجد API أو بيئة محلية → نكتب الرمز في storage/logs/laravel.log
         $hasOtpApi = !empty(config('services.authentica.api_key', '')) || !empty(env('AUTHENTICA_API_KEY'));
         $sendViaApi = $hasOtpApi && !app()->environment('local');
 

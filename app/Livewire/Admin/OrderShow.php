@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Models\Attachment;
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\OrderUpdate;
 use App\Services\ActivityLogger;
@@ -27,10 +26,7 @@ class OrderShow extends Component
     public string $assign_note = '';
     public string $to_status = '';
     public string $status_note = '';
-    public string $payment_method = 'cash';
-    public string $payment_status = 'pending';
-    public string $payment_amount = '';
-    public string $attachment_type = 'before_photo';
+    public string $attachment_type = 'signature';
     public $attachment_file = null;
 
     public function mount(Order $order, $technicians = null): void
@@ -41,17 +37,11 @@ class OrderShow extends Component
             'technician',
             'services',
             'statusLogs',
-            'payments',
-            'payment',
             'invoice',
             'attachments',
         ]);
         $this->technicians = $technicians ?? collect();
         $this->to_status = $order->status;
-        $payment = $order->payment;
-        $this->payment_method = $payment?->method ?? 'cash';
-        $this->payment_status = $payment?->status ?? 'pending';
-        $this->payment_amount = $payment ? (string) $payment->amount : (string) ($order->total_amount ?? 0);
     }
 
     public function assignTechnician(): void
@@ -116,10 +106,6 @@ class OrderShow extends Component
             'changed_by'  => $user->id,
         ]);
 
-        $admin = User::where('role', 'admin')->first();
-        if ($admin) {
-            $admin->notify(new OrderUpdate($this->order));
-        }
         $this->order->company?->notify(new OrderUpdate($this->order));
         ActivityLogger::log(
             action: 'hold_order',
@@ -132,45 +118,9 @@ class OrderShow extends Component
         session()->flash('success', 'تم تحديث حالة الطلب بنجاح.');
     }
 
-    public function storePayment(): void
-    {
-        $this->validate([
-            'payment_method' => ['required', 'in:cash,tap,bank'],
-            'payment_status' => ['required', 'in:pending,paid,failed'],
-            'payment_amount' => ['required', 'numeric', 'min:0'],
-        ]);
-
-        $this->order->payment()->updateOrCreate(
-            ['order_id' => $this->order->id],
-            [
-                'method'     => $this->payment_method,
-                'status'     => $this->payment_status,
-                'amount'     => (float) $this->payment_amount,
-                'paid_at'    => $this->payment_status === 'paid' ? now() : null,
-            ]
-        );
-
-        if ($this->payment_status === 'paid' && $this->order->status !== OrderStatus::COMPLETED) {
-            $from = $this->order->status;
-            $to = OrderStatus::COMPLETED;
-            $this->order->update(['status' => $to]);
-            $this->order->statusLogs()->create([
-                'from_status' => $from,
-                'to_status'   => $to,
-                'note'        => 'تم تسجيل الدفع من لوحة الأدمن.',
-                'changed_by'  => auth()->id(),
-            ]);
-        }
-
-        $this->refreshOrder();
-        $this->payment_status = $this->order->payment?->status ?? 'pending';
-        $this->payment_amount = (string) ($this->order->payment?->amount ?? 0);
-        session()->flash('success', 'تم تسجيل بيانات الدفع.');
-    }
-
     public function createInvoice(): void
     {
-        $this->order->load(['services', 'payments']);
+        $this->order->load(['services']);
         $subtotal = (float) $this->order->total_amount;
         $tax = (float) ($this->order->tax_amount ?? 0);
 
@@ -182,18 +132,6 @@ class OrderShow extends Component
             'paid_amount'    => 0,
         ]);
 
-        $total = $subtotal + $tax;
-        $paid = (float) $this->order->payments()->where('status', 'paid')->sum('amount');
-        $remaining = $total - $paid;
-        if ($remaining > 0 && $this->order->payments()->where('status', 'pending')->count() === 0) {
-            Payment::create([
-                'order_id'   => $this->order->id,
-                'method'     => 'cash',
-                'status'     => 'pending',
-                'amount'     => $remaining,
-            ]);
-        }
-
         $this->refreshOrder();
         session()->flash('success', 'تم إنشاء الفاتورة.');
     }
@@ -201,7 +139,7 @@ class OrderShow extends Component
     public function uploadAttachment(): void
     {
         $this->validate([
-            'attachment_type' => ['required', 'in:before_photo,after_photo,signature,other'],
+            'attachment_type' => ['required', 'in:signature,other'],
             'attachment_file' => ['required', 'file', 'max:5120'],
         ]);
 
@@ -231,25 +169,6 @@ class OrderShow extends Component
         session()->flash('success', 'تم حذف المرفق.');
     }
 
-    public function confirmBankPayment(int $paymentId): void
-    {
-        $payment = Payment::query()
-            ->where('order_id', $this->order->id)
-            ->where('method', 'bank')
-            ->where('status', 'pending')
-            ->findOrFail($paymentId);
-
-        $payment->update([
-            'status'      => 'paid',
-            'paid_at'     => now(),
-            'reviewed_at' => now(),
-            'reviewed_by' => auth()->id(),
-        ]);
-
-        $this->refreshOrder();
-        session()->flash('success', 'تم تأكيد التحويل.');
-    }
-
     protected function refreshOrder(): void
     {
         $this->order = $this->order->fresh([
@@ -258,8 +177,6 @@ class OrderShow extends Component
             'technician',
             'services',
             'statusLogs',
-            'payments',
-            'payment',
             'invoice',
             'attachments',
         ]);
@@ -268,44 +185,12 @@ class OrderShow extends Component
     public function render(): View
     {
         $attachments = $this->order->attachments ?? collect();
-        $before = $attachments->where('type', 'before_photo');
-        $after = $attachments->where('type', 'after_photo');
         $others = $attachments->whereIn('type', ['signature', 'other']);
-
-        $payment = $this->order->payment;
-        $status = $payment?->status;
-        $method = $payment?->method;
-        $amount = (float) ($payment?->amount ?? 0);
-        $statusLabel = match ($status) {
-            'paid' => __('livewire.paid'),
-            'pending' => __('livewire.pending'),
-            'failed' => __('livewire.payment_failed'),
-            default => '—',
-        };
-        $methodLabel = match ($method) {
-            'cash' => __('livewire.cash'),
-            'tap' => __('livewire.tap'),
-            'bank' => __('livewire.bank_transfer'),
-            default => '—',
-        };
-        $badgeClass = match ($status) {
-            'paid' => 'bg-emerald-100 text-emerald-700',
-            'pending' => 'bg-amber-100 text-amber-700',
-            'failed' => 'bg-red-100 text-red-700',
-            default => 'bg-slate-100 text-slate-700',
-        };
 
         return view('livewire.admin.order-show', [
             'order'       => $this->order,
             'technicians' => $this->technicians,
-            'before'      => $before,
-            'after'       => $after,
             'others'      => $others,
-            'payment'     => $payment,
-            'statusLabel' => $statusLabel,
-            'methodLabel' => $methodLabel,
-            'amount'      => $amount,
-            'badgeClass'  => $badgeClass,
         ]);
     }
 }

@@ -39,6 +39,8 @@ return [
     'total_operating_cost' => 'التكلفة التشغيلية الإجمالية',
     'above_normal' => 'أعلى من المعتاد',
     'below_normal' => 'أقل من المعتاد',
+    'below_average' => 'أقل من المعدل',
+    'above_average' => 'أعلى من المعدل',
     'stable_indicator' => 'مستقر',
     'from_normal_at' => 'من المعدل المعتاد بنسبة',
     'indicators_summary' => 'ملخص المؤشرات',

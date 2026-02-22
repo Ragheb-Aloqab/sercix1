@@ -92,6 +92,10 @@ return [
 
     // Topbar / layout
     'subtitle_default' => 'لوحة التحكم',
+    'data_board' => 'لوحة البيانات',
+    'day' => 'يوم',
+    'month' => 'شهر',
+    'six_month_comparison' => 'مقارنة سبعة أشهر',
     'page_title_default' => 'نظرة عامة على التشغيل',
     'theme_light' => 'فاتح',
     'theme_dark' => 'داكن',

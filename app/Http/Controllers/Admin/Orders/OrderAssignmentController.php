@@ -12,6 +12,9 @@ class OrderAssignmentController extends Controller
 {
     public function store(AssignTechnicianRequest $request, Order $order)
     {
+        // Technician assignment disabled - tasks remain unassigned
+        return back()->with('info', __('messages.assignment_disabled'));
+
         $this->authorize('assignTechnician', $order);
 
         $tech = User::query()
@@ -40,9 +43,7 @@ class OrderAssignmentController extends Controller
         $order->technician_id = $tech->id;
         $order->save();
         
-       /* $tech->notify(
-            new OrderAssignedToTechnician($order)
-        );*/
+      
         return back()->with('success', __('messages.order_assigned'));
     }
 }

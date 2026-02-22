@@ -4,8 +4,7 @@
     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
         <button type="button"
             @click="open = ! open"
-            class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800
-                   hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold inline-flex items-center justify-center gap-2"
+            class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 {{ auth('company')->check() ? 'border border-slate-500/50 hover:bg-slate-700/50 text-slate-200' : 'border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
             title="{{ __('index.language') ?? 'Language' }}">
             <i class="fa-solid fa-globe"></i>
             <span class="hidden sm:inline">{{ app()->getLocale() === 'ar' ? __('dashboard.lang_ar') : __('dashboard.lang_en') }}</span>
@@ -18,20 +17,21 @@
              x-transition:leave="transition ease-in duration-75"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="absolute end-0 mt-2 w-40 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft py-1 z-50"
+             class="absolute end-0 mt-2 w-40 rounded-xl shadow-soft py-1 z-50 {{ auth('company')->check() ? 'bg-slate-800 border border-slate-600/50' : 'bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800' }}"
              style="display: none;">
             <a href="{{ route('set-locale', ['lang' => 'ar']) }}"
-               class="block px-4 py-3 min-h-[44px] flex items-center text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'ar' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
+               class="block px-4 py-3 min-h-[44px] flex items-center text-sm {{ auth('company')->check() ? (app()->getLocale() === 'ar' ? 'font-bold text-white hover:bg-slate-700/50' : 'text-slate-400 hover:bg-slate-700/50') : 'hover:bg-slate-100 dark:hover:bg-slate-800 ' . (app()->getLocale() === 'ar' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400') }}">
                 {{ __('dashboard.lang_ar') }}
             </a>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}"
-               class="block px-4 py-3 min-h-[44px] flex items-center text-sm hover:bg-slate-100 dark:hover:bg-slate-800 {{ app()->getLocale() === 'en' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400' }}">
+               class="block px-4 py-3 min-h-[44px] flex items-center text-sm {{ auth('company')->check() ? (app()->getLocale() === 'en' ? 'font-bold text-white hover:bg-slate-700/50' : 'text-slate-400 hover:bg-slate-700/50') : 'hover:bg-slate-100 dark:hover:bg-slate-800 ' . (app()->getLocale() === 'en' ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400') }}">
                 {{ __('dashboard.lang_en') }}
             </a>
         </div>
     </div>
 
-    {{-- Toggle Theme --}}
+    {{-- Toggle Theme (hidden for company - always dark) --}}
+    @if (!auth('company')->check())
     <button
         wire:click="toggleTheme"
         class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl flex items-center justify-center
@@ -43,5 +43,5 @@
         title="{{ $theme === 'dark' ? __('dashboard.theme_light') : __('dashboard.theme_dark') }}">
         <i class="fa-solid {{ $theme === 'dark' ? 'fa-sun' : 'fa-moon' }}"></i>
     </button>
-
+    @endif
 </div>

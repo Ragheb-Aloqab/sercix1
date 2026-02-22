@@ -15,10 +15,6 @@
         <p class="text-3xl font-black mt-1">{{ $completed ?? 0 }}</p>
     </div>
 
-    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
-        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('dashboard.total_paid') }}</p>
-        <p class="text-3xl font-black mt-1">{{ number_format($paidTotal ?? 0, 2) }}</p>
-    </div>
 </div>
 
 <div class="mt-4 sm:mt-6 grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4">

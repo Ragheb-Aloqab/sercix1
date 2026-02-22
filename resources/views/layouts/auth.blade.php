@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ __('login.title') }} — {{ $siteName ?? config('app.name', 'SERV.X') }}</title>
+    @include('components.seo-meta', [
+        'title' => __('login.title') . ' — ' . ($siteName ?? config('app.name', 'SERV.X')),
+        'description' => config('seo.default_description'),
+        'noindex' => true,
+    ])
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -33,7 +37,7 @@
             {{-- Logo --}}
             <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-8">
                 @if($siteLogoUrl ?? null)
-                    <img src="{{ $siteLogoUrl }}" alt="" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? config('app.name', 'SERV.X') }}" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
                 @else
                     <div class="h-11 w-11 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}

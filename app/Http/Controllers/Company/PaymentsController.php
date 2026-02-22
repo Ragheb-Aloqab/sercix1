@@ -73,6 +73,9 @@ class PaymentsController extends Controller
     {
         $this->authorize('update', $payment);
 
+        // Payment process temporarily disabled - backend intact for future integration
+        return back()->with('info', __('messages.payment_temporarily_disabled'));
+
         $company = auth('company')->user();
         if ($payment->status === 'paid') {
             return back()->with('error', __('messages.payment_already_paid'));
@@ -95,6 +98,9 @@ class PaymentsController extends Controller
     public function chargeWithToken(Request $request, Payment $payment)
     {
         $this->authorize('update', $payment);
+
+        // Payment process temporarily disabled - backend intact for future integration
+        return response()->json(['success' => false, 'error' => __('messages.payment_temporarily_disabled')], 400);
 
         if ($payment->status === 'paid') {
             return response()->json(['success' => false, 'error' => __('messages.payment_already_paid')], 400);
@@ -126,6 +132,9 @@ class PaymentsController extends Controller
     public function uploadBankReceipt(Request $request, Payment $payment)
     {
         $this->authorize('update', $payment);
+
+        // Payment process temporarily disabled - backend intact for future integration
+        return back()->with('info', __('messages.payment_temporarily_disabled'));
 
         $company = auth('company')->user();
         if ($payment->status === 'paid') {

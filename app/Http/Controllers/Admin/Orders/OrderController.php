@@ -22,7 +22,6 @@ class OrderController extends Controller
             'technician',
             'services',
             'statusLogs',
-            'payments',
             'invoice',
             'attachments',
         ]);

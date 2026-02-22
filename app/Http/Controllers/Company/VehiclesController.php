@@ -103,17 +103,15 @@ class VehiclesController extends Controller
         $company = auth('company')->user();
         $vehicle->load([
             'branch:id,name',
-            'orders' => fn ($q) => $q->with(['services', 'payments', 'technician:id,name,phone'])
+            'orders' => fn ($q) => $q->with(['services', 'technician:id,name,phone'])
                 ->latest(),
             'fuelRefills' => fn ($q) => $q->latest('refilled_at'),
         ]);
 
         $orders = $vehicle->orders ?? collect();
         $totalOrdersAmount = 0;
-        $totalPaid = 0;
         foreach ($orders as $o) {
             $totalOrdersAmount += (float) ($o->total_amount ?? 0);
-            $totalPaid += (float) ($o->payments->sum('amount'));
         }
 
         $fuelRefills = $vehicle->fuelRefills ?? collect();
@@ -132,20 +130,18 @@ class VehiclesController extends Controller
 
         $ordersWithDisplay = $orders->map(function ($order) use ($statusLabels) {
             $orderTotal = (float) ($order->total_amount ?? 0);
-            $orderPaid = (float) ($order->payments->sum('amount'));
             $orderStatusClass = match ($order->status ?? '') {
-                'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'cancelled', 'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
-                'pending_approval' => 'bg-amber-50 text-amber-700 border-amber-200',
-                'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'pending_confirmation' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                'in_progress' => 'bg-amber-50 text-amber-700 border-amber-200',
-                default => 'bg-slate-100 text-slate-700 border-slate-200',
+                'completed' => 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50',
+                'cancelled', 'rejected' => 'bg-red-500/30 text-red-300 border-red-400/50',
+                'pending_approval' => 'bg-amber-500/30 text-amber-300 border-amber-400/50',
+                'approved' => 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50',
+                'pending_confirmation' => 'bg-indigo-500/30 text-indigo-300 border-indigo-400/50',
+                'in_progress' => 'bg-amber-500/30 text-amber-300 border-amber-400/50',
+                default => 'bg-slate-600/30 text-slate-300 border-slate-500/50',
             };
             return (object) [
                 'order' => $order,
                 'orderTotal' => $orderTotal,
-                'orderPaid' => $orderPaid,
                 'orderStatusClass' => $orderStatusClass,
                 'statusLabel' => $statusLabels[$order->status ?? ''] ?? $order->status,
             ];
@@ -157,7 +153,6 @@ class VehiclesController extends Controller
             'orders',
             'fuelRefills',
             'totalOrdersAmount',
-            'totalPaid',
             'totalFuelCost',
             'totalFuelLiters',
             'statusLabels',

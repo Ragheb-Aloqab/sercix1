@@ -7,8 +7,16 @@
             <span class="font-bold">{{ $order->status }}</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400">{{ __('dashboard.technician_label') }}</span>
-            <span class="font-bold">{{ $order->technician?->name ?? '—' }}</span>
+            <span class="text-slate-500 dark:text-slate-400">{{ __('orders.driver_name') }}</span>
+            <span class="font-bold">{{ $order->requested_by_name ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400">{{ __('orders.vehicle_plate') }}</span>
+            <span class="font-bold">{{ $order->vehicle?->plate_number ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400">{{ __('orders.request_date') }}</span>
+            <span class="font-bold">{{ $order->created_at?->format('Y-m-d H:i') }}</span>
         </div>
         <div class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400">{{ __('common.services') }}</span>

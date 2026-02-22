@@ -5,12 +5,9 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Support\OrderStatus;
-use App\Models\User;
-use App\Models\Payment;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Notifications\OrderCancelRequested;
 class OrdersController extends Controller
 {
     public function index()
@@ -26,7 +23,6 @@ class OrdersController extends Controller
         $order->load([
             'technician:id,name,phone',
             'attachments',
-            'payments',
             'invoice',
             'services',
             'orderServices',
@@ -51,7 +47,6 @@ class OrdersController extends Controller
             'service_ids.*'     => ['integer', 'exists:services,id'],
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
             'notes'             => ['nullable', 'string', 'max:1000'],
-            'payment_method'    => ['required', 'in:cash,tap,bank'],
         ]);
         abort_unless(
             $company->vehicles()->where('id', $data['vehicle_id'])->exists(),
@@ -89,10 +84,7 @@ class OrdersController extends Controller
             __('messages.invalid_services')
         );
 
-        
-        $amount = (float) $services->sum(fn ($s) => (float) ($s->pivot_base_price ?? $s->base_price ?? 0));
-
-        $order = DB::transaction(function () use ($company, $data, $services, $amount) {
+        $order = DB::transaction(function () use ($company, $data, $services) {
 
             $order = Order::create([
                 'company_id'        => $company->id,
@@ -115,14 +107,6 @@ class OrdersController extends Controller
             }
             $order->services()->sync($syncData);
 
-            
-            Payment::create([
-                'order_id'   => $order->id,
-                'method'     => $data['payment_method'],
-                'status'     => 'pending',
-                'amount'     => $amount,
-            ]);
-            
             return $order;
         });
 
@@ -138,10 +122,7 @@ class OrdersController extends Controller
             return back()->with('error', __('messages.order_in_progress_cancel'));
         }
 
-        $admin = User::where('role', 'admin')->first();
-        if ($admin) {
-            $admin->notify(new OrderCancelRequested($order));
-        }
+        // Admin notifications removed - only Company ↔ Driver
 
         return back()->with('success', __('messages.order_cancel_requested'));
     }

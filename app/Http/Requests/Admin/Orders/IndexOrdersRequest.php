@@ -17,7 +17,6 @@ class IndexOrdersRequest extends FormRequest
             'status' => ['nullable', 'string'],
             'company_id' => ['nullable', 'integer', 'exists:companies,id'],
             'technician_id' => ['nullable', 'integer', 'exists:users,id'],
-            'payment_method' => ['nullable', 'in:cash,tap'],
 
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date', 'after_or_equal:from'],

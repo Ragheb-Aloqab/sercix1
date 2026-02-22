@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payments/tap/webhook',
         ]);
+        $middleware->appendToGroup('web', \App\Http\Middleware\ForceHttps::class);
         $middleware->redirectGuestsTo(fn () => route('dashboard'));
         $middleware->web(append: [\App\Http\Middleware\SetLocaleFromSession::class]);
         $middleware->alias([

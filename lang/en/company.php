@@ -39,6 +39,8 @@ return [
     'total_operating_cost' => 'Total operating cost',
     'above_normal' => 'Above normal',
     'below_normal' => 'Below normal',
+    'below_average' => 'Below average',
+    'above_average' => 'Above average',
     'stable_indicator' => 'Stable',
     'from_normal_at' => 'from normal rate at',
     'indicators_summary' => 'Indicators summary',

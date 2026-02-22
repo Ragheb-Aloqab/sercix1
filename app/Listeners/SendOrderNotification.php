@@ -5,8 +5,6 @@ namespace App\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Events\OrderCreated;
-use App\Models\User;
-use App\Notifications\NewOrderForAdmin;
 use App\Services\ActivityLogger;
 class SendOrderNotification
 {
@@ -23,16 +21,9 @@ class SendOrderNotification
      */
     public function handle(OrderCreated $event): void
     {
-        // Only notify admin when order is pending (ready for assignment), not when driver just requested
-        if ($event->order->status === 'pending_approval') {
-            return;
-        }
+        // Admin notifications removed - only Company ↔ Driver notifications
 
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new NewOrderForAdmin($event->order));
-        }
-      ActivityLogger::log(
+        ActivityLogger::log(
             action: 'order_created',
             subjectType: 'order',
             subjectId: $event->order->id,

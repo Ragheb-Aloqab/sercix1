@@ -30,19 +30,6 @@
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('dashboard.today_revenue') }}</p>
-                    <p class="text-3xl font-black mt-1">{{ number_format($todayRevenue, 2) }}</p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center">
-                    <i class="fa-solid fa-sack-dollar"></i>
-                </div>
-            </div>
-            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ __('dashboard.pending_payments') }}: {{ $pendingPayments }}</p>
-        </div>
-
-        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
-            <div class="flex items-start justify-between">
-                <div>
                     <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('dashboard.pending') }}</p>
                     <p class="text-3xl font-black mt-1">{{ $pending }}</p>
                 </div>
@@ -84,7 +71,6 @@
             <h2 class="text-lg font-black">{{ __('dashboard.alerts') }}</h2>
             <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
                 <li>• {{ __('dashboard.unassigned') }}: {{ $unassigned }}</li>
-                <li>• {{ __('dashboard.pending_payments') }}: {{ $pendingPayments }}</li>
                 <li>• {{ __('dashboard.active_techs') }}: {{ $activeTechs }}</li>
             </ul>
         </div>

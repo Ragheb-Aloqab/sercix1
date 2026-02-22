@@ -1,11 +1,10 @@
 
 <aside id="sidebar"
     class="hidden lg:flex flex-col fixed inset-y-0 z-50 w-80 max-w-[90vw]
-    left-0
-    bg-white/80 dark:bg-slate-900/70 backdrop-blur border-slate-200/70 dark:border-slate-800
-    border-e shadow-soft lg:shadow-none
-    h-dvh overflow-hidden">
-    <div class="px-6 py-6 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
+    left-0 backdrop-blur shadow-soft lg:shadow-none
+    border-e h-dvh overflow-hidden
+    {{ $role === 'company' ? 'bg-slate-800/80 border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
+    <div class="px-6 py-6 border-b {{ $role === 'company' ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-between">
         <a href="{{ route('index') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
             @if(($siteLogoUrl ?? null))
                 <img src="{{ $siteLogoUrl }}" alt="" class="w-11 h-11 rounded-2xl object-cover flex-shrink-0">
@@ -16,7 +15,7 @@
                 </div>
             @endif
             <div class="min-w-0">
-                <p class="font-extrabold leading-5 truncate">
+                <p class="font-extrabold leading-5 truncate {{ $role === 'company' ? 'text-white' : '' }}">
                     {{ $siteName ?? 'SERV.X' }}
                     @if ($role === 'admin')
                         {{ __('dashboard.admin') }}
@@ -30,13 +29,13 @@
                         {{ __('dashboard.guest') }}
                     @endif
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('dashboard.dashboard_v1') }}</p>
+                <p class="text-xs {{ $role === 'company' ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">{{ __('dashboard.dashboard_v1') }}</p>
             </div>
         </a>
 
         <button id="closeSidebar"
             class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl
-            border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
+            {{ $role === 'company' ? 'border-slate-600/50 hover:bg-slate-700/50 text-slate-300' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
             <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
@@ -46,7 +45,7 @@
 
         {{-- Nav — shared items + role-specific links --}}
         <nav class="px-4 pb-6">
-            <p class="px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">{{ __('dashboard.menu') }}</p>
+            <p class="px-3 text-xs font-semibold {{ $role === 'company' ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }} mb-2">{{ __('dashboard.menu') }}</p>
 
             {{-- Overview (role-specific href) --}}
             <a href="{{ $overviewHref }}" class="mt-2 {{ $overviewActive ? $active : $link }}">
@@ -82,17 +81,17 @@
     </div>
 
     {{-- Footer (Fixed Bottom) — logout / user info --}}
-    <div class="p-6 border-t border-slate-200/70 dark:border-slate-800">
+    <div class="p-6 border-t {{ $role === 'company' ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }}">
         <div class="flex items-center gap-3">
             <div
-                class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center font-black">
+                class="w-10 h-10 rounded-2xl flex items-center justify-center font-black {{ $role === 'company' ? 'bg-sky-600 text-white' : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' }}">
                 {{ $avatarLetter }}
             </div>
 
             <div class="flex-1 min-w-0">
-                <p class="font-bold leading-5 truncate">{{ $displayName }}</p>
+                <p class="font-bold leading-5 truncate {{ $role === 'company' ? 'text-white' : '' }}">{{ $displayName }}</p>
                 @if ($displayEmail)
-                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ $displayEmail }}</p>
+                    <p class="text-xs truncate {{ $role === 'company' ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">{{ $displayEmail }}</p>
                 @endif
             </div>
 
@@ -101,7 +100,7 @@
                 <form method="POST" action="{{ route('company.logout') }}" class="inline">
                     @csrf
                     <button type="submit"
-                        class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
+                        class="px-3 py-2 rounded-xl border border-slate-500/50 hover:bg-slate-700/50 text-slate-300 text-sm font-semibold transition-colors">
                         <i class="fa-solid fa-right-from-bracket me-2"></i> {{ __('dashboard.logout') }}
                     </button>
                 </form>

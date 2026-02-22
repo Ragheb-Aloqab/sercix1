@@ -69,10 +69,19 @@ class Sidebar extends Component
         $companyUser = auth('company')->user();
         $webUser = auth('web')->user();
         $role = $this->resolveRole();
-        $link = 'group flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800';
-        $active = 'group flex items-center gap-3 px-3 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900';
-        $iconWrap = 'w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center';
-        $iconWrapActive = 'w-9 h-9 rounded-xl bg-white/15 dark:bg-slate-900/10 flex items-center justify-center';
+        $isCompany = $role === 'company';
+        $link = $isCompany
+            ? 'group flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors'
+            : 'group flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800';
+        $active = $isCompany
+            ? 'group flex items-center gap-3 px-3 py-3 rounded-2xl bg-sky-500/30 text-sky-200 border border-sky-400/40'
+            : 'group flex items-center gap-3 px-3 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900';
+        $iconWrap = $isCompany
+            ? 'w-9 h-9 rounded-xl bg-slate-700/50 flex items-center justify-center text-slate-400'
+            : 'w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center';
+        $iconWrapActive = $isCompany
+            ? 'w-9 h-9 rounded-xl bg-sky-500/40 flex items-center justify-center text-sky-200'
+            : 'w-9 h-9 rounded-xl bg-white/15 dark:bg-slate-900/10 flex items-center justify-center';
         $overviewHref = match ($role) {
             'admin' => route('admin.dashboard'),
             'technician' => route('tech.dashboard'),

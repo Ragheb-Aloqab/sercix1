@@ -98,9 +98,7 @@ class NotificationsBell extends Component
             $orderId = data_get($notification->data, 'order_id');
             $paymentId = data_get($notification->data, 'payment_id');
 
-            if ($paymentId && Auth::guard('company')->check()) {
-                $url = route('company.payments.show', $paymentId);
-            } elseif ($orderId) {
+            if ($orderId) {
                 if (Auth::guard('company')->check()) {
                     $url = route('company.orders.show', $orderId);
                 } elseif (Auth::guard('web')->check() && ($actor->role ?? null) === 'technician') {
@@ -108,11 +106,12 @@ class NotificationsBell extends Component
                 } else {
                     $url = route('admin.orders.show', $orderId);
                 }
-            } elseif ($paymentId && Auth::guard('web')->check()) {
-                // no admin payment show route; best fallback is order if available
+            } elseif ($paymentId) {
                 $maybeOrderId = data_get($notification->data, 'order_id');
                 if ($maybeOrderId) {
-                    $url = route('admin.orders.show', $maybeOrderId);
+                    $url = Auth::guard('company')->check()
+                        ? route('company.orders.show', $maybeOrderId)
+                        : route('admin.orders.show', $maybeOrderId);
                 }
             }
         }

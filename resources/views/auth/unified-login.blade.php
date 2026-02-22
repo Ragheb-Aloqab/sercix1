@@ -3,7 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>{{ __('login.title') }} — {{ $siteName ?? 'SERV.X' }}</title>
+    @include('components.seo-meta', [
+        'title' => __('login.title') . ' — ' . ($siteName ?? 'SERV.X'),
+        'description' => config('seo.default_description'),
+        'noindex' => true,
+    ])
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -20,7 +24,7 @@
     <div class="w-full max-w-sm">
         <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6">
             @if($siteLogoUrl ?? null)
-                <img src="{{ $siteLogoUrl }}" alt="" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
+                <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
             @else
                 <div class="h-11 w-11 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
             @endif

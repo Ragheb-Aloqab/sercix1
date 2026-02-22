@@ -3,7 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>@yield('title', __('driver.dashboard')) — {{ $siteName ?? 'SERV.X' }}</title>
+    @include('components.seo-meta', [
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('driver.dashboard') . ' — ' . ($siteName ?? 'SERV.X')),
+        'description' => config('seo.default_description'),
+        'noindex' => true,
+    ])
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else

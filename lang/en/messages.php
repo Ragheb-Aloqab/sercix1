@@ -33,6 +33,7 @@ return [
 
     // Orders (Admin)
     'order_assigned' => 'Order assigned to technician successfully.',
+    'assignment_disabled' => 'Technician assignment is temporarily disabled.',
     'order_status_updated' => 'Order status updated successfully.',
     'order_completed_no_change' => 'Cannot change a completed order.',
     'order_cancelled_no_change' => 'Cannot change a cancelled order.',
@@ -58,6 +59,7 @@ return [
     'payment_note_admin' => 'Payment recorded from admin panel.',
     'payment_note_tap' => 'Payment completed via Tap.',
     'payment_already_paid' => 'This payment is already paid.',
+    'payment_temporarily_disabled' => 'Payment processing is temporarily disabled. Your payment data is preserved for future use.',
     'tap_not_implemented' => 'Tap integration is not yet implemented in this controller.',
     'receipt_uploaded' => 'Receipt uploaded successfully. It will be reviewed by admin.',
     'payment_not_found' => 'Payment not found.',

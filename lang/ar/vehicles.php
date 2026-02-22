@@ -30,6 +30,12 @@ return [
     'vin' => 'VIN',
     'driver_name' => 'اسم السائق',
     'driver_phone' => 'جوال السائق',
+    'mobile_number' => 'رقم الجوال',
+    'license_plate' => 'رقم اللوحة',
+    'location' => 'الموقع',
+    'maintenance_requests_count' => 'عدد طلبات الصيانة',
+    'car_image' => 'صورة السيارة',
+    'upload_image' => 'تحميل الصورة',
     'notes' => 'ملاحظات',
 
     // Status

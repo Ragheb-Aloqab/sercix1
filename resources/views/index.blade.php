@@ -4,8 +4,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="{{ __('index.pageTitle') }} — {{ __('index.brandTag') }}" />
-    <title>{{ $siteName ?? 'SERV.X' }} — {{ __('index.pageTitle') }}</title>
+    @include('components.seo-meta', [
+        'title' => ($siteName ?? 'SERV.X') . ' — ' . __('index.pageTitle'),
+        'description' => __('index.pageTitle') . ' — ' . __('index.brandTag'),
+        'image' => $siteLogoUrl ?? null,
+        'noindex' => false,
+        'breadcrumbs' => [['name' => __('index.pageTitle'), 'url' => '/']],
+    ])
     @if ($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -39,6 +44,11 @@
         }
     </style>
 
+    @include('components.structured-data', [
+        'type' => 'all',
+        'breadcrumbs' => [['name' => $siteName ?? 'SERV.X', 'url' => '/']],
+    ])
+
     <script>
         tailwind.config = {
             theme: {
@@ -62,7 +72,7 @@
         <a href="{{ url('/') }}" class="flex items-center gap-3 group">
                 <div class="flex items-center justify-center h-12 w-12 rounded-full shadow-soft overflow-hidden shrink-0 border border-white/20">
                     @if ($siteLogoUrl ?? null)
-                        <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-full w-full object-cover" loading="eager" />
+                        <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
                     @else
                         <div class="h-full w-full bg-red-600 flex items-center justify-center text-white font-black text-lg">
                             {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}
@@ -414,7 +424,7 @@
                 <div class="text-start order-1 rtl:md:order-3">
                     <div class="flex flex-row rtl:flex-row-reverse items-center gap-3">
                         @if ($siteLogoUrl ?? null)
-                            <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-10 w-10 rounded-full object-cover shadow-soft" loading="lazy" />
+                            <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'SERV.X' }}" class="h-10 w-10 rounded-full object-cover shadow-soft" loading="lazy" decoding="async" />
                         @else
                             <div class="h-10 w-10 rounded-full bg-red-600 flex items-center justify-center text-white font-black text-sm shadow-soft">
                                 {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}

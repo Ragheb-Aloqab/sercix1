@@ -4,11 +4,9 @@ namespace App\Observers;
 
 use App\Models\Order;
 use App\Models\User;
-use App\Models\Payment;
 use App\Events\OrderCreated;
 use App\Events\OrderAssignedToTechnician;
 use App\Notifications\DriverServiceRequestNotification;
-use App\Notifications\NewOrderForAdmin;
 use App\Services\InvoicePdfService;
 
 class OrderObserver
@@ -33,13 +31,7 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        // Company approved request: notify admin
-        if ($order->wasChanged('status') && $order->status === 'approved' && $order->getOriginal('status') === 'pending_approval') {
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new NewOrderForAdmin($order));
-            }
-        }
+        // Admin notifications removed - only Company ↔ Driver notifications
 
         // Auto-create invoice when order is completed
         if ($order->wasChanged('status') && $order->status === 'completed') {
@@ -88,34 +80,22 @@ class OrderObserver
             return;
         }
 
-        $order->load(['services', 'payments']);
+        $order->load(['services']);
         $subtotal = (float) $order->total_amount;
         $tax = (float) ($order->tax_amount ?? 0);
-        $paid = (float) $order->payments()->where('status', 'paid')->sum('amount');
 
         $invoice = $order->invoice()->create([
             'company_id' => $order->company_id,
             'invoice_number' => 'INV-' . $order->id . '-' . now()->format('Ymd'),
             'subtotal' => $subtotal,
             'tax' => $tax,
-            'paid_amount' => $paid,
+            'paid_amount' => 0,
         ]);
 
         try {
             app(InvoicePdfService::class)->generate($invoice);
         } catch (\Throwable $e) {
             report($e);
-        }
-
-        $total = $subtotal + $tax;
-        $remaining = max(0, $total - $paid);
-        if ($remaining > 0 && $order->payments()->where('status', 'pending')->count() === 0) {
-            Payment::create([
-                'order_id' => $order->id,
-                'method' => 'cash',
-                'status' => 'pending',
-                'amount' => $remaining,
-            ]);
         }
     }
 }

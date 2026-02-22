@@ -33,7 +33,7 @@ class OrdersList extends Component
         return Order::query()
             ->where('company_id', $company->id)
             ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))
-            ->with(['technician:id,name,phone', 'payments', 'services'])
+            ->with(['vehicle:id,plate_number,make,model', 'services'])
             ->latest();
     }
 
@@ -43,9 +43,7 @@ class OrdersList extends Component
         $statuses = OrderStatus::ALL;
 
         $ordersWithDisplay = $orders->getCollection()->map(function ($order) {
-            $payment = $order->payments?->first();
-            $amount = $payment?->amount ?? $order->total_amount;
-            return (object) ['order' => $order, 'payment' => $payment, 'amount' => $amount];
+            return (object) ['order' => $order];
         });
         $orders->setCollection($ordersWithDisplay);
 

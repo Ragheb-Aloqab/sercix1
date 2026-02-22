@@ -13,14 +13,12 @@ class OrdersList extends Component
 
     public string $search = '';
     public string $status = '';
-    public string $payment_method = '';
     public string $from = '';
     public string $to = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'status' => ['except' => ''],
-        'payment_method' => ['except' => ''],
         'from' => ['except' => ''],
         'to' => ['except' => ''],
     ];
@@ -31,11 +29,6 @@ class OrdersList extends Component
     }
 
     public function updatedStatus(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedPaymentMethod(): void
     {
         $this->resetPage();
     }
@@ -54,7 +47,6 @@ class OrdersList extends Component
     {
         $this->search = '';
         $this->status = '';
-        $this->payment_method = '';
         $this->from = '';
         $this->to = '';
         $this->resetPage();
@@ -67,12 +59,10 @@ class OrdersList extends Component
                 'company:id,company_name,phone',
                 'vehicle:id,company_id,make,model,plate_number',
                 'technician:id,name,phone',
-                'payment:id,order_id,method,status,amount,paid_at',
                 'services:id,name',
             ])
             ->withCount('services')
             ->when($this->status !== '' && in_array($this->status, OrderStatus::ALL, true), fn ($q) => $q->where('status', $this->status))
-            ->when($this->payment_method !== '', fn ($q) => $q->whereHas('payments', fn ($p) => $p->where('method', $this->payment_method)))
             ->when($this->from !== '', fn ($q) => $q->whereDate('created_at', '>=', $this->from))
             ->when($this->to !== '', fn ($q) => $q->whereDate('created_at', '<=', $this->to))
             ->when($this->search !== '', function ($q) {

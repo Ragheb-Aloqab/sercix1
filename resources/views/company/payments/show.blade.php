@@ -1,174 +1,79 @@
 @extends('admin.layouts.app')
 
-@section('page_title', 'Payment Details')
-@section('subtitle', 'Track payment status')
+@section('page_title', __('payments.payment_details') ?? 'Payment Details')
+@section('subtitle', __('payments.track_status') ?? 'Track payment status')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-6 space-y-6">
-
-    <div>
-        <h1 class="text-2xl font-black">المدفوع #{{ $payment->id }}</h1>
-        <p class="text-sm text-slate-500 mt-1">الطلب #{{ $payment->order_id }}</p>
-    </div>
+@include('company.partials.glass-start', ['title' => __('payments.payment_details') ?? 'تفاصيل المدفوع'])
 
     @if (session('success'))
-        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold text-sm">
+        <div class="p-4 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 mb-6">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session('error'))
-        <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 font-semibold text-sm">
+        <div class="p-4 rounded-2xl bg-red-500/20 text-red-300 border border-red-400/50 mb-6">
             {{ session('error') }}
         </div>
     @endif
 
     @if (session('info'))
-        <div class="p-3 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 font-semibold text-sm">
+        <div class="p-4 rounded-2xl bg-sky-500/20 text-sky-300 border border-sky-400/50 mb-6">
             {{ session('info') }}
         </div>
     @endif
 
-    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div>
-                <p class="text-slate-500">المبلغ</p>
-                <p class="font-black text-lg">{{ number_format((float) $payment->amount, 2) }} SAR</p>
-            </div>
-
-            <div>
-                <p class="text-slate-500">الحالة</p>
-                <span class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold {{ $payment->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800' }}">
-                    {{ $payment->status === 'paid' ? 'Paid' : 'Unpaid' }}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+            <p class="text-sm text-slate-400 mb-2 text-end">{{ __('payments.amount') ?? 'المبلغ' }}</p>
+            <p class="text-2xl font-black text-white text-end">{{ number_format((float) $payment->amount, 2) }} {{ __('company.sar') }}</p>
+        </div>
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+            <p class="text-sm text-slate-400 mb-2 text-end">{{ __('payments.status') ?? 'الحالة' }}</p>
+            <p class="text-end">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold {{ $payment->status === 'paid' ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/50' : 'bg-amber-500/30 text-amber-300 border border-amber-400/50' }}">
+                    {{ $payment->status === 'paid' ? __('vehicles.paid') : __('payments.unpaid') ?? 'Unpaid' }}
                 </span>
-            </div>
-
-            <div>
-                <p class="text-slate-500">طريقة الدفع</p>
-                <p class="font-bold">{{ $payment->method ? strtoupper($payment->method) : '—' }}</p>
-            </div>
-
-            <div>
-                <p class="text-slate-500">التاريخ</p>
-                <p>{{ optional($payment->created_at)->format('Y-m-d H:i') }}</p>
-            </div>
-
-            @if (!empty($payment->paid_at))
-                <div>
-                    <p class="text-slate-500">Paid at</p>
-                    <p>{{ \Illuminate\Support\Carbon::parse($payment->paid_at)->format('Y-m-d H:i') }}</p>
-                </div>
-            @endif
+            </p>
+        </div>
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+            <p class="text-sm text-slate-400 mb-2 text-end">{{ __('payments.method') ?? 'طريقة الدفع' }}</p>
+            <p class="font-bold text-white text-end">{{ $payment->method ? strtoupper($payment->method) : '—' }}</p>
+        </div>
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+            <p class="text-sm text-slate-400 mb-2 text-end">{{ __('payments.date') ?? 'التاريخ' }}</p>
+            <p class="font-bold text-white text-end">{{ optional($payment->created_at)->format('Y-m-d H:i') }}</p>
         </div>
     </div>
 
-    @if ($payment->status !== 'paid')
-        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-6 space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a href="{{ route('company.payments.show', $payment) }}?mode=online"
-                   class="w-full px-5 py-3 rounded-2xl font-black text-center border {{ $mode === 'online' ? 'bg-emerald-600 text-white border-emerald-600' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40' }}">
-                    دفع اونلاين
-                </a>
-
-                <a href="{{ route('company.payments.show', $payment) }}?mode=bank"
-                   class="w-full px-5 py-3 rounded-2xl font-black text-center border {{ $mode === 'bank' ? 'bg-sky-600 text-white border-sky-600' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40' }}">
-                    تحويل بنكي
-                </a>
-            </div>
-
-            @if ($mode === 'online')
-                @if (!empty($enabled['tap']))
-                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-black">دفع اونلاين</p>
-                                <p class="text-sm text-slate-500 mt-1">Amount: {{ number_format((float) $payment->amount, 2) }} SAR</p>
-                            </div>
-                        </div>
-
-                        {{-- Tap hosted page (works reliably — Tap's CDN for embedded form often fails) --}}
-                        <form method="POST" action="{{ route('company.payments.tap', $payment) }}">
-                            @csrf
-                            <button type="submit" class="w-full px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black">
-                                دفع الان
-                            </button>
-                        </form>
-                        <p class="text-xs text-slate-500 mt-2">ستنتقل إلى صفحة Tap الآمنة لإدخال بيانات البطاقة.</p>
-                    </div>
-                @else
-                    <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 font-semibold text-sm">
-                        الدفع اونلاين غير متوفر حاليا
-                    </div>
-                @endif
-            @endif
-
-            @if ($mode === 'bank')
-                @if (!empty($enabled['bank']) && $bankAccounts->count())
-                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-                        <div>
-                            <p class="font-black">تحويل بنكي</p>
-                            <p class="text-sm text-slate-500 mt-1">Amount: {{ number_format((float) $payment->amount, 2) }} SAR</p>
-                        </div>
-
-                        <form method="POST" action="{{ route('company.payments.bank.receipt', $payment) }}" enctype="multipart/form-data" class="space-y-4">
-                            @csrf
-
-                            <div>
-                                <label class="text-sm font-bold">حساب بنكي</label>
-                                <select name="bank_account_id" required
-                                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                                    @foreach ($bankAccounts as $acc)
-                                        <option value="{{ $acc->id }}">
-                                            {{ $acc->bank_name }} - {{ $acc->account_name }} ({{ $acc->iban }})
-                                            @if ($acc->is_default) * @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('bank_account_id')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="text-sm font-bold">اسم المرسل</label>
-                                <input name="sender_name" required
-                                       class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                                @error('sender_name')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="text-sm font-bold">Transfer receipt</label>
-                                <input type="file" name="receipt" accept="image/*" required class="mt-2 w-full text-sm">
-                                @error('receipt')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <button class="w-full px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-black">
-                                Submit receipt
-                            </button>
-                        </form>
-                    </div>
-                @else
-                    <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 font-semibold text-sm">
-                        الدفع البنكي غير متوفر حاليا.
-                    </div>
-                @endif
-            @endif
-
-            @if ($mode !== 'online' && $mode !== 'bank')
-                <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-sm">
-                    اختر طريقة الدفع للاستمرار
-                </div>
-            @endif
-        </div>
-    @else
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 font-bold text-center">
-            This payment is already paid.
+    @if (!empty($payment->paid_at))
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm mb-6">
+            <p class="text-sm text-slate-400 mb-2 text-end">{{ __('payments.paid_at') ?? 'Paid at' }}</p>
+            <p class="font-bold text-white text-end">{{ \Illuminate\Support\Carbon::parse($payment->paid_at)->format('Y-m-d H:i') }}</p>
         </div>
     @endif
 
-</div>
+    @if ($payment->status !== 'paid')
+        <div class="rounded-2xl bg-amber-500/20 border border-amber-400/50 p-4 text-amber-300 font-semibold text-sm mb-6">
+            {{ __('messages.payment_temporarily_disabled') }}
+        </div>
+    @else
+        <div class="rounded-2xl bg-emerald-500/20 border border-emerald-400/50 p-4 text-emerald-300 font-bold text-center mb-6">
+            {{ __('payments.already_paid') ?? 'This payment is already paid.' }}
+        </div>
+    @endif
+
+    <div class="flex flex-wrap gap-3">
+        <a href="{{ route('company.orders.show', $payment->order) }}"
+            class="px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:border-slate-400/50 hover:bg-slate-700/50 transition-all">
+            <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} me-2"></i> {{ __('common.back') ?? 'رجوع' }}
+        </a>
+        <a href="{{ route('company.payments.index') }}"
+            class="px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:border-slate-400/50 hover:bg-slate-700/50 transition-all">
+            {{ __('payments.all_payments') ?? 'كل المدفوعات' }}
+        </a>
+    </div>
+
+@include('company.partials.glass-end')
 @endsection

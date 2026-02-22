@@ -49,9 +49,6 @@ class InvoicesController extends Controller
 
         $invoices = (clone $baseQuery)
             ->with([
-                'order.payments' => function ($q) {
-                    $q->select('id', 'order_id', 'status', 'amount', 'method', 'paid_at', 'created_at');
-                },
                 'order.services',
                 'order.vehicle',
                 'fuelRefill.vehicle',
@@ -64,7 +61,7 @@ class InvoicesController extends Controller
             $total = (float) ($invoice->total ?? 0);
 
             $paid = $invoice->order_id
-                ? (float) ($invoice->order?->payments?->where('status', 'paid')->sum(fn ($p) => (float) $p->amount) ?? 0)
+                ? (float) ($invoice->order?->invoice?->paid_amount ?? 0)
                 : 0.0;
 
             $remaining = max(0, $total - $paid);
@@ -167,16 +164,13 @@ class InvoicesController extends Controller
         $invoice->load([
             'order.services',
             'order.vehicle',
-            'order.payments',
             'order.attachments',
             'fuelRefill.vehicle',
         ]);
 
         $total = (float) ($invoice->total ?? 0);
 
-        $paid = $invoice->order_id
-            ? (float) ($invoice->order?->payments?->where('status', 'paid')->sum(fn ($p) => (float) $p->amount) ?? 0)
-            : 0.0;
+        $paid = (float) ($invoice->paid_amount ?? 0);
 
         $remaining = max(0, $total - $paid);
 

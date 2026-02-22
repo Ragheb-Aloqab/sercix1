@@ -45,40 +45,6 @@
                 @endif
             </div>
 
-            {{-- Payment --}}
-            <div class="mt-3 grid grid-cols-2 gap-3">
-                <div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('orders.payment_method') }}</p>
-                    <span
-                        class="inline-flex px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
-                        {{ $order->payment?->method ?? '—' }}
-                    </span>
-                </div>
-
-                <div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('orders.payment_status') }}</p>
-                    @php($paymentStatus = $order->payment?->status)
-                    @if ($paymentStatus === 'paid')
-                        <span
-                            class="inline-flex px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                            {{ __('common.paid') }}
-                        </span>
-                    @elseif($paymentStatus === 'partial')
-                        <span class="inline-flex px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                            {{ __('common.partial_paid') }}
-                        </span>
-                    @elseif($paymentStatus === 'failed')
-                        <span class="inline-flex px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-                            {{ __('common.payment_failed') }}
-                        </span>
-                    @else
-                        <span class="inline-flex px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-                            {{ __('common.unpaid') }}
-                        </span>
-                    @endif
-                </div>
-            </div>
-
             {{-- Actions --}}
             <div class="mt-4 flex justify-end">
                 <a href="{{ route('admin.orders.show', $order) }}"
@@ -104,8 +70,6 @@
                     <th class="py-3 px-4 font-semibold">{{ __('common.company') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.services') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('orders.order_date') }}</th>
-                    <th class="py-3 px-4 font-semibold">{{ __('orders.payment') }}</th>
-                    <th class="py-3 px-4 font-semibold">{{ __('orders.payment_status') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('orders.status') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.actions') }}</th>
                 </tr>
@@ -147,33 +111,6 @@
                         </td>
 
                         <td class="py-4 px-4">
-                            <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
-                                {{ $order->payment?->method ?? '—' }}
-                            </span>
-                        </td>
-
-                        <td class="py-4 px-4">
-                            @php($paymentStatus = $order->payment?->status)
-                            @if ($paymentStatus === 'paid')
-                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                                    {{ __('common.paid') }}
-                                </span>
-                            @elseif($paymentStatus === 'partial')
-                                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                                    {{ __('common.partial_paid') }}
-                                </span>
-                            @elseif($paymentStatus === 'failed')
-                                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-                                    {{ __('common.payment_failed') }}
-                                </span>
-                            @else
-                                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-                                    {{ __('common.unpaid') }}
-                                </span>
-                            @endif
-                        </td>
-
-                        <td class="py-4 px-4">
                             @include('admin.orders.partials._status_badge', ['status' => $order->status])
                         </td>
 
@@ -186,7 +123,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="py-8 text-center text-slate-500">
+                        <td colspan="6" class="py-8 text-center text-slate-500">
                             {{ __('common.no_orders') }}
                         </td>
                     </tr>

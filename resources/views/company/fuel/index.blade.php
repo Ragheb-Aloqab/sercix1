@@ -5,37 +5,38 @@
 @section('subtitle', __('fuel.subtitle'))
 
 @section('content')
+@include('company.partials.glass-start', ['title' => __('fuel.title')])
     <div class="space-y-6">
-        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3">
+        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 mb-6">
             <a href="{{ route('company.vehicles.index') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
-                <i class="fa-solid fa-arrow-right"></i> {{ __('fuel.back_to_vehicles') }}
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
+                <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}"></i> {{ __('fuel.back_to_vehicles') }}
             </a>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('company.invoices.index', ['invoice_type' => 'fuel']) }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
                     <i class="fa-solid fa-file-invoice"></i> {{ __('invoice.fuel_invoice') }}
                 </a>
                 <a href="{{ route('company.reports.index') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
                     <i class="fa-solid fa-chart-pie"></i> {{ __('reports.all_reports') }}
                 </a>
             </div>
         </div>
 
-        <form method="GET" action="{{ route('company.fuel.index') }}" class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4">
+        <form method="GET" action="{{ route('company.fuel.index') }}" class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 mb-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
-                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.from_date') }}</label>
-                    <input type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent" />
+                    <label class="text-sm font-bold text-slate-400">{{ __('fuel.from_date') }}</label>
+                    <input type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-500/50 px-4 py-2 bg-slate-800/40 text-white" />
                 </div>
                 <div>
-                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.to_date') }}</label>
-                    <input type="date" name="to" value="{{ $to->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent" />
+                    <label class="text-sm font-bold text-slate-400">{{ __('fuel.to_date') }}</label>
+                    <input type="date" name="to" value="{{ $to->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-500/50 px-4 py-2 bg-slate-800/40 text-white" />
                 </div>
                 <div>
-                    <label class="text-sm font-bold text-slate-700">{{ __('fuel.vehicle') }}</label>
-                    <select name="vehicle_id" class="mt-1 w-full rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-2 bg-transparent">
+                    <label class="text-sm font-bold text-slate-400">{{ __('fuel.vehicle') }}</label>
+                    <select name="vehicle_id" class="mt-1 w-full rounded-2xl border border-slate-500/50 px-4 py-2 bg-slate-800/40 text-white">
                         <option value="">{{ __('fuel.all_vehicles') }}</option>
                         @foreach ($vehicles as $v)
                             <option value="{{ $v->id }}" @selected($vehicleId == $v->id)>{{ $v->plate_number }} — {{ trim(($v->make ?? '') . ' ' . ($v->model ?? '')) }}</option>
@@ -50,80 +51,80 @@
             </div>
         </form>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
-                <p class="text-amber-700 dark:text-amber-400 text-sm">{{ __('fuel.total_fuel_cost') }}</p>
-                <p class="text-2xl font-black mt-1 text-amber-700 dark:text-amber-300">{{ number_format($totalCost, 2) }} ر.س</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+                <p class="text-amber-400 text-sm mb-2 text-end">{{ __('fuel.total_fuel_cost') }}</p>
+                <p class="text-2xl font-black text-white text-end">{{ number_format($totalCost, 2) }} {{ __('company.sar') }}</p>
             </div>
-            <div class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
-                <p class="text-amber-700 dark:text-amber-400 text-sm">{{ __('fuel.total_liters') }}</p>
-                <p class="text-2xl font-black mt-1 text-amber-700 dark:text-amber-300">{{ number_format($totalLiters, 1) }}</p>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+                <p class="text-amber-400 text-sm mb-2 text-end">{{ __('fuel.total_liters') }}</p>
+                <p class="text-2xl font-black text-white text-end">{{ number_format($totalLiters, 1) }}</p>
             </div>
-            <div class="rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
-                <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('fuel.refill_count') }}</p>
-                <p class="text-2xl font-black mt-1">{{ $refillCount }}</p>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+                <p class="text-slate-400 text-sm mb-2 text-end">{{ __('fuel.refill_count') }}</p>
+                <p class="text-2xl font-black text-white text-end">{{ $refillCount }}</p>
             </div>
         </div>
 
-        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft overflow-hidden">
-            <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
-                <h2 class="text-lg font-black">{{ __('fuel.refills_log') }}</h2>
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 overflow-hidden">
+            <div class="p-5 border-b border-slate-600/50">
+                <h2 class="text-base font-bold text-slate-300 text-end">{{ __('fuel.refills_log') }}</h2>
             </div>
             <div class="p-5">
                 @if ($refills->count())
-                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-sm min-w-[640px]">
                             <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-700">
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.date') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.vehicle') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.quantity') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('company.cost') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.odometer') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.source') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold">{{ __('fuel.invoice') }}</th>
+                                <tr class="border-b border-slate-600/50 text-slate-400">
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.date') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.vehicle') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.quantity') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('company.cost') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.odometer') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.source') }}</th>
+                                    <th class="text-end py-3 px-2 font-bold">{{ __('fuel.invoice') }}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-600/50">
                                 @foreach ($refills as $fr)
-                                    <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                        <td class="py-3 px-2">{{ $fr->refilled_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
-                                        <td class="py-3 px-2">
+                                    <tr class="hover:bg-slate-700/30 transition-colors">
+                                        <td class="py-3 px-2 text-white text-end">{{ $fr->refilled_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                        <td class="py-3 px-2 text-end">
                                             @if ($fr->vehicle)
-                                                <a href="{{ route('company.vehicles.show', $fr->vehicle) }}" class="text-emerald-600 dark:text-emerald-400 hover:underline">
+                                                <a href="{{ route('company.vehicles.show', $fr->vehicle) }}" class="text-sky-400 hover:text-sky-300">
                                                     {{ $fr->vehicle->plate_number }} — {{ trim(($fr->vehicle->make ?? '') . ' ' . ($fr->vehicle->model ?? '')) }}
                                                 </a>
                                             @else
-                                                —
+                                                <span class="text-slate-500">—</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2">{{ number_format($fr->liters, 1) }}</td>
-                                        <td class="py-3 px-2 font-bold">{{ number_format($fr->cost, 2) }} {{ __('company.sar') }}</td>
-                                        <td class="py-3 px-2">{{ $fr->odometer_km ? number_format($fr->odometer_km) . ' ' . __('common.km') : '—' }}</td>
-                                        <td class="py-3 px-2">
+                                        <td class="py-3 px-2 text-white text-end">{{ number_format($fr->liters, 1) }}</td>
+                                        <td class="py-3 px-2 font-bold text-white text-end">{{ number_format($fr->cost, 2) }} {{ __('company.sar') }}</td>
+                                        <td class="py-3 px-2 text-white text-end">{{ $fr->odometer_km ? number_format($fr->odometer_km) . ' ' . __('common.km') : '—' }}</td>
+                                        <td class="py-3 px-2 text-end">
                                             @if ($fr->isFromExternalProvider())
-                                                <span class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700">{{ $fr->provider }}</span>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-sky-500/30 text-sky-300 border border-sky-400/50">{{ $fr->provider }}</span>
                                             @else
                                                 <span class="text-xs text-slate-500">{{ __('fuel.manual') }}</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2 min-w-[140px]">
+                                        <td class="py-3 px-2 min-w-[140px] text-end">
                                             @if ($fr->invoice)
-                                                <div class="flex flex-wrap gap-2">
-                                                    <a href="{{ route('company.invoices.show', $fr->invoice) }}" class="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline text-sm font-bold">
+                                                <div class="flex flex-wrap gap-2 justify-end">
+                                                    <a href="{{ route('company.invoices.show', $fr->invoice) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold">
                                                         <i class="fa-solid fa-eye"></i> {{ __('invoice.view_details') }}
                                                     </a>
-                                                    <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
+                                                    <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
                                                         <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_invoice') }}
                                                     </a>
                                                 </div>
                                             @elseif ($fr->receipt_path)
-                                                <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-bold">
+                                                <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
                                                     <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
                                                 </a>
                                                 <form method="POST" action="{{ route('company.fuel.generate-invoice', $fr) }}" class="inline mt-1">
                                                     @csrf
-                                                    <button type="submit" class="text-amber-600 dark:text-amber-400 hover:underline text-xs font-bold">
+                                                    <button type="submit" class="text-amber-400 hover:text-amber-300 text-xs font-bold">
                                                         {{ __('invoice.create_invoice') }}
                                                     </button>
                                                 </form>
@@ -138,9 +139,10 @@
                     </div>
                     <div class="mt-4">{{ $refills->links() }}</div>
                 @else
-                    <p class="text-slate-500 dark:text-slate-400">{{ __('fuel.no_refills') }}</p>
+                    <p class="text-slate-500 py-4 text-end">{{ __('fuel.no_refills') }}</p>
                 @endif
             </div>
         </div>
     </div>
+@include('company.partials.glass-end')
 @endsection

@@ -15,13 +15,6 @@
                 @endforeach
             </select>
 
-            <select wire:model.live="payment_method"
-                    class="px-4 py-3 min-h-[44px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                <option value="">{{ __('livewire.all_payment_methods') }}</option>
-                <option value="cash">cash</option>
-                <option value="tap">tap</option>
-            </select>
-
             <input type="date" wire:model.live="from"
                    class="px-4 py-3 min-h-[44px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent" />
 

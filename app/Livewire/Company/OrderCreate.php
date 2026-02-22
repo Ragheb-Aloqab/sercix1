@@ -3,7 +3,6 @@
 namespace App\Livewire\Company;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\Service;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -14,7 +13,6 @@ class OrderCreate extends Component
     public $service_ids = [];
     public $company_branch_id = '';
     public string $notes = '';
-    public string $payment_method = 'cash';
 
     public $services;
     public $branches;
@@ -57,7 +55,6 @@ class OrderCreate extends Component
             'service_ids.*' => ['integer', 'exists:services,id'],
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'payment_method' => ['required', 'in:cash,tap,bank'],
         ];
     }
 
@@ -102,7 +99,7 @@ class OrderCreate extends Component
 
         $amount = (float) $services->sum(fn ($s) => (float) ($s->pivot_base_price ?? $s->base_price ?? 0));
 
-        $order = DB::transaction(function () use ($company, $services, $amount) {
+        $order = DB::transaction(function () use ($company, $services) {
             $order = Order::create([
                 'company_id' => $company->id,
                 'vehicle_id' => (int) $this->vehicle_id,
@@ -121,13 +118,6 @@ class OrderCreate extends Component
                 ];
             }
             $order->services()->sync($syncData);
-
-            Payment::create([
-                'order_id' => $order->id,
-                'method' => $this->payment_method,
-                'status' => 'pending',
-                'amount' => $amount,
-            ]);
 
             return $order;
         });

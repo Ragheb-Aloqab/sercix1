@@ -1,13 +1,17 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}"
-      class="{{ session('ui.theme') === 'dark' ? 'dark' : '' }} h-full scroll-smooth">
+      class="{{ auth('company')->check() || session('ui.theme') === 'dark' ? 'dark' : '' }} h-full scroll-smooth">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>@yield('title', __('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'SERV.X'))</title>
+    @include('components.seo-meta', [
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'SERV.X')),
+        'description' => config('seo.default_description'),
+        'noindex' => true,
+    ])
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -59,9 +63,9 @@
     @stack('styles')
 </head>
 
-<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden">
+<body class="h-full overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
 
-<div class="min-h-screen flex w-full min-w-0">
+<div class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() ? 'company-dashboard-layout' : '' }}">
     {{-- Sidebar --}}
     <livewire:dashboard.sidebar />
 
@@ -74,10 +78,10 @@
         @include('admin.partials.topbar')
 
         {{-- Page Content --}}
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-6 w-full min-w-0 overflow-x-hidden">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-6 w-full min-w-0 overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard-content' : '' }}">
             @yield('content')
 
-            <div class="mt-8 text-sm text-slate-500 dark:text-slate-400">
+            <div class="mt-8 text-sm {{ auth('company')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">
                 © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
             </div>
         </section>

@@ -3,7 +3,6 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\User;
 use Livewire\Component;
 
@@ -41,12 +40,6 @@ class Overview extends Component
             ", [$today])
             ->first();
 
-        $todayRevenue = Payment::query()
-            ->where('status', 'paid')
-            ->whereDate('created_at', $today)
-            ->sum('amount');
-
-        $pendingPayments = Payment::query()->where('status', 'pending')->count();
         $activeTechs = User::query()->where('role', 'technician')->where('status', 'active')->count();
 
         $latestOrders = Order::query()
@@ -60,8 +53,6 @@ class Overview extends Component
             'inProgress'      => (int) ($orderStats?->in_progress ?? 0),
             'pending'         => (int) ($orderStats?->pending ?? 0),
             'unassigned'      => (int) ($orderStats?->unassigned ?? 0),
-            'todayRevenue'    => $todayRevenue,
-            'pendingPayments' => $pendingPayments,
             'activeTechs'     => $activeTechs,
             'latestOrders'    => $latestOrders,
         ]);
@@ -82,11 +73,6 @@ class Overview extends Component
             ", [$today])
             ->first();
 
-        $paidTotal = Payment::query()
-            ->whereHas('order', fn ($q) => $q->where('company_id', $company->id))
-            ->where('status', 'paid')
-            ->sum('amount');
-
         $latestOrders = Order::query()
             ->where('company_id', $company->id)
             ->latest()
@@ -103,7 +89,6 @@ class Overview extends Component
             'todayOrders'    => (int) ($orderStats?->today_orders ?? 0),
             'inProgress'     => (int) ($orderStats?->in_progress ?? 0),
             'completed'      => (int) ($orderStats?->completed ?? 0),
-            'paidTotal'      => $paidTotal,
             'latestOrders'   => $latestOrders,
             'enabledServices' => $enabledServices,
         ]);

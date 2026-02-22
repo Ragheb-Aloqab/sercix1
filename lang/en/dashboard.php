@@ -92,6 +92,10 @@ return [
 
     // Topbar / layout
     'subtitle_default' => 'Dashboard',
+    'data_board' => 'Dashboard',
+    'day' => 'Day',
+    'month' => 'Month',
+    'six_month_comparison' => '7-month comparison',
     'page_title_default' => 'Operations overview',
     'theme_light' => 'Light',
     'theme_dark' => 'Dark',

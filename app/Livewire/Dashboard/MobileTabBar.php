@@ -101,6 +101,7 @@ class MobileTabBar extends Component
             'moreItems' => $moreItems,
             'hasMore' => $hasMore,
             'hasNav' => $hasNav,
+            'role' => $this->getRole(),
         ]);
     }
 }

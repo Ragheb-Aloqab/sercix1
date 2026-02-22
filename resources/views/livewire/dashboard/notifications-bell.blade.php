@@ -1,7 +1,7 @@
 <div class="relative" x-data="{ open: @entangle('open').live }" @click.away="$wire.close(); open=false" wire:poll.visible.20s="refreshUnread">
 
     <button type="button"
-        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl sm:rounded-2xl shrink-0 {{ auth('company')->check() ? 'border border-slate-500/50 hover:bg-slate-700/50 text-slate-200' : 'border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
         wire:click="toggle">
         <i class="fa-regular fa-bell"></i>
 

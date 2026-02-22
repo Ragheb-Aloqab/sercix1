@@ -33,6 +33,7 @@ return [
 
     // Orders (Admin)
     'order_assigned' => 'تم إسناد الطلب للفني بنجاح.',
+    'assignment_disabled' => 'إسناد الفني معطّل مؤقتاً.',
     'order_status_updated' => 'تم تحديث حالة الطلب بنجاح',
     'order_completed_no_change' => 'لا يمكن تغيير طلب مكتمل.',
     'order_cancelled_no_change' => 'لا يمكن تغيير طلب ملغي.',
@@ -58,6 +59,7 @@ return [
     'payment_note_admin' => 'تم تسجيل الدفع من لوحة الأدمن.',
     'payment_note_tap' => 'تم إتمام الدفع عبر Tap.',
     'payment_already_paid' => 'هذه الدفعة مدفوعة بالفعل.',
+    'payment_temporarily_disabled' => 'معالجة الدفع معطّلة مؤقتاً. بيانات الدفع محفوظة للاستخدام المستقبلي.',
     'tap_not_implemented' => 'ربط Tap لم يُنفّذ بعد في هذا الكنترولر.',
     'receipt_uploaded' => 'تم رفع الإيصال بنجاح وسيتم مراجعته من الإدارة.',
     'payment_not_found' => 'الدفعة غير موجودة.',

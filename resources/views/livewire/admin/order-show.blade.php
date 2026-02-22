@@ -51,7 +51,7 @@
             @include('admin.orders.partials._services', ['order' => $order])
             @include('admin.orders.partials._timeline', ['order' => $order])
 
-            {{-- Attachments (Livewire) --}}
+            {{-- Attachments: before/after images removed; signature/other kept for reference --}}
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft">
                 <div class="p-5 border-b border-slate-200/70 dark:border-slate-800">
                     <h2 class="text-lg font-black">{{ __('livewire.attachments') }}</h2>
@@ -60,8 +60,6 @@
                     <form wire:submit="uploadAttachment" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <select wire:model="attachment_type"
                                 class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                            <option value="before_photo">{{ __('livewire.before') }}</option>
-                            <option value="after_photo">{{ __('livewire.after') }}</option>
                             <option value="signature">{{ __('livewire.signature') }}</option>
                             <option value="other">{{ __('livewire.other') }}</option>
                         </select>
@@ -71,38 +69,6 @@
                             {{ __('livewire.upload') }}
                         </button>
                     </form>
-                    <div>
-                        <h3 class="font-black mb-3">{{ __('livewire.photos_before') }}</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                            @forelse($before as $att)
-                                <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                                    <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank"><img src="{{ asset('storage/' . $att->file_path) }}" class="w-full h-32 object-cover" alt=""></a>
-                                    <div class="p-3 flex justify-between items-center">
-                                        <span class="text-xs text-slate-500">{{ $att->created_at?->format('Y-m-d H:i') }}</span>
-                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-sm text-slate-500 col-span-full">{{ __('livewire.no_before_photos') }}</p>
-                            @endforelse
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-black mb-3">{{ __('livewire.photos_after') }}</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                            @forelse($after as $att)
-                                <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                                    <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank"><img src="{{ asset('storage/' . $att->file_path) }}" class="w-full h-32 object-cover" alt=""></a>
-                                    <div class="p-3 flex justify-between items-center">
-                                        <span class="text-xs text-slate-500">{{ $att->created_at?->format('Y-m-d H:i') }}</span>
-                                        <button type="button" wire:click="deleteAttachment({{ $att->id }})" class="text-rose-600 font-bold text-sm">{{ __('common.delete') }}</button>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-sm text-slate-500 col-span-full">{{ __('livewire.no_after_photos') }}</p>
-                            @endforelse
-                        </div>
-                    </div>
                     <div>
                         <h3 class="font-black mb-3">{{ __('livewire.signature_other') }}</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -124,24 +90,7 @@
         </div>
 
         <div class="space-y-4">
-            {{-- Assign technician (Livewire) --}}
-            <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                <h2 class="text-lg font-black mb-3">{{ __('livewire.assign_technician') }}</h2>
-                <p class="text-sm text-slate-500 mb-3">{{ __('livewire.current_technician') }}: <span class="font-bold">{{ $order->technician?->name ?? __('livewire.unassigned') }}</span></p>
-                <form wire:submit="assignTechnician" class="space-y-3">
-                    <select wire:model="technician_id"
-                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                        <option value="0">{{ __('livewire.select_technician') }}</option>
-                        @foreach ($technicians as $t)
-                            <option value="{{ $t->id }}">{{ $t->name }} {{ $t->phone ? "({$t->phone})" : '' }}</option>
-                        @endforeach
-                    </select>
-                    <textarea wire:model="assign_note" rows="3"
-                              class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                              placeholder="{{ __('livewire.reason_optional') }}"></textarea>
-                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold">{{ __('livewire.assign') }}</button>
-                </form>
-            </div>
+            {{-- Technician assignment removed - tasks remain unassigned --}}
 
             {{-- Change status (Livewire) --}}
             <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
@@ -157,54 +106,6 @@
                               class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
                               placeholder="{{ __('livewire.reason_optional') }}"></textarea>
                     <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold">{{ __('livewire.update') }}</button>
-                </form>
-            </div>
-
-            {{-- Payment (Livewire) + Bank receipt --}}
-            <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
-                <h2 class="text-lg font-black mb-3">{{ __('livewire.payment') }}</h2>
-                <div class="text-sm mb-4">
-                    <div class="mt-2 flex flex-wrap items-center gap-2">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold {{ $badgeClass }}">{{ $statusLabel }}</span>
-                        @if ($payment)
-                            <span class="text-xs font-semibold">{{ number_format($amount, 2) }} SAR • {{ $methodLabel }}</span>
-                        @endif
-                    </div>
-                </div>
-                @if ($payment && $payment->method === 'bank' && $payment->status === 'pending' && $payment->receipt_path)
-                    <div class="mb-4 p-4 rounded-2xl border border-sky-200 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-900/20">
-                        <p class="font-bold text-sm mb-2">{{ __('livewire.bank_receipt') }}</p>
-                        @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($payment->receipt_path))
-                            <a href="{{ asset('storage/' . $payment->receipt_path) }}" target="_blank" class="block rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-2">
-                                <img src="{{ asset('storage/' . $payment->receipt_path) }}" alt="إيصال" class="w-full max-h-48 object-contain" />
-                            </a>
-                            <button type="button" wire:click="confirmBankPayment({{ $payment->id }})"
-                                    wire:confirm="{{ __('livewire.confirm_receipt_question') }}"
-                                    class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
-                                {{ __('livewire.confirm_receipt') }}
-                            </button>
-                        @else
-                            <p class="text-slate-500 text-sm">{{ __('livewire.no_file_attached') }}</p>
-                        @endif
-                    </div>
-                @endif
-                <form wire:submit="storePayment" class="space-y-3">
-                    <select wire:model="payment_method"
-                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                        <option value="cash">cash</option>
-                        <option value="tap">tap</option>
-                        <option value="bank">bank</option>
-                    </select>
-                    <select wire:model="payment_status"
-                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-                        <option value="pending">pending</option>
-                        <option value="paid">paid</option>
-                        <option value="failed">failed</option>
-                    </select>
-                    <input type="number" step="0.01" wire:model="payment_amount"
-                           class="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                           placeholder="{{ __('livewire.amount_sar') }}" />
-                    <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">{{ __('common.save_payment') }}</button>
                 </form>
             </div>
 

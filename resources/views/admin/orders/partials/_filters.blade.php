@@ -13,13 +13,6 @@
             @endforeach
         </select>
 
-        <select name="payment_method"
-            class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent">
-            <option value="">كل طرق الدفع</option>
-            <option value="cash" @selected(request('payment_method') === 'cash')>cash</option>
-            <option value="tap" @selected(request('payment_method') === 'tap')>tap</option>
-        </select>
-
         <input type="date" name="from" value="{{ request('from') }}"
             class="px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent" />
 

@@ -15,6 +15,14 @@ Route::post('/logout', function (Request $request) {
 
 Route::get('/', \App\Http\Controllers\IndexController::class)->name('index');
 
+/*
+|--------------------------------------------------------------------------
+| SEO: robots.txt & Sitemap
+|--------------------------------------------------------------------------
+*/
+Route::get('/robots.txt', \App\Http\Controllers\RobotsController::class)->name('robots');
+Route::get('/sitemap.xml', \App\Http\Controllers\SitemapController::class)->name('sitemap');
+
 Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('set-locale');
 
 /*

@@ -4,7 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>إنشاء حساب شركة — OTP</title>
+    @include('components.seo-meta', [
+        'title' => __('index.create_company_account') . ' — ' . ($siteName ?? 'SERV.X'),
+        'description' => config('seo.default_description'),
+        'noindex' => true,
+    ])
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
