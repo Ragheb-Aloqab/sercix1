@@ -11,10 +11,12 @@ class Vehicle extends Model
         'company_id',
         'company_branch_id',
         'type',
+        'name',
         'make',
         'model',
         'year',
         'plate_number',
+        'imei',
         'color',
         'image_path',
         'driver_name',
@@ -41,5 +43,24 @@ class Vehicle extends Model
     public function fuelRefills()
     {
         return $this->hasMany(FuelRefill::class)->orderByDesc('refilled_at');
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(VehicleLocation::class)->orderByDesc('tracker_timestamp');
+    }
+
+    public function latestLocation()
+    {
+        return $this->hasOne(VehicleLocation::class)->latestOfMany('tracker_timestamp');
+    }
+
+    /** Display name: name or make+model */
+    public function getDisplayNameAttribute(): string
+    {
+        if (!empty($this->name)) {
+            return $this->name;
+        }
+        return trim(($this->make ?? '') . ' ' . ($this->model ?? '')) ?: $this->plate_number ?? __('vehicles.vehicle');
     }
 }

@@ -19,14 +19,19 @@ class Company extends Authenticatable
         'phone',
         'email',
         'status',
-        // إذا عندك كلمة مرور (حتى لو OTP فقط)
-        // 'password',
-        'password'
+        'password',
+        'tracking_api_key',
+        'tracking_base_url',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'tracking_api_key',
+    ];
+
+    protected $casts = [
+        'tracking_api_key' => 'encrypted',
     ];
 
     /*

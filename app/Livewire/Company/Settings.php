@@ -13,6 +13,9 @@ class Settings extends Component
     public string $email = '';
     public string $phone = '';
 
+    public string $tracking_api_key = '';
+    public string $tracking_base_url = '';
+
     public string $current_password = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -30,6 +33,8 @@ class Settings extends Component
         $this->name  = (string) ($company->company_name ?? $company->name ?? '');
         $this->email = (string) ($company->email ?? '');
         $this->phone = (string) ($company->phone ?? '');
+        // Do not load API key for security - user enters new value to update
+        $this->tracking_base_url = (string) ($company->tracking_base_url ?? '');
     }
 
     public function saveProfile()
@@ -63,6 +68,25 @@ class Settings extends Component
         $company->save();
 
         session()->flash('success', 'تم تحديث بيانات الشركة ');
+    }
+
+    public function saveTrackingSettings()
+    {
+        $company = $this->company();
+        abort_unless($company, 403);
+
+        $this->validate([
+            'tracking_base_url' => ['nullable', 'string', 'max:500', 'url'],
+            'tracking_api_key' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $company->tracking_base_url = $this->tracking_base_url ?: null;
+        if ($this->tracking_api_key !== '') {
+            $company->tracking_api_key = $this->tracking_api_key;
+        }
+        $company->save();
+
+        session()->flash('success', __('tracking.settings_saved'));
     }
 
     public function changePassword()

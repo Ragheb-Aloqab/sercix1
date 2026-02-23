@@ -13,6 +13,7 @@ use App\Http\Controllers\Company\PaymentsController;
 use App\Http\Controllers\Company\ServicesController;
 use App\Http\Controllers\Company\NotificationsController;
 use App\Http\Controllers\Company\BranchesController;
+use App\Http\Controllers\Company\TrackingController;
 use App\Livewire\Company\Settings;
 
 /*
@@ -124,6 +125,19 @@ Route::middleware(['company'])
         Route::patch('/vehicles/{vehicle}', [VehiclesController::class, 'update'])
             ->name('vehicles.update')
             ->whereNumber('vehicle');
+
+        // Tracking
+        Route::get('/vehicles/{vehicle}/track', [TrackingController::class, 'show'])
+            ->name('vehicles.track')
+            ->whereNumber('vehicle');
+        Route::post('/vehicles/{vehicle}/track/fetch', [TrackingController::class, 'fetchLocation'])
+            ->name('vehicles.track.fetch')
+            ->whereNumber('vehicle');
+        Route::get('/tracking', [TrackingController::class, 'index'])
+            ->name('tracking.index');
+        Route::post('/tracking/fetch-all', [TrackingController::class, 'fetchAll'])
+            ->name('tracking.fetch_all');
+
         // Branches
         Route::get('/branches', [BranchesController::class, 'index'])
             ->name('branches.index');

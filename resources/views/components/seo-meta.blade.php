@@ -11,7 +11,7 @@
 --}}
 @php
     $siteUrl = rtrim(config('seo.site_url', config('app.url')), '/');
-    $siteName = config('seo.site_name', $siteName ?? config('app.name', 'SERV.X'));
+    $siteName = config('seo.site_name', $siteName ?? config('app.name', 'Servx Motors'));
     $title = $title ?? ($pageTitle ?? config('seo.default_title'));
     $description = $description ?? ($pageDescription ?? config('seo.default_description'));
     $image = $image ?? config('seo.default_image') ?? ($siteLogoUrl ?? null);

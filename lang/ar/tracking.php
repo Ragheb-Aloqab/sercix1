@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'api_not_configured' => 'واجهة التتبع غير مُعدّة. يرجى إضافة مفتاح API وعنوان Base URL من الإعدادات.',
+    'api_error' => 'خطأ في واجهة التتبع',
+    'invalid_response' => 'استجابة غير صالحة من واجهة التتبع.',
+    'imei_required' => 'رقم IMEI مطلوب للتتبع.',
+    'company_not_found' => 'الشركة غير موجودة.',
+
+    'track_vehicle' => 'تتبع',
+    'tracking_page' => 'تتبع المركبة',
+    'live_updates' => 'تحديثات مباشرة كل ثانيتين',
+    'last_update' => 'آخر تحديث',
+    'speed' => 'السرعة',
+    'address' => 'العنوان',
+    'plate' => 'اللوحة',
+    'vehicle_name' => 'اسم المركبة',
+    'no_location' => 'لا توجد بيانات موقع بعد',
+    'fetching' => 'جاري جلب الموقع...',
+    'odometer' => 'عداد المسافات',
+    'machine_status' => 'المحرك',
+    'engine_on' => 'تشغيل',
+    'engine_off' => 'إيقاف',
+    'engine_hours' => 'ساعات التشغيل',
+    'fuel_level' => 'مستوى الوقود',
+    'km' => 'كم',
+    'kmh' => 'كم/س',
+
+    'status_moving' => 'متحرك',
+    'status_stopped' => 'متوقف',
+    'status_idle' => 'خامل',
+
+    'settings_title' => 'إعدادات واجهة التتبع',
+    'settings_desc' => 'أدخل بيانات اعتماد واجهة مزود التتبع. تُستخدم لجلب مواقع المركبات عبر IMEI.',
+    'api_key' => 'مفتاح API',
+    'base_url' => 'عنوان Base URL',
+    'api_key_placeholder' => 'مفتاح واجهة التتبع',
+    'api_key_hint' => 'اتركه فارغاً للاحتفاظ بالمفتاح الحالي. أدخل مفتاحاً جديداً للتحديث.',
+    'base_url_placeholder' => 'https://api.your-provider.com أو الرابط الكامل من Postman (مثل https://x.com/api/positions)',
+    'save_settings' => 'حفظ إعدادات التتبع',
+    'settings_saved' => 'تم حفظ إعدادات واجهة التتبع بنجاح.',
+];

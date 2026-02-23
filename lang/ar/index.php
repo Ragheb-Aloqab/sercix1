@@ -6,7 +6,7 @@ return [
 
     // Hero - Numbers
     'numbersTitle' => 'أرقام',
-    'numbersBrand' => 'SERV.X MOTORS',
+    'numbersBrand' => 'Servx Motors',
     'statCompanies' => 'شركة',
     'statCompaniesValue' => '16',
     'statVehicles' => 'مركبة',
@@ -14,7 +14,7 @@ return [
     'statSavings' => 'قيمة التوفير',
     'statSavingsValue' => '100.000',
 
-    // SERVX offers you
+    // Servx Motors offers you
     'offersTitle' => 'تقدم لك',
     'offersFeature1' => 'منصة موحدة لإدارة الأسطول',
     'offersDesc1' => 'متابعة المركبات، التكاليف، الصيانة، والمحروقات من نظام واحد',
@@ -27,9 +27,9 @@ return [
     'offersFeature5' => 'توثيق الفواتير الضريبية وربطها تلقائيا',
     'offersDesc5' => 'ربط كل فاتورة بالمركبة المعنية مع جاهزية كاملة للمحاسبة و المراجعة، والامتثال الضريبي',
 
-    // Why SERVX
+    // Why Servx Motors
     'whyTitle' => 'لماذا',
-    'whyBrand' => 'SERVX',
+    'whyBrand' => 'Servx Motors',
     'whyProblem' => 'لاحظنا أن الأساطيل تواجه صعوبات متكررة في الإدارة والصيانة وذلك يؤثر سلبا على الكفاءة وتزيد من الأعباء المالية...',
     'whyPoint1' => 'منصات مختلفه لمتابعة المركبه وتكاليفها وحالتها',
     'whyPoint2' => 'تكاليف غير دقيقه لكل مركبه',
@@ -60,7 +60,7 @@ return [
     'brandTag' => 'حلول صيانة الأساطيل للشركات',
     'navServices' => 'الحلول',
     'navOffers' => 'ما نقدمه',
-    'navWhy' => 'لماذا سيرفكس',
+    'navWhy' => 'لماذا سيرفكس موتورز',
     'navHow' => 'كيف تعمل',
     'navPricing' => 'الخطط',
     'navFaq' => 'الأسئلة',
@@ -69,7 +69,7 @@ return [
     'navLogin' => 'تسجيل الدخول',
     'mNavServices' => 'الحلول',
     'mNavOffers' => 'ما نقدمه',
-    'mNavWhy' => 'لماذا سيرفكس',
+    'mNavWhy' => 'لماذا سيرفكس موتورز',
     'mNavHow' => 'كيف تعمل',
     'mNavPricing' => 'الخطط',
     'mNavFaq' => 'الأسئلة',

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @include('components.seo-meta', [
-        'title' => __('login.title') . ' — ' . ($siteName ?? config('app.name', 'SERV.X')),
+        'title' => __('login.title') . ' — ' . ($siteName ?? config('app.name', 'Servx Motors')),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -24,26 +24,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @livewireStyles
-    @vite(['resources/js/app.js'])
-
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-    </style>
+    @vite(['resources/js/app.js', 'resources/css/style.css'])
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800 antialiased overflow-x-hidden">
+<body class="page-auth min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800 antialiased overflow-x-hidden">
     <div class="min-h-screen flex flex-col justify-center items-center px-4 py-10 sm:py-14">
         {{-- Card container --}}
         <div class="w-full max-w-sm">
             {{-- Logo --}}
             <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-8">
                 @if($siteLogoUrl ?? null)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? config('app.name', 'SERV.X') }}" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? config('app.name', 'Servx Motors') }}" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
                 @else
                     <div class="h-11 w-11 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}
                     </div>
                 @endif
-                <span class="text-xl font-bold text-slate-800">{{ $siteName ?? config('app.name', 'SERV.X') }}</span>
+                <span class="text-xl font-bold text-slate-800">{{ $siteName ?? config('app.name', 'Servx Motors') }}</span>
             </a>
 
             {{-- Card --}}

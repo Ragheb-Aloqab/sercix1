@@ -1,4 +1,4 @@
-<div id="createOrderModal" class="fixed inset-0 hidden z-50 overflow-y-auto">
+<div id="createOrderModal" class="fixed inset-0 hidden z-[1100] overflow-y-auto">
   <div class="absolute inset-0 bg-black/40 min-h-full"></div>
   <div class="absolute inset-0 flex items-start sm:items-center justify-center p-4 pt-8 sm:pt-4 pb-24">
     <div class="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">

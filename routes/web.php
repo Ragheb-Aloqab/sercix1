@@ -81,7 +81,9 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::post('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'storeFuelRefill'])->name('fuel-refill.store');
     });
 });
+Route::domain('{company}.servexmotors.com')->group(function(){
 
+});
 /*
 |--------------------------------------------------------------------------
 | Company Auth (OTP) — /company/login redirects to unified sign-in
@@ -152,7 +154,8 @@ Route::middleware(['company'])
     ->prefix('dashboard/companies')
     ->name('company.')
     ->group(function () {
-        Route::get('/tracking', fn () => view('company.dashboard.tracking'))->name('tracking');
+        Route::get('/tracking', [\App\Http\Controllers\Company\TrackingController::class, 'index'])
+            ->name('tracking');
         Route::get('/fuel-balance', fn () => view('company.dashboard.fuel_balance'))->name('fuel_balance');
     });
 

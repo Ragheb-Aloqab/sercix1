@@ -12,10 +12,10 @@ class IndexController extends Controller
         // Always show main page — logged-in users can access it via "Main page" link in sidebar
         $contactEmail = Setting::get('contact_email', 'b2b@oilgo.com');
         $contactWhatsapp = Setting::get('contact_whatsapp', '05xxxxxxxx');
-        $siteName = Setting::get('site_name', 'SERV.X');
+        $siteName = Setting::get('site_name', 'Servx Motors');
         $siteLogoUrl = $this->siteLogoUrl();
 
-        $currentLocale = app()->getLocale();
+        $currentLocale = session('ui.locale', app()->getLocale());
         $user = null;
         $dashboardRoute = '#';
         $logoutRoute = route('logout');
@@ -66,7 +66,7 @@ class IndexController extends Controller
             return $this->logoUrl($company->logo_path);
         }
 
-        return null;
+        return asset('images/serv.x logo.png');
     }
 
     private function logoFileExists(string $path): bool

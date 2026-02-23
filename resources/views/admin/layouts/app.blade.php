@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-      dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}"
+      dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
       class="{{ auth('company')->check() || session('ui.theme') === 'dark' ? 'dark' : '' }} h-full scroll-smooth">
 
 <head>
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     @include('components.seo-meta', [
-        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'SERV.X')),
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'Servx Motors')),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -18,62 +18,52 @@
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
 
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/css/style.css', 'resources/js/app.js'])
+
+    @if(auth('company')->check())
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    @endif
 
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    boxShadow: {
-                        soft: "0 12px 30px rgba(0,0,0,.08)"
-                    },
-                    minHeight: {
-                        'touch': '44px'
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        ::-webkit-scrollbar { height: 10px; width: 10px }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px }
-        .dark ::-webkit-scrollbar-thumb { background: #475569 }
-        /* Sidebar positioning (desktop only; hidden on mobile, replaced by tab bar) */
-        [dir="ltr"] #sidebar { left: 0; right: auto; }
-        [dir="rtl"] #sidebar { left: auto; right: 0; }
-        [x-cloak] { display: none !important; }
-        /* Responsive: prevent horizontal scroll, ensure touch-friendly */
-        html { overflow-x: hidden; }
-        body { -webkit-overflow-scrolling: touch; }
-        /* Minimum font size for readability on mobile */
-        @media (max-width: 639px) {
-            body { font-size: 15px; }
-        }
-        /* Table scroll containers: smooth scroll on touch devices */
-        .overflow-x-auto { -webkit-overflow-scrolling: touch; }
-    </style>
 
     @livewireStyles
     @stack('styles')
 </head>
 
-<body class="h-full overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
+<body class="admin-layout h-full overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard bg-servx-black text-servx-silver-light font-servx' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
 
-<div class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() ? 'company-dashboard-layout' : '' }}">
-    {{-- Sidebar --}}
-    <livewire:dashboard.sidebar />
+<div x-data="{ sidebarOpen: false }"
+     @keydown.escape.window="sidebarOpen = false"
+     @close-sidebar.window="sidebarOpen = false"
+     class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() ? 'company-dashboard-layout' : '' }}">
+    {{-- Mobile backdrop --}}
+    <div x-show="sidebarOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="lg:hidden fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm"></div>
+
+    {{-- Sidebar wrapper: fixed 250px, slide-out on mobile, always visible on lg+ --}}
+    <div class="dashboard-sidebar-wrapper flex flex-col max-w-[90vw]
+                transform transition-transform duration-300 ease-out
+                lg:!translate-x-0"
+         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'">
+        <livewire:dashboard.sidebar />
+    </div>
 
     {{-- Mobile bottom tab bar (visible on lg and below) --}}
     <livewire:dashboard.mobile-tab-bar />
 
-    {{-- Main --}}
-    <main class="flex-1 min-w-0 w-full lg:ms-80 lg:min-w-0">
+    {{-- Main: margin-left 250px on lg+ so content sits next to sidebar --}}
+    <main class="dashboard-main flex-1 min-w-0 w-full transition-[margin] duration-200">
         {{-- Topbar --}}
         @include('admin.partials.topbar')
 
@@ -82,11 +72,14 @@
             @yield('content')
 
             <div class="mt-8 text-sm {{ auth('company')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">
-                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
+                © {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}
             </div>
         </section>
     </main>
 </div>
+
+{{-- Map scripts (Leaflet + Alpine) - must run after content so @push is populated --}}
+@stack('scripts-head')
 
 @livewireScripts
 

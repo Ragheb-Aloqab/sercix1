@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use App\Events\OrderCreated;
 use App\Events\OrderAssignedToTechnician;
 use App\Notifications\DriverServiceRequestNotification;
@@ -16,6 +17,9 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
+        if ($order->company_id) {
+            Cache::forget("company_dashboard_{$order->company_id}");
+        }
         if ($order->status === 'pending_approval') {
             $company = $order->company;
             if ($company) {
@@ -31,6 +35,9 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        if ($order->company_id) {
+            Cache::forget("company_dashboard_{$order->company_id}");
+        }
         // Admin notifications removed - only Company ↔ Driver notifications
 
         // Auto-create invoice when order is completed

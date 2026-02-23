@@ -24,9 +24,10 @@ class VehiclesController extends Controller
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($qq) use ($q) {
                     $qq->where('plate_number', 'like', "%{$q}%")
-                        ->orWhere('brand', 'like', "%{$q}%")
+                        ->orWhere('name', 'like', "%{$q}%")
+                        ->orWhere('make', 'like', "%{$q}%")
                         ->orWhere('model', 'like', "%{$q}%")
-                        ->orWhere('vin', 'like', "%{$q}%");
+                        ->orWhere('imei', 'like', "%{$q}%");
                 });
             })
             ->latest()
@@ -64,7 +65,9 @@ class VehiclesController extends Controller
         $data = $request->validate([
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
 
+            'name'         => ['nullable', 'string', 'max:150'],
             'plate_number' => ['required', 'string', 'max:50'],
+            'imei'         => ['required', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
             'brand'        => ['nullable', 'string', 'max:100'],
             'model'        => ['nullable', 'string', 'max:100'],
             'year'         => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
@@ -75,6 +78,8 @@ class VehiclesController extends Controller
             'driver_name'  => ['nullable', 'string', 'max:100'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
+        $data['make'] = $data['brand'] ?? null;
+        unset($data['brand']);
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);
             $this->authorize('view', $branch);
@@ -190,7 +195,9 @@ class VehiclesController extends Controller
         $data = $request->validate([
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
 
+            'name'         => ['nullable', 'string', 'max:150'],
             'plate_number' => ['required', 'string', 'max:50'],
+            'imei'         => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
             'brand'        => ['nullable', 'string', 'max:100'],
             'model'        => ['nullable', 'string', 'max:100'],
             'year'         => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
@@ -201,6 +208,8 @@ class VehiclesController extends Controller
             'driver_name'  => ['nullable', 'string', 'max:100'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
+        $data['make'] = $data['brand'] ?? null;
+        unset($data['brand']);
 
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);

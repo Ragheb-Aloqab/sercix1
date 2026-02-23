@@ -84,7 +84,7 @@
                             <div class="overflow-x-auto border rounded-2xl">
                                 <table class="w-full text-sm">
                                     <thead class="bg-slate-50 dark:bg-slate-800/50">
-                                        <tr class="text-right">
+                                        <tr class="text-end">
                                             <th class="p-3 font-bold">{{ __('invoice.service') }}</th>
                                             <th class="p-3 font-bold">{{ __('invoice.quantity') }}</th>
                                             <th class="p-3 font-bold">{{ __('invoice.unit_price') }}</th>

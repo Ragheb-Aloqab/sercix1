@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', __('vehicles.title') . ' | SERV.X')
+@section('title', __('vehicles.title') . ' | Servx Motors')
 @section('page_title', __('vehicles.page_title'))
 @section('subtitle', __('vehicles.manage_vehicles'))
 
@@ -60,6 +60,7 @@
                         <tr class="text-slate-400 border-b border-slate-600/50">
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.plate') }}</th>
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.vehicle') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">IMEI</th>
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.branch') }}</th>
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.status') }}</th>
                             <th class="text-start py-3 px-2 font-bold">{{ __('vehicles.actions') }}</th>
@@ -76,12 +77,15 @@
                                 <td class="py-3 px-2 text-end">
                                     <a href="{{ route('company.vehicles.show', $v) }}" class="block hover:opacity-80">
                                         <div class="font-semibold text-white">
-                                            {{ $v->make ?? $v->brand ?? '-' }} {{ $v->model ?? '' }}
+                                            {{ $v->display_name }}
                                         </div>
                                         <div class="text-xs text-slate-500">
-                                            {{ __('vehicles.year_label') }}: {{ $v->year ?? '-' }} — {{ __('vehicles.vin_label') }}: {{ $v->vin ?? '-' }}
+                                            {{ __('vehicles.year_label') }}: {{ $v->year ?? '-' }}
                                         </div>
                                     </a>
+                                </td>
+                                <td class="py-3 px-2 text-end text-slate-400 font-mono text-sm">
+                                    {{ $v->imei ?? '—' }}
                                 </td>
                                 <td class="py-3 px-2 text-white text-end">
                                     {{ $v->branch?->name ?? '-' }}
@@ -107,10 +111,17 @@
                                             class="px-3 py-2 min-h-[44px] rounded-2xl border border-slate-500/50 text-white font-bold hover:bg-slate-700/50 inline-flex items-center justify-center gap-2 transition-colors">
                                             <i class="fa-solid fa-pen shrink-0"></i> {{ __('common.edit') }}
                                         </a>
-                                        <span class="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-2xl border border-slate-500/30 text-slate-500 font-bold cursor-not-allowed"
-                                            title="{{ __('vehicles.tracking_coming_soon') }}">
-                                            <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('vehicles.tracking') }}
-                                        </span>
+                                        @if ($v->imei)
+                                            <a href="{{ route('company.vehicles.track', $v) }}"
+                                                class="px-3 py-2 min-h-[44px] rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold inline-flex items-center justify-center gap-2 transition-colors">
+                                                <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('tracking.track_vehicle') }}
+                                            </a>
+                                        @else
+                                            <span class="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-2xl border border-slate-500/30 text-slate-500 font-bold cursor-not-allowed"
+                                                title="{{ __('tracking.imei_required') }}">
+                                                <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('tracking.track_vehicle') }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

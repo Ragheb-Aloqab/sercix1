@@ -1,7 +1,7 @@
 {{-- @extends('dashboard.layout.app') --}}
 @extends('admin.layouts.app')
 
-@section('title', 'إضافة فني | SERV.X')
+@section('title', 'إضافة فني | Servx Motors')
 @section('page_title', 'إضافة فني جديد')
 
 @section('content')

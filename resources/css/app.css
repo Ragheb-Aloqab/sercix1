@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Glass layout: reduced blur on mobile for better performance */
+@layer components {
+    .company-glass,
+    .dashboard-glass {
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1920');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .company-glass::before,
+    .dashboard-glass::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(11, 11, 13, 0.96) 0%, rgba(26, 10, 10, 0.94) 50%, rgba(11, 11, 13, 0.96) 100%);
+    }
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+        .company-glass::before,
+        .dashboard-glass::before {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        @media (min-width: 768px) {
+            .company-glass::before,
+            .dashboard-glass::before {
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+        }
+    }
+    .company-glass .company-glass-content,
+    .dashboard-glass .dashboard-content {
+        position: relative;
+        z-index: 1;
+    }
+}

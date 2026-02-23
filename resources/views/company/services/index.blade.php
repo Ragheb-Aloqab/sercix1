@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', ' خدمات الشركة | SERV.X')
+@section('title', ' خدمات الشركة | Servx Motors')
 @section('page_title', __('dashboard.services'))
 
 @section('content')

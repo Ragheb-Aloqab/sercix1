@@ -1,52 +1,80 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{{ __('login.verify_title') }} — {{ $siteName ?? 'SERV.X' }}</title>
+    <title>{{ __('login.verify_title') }} — {{ $siteName ?? 'Servx Motors' }}</title>
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <style> body { font-family: "Tajawal", system-ui, sans-serif; } .shadow-soft { box-shadow: 0 18px 60px rgba(0,0,0,.12); } </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        servx: {
+                            black: '#0B0B0D',
+                            'black-soft': '#111111',
+                            'black-card': '#151515',
+                            red: '#DC2626',
+                            'red-hover': '#EF4444',
+                            silver: '#B8B8B8',
+                            'silver-light': '#E5E5E5',
+                        }
+                    },
+                    fontFamily: { servx: ['Rajdhani', 'Tajawal', 'system-ui', 'sans-serif'] },
+                    boxShadow: { 'servx-card': '0 8px 32px rgba(0,0,0,0.5)' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    @vite(['resources/css/style.css'])
 </head>
-<body class="bg-slate-50 text-slate-900">
-<div class="min-h-screen flex items-center justify-center px-4">
-    <div class="w-full max-w-md">
-        <a href="{{ url('/') }}" class="flex items-center justify-center mb-6">
-            <div class="bg-white rounded-2xl px-5 py-3 shadow-soft border border-slate-200 text-center flex items-center gap-3">
-                @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" class="h-10 w-10 rounded-xl object-cover">@endif
-                <div class="text-lg font-extrabold">{{ $siteName ?? 'SERV.X' }}</div>
-            </div>
+<body class="page-auth min-h-screen bg-servx-black text-servx-silver-light antialiased overflow-x-hidden font-servx">
+<div class="min-h-screen flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-sm">
+        <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6 group">
+            @if($siteLogoUrl ?? null)
+                <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="h-11 w-11 rounded-full object-cover border-2 border-servx-red/50 group-hover:border-servx-red transition-colors">
+            @else
+                <div class="h-11 w-11 rounded-full bg-servx-black-card border-2 border-servx-red/50 flex items-center justify-center text-servx-red font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
+            @endif
+            <span class="text-xl font-bold text-servx-silver-light group-hover:text-white transition-colors">{{ $siteName ?? 'Servx Motors' }}</span>
         </a>
 
-        <div class="bg-white border border-slate-200 rounded-3xl shadow-soft p-6 sm:p-8">
-            <h1 class="text-2xl font-extrabold">{{ __('login.verify_title') }}</h1>
-            <p class="mt-2 text-sm text-slate-600">{{ __('login.verify_sent') }}: <span class="font-bold">{{ $phone }}</span></p>
+        <div class="bg-servx-black-card rounded-xl border border-servx-red/30 shadow-servx-card p-6 sm:p-8">
+            <h1 class="text-xl font-bold text-white">{{ __('login.verify_title') }}</h1>
+            <p class="mt-2 text-sm text-servx-silver">{{ __('login.verify_sent') }}: <span class="font-bold text-servx-silver-light">{{ $phone }}</span></p>
 
-            @if (session('success'))<div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ session('success') }}</div>@endif
-            @if ($errors->any())<div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+            @if (session('success'))<div class="mt-4 rounded-lg border border-servx-red/30 bg-servx-red/10 p-3 text-sm text-servx-silver-light">{{ session('success') }}</div>@endif
+            @if ($errors->any())<div class="mt-4 rounded-lg border border-servx-red/50 bg-servx-red/10 p-3 text-sm text-servx-silver-light"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
             <form method="POST" action="{{ route('sign-in.verify_otp') }}" class="mt-6 space-y-4">
                 @csrf
                 <div>
-                    <label class="text-sm font-bold text-slate-700">{{ __('login.verify_otp_label') }}</label>
+                    <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.verify_otp_label') }}</label>
                     <input name="otp" inputmode="numeric" maxlength="6" placeholder="{{ __('login.verify_otp_placeholder') }}"
-                        class="mt-2 w-full tracking-widest text-center text-2xl font-extrabold rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
+                        class="mt-2 w-full tracking-widest text-center text-2xl font-bold rounded-lg border border-servx-red/30 bg-servx-black-soft px-4 py-3 text-servx-silver-light placeholder-servx-silver outline-none focus:border-servx-red focus:ring-2 focus:ring-servx-red/20" />
                 </div>
-                <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-white font-extrabold hover:bg-emerald-700">{{ __('login.verify_submit') }}</button>
+                <button type="submit" class="w-full rounded-lg bg-servx-red hover:bg-servx-red-hover px-6 py-3 min-h-[44px] text-white font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]">
+                    {{ __('login.verify_submit') }}
+                </button>
             </form>
-            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-bold text-slate-700">{{ __('login.change_phone') }}</a>
+            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-medium text-servx-silver hover:text-servx-red transition-colors">{{ __('login.change_phone') }}</a>
         </div>
-        <div class="mt-4 flex justify-center gap-2">
-            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'ar' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">العربية</a>
-            <span class="text-slate-400">|</span>
-            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="text-xs font-semibold {{ app()->getLocale() === 'en' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">English</a>
+        <div class="mt-6 flex items-center justify-center gap-3 text-xs text-servx-silver">
+            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">العربية</a>
+            <span>·</span>
+            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-slate-500">© {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}</p>
+        <p class="mt-4 text-center text-xs text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
     </div>
 </div>
 </body>

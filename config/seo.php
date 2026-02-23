@@ -13,11 +13,11 @@ return [
 
     'site_url' => env('APP_URL', 'https://servxmotors.com'),
 
-    'site_name' => env('APP_NAME', 'SERV.X'),
+    'site_name' => env('APP_NAME', 'Servx Motors'),
 
-    'default_title' => env('SEO_DEFAULT_TITLE', 'SERV.X — Corporate Fleet Maintenance Solutions'),
+    'default_title' => env('SEO_DEFAULT_TITLE', 'Servx Motors — Corporate Fleet Maintenance Solutions'),
 
-    'default_description' => env('SEO_DEFAULT_DESCRIPTION', 'SERV.X is an integrated platform for fleet management. Oil & filter services, maintenance tracking, and consolidated invoicing for corporate fleets.'),
+    'default_description' => env('SEO_DEFAULT_DESCRIPTION', 'Servx Motors is an integrated platform for fleet management. Oil & filter services, maintenance tracking, and consolidated invoicing for corporate fleets.'),
 
     'default_image' => env('SEO_DEFAULT_IMAGE', null),
 

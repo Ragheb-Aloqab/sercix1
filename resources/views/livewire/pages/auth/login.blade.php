@@ -51,7 +51,7 @@ new #[Layout('layouts.auth')] class extends Component
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
             <x-primary-button>{{ __('Log in') }}</x-primary-button>
             @if (Route::has('password.request'))
-                <a class="text-sm text-slate-500 hover:text-slate-700 text-center sm:text-left" href="{{ route('password.request') }}" wire:navigate>
+                <a class="text-sm text-slate-500 hover:text-slate-700 text-center sm:text-start" href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </a>
             @endif

@@ -9,11 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 class ForceHttps
 {
     /**
-     * Force HTTPS in production.
+    * Force HTTPS in production (skip for localhost/127.0.0.1).
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->environment('production') && ! $request->secure()) {
+        $host = $request->getHost();
+        $isLocal = in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+
+        if (! $isLocal && app()->environment('production') && ! $request->secure()) {
             return redirect()->secure($request->getRequestUri(), 301);
         }
 

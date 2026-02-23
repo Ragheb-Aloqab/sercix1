@@ -4,27 +4,8 @@
     <meta charset="utf-8">
     <title>فاتورة</title>
 
-    {{-- Tailwind --}}
+    {{-- Tailwind + custom styles (includes print rules) --}}
     @vite(['resources/css/app.css'])
-
-    <style>
-        /* للطباعة */
-        @media print {
-            body {
-                background: white !important;
-            }
-
-            /* أي عنصر يحمل هذا الكلاس لن يظهر عند الطباعة */
-            .no-print {
-                display: none !important;
-            }
-        }
-
-        /* إزالة هوامش المتصفح ومنع ظهور رابط الصفحة أو التاريخ */
-        @page {
-            margin: 0;
-        }
-    </style>
 </head>
 <body class="bg-white text-gray-900">
 

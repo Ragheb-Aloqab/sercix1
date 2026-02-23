@@ -1,246 +1,245 @@
 @extends('admin.layouts.app')
 
-@section('title', __('company.dashboard_title') . ' | ' . ($siteName ?? 'SERV.X'))
+@section('title', __('company.dashboard_title') . ' | ' . ($siteName ?? 'Servx Motors'))
 @section('page_title', __('company.dashboard_title'))
-
-@push('styles')
-<style>
-    .dashboard-glass {
-        position: relative;
-        background-image: url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1920');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    .dashboard-glass::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-    }
-    .dashboard-glass .dashboard-content {
-        position: relative;
-        z-index: 1;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
-    }
-    .animate-fade-in-delay-1 { animation-delay: 0.1s; }
-    .animate-fade-in-delay-2 { animation-delay: 0.2s; }
-    .animate-fade-in-delay-3 { animation-delay: 0.3s; }
-</style>
-@endpush
 
 @section('content')
 <div class="dashboard-glass min-h-[calc(100vh-8rem)] mx-0 px-4 sm:px-6 py-6 sm:py-8 rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl">
-    <div class="dashboard-content max-w-7xl mx-auto">
-        {{-- Header Section --}}
-        <header class="mb-8 sm:mb-10 animate-fade-in">
-            <div class="inline-block px-6 py-3 rounded-xl bg-slate-900/80 border border-sky-500/60">
-                <h1 class="text-2xl sm:text-3xl font-black text-white" dir="rtl">
-                    {{ __('dashboard.data_board') }}
-                </h1>
+    <div class="dashboard-content max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        {{-- 1. Header with blue accent underline --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="text-center sm:text-start w-full sm:w-auto">
+                <h1 class="dash-page-title">{{ __('dashboard.data_board') }}</h1>
+                <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
             </div>
-        </header>
+            <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
+                <a href="{{ route('company.orders.create') }}" class="dash-btn dash-btn-primary">
+                    <i class="fa-solid fa-plus"></i>{{ __('company.orders') }}
+                </a>
+                <a href="{{ route('company.vehicles.index') }}" class="dash-btn dash-btn-secondary">
+                    <i class="fa-solid fa-car"></i>{{ __('company.vehicles') }}
+                </a>
+                <a href="{{ route('company.fuel.index') }}" class="dash-btn dash-btn-secondary">
+                    <i class="fa-solid fa-gas-pump"></i>{{ __('company.fuel_report') }}
+                </a>
+                <a href="{{ route('company.invoices.index') }}" class="dash-btn dash-btn-secondary">
+                    <i class="fa-solid fa-file-invoice"></i>{{ __('company.invoices') }}
+                </a>
+            </div>
+        </div>
 
-        {{-- First Row: 3 KPI Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            {{-- عدد السيارات --}}
-            <div class="group rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:scale-[1.02] hover:border-slate-400/50 transition-all duration-300 animate-fade-in animate-fade-in-delay-1 opacity-0">
-                <p class="text-sm text-slate-400 mb-2 text-end">{{ __('company.vehicles_count') }}</p>
-                <div class="flex items-end justify-between gap-3">
-                    <span class="text-3xl sm:text-4xl font-black text-white">{{ $vehiclesCount ?? 0 }}</span>
-                    @if(($vehiclesTrend ?? 'up') === 'up')
-                        <span class="text-emerald-500 text-xl"><i class="fa-solid fa-caret-up"></i></span>
-                    @else
-                        <span class="text-red-500 text-xl"><i class="fa-solid fa-caret-down"></i></span>
-                    @endif
+        {{-- 2. Top row: 3 KPI cards with trend indicators (reference layout) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div class="dash-card dash-card-kpi group">
+                <p class="dash-card-title">{{ __('company.vehicles_count') }}</p>
+                <div class="flex items-center justify-between gap-2">
+                    <p class="dash-card-value">{{ $vehiclesCount ?? 0 }}</p>
+                    <span class="dash-trend dash-trend-up" title="{{ __('company.above_normal') }}">
+                        <i class="fa-solid fa-caret-up"></i>
+                    </span>
                 </div>
             </div>
-
-            {{-- إجمالي تكلفة الصيانة --}}
-            <div class="group rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:scale-[1.02] hover:border-slate-400/50 transition-all duration-300 animate-fade-in animate-fade-in-delay-2 opacity-0">
-                <p class="text-sm text-slate-400 mb-2 text-end">{{ __('company.total_maintenance_cost') }}</p>
-                <div class="flex items-end justify-between gap-3">
-                    <span class="text-3xl sm:text-4xl font-black text-white">{{ number_format($maintenanceSummary['total'] ?? 0, 0) }}</span>
-                    @if(($maintenanceTrend ?? 'down') === 'up')
-                        <span class="text-emerald-500 text-xl"><i class="fa-solid fa-caret-up"></i></span>
-                    @else
-                        <span class="text-red-500 text-xl"><i class="fa-solid fa-caret-down"></i></span>
-                    @endif
+            <div class="dash-card dash-card-kpi group">
+                <p class="dash-card-title">{{ __('company.total_maintenance_cost') }}</p>
+                <div class="flex items-center justify-between gap-2">
+                    <p class="dash-card-value">{{ number_format($maintenanceSummary['total'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                    <span class="dash-trend dash-trend-{{ $maintenanceTrend }}" title="{{ $maintenanceUI['text'] }}">
+                        @if($maintenanceTrend === 'up')
+                            <i class="fa-solid fa-caret-up"></i>
+                        @elseif($maintenanceTrend === 'down')
+                            <i class="fa-solid fa-caret-down"></i>
+                        @else
+                            <i class="fa-solid fa-minus"></i>
+                        @endif
+                    </span>
                 </div>
             </div>
-
-            {{-- إجمالي تكلفة المحروقات --}}
-            <div class="group rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:scale-[1.02] hover:border-slate-400/50 transition-all duration-300 animate-fade-in animate-fade-in-delay-3 opacity-0">
-                <p class="text-sm text-slate-400 mb-2 text-end">{{ __('company.total_fuel_cost') }}</p>
-                <div class="flex items-end justify-between gap-3">
-                    <span class="text-3xl sm:text-4xl font-black text-white">{{ number_format($fuelSummary['total'] ?? 0, 0) }}</span>
-                    @if(($fuelTrend ?? 'down') === 'up')
-                        <span class="text-emerald-500 text-xl"><i class="fa-solid fa-caret-up"></i></span>
-                    @else
-                        <span class="text-red-500 text-xl"><i class="fa-solid fa-caret-down"></i></span>
-                    @endif
+            <div class="dash-card dash-card-kpi group">
+                <p class="dash-card-title">{{ __('company.total_fuel_cost') }}</p>
+                <div class="flex items-center justify-between gap-2">
+                    <p class="dash-card-value">{{ number_format($fuelSummary['total'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                    <span class="dash-trend dash-trend-{{ $fuelTrend }}" title="{{ $fuelUI['text'] }}">
+                        @if($fuelTrend === 'up')
+                            <i class="fa-solid fa-caret-up"></i>
+                        @elseif($fuelTrend === 'down')
+                            <i class="fa-solid fa-caret-down"></i>
+                        @else
+                            <i class="fa-solid fa-minus"></i>
+                        @endif
+                    </span>
                 </div>
             </div>
         </div>
 
-        {{-- Second Row: 3 Main Sections --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {{-- A) إجمالي التكلفة Card --}}
-            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
-                <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('company.total_cost') }}</h2>
-                <div class="flex flex-col sm:flex-row items-end justify-between gap-4">
-                    <div class="flex gap-3 sm:gap-4 flex-wrap">
-                        <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 px-4 py-3 min-w-[80px]">
-                            <p class="text-xs text-slate-400">{{ __('dashboard.day') }}</p>
-                            <p class="text-lg font-bold text-white">{{ $dailyCost ?? 0 }}</p>
-                        </div>
-                        <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 px-4 py-3 min-w-[80px]">
-                            <p class="text-xs text-slate-400">{{ __('dashboard.month') }}</p>
-                            <p class="text-lg font-bold text-white">{{ $monthlyCost ?? 0 }}</p>
-                        </div>
-                        <div class="relative w-14 h-14 shrink-0">
-                            <svg class="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(100,116,139,0.3)" stroke-width="2"/>
-                                <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(56,189,248,0.6)" stroke-width="2" stroke-dasharray="{{ min(abs($sevenMonthPercent ?? 0) * 1.01, 100) }} 100" stroke-linecap="round"/>
-                            </svg>
-                            <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-300">{{ $sevenMonthPercent ?? 0 }}%</span>
-                        </div>
+        {{-- 3. Bottom row: 4 sections (Total Cost, Seven Months, Top 5, Fleet Indicators) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+            {{-- Total Cost card --}}
+            <div class="dash-card dash-card-interactive">
+                <h2 class="dash-section-title">{{ __('company.total_cost') }}</h2>
+                <p class="dash-card-value dash-card-value-lg mb-4">{{ number_format($totalCost ?? 0, 0) }}</p>
+                <div class="flex flex-wrap gap-3">
+                    <div class="dash-stat-mini">
+                        <p class="dash-stat-mini-label">{{ __('dashboard.day') }}</p>
+                        <p class="dash-stat-mini-value">{{ $dailyCost ?? 0 }}</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl sm:text-3xl font-black text-white">{{ number_format($totalCost ?? 0, 0) }}</span>
-                        @if(($sevenMonthPercent ?? 0) > 0)
-                            <span class="text-red-500 text-lg" title="{{ __('company.above_average') }}"><i class="fa-solid fa-caret-down"></i></span>
-                        @else
-                            <span class="text-emerald-500 text-lg" title="{{ __('company.below_average') }}"><i class="fa-solid fa-caret-up"></i></span>
-                        @endif
+                    <div class="dash-stat-mini">
+                        <p class="dash-stat-mini-label">{{ __('dashboard.month') }}</p>
+                        <p class="dash-stat-mini-value">{{ $monthlyCost ?? 0 }}</p>
                     </div>
                 </div>
-                <p class="text-xs text-slate-500 mt-2 text-end">{{ __('dashboard.six_month_comparison') }}</p>
             </div>
 
-            {{-- B) أعلى خمس سيارات تكلفة --}}
-            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
-                <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('company.top_5_vehicles') }}</h2>
+            {{-- Seven Months Comparison --}}
+            <div class="dash-card dash-card-interactive">
+                <h2 class="dash-section-title">{{ __('dashboard.six_month_comparison') }}</h2>
+                <div class="dash-chart-container">
+                    <div class="dash-chart-bars" role="img" aria-label="{{ __('dashboard.six_month_comparison') }}">
+                        @php
+                            $sevenMonths = $lastSevenMonths ?? [];
+                            $maxCost = max(1, (float) collect($sevenMonths)->max('total_cost'));
+                        @endphp
+                        @foreach($sevenMonths as $m)
+                            <div class="dash-chart-bar-wrap" title="{{ $m['year'] }}-{{ str_pad($m['month'], 2, '0', STR_PAD_LEFT) }}: {{ number_format($m['total_cost'], 0) }} {{ __('company.sar') }}">
+                                <div class="dash-chart-bar" style="height: {{ max(8, ($m['total_cost'] / $maxCost) * 100) }}%"></div>
+                            </div>
+                        @endforeach
+                        @if(empty($sevenMonths))
+                            @for($i = 0; $i < 7; $i++)
+                                <div class="dash-chart-bar-wrap"><div class="dash-chart-bar dash-chart-bar-empty" style="height: 20%"></div></div>
+                            @endfor
+                        @endif
+                    </div>
+                    <div class="dash-chart-trend">
+                        <span class="dash-trend dash-trend-{{ ($sevenMonthPercent ?? 0) >= 0 ? 'up' : 'down' }} dash-trend-lg">
+                            @if(($sevenMonthPercent ?? 0) >= 0)
+                                <i class="fa-solid fa-caret-up"></i>
+                            @else
+                                <i class="fa-solid fa-caret-down"></i>
+                            @endif
+                        </span>
+                        <span class="text-sm text-slate-400">{{ number_format(abs($sevenMonthPercent ?? 0), 1) }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Top 5 Vehicles --}}
+            <div class="dash-card dash-card-interactive">
+                <h2 class="dash-section-title">{{ __('company.top_5_vehicles') }}</h2>
                 @php $top5 = ($topVehicles ?? collect())->take(5); @endphp
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
                     @for($i = 0; $i < 5; $i++)
                         @if(isset($top5[$i]))
                             @php $v = $top5[$i]; @endphp
-                            <a href="{{ route('company.vehicles.show', $v->id) }}" class="block rounded-xl bg-slate-700/50 border border-slate-500/30 p-3 hover:border-slate-400/50 transition-colors">
+                            <a href="{{ route('company.vehicles.show', $v->id) }}" class="dash-vehicle-card block">
                                 <p class="text-xs text-slate-400 truncate">{{ $v->make ?? '' }} {{ $v->model ?? '' }}</p>
-                                <p class="text-sm font-bold text-white truncate">{{ number_format($v->total_cost ?? $v->total_service_cost ?? 0, 0) }} {{ __('company.sar') }}</p>
+                                <p class="text-sm font-bold text-white truncate">{{ number_format($v->total_cost ?? $v->total_service_cost ?? 0, 0) }}</p>
                             </a>
                         @else
-                            <div class="rounded-xl bg-slate-700/30 border border-slate-500/20 p-3 border-dashed">
-                                <p class="text-xs text-slate-500">—</p>
-                                <p class="text-sm text-slate-500">—</p>
+                            <div class="dash-vehicle-card dash-vehicle-card-empty">
+                                <span class="text-slate-500 text-sm">—</span>
                             </div>
                         @endif
                     @endfor
                 </div>
-                <p class="text-xs text-slate-500 mt-4 text-end">{{ __('company.top5_summary') }}: {{ number_format($top5Summary['top_total'] ?? 0, 2) }} {{ __('company.sar') }} ({{ $top5Summary['ui_percentage'] ?? 0 }}% {{ __('company.of_total_cost') }})</p>
             </div>
 
-            {{-- C) مؤشرات الأسطول --}}
-            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
-                <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('company.fleet_indicators') }}</h2>
+            {{-- Fleet Indicators --}}
+            <div class="dash-card dash-card-interactive">
+                <h2 class="dash-section-title">{{ __('company.fleet_indicators') }}</h2>
                 <div class="space-y-4">
-                    <div class="flex items-center gap-3" dir="rtl">
-                        <span class="w-6 h-4 rounded border flex-shrink-0 {{ ($maintenanceIndicator['direction'] ?? '') === 'down' || ($fuelIndicator['direction'] ?? '') === 'down' ? 'bg-emerald-500/40 border-emerald-400/60' : 'border-slate-500/50 bg-slate-700/30' }}"></span>
-                        <span class="text-sm text-slate-300">{{ __('company.below_average') }}</span>
-                    </div>
-                    <div class="flex items-center gap-3" dir="rtl">
-                        <span class="w-6 h-4 rounded border flex-shrink-0 {{ ($maintenanceIndicator['direction'] ?? '') === 'up' || ($fuelIndicator['direction'] ?? '') === 'up' ? 'bg-red-500/40 border-red-400/60' : 'border-slate-500/50 bg-slate-700/30' }}"></span>
-                        <span class="text-sm text-slate-300">{{ __('company.above_average') }}</span>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-slate-400">{{ __('company.maintenance_cost') }}</span>
-                            <span class="{{ $maintenanceUI['textClass'] }} text-sm font-bold flex items-center gap-1">
-                                {{ $maintenanceUI['text'] }} <span>{{ $maintenanceUI['icon'] }}</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-slate-700/50 rounded-full h-4">
-                            <div class="{{ $maintenanceUI['barClass'] }} h-4 rounded-full" style="width: {{ min($maintenanceIndicator['percent'] ?? 0, 100) }}%"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2 text-end">{{ $maintenanceUI['text'] }} {{ __('company.from_normal_at') }} {{ $maintenanceIndicator['percent'] ?? 0 }}%</p>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-slate-400">{{ __('company.fuel_consumption') }}</span>
-                            <span class="{{ $fuelUI['textClass'] }} text-sm font-bold flex items-center gap-1">
-                                {{ $fuelUI['text'] }} {{ $fuelUI['icon'] }}
-                            </span>
-                        </div>
-                        <div class="w-full bg-slate-700/50 rounded-full h-4">
-                            <div class="{{ $fuelUI['barClass'] }} h-4 rounded-full" style="width: {{ min($fuelIndicator['percent'] ?? 0, 100) }}%"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2 text-end">{{ $fuelUI['text'] }} {{ __('company.from_normal_at') }} {{ $fuelIndicator['percent'] ?? 0 }}%</p>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-slate-400">{{ __('company.total_operating_cost') }}</span>
-                            <span class="{{ $operatingUI['textClass'] }} text-sm font-bold flex items-center gap-1">
-                                {{ $operatingUI['text'] }} {{ $operatingUI['icon'] }}
-                            </span>
-                        </div>
-                        <div class="w-full bg-slate-700/50 rounded-full h-4">
-                            <div class="{{ $operatingUI['barClass'] }} h-4 rounded-full" style="width: {{ min($operatingIndicator['percent'] ?? 0, 100) }}%"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2 text-end">{{ $operatingUI['text'] }} {{ __('company.from_normal_at') }} {{ $operatingIndicator['percent'] ?? 0 }}%</p>
-                    </div>
+                    <label class="dash-indicator-row">
+                        <span class="dash-indicator-check {{ str_contains($maintenanceUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
+                        <span class="text-sm {{ $maintenanceUI['textClass'] ?? 'text-slate-400' }}">{{ $maintenanceUI['text'] ?? __('company.stable_indicator') }}</span>
+                    </label>
+                    <label class="dash-indicator-row">
+                        <span class="dash-indicator-check {{ str_contains($fuelUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
+                        <span class="text-sm {{ $fuelUI['textClass'] ?? 'text-slate-400' }}">{{ $fuelUI['text'] ?? __('company.stable_indicator') }}</span>
+                    </label>
+                    <label class="dash-indicator-row">
+                        <span class="dash-indicator-check {{ str_contains($operatingUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
+                        <span class="text-sm {{ $operatingUI['textClass'] ?? 'text-slate-400' }}">{{ $operatingUI['text'] ?? __('company.stable_indicator') }}</span>
+                    </label>
                 </div>
             </div>
         </div>
 
-        {{-- Quick Actions & Recent Invoices (compact) --}}
-        <div class="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
-                <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('company.quick_actions') }}</h2>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('company.orders.index') }}" class="px-4 py-2 rounded-xl bg-sky-600/80 hover:bg-sky-500 text-white text-sm font-semibold transition-colors">
-                        <i class="fa-solid fa-receipt me-2"></i>{{ __('company.orders') }}
-                    </a>
-                    <a href="{{ route('company.vehicles.index') }}" class="px-4 py-2 rounded-xl bg-slate-600/80 hover:bg-slate-500 text-white text-sm font-semibold transition-colors">
-                        <i class="fa-solid fa-car me-2"></i>{{ __('company.vehicles') }}
-                    </a>
-                    <a href="{{ route('company.fuel.index') }}" class="px-4 py-2 rounded-xl bg-amber-600/80 hover:bg-amber-500 text-white text-sm font-semibold transition-colors">
-                        <i class="fa-solid fa-gas-pump me-2"></i>{{ __('company.fuel_report') }}
-                    </a>
-                    <a href="{{ route('company.invoices.index') }}" class="px-4 py-2 rounded-xl bg-emerald-600/80 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors">
-                        <i class="fa-solid fa-file-invoice me-2"></i>{{ __('company.invoices') }}
-                    </a>
-                </div>
+        {{-- 4. Secondary: Order KPIs + Latest Orders --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="dash-card dash-card-compact">
+                <p class="dash-card-title">{{ __('dashboard.today_orders') }}</p>
+                <p class="dash-card-value">{{ $todayOrders ?? 0 }}</p>
             </div>
-            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
+            <div class="dash-card dash-card-compact">
+                <p class="dash-card-title">{{ __('dashboard.in_progress') }}</p>
+                <p class="dash-card-value">{{ $inProgress ?? 0 }}</p>
+            </div>
+            <div class="dash-card dash-card-compact">
+                <p class="dash-card-title">{{ __('dashboard.completed') }}</p>
+                <p class="dash-card-value">{{ $completed ?? 0 }}</p>
+            </div>
+            <div class="dash-card dash-card-compact">
+                <p class="dash-card-title">{{ __('company.recent_invoices') }}</p>
+                <p class="dash-card-value text-base">{{ count($recentInvoices ?? []) }}</p>
+            </div>
+        </div>
+
+        {{-- 5. Latest Orders (full width) --}}
+        <div class="dash-card">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="dash-section-title">{{ __('dashboard.latest_orders') }}</h2>
+                <a href="{{ route('company.orders.index') }}" class="dash-link">{{ __('common.view_all') }}</a>
+            </div>
+            <div class="space-y-2 max-h-44 overflow-y-auto">
+                @forelse($latestOrders ?? [] as $o)
+                    <a href="{{ route('company.orders.show', $o) }}" class="dash-order-row">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold text-white truncate">{{ __('dashboard.order') }} #{{ $o->id }} — {{ $o->status }}</p>
+                            <p class="text-xs text-slate-400 truncate">{{ $o->city ?? '-' }} · {{ \Illuminate\Support\Str::limit($o->address ?? '', 35) }}</p>
+                        </div>
+                        <span class="text-sky-400 text-sm shrink-0"><i class="fa-solid fa-arrow-left ms-1"></i></span>
+                    </a>
+                @empty
+                    <p class="text-slate-500 text-sm py-6 text-center">{{ __('orders.no_orders') }}</p>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- 6. Recent Invoices + Enabled Services --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="dash-card">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-base font-bold text-slate-300 text-end">{{ __('company.recent_invoices') }}</h2>
-                    <a href="{{ route('company.invoices.index') }}" class="text-sm text-sky-400 hover:text-sky-300">{{ __('common.view_all') }}</a>
+                    <h2 class="dash-section-title">{{ __('company.recent_invoices') }}</h2>
+                    <a href="{{ route('company.invoices.index') }}" class="dash-link">{{ __('common.view_all') }}</a>
                 </div>
                 @if(count($recentInvoices ?? []) > 0)
-                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                    <div class="space-y-2 max-h-36 overflow-y-auto">
                         @foreach($recentInvoices->take(5) as $inv)
-                            <a href="{{ route('company.invoices.show', $inv) }}" class="flex justify-between items-center py-2 border-b border-slate-600/50 last:border-0 text-sm hover:text-sky-300 transition-colors">
-                                <span>{{ $inv->invoice_number ?? '#' . $inv->id }}</span>
-                                <span class="font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} {{ __('company.sar') }}</span>
+                            <a href="{{ route('company.invoices.show', $inv) }}" class="dash-invoice-row">
+                                <span class="text-white font-medium">{{ $inv->invoice_number ?? '#' . $inv->id }}</span>
+                                <span class="text-slate-300 font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} {{ __('company.sar') }}</span>
                             </a>
                         @endforeach
                     </div>
                 @else
-                    <p class="text-slate-500 text-sm py-4">{{ __('company.no_invoices_yet') }}</p>
+                    <p class="text-slate-500 text-sm py-6">{{ __('company.no_invoices_yet') }}</p>
                 @endif
+            </div>
+            <div class="dash-card">
+                <h2 class="dash-section-title">{{ __('dashboard.enabled_services') }}</h2>
+                <div class="flex flex-wrap gap-2">
+                    @forelse($enabledServices ?? [] as $s)
+                        <span class="dash-service-tag">
+                            <span class="text-white font-medium">{{ $s->name }}</span>
+                            <span class="text-slate-400">{{ $s->pivot->base_price ?? $s->base_price }} {{ __('company.sar') }}</span>
+                        </span>
+                    @empty
+                        <p class="text-slate-500 text-sm">{{ __('dashboard.no_services_enabled') }}</p>
+                    @endforelse
+                </div>
             </div>
         </div>
 
-        <footer class="text-center text-slate-500 text-sm mt-8">
+        <footer class="dash-footer">
             {{ __('company.last_update') }}: {{ now()->format('Y-m-d') }}
         </footer>
     </div>

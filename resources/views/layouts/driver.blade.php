@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     @include('components.seo-meta', [
-        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('driver.dashboard') . ' — ' . ($siteName ?? 'SERV.X')),
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('driver.dashboard') . ' — ' . ($siteName ?? 'Servx Motors')),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -16,28 +16,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: "Tajawal", system-ui, sans-serif; }
-        .shadow-soft { box-shadow: 0 18px 60px rgba(0,0,0,.12); }
-        .pb-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0)); }
-        @media (min-width: 1024px) {
-            .pb-tabbar { padding-bottom: 0; }
-        }
-        @media (max-width: 639px) {
-            body { font-size: 15px; }
-        }
-        .driver-avatar { font-size: 1rem; font-weight: 700; }
-    </style>
+    @vite(['resources/css/style.css'])
     @stack('styles')
 </head>
-<body class="bg-slate-50 text-slate-900 overflow-x-hidden min-h-screen">
+<body class="page-tajawal bg-slate-50 text-slate-900 overflow-x-hidden min-h-screen">
 <div class="min-h-screen flex flex-col pb-tabbar">
     {{-- Top bar (always visible) --}}
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 w-full">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
             <a href="{{ route('driver.dashboard') }}" class="font-extrabold text-lg flex items-center gap-2 min-w-0 truncate shrink-0">
                 @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" class="h-8 w-8 rounded-lg object-cover shrink-0">@endif
-                <span class="truncate">{{ $siteName ?? 'SERV.X' }}</span>
+                <span class="truncate">{{ $siteName ?? 'Servx Motors' }}</span>
             </a>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 {{-- Language switcher --}}

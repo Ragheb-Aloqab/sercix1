@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Observers;
+
 use App\Models\Invoice;
+use Illuminate\Support\Facades\Cache;
+
 class InvoiceObserver
 {
   
@@ -32,7 +35,9 @@ class InvoiceObserver
      */
     public function created(Invoice $invoice): void
     {
-        //
+        if ($invoice->company_id ?? null) {
+            Cache::forget("company_dashboard_{$invoice->company_id}");
+        }
     }
 
     /**
@@ -40,7 +45,9 @@ class InvoiceObserver
      */
     public function updated(Invoice $invoice): void
     {
-        //
+        if ($invoice->company_id ?? null) {
+            Cache::forget("company_dashboard_{$invoice->company_id}");
+        }
     }
 
     /**

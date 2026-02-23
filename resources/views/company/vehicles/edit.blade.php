@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'تعديل مركبة | SERV.X')
+@section('title', 'تعديل مركبة | Servx Motors')
 @section('page_title', 'تعديل مركبة')
 @section('subtitle', 'تعديل بيانات المركبة')
 
@@ -39,14 +39,30 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                    <label class="text-sm font-bold text-slate-400">رقم اللوحة *</label>
+                    <label class="text-sm font-bold text-slate-400">{{ __('tracking.vehicle_name') }} ({{ __('common.optional') }})</label>
+                    <input type="text" name="name" value="{{ old('name', $vehicle->name) }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white"
+                        placeholder="{{ __('tracking.vehicle_name') }}">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-400">{{ __('vehicles.plate_number') }} *</label>
                     <input type="text" name="plate_number" value="{{ old('plate_number', $vehicle->plate_number) }}"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white"
                         required>
                 </div>
 
                 <div>
-                    <label class="text-sm font-bold text-slate-400">الفرع (اختياري)</label>
+                    <label class="text-sm font-bold text-slate-400">IMEI ({{ __('common.optional') }})</label>
+                    <input type="text" name="imei" value="{{ old('imei', $vehicle->imei) }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-mono"
+                        placeholder="123456789012345" maxlength="20"
+                        pattern="[0-9]{10,20}" title="{{ __('tracking.imei_required') }}">
+                    <p class="text-xs text-slate-500 mt-1">{{ __('tracking.imei_required') }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-400">{{ __('vehicles.branch') }} ({{ __('common.optional') }})</label>
                     <select name="company_branch_id"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white">
                         <option value="">— بدون —</option>

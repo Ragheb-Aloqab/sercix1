@@ -54,7 +54,7 @@
 </div>
 @extends('admin.layouts.app')
 
-@section('title', 'تعديل عميل | SERV.X')
+@section('title', 'تعديل عميل | Servx Motors')
 @section('page_title', 'تعديل بيانات العميل')
 
 @section('content')

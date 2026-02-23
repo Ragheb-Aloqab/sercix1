@@ -6,7 +6,7 @@ return [
 
     // Hero - Numbers
     'numbersTitle' => 'Numbers',
-    'numbersBrand' => 'SERV.X MOTORS',
+    'numbersBrand' => 'Servx Motors',
     'statCompanies' => 'Company',
     'statCompaniesValue' => '16',
     'statVehicles' => 'Vehicle',
@@ -14,8 +14,8 @@ return [
     'statSavings' => 'Savings Value',
     'statSavingsValue' => '100.000',
 
-    // SERVX offers you
-    'offersTitle' => 'SERVX offers you',
+    // Servx Motors offers you
+    'offersTitle' => 'Servx Motors offers you',
     'offersFeature1' => 'Unified platform for fleet management',
     'offersDesc1' => 'Monitoring vehicles, costs, maintenance, and fuels from one system',
     'offersFeature2' => 'Accurate cost for each vehicle',
@@ -27,9 +27,9 @@ return [
     'offersFeature5' => 'Documenting tax invoices and linking them automatically',
     'offersDesc5' => 'Linking each invoice to the concerned vehicle with full readiness for accounting, auditing, and tax compliance',
 
-    // Why SERVX
+    // Why Servx Motors
     'whyTitle' => 'Why',
-    'whyBrand' => 'SERVX',
+    'whyBrand' => 'Servx Motors',
     'whyProblem' => 'We noticed that fleets face recurring difficulties in management and maintenance, and this negatively affects efficiency and increases financial burdens...',
     'whyPoint1' => 'Different platforms for tracking the vehicle, its costs, and its status',
     'whyPoint2' => 'Inaccurate costs for each vehicle',
@@ -46,21 +46,21 @@ return [
     'workflowStep3' => 'Manager approval',
     'workflowDesc3' => 'The request automatically reaches the specialized manager, and implementation does not proceed until after electronic approval.',
     'workflowStep4' => 'Execution through a company-approved center',
-    'workflowDesc4' => 'The service is carried out by a company-approved maintenance center without any operational intervention from SERVX.',
+    'workflowDesc4' => 'The service is carried out by a company-approved maintenance center without any operational intervention from Servx Motors.',
     'workflowStep5' => 'Invoice documentation and linking',
     'workflowDesc5' => 'Upload and link the invoice to the vehicle and the request, and document it for tax purposes within the platform.',
     'workflowConclusion' => 'Update and data analysis',
     'workflowConclusionDesc' => 'The cost is directly reflected in the vehicle file, reports, and control panels.',
 
     // Hero platform description
-    'platformDesc' => 'SERV.X is an integrated platform for fleet management that includes a control panel for managing and maintaining vehicle fleets, and managing maintenance and fuel costs, with direct execution of maintenance work.',
+    'platformDesc' => 'Servx Motors is an integrated platform for fleet management that includes a control panel for managing and maintaining vehicle fleets, and managing maintenance and fuel costs, with direct execution of maintenance work.',
     'langAr' => 'العربية',
     'langEn' => 'English',
     'announceText' => 'B2B Fleet service: oil & filters on-site + monthly consolidated invoicing',
     'brandTag' => 'Corporate fleet maintenance solutions',
     'navServices' => 'Solutions',
     'navOffers' => 'What we offer',
-    'navWhy' => 'Why SERVX',
+    'navWhy' => 'Why Servx Motors',
     'navHow' => 'How it works',
     'navPricing' => 'Plans',
     'navFaq' => 'FAQ',
@@ -69,7 +69,7 @@ return [
     'navLogin' => 'Log in',
     'mNavServices' => 'Solutions',
     'mNavOffers' => 'What we offer',
-    'mNavWhy' => 'Why SERVX',
+    'mNavWhy' => 'Why Servx Motors',
     'mNavHow' => 'How it works',
     'mNavPricing' => 'Plans',
     'mNavFaq' => 'FAQ',

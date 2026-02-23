@@ -39,6 +39,12 @@ class LocaleController extends Controller
             ]);
         }
 
-        return redirect()->back();
+        Session::save();
+
+        $previous = url()->previous();
+        $target = $previous && !str_contains($previous, '/set-locale') ? $previous : route('index');
+        $sep = str_contains($target, '?') ? '&' : '?';
+        return redirect()->to($target . $sep . '_=' . time())
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 }

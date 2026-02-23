@@ -1,4 +1,4 @@
-# SEO Implementation Checklist — SERV.X / servxmotors.com
+# SEO Implementation Checklist — Servx Motors / servxmotors.com
 
 **Generated:** 2025-02-22  
 **Status:** Production-ready for indexing

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\FuelRefill;
 use App\Models\Invoice;
+use Illuminate\Support\Facades\Cache;
 use App\Services\InvoicePdfService;
 
 class FuelRefillObserver
@@ -14,6 +15,9 @@ class FuelRefillObserver
      */
     public function created(FuelRefill $fuelRefill): void
     {
+        if ($fuelRefill->company_id) {
+            Cache::forget("company_dashboard_{$fuelRefill->company_id}");
+        }
         if (!$fuelRefill->receipt_path) {
             return;
         }

@@ -1,0 +1,593 @@
+/**
+ * SERVX Design System - Premium Automotive Fleet-Tech
+ * Brand colors from logo: Black, Red accent, Silver typography
+ * Full RTL/LTR support via logical properties
+ */
+
+/* ========== SERVX Brand Variables ========== */
+:root {
+    /* Primary */
+    --servx-black: #0B0B0D;
+    --servx-black-soft: #111111;
+    --servx-black-card: #151515;
+    --servx-red: #DC2626;
+    --servx-red-hover: #EF4444;
+    --servx-red-muted: rgba(220, 38, 38, 0.15);
+    --servx-red-glow: rgba(220, 38, 38, 0.25);
+    /* Typography */
+    --servx-silver: #B8B8B8;
+    --servx-silver-light: #E5E5E5;
+    --servx-white: #FFFFFF;
+    /* Gradients (black → dark red only) */
+    --servx-gradient-subtle: linear-gradient(135deg, #0B0B0D 0%, #1a0a0a 50%, #0B0B0D 100%);
+    --servx-gradient-red-glow: linear-gradient(90deg, transparent 0%, rgba(220, 38, 38, 0.08) 50%, transparent 100%);
+    /* Shadows */
+    --servx-shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --servx-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
+    /* Transitions */
+    --servx-transition: 200ms ease;
+    --servx-transition-fast: 150ms ease;
+    /* Layout */
+    --sidebar-width: 250px;
+}
+
+/* ========== Base / Global ========== */
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    -webkit-overflow-scrolling: touch;
+    text-align: start;
+}
+
+/* RTL: Progress bars fill from end (right in RTL) */
+[dir="rtl"] .progress-bar-fill {
+    margin-inline-end: auto;
+    margin-inline-start: 0;
+}
+
+@media (max-width: 639px) {
+    html { font-size: 15px; }
+    body { font-size: 15px; }
+}
+
+/* ========== SERVX Typography ========== */
+body.page-index,
+body.page-tajawal {
+    font-family: "Tajawal", "Rajdhani", system-ui, -apple-system, sans-serif;
+}
+
+body.page-auth {
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+body.page-figtree {
+    font-family: "Figtree", system-ui, sans-serif;
+}
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(220, 38, 38, 0.3);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--servx-red);
+}
+
+.dark ::-webkit-scrollbar-thumb,
+.admin-layout.dark ::-webkit-scrollbar-thumb {
+    background: rgba(220, 38, 38, 0.4);
+}
+
+.admin-layout:not(.dark) ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+/* ========== SERVX Buttons ========== */
+.btn-servx-primary {
+    background: var(--servx-red);
+    color: var(--servx-white);
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    transition: background var(--servx-transition), transform var(--servx-transition-fast);
+}
+.btn-servx-primary:hover {
+    background: var(--servx-red-hover);
+    transform: translateY(-1px);
+}
+
+.btn-servx-secondary {
+    background: transparent;
+    color: var(--servx-red);
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    border: 2px solid var(--servx-red);
+    border-radius: 0.5rem;
+    transition: background var(--servx-transition), color var(--servx-transition), transform var(--servx-transition-fast);
+}
+.btn-servx-secondary:hover {
+    background: var(--servx-red-muted);
+    color: var(--servx-red-hover);
+    transform: translateY(-1px);
+}
+
+/* ========== SERVX Cards ========== */
+.servx-card {
+    background: var(--servx-black-card);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--servx-shadow-soft);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: border-color var(--servx-transition), box-shadow var(--servx-transition);
+}
+.servx-card:hover {
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: var(--servx-shadow-card), 0 0 0 1px rgba(220, 38, 38, 0.1);
+}
+
+/* RTL: Red accent line on hover - uses logical properties */
+.servx-card-accent {
+    border-inline-start: 3px solid transparent;
+    transition: border-inline-start-color var(--servx-transition);
+}
+.servx-card-accent:hover {
+    border-inline-start-color: var(--servx-red);
+}
+
+/* ========== Index / Landing ========== */
+.focus-ring:focus-visible {
+    outline: 2px solid var(--servx-red);
+    outline-offset: 2px;
+}
+
+/* Hero: Black with subtle red glow */
+.hero-servx {
+    background: var(--servx-black);
+    position: relative;
+}
+.hero-servx::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--servx-gradient-red-glow);
+    opacity: 0.6;
+    pointer-events: none;
+}
+[dir="rtl"] .hero-servx::before {
+    transform: scaleX(-1);
+}
+
+/* Stat bar - RTL-aware gradient */
+.stat-bar-servx {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--servx-silver) 0%, var(--servx-red) 100%);
+    min-width: 40px;
+}
+[dir="rtl"] .stat-bar-servx {
+    background: linear-gradient(to left, var(--servx-silver) 0%, var(--servx-red) 100%);
+}
+
+/* ========== Shadow ========== */
+.shadow-soft {
+    box-shadow: var(--servx-shadow-soft);
+}
+
+/* ========== Admin / Dashboard Layout ========== */
+/* Sidebar: fixed 250px, left (LTR) or right (RTL), z-index 1000 */
+
+/* Sidebar: fixed positioning, explicit for reliability */
+.dashboard-sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: var(--sidebar-width);
+    z-index: 1000;
+}
+[dir="rtl"] .dashboard-sidebar-wrapper {
+    left: auto;
+    right: 0;
+}
+
+/* Main content: margin to sit next to sidebar, full width when collapsed */
+.dashboard-main {
+    margin-left: 0;
+}
+@media (min-width: 1024px) {
+    .dashboard-main {
+        margin-left: var(--sidebar-width);
+    }
+}
+[dir="rtl"] .dashboard-main {
+    margin-left: 0;
+}
+@media (min-width: 1024px) {
+    [dir="rtl"] .dashboard-main {
+        margin-right: var(--sidebar-width);
+        margin-left: 0;
+    }
+}
+
+/* Company dashboard: main content fills space */
+.company-dashboard-layout {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+}
+.company-dashboard-layout main {
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ========== Company Dashboard (Reference Design) ========== */
+:root {
+    --servx-blue: #3B82F6;
+    --servx-blue-hover: #60A5FA;
+    --servx-green: #22C55E;
+    --servx-green-muted: rgba(34, 197, 94, 0.2);
+    --servx-red-muted: rgba(239, 68, 68, 0.2);
+}
+
+/* Page title with blue accent underline */
+.dash-page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--servx-white);
+    margin-block-end: 0;
+}
+@media (min-width: 640px) {
+    .dash-page-title {
+        font-size: 1.875rem;
+    }
+}
+.dash-title-accent {
+    width: 60px;
+    height: 3px;
+    background: var(--servx-blue);
+    border-radius: 2px;
+    margin-block-start: 0.5rem;
+}
+
+/* Dashboard buttons */
+.dash-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all var(--servx-transition);
+}
+.dash-btn-primary {
+    background: var(--servx-blue);
+    color: white;
+}
+.dash-btn-primary:hover {
+    background: var(--servx-blue-hover);
+    transform: translateY(-1px);
+}
+.dash-btn-secondary {
+    background: rgba(51, 65, 85, 0.8);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dash-btn-secondary:hover {
+    background: rgba(71, 85, 105, 0.9);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Company Dashboard Cards */
+.dash-card {
+    border-radius: 1rem;
+    background: var(--servx-black-card);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.25rem 1.5rem;
+    transition: all var(--servx-transition);
+}
+.dash-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.dash-card-kpi,
+.dash-card-interactive {
+    transition: transform var(--servx-transition), border-color var(--servx-transition), box-shadow var(--servx-transition);
+}
+.dash-card-kpi:hover,
+.dash-card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.25);
+}
+.dash-card-compact {
+    padding: 1rem 1.25rem;
+}
+.dash-card-accent {
+    border-inline-start: 4px solid var(--servx-red);
+}
+
+.dash-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--servx-silver);
+    margin-block-end: 0.25rem;
+}
+
+.dash-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--servx-white);
+}
+.dash-card-value-lg {
+    font-size: 1.75rem;
+    margin-block-end: 0.5rem;
+}
+@media (min-width: 640px) {
+    .dash-card-value {
+        font-size: 1.875rem;
+    }
+    .dash-card-value-lg {
+        font-size: 2.25rem;
+    }
+}
+
+.dash-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--servx-silver-light);
+    margin-block-end: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Trend indicators (green up = good, red down = bad) */
+.dash-trend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: transform var(--servx-transition);
+}
+.dash-trend-up {
+    color: var(--servx-green);
+}
+.dash-trend-down {
+    color: #EF4444;
+}
+.dash-trend-stable {
+    color: var(--servx-blue);
+}
+.dash-trend-lg {
+    font-size: 1.25rem;
+}
+
+/* Mini stat blocks (Day / Month) */
+.dash-stat-mini {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(51, 65, 85, 0.5);
+    min-width: 4rem;
+}
+.dash-stat-mini-label {
+    font-size: 0.75rem;
+    color: var(--servx-silver);
+}
+.dash-stat-mini-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--servx-white);
+}
+
+/* Seven Months chart */
+.dash-chart-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 100px;
+}
+@media (min-width: 640px) {
+    .dash-chart-container {
+        min-height: 120px;
+    }
+}
+.dash-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    flex: 1;
+    height: 60px;
+}
+@media (min-width: 640px) {
+    .dash-chart-bars {
+        height: 80px;
+    }
+}
+.dash-chart-bar-wrap {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    min-width: 12px;
+}
+.dash-chart-bar {
+    width: 100%;
+    min-height: 4px;
+    background: var(--servx-blue);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.4s ease;
+}
+.dash-chart-bar-empty {
+    background: rgba(255, 255, 255, 0.1);
+}
+.dash-chart-trend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Vehicle cards (Top 5) */
+.dash-vehicle-card {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all var(--servx-transition);
+}
+.dash-vehicle-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(51, 65, 85, 0.7);
+}
+.dash-vehicle-card-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-style: dashed;
+}
+
+/* Fleet indicator rows (checkbox style) */
+.dash-indicator-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: default;
+}
+.dash-indicator-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all var(--servx-transition);
+    position: relative;
+}
+.dash-indicator-check-active {
+    background: var(--servx-green);
+    border-color: var(--servx-green);
+}
+.dash-indicator-check-active::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+[dir="rtl"] .dash-indicator-check-active::after {
+    inset-inline-start: 5px;
+    inset-inline-end: auto;
+}
+
+/* Links */
+.dash-link {
+    font-size: 0.875rem;
+    color: var(--servx-blue);
+    font-weight: 500;
+    transition: color var(--servx-transition);
+}
+.dash-link:hover {
+    color: var(--servx-blue-hover);
+}
+
+/* Order row */
+.dash-order-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all var(--servx-transition);
+}
+.dash-order-row:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Invoice row */
+.dash-invoice-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(51, 65, 85, 0.3);
+    transition: background var(--servx-transition);
+}
+.dash-invoice-row:hover {
+    background: rgba(51, 65, 85, 0.5);
+}
+
+/* Service tag */
+.dash-service-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.875rem;
+}
+
+/* Footer */
+.dash-footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--servx-silver);
+    padding-block-start: 1rem;
+}
+
+/* ========== Driver Layout ========== */
+.pb-tabbar {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0));
+}
+@media (min-width: 1024px) {
+    .pb-tabbar {
+        padding-bottom: 0;
+    }
+}
+
+.driver-avatar {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* ========== Print ========== */
+@media print {
+    body {
+        background: white !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+@page {
+    margin: 0;
+}

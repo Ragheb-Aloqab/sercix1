@@ -1,48 +1,73 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>تأكيد OTP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ app()->getLocale() === 'ar' ? 'تأكيد OTP' : 'Verify OTP' }} — {{ $siteName ?? 'Servx Motors' }}</title>
+    @if($siteLogoUrl ?? null)
+        <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: "Tajawal", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        servx: {
+                            black: '#0B0B0D',
+                            'black-soft': '#111111',
+                            'black-card': '#151515',
+                            red: '#DC2626',
+                            'red-hover': '#EF4444',
+                            silver: '#B8B8B8',
+                            'silver-light': '#E5E5E5',
+                        }
+                    },
+                    fontFamily: { servx: ['Rajdhani', 'Tajawal', 'system-ui', 'sans-serif'] },
+                    boxShadow: { 'servx-card': '0 8px 32px rgba(0,0,0,0.5)' }
+                }
+            }
         }
-
-        :root {
-            --shadow: 0 18px 60px rgba(0, 0, 0, .12);
-        }
-
-        .shadow-soft {
-            box-shadow: var(--shadow);
-        }
-    </style>
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    @vite(['resources/css/style.css'])
 </head>
 
-<body class="bg-slate-50 text-slate-900">
-    <div class="min-h-screen flex items-center justify-center px-4">
+<body class="page-auth min-h-screen bg-servx-black text-servx-silver-light antialiased overflow-x-hidden font-servx">
+    <div class="min-h-screen flex items-center justify-center px-4 py-10">
         <div class="w-full max-w-md">
-            <div class="bg-white border border-slate-200 rounded-3xl shadow-soft p-6 sm:p-8">
-                <h1 class="text-2xl font-extrabold">تأكيد رمز التحقق</h1>
-                <p class="mt-2 text-sm text-slate-600">
-                    تم إرسال رمز إلى: <span class="font-extrabold">{{ $phone }}</span>
-                    <br>
-                    (تجريبي: الرمز موجود في ملف log)
+            <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6 group">
+                @if($siteLogoUrl ?? null)
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="h-11 w-11 rounded-full object-cover border-2 border-servx-red/50 group-hover:border-servx-red transition-colors">
+                @else
+                    <div class="h-11 w-11 rounded-full bg-servx-black-card border-2 border-servx-red/50 flex items-center justify-center text-servx-red font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
+                @endif
+                <span class="text-xl font-bold text-servx-silver-light group-hover:text-white transition-colors">{{ $siteName ?? 'Servx Motors' }}</span>
+            </a>
+
+            <div class="bg-servx-black-card rounded-xl border border-servx-red/30 shadow-servx-card p-6 sm:p-8">
+                <h1 class="text-2xl font-bold text-white">{{ app()->getLocale() === 'ar' ? 'تأكيد رمز التحقق' : 'Verify code' }}</h1>
+                <p class="mt-2 text-sm text-servx-silver">
+                    {{ app()->getLocale() === 'ar' ? 'تم إرسال رمز إلى:' : 'Code sent to:' }} <span class="font-bold text-servx-silver-light">{{ $phone }}</span>
+                    @if(app()->environment('local'))
+                        <br><span class="text-xs text-servx-silver">({{ app()->getLocale() === 'ar' ? 'تجريبي: الرمز موجود في ملف log' : 'Demo: check log file' }})</span>
+                    @endif
                 </p>
 
                 @if (session('success'))
-                    <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                    <div class="mt-4 rounded-lg border border-servx-red/30 bg-servx-red/10 p-3 text-sm text-servx-silver-light">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if ($errors->any())
-                    <div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                    <div class="mt-4 rounded-lg border border-servx-red/50 bg-servx-red/10 p-3 text-sm text-servx-silver-light">
                         <ul class="list-disc ms-5 space-y-1">
                             @foreach ($errors->all() as $e)
                                 <li>{{ $e }}</li>
@@ -51,40 +76,43 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('company.verify') }}" class="mt-6 space-y-4">
+                <form method="POST" action="{{ route('company.verify_otp') }}" class="mt-6 space-y-4">
                     @csrf
 
                     <div>
-                        <label class="text-sm font-bold text-slate-700">رمز التحقق (6 أرقام)</label>
-                        <input name="otp" inputmode="numeric" maxlength="6" placeholder="مثال: 123456"
-                            class="mt-2 w-full tracking-widest text-center text-2xl font-extrabold rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
-                        <p class="mt-2 text-xs text-slate-500">* أدخل الرمز قبل انتهاء الصلاحية.</p>
+                        <label class="block text-sm font-medium text-servx-silver-light">{{ app()->getLocale() === 'ar' ? 'رمز التحقق (6 أرقام)' : 'Verification code (6 digits)' }}</label>
+                        <input name="otp" inputmode="numeric" maxlength="6" placeholder="{{ app()->getLocale() === 'ar' ? 'مثال: 123456' : 'e.g. 123456' }}"
+                            class="mt-2 w-full tracking-widest text-center text-2xl font-bold rounded-lg border border-servx-red/30 bg-servx-black-soft px-4 py-3 text-servx-silver-light placeholder-servx-silver outline-none focus:border-servx-red focus:ring-2 focus:ring-servx-red/20" />
+                        <p class="mt-2 text-xs text-servx-silver">{{ app()->getLocale() === 'ar' ? '* أدخل الرمز قبل انتهاء الصلاحية.' : '* Enter the code before it expires.' }}</p>
                     </div>
 
                     <button type="submit"
-                        class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-white font-extrabold hover:bg-emerald-700 transition">
-                        تحقق ودخول
+                        class="w-full rounded-lg bg-servx-red hover:bg-servx-red-hover px-6 py-3 min-h-[44px] text-white font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]">
+                        {{ app()->getLocale() === 'ar' ? 'تحقق ودخول' : 'Verify & sign in' }}
                     </button>
 
                     <div class="flex items-center justify-between text-sm">
-                        <a href="{{ route('company.login') }}" class="font-bold text-slate-700 hover:text-slate-900">
-                            تعديل رقم الجوال
+                        <a href="{{ route('sign-in.index') }}" class="font-medium text-servx-silver hover:text-servx-red transition-colors">
+                            {{ app()->getLocale() === 'ar' ? 'تعديل رقم الجوال' : 'Change phone number' }}
                         </a>
 
-                        <form method="POST" action="{{ route('company.send_otp') }}">
+                        <form method="POST" action="{{ route('company.send_otp') }}" class="inline">
                             @csrf
                             <input type="hidden" name="phone" value="{{ $phone }}">
-                            <button type="submit" class="font-bold text-emerald-700 hover:text-emerald-800">
-                                إعادة إرسال
+                            <button type="submit" class="font-medium text-servx-red hover:text-servx-red-hover transition-colors">
+                                {{ app()->getLocale() === 'ar' ? 'إعادة إرسال' : 'Resend' }}
                             </button>
                         </form>
                     </div>
                 </form>
             </div>
 
-            <div class="mt-4 text-center text-xs text-slate-500">
-                © {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}
+            <div class="mt-6 flex items-center justify-center gap-3 text-xs text-servx-silver">
+                <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">العربية</a>
+                <span>·</span>
+                <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
             </div>
+            <p class="mt-4 text-center text-xs text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
         </div>
     </div>
 </body>

@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'إضافة عنصر | SERV.X')
+@section('title', 'إضافة عنصر | Servx Motors')
 @section('page_title', 'إضافة عنصر للمخزون')
 
 @section('content')

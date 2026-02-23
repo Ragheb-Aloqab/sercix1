@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'تفاصيل الطلب | SERV.X')
+@section('title', 'تفاصيل الطلب | Servx Motors')
 @section('page_title', __('orders.order_details'))
 @section('subtitle', __('orders.order') . ' #' . $order->id)
 

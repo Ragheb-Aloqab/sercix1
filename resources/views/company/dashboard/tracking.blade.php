@@ -6,7 +6,7 @@
 --}}
 @extends('admin.layouts.app')
 
-@section('title', __('company.tracking_page') . ' | ' . ($siteName ?? 'SERV.X'))
+@section('title', __('company.tracking_page') . ' | ' . ($siteName ?? 'Servx Motors'))
 @section('page_title', __('company.tracking_page'))
 @section('subtitle', __('company.tracking_placeholder_desc'))
 

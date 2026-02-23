@@ -14,6 +14,7 @@ use App\Models\Vehicle;
 use App\Observers\FuelRefillObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\OrderObserver;
+use App\Observers\VehicleObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         Invoice::observe(InvoiceObserver::class);
         Order::observe(OrderObserver::class);
         FuelRefill::observe(FuelRefillObserver::class);
+        Vehicle::observe(VehicleObserver::class);
 
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly
@@ -44,10 +46,10 @@ class AppServiceProvider extends ServiceProvider
         ];
         View::composer($brandingViews, function ($view) {
             try {
-                $siteName = Setting::get('site_name', 'SERV.X');
+                $siteName = Setting::get('site_name', 'Servx Motors');
                 $siteLogoUrl = cache()->remember('site_logo_url', 300, fn () => $this->siteLogoUrl());
             } catch (\Throwable $e) {
-                $siteName = 'SERV.X';
+                $siteName = 'Servx Motors';
                 $siteLogoUrl = null;
             }
             $view->with([
@@ -92,19 +94,22 @@ class AppServiceProvider extends ServiceProvider
             $view->with(compact('before', 'after', 'others'));
         });
 
-        // Driver layout: driver name and initial from first linked vehicle
+        // Driver layout: driver name and initial from first linked vehicle (cached per session)
         View::composer('layouts.driver', function ($view) {
-            $driverName = __('driver.driver');
             $phone = Session::get('driver_phone');
-            if ($phone) {
-                $variants = $this->driverPhoneVariants($phone);
-                $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
-                if ($vehicle && $vehicle->driver_name) {
-                    $driverName = $vehicle->driver_name;
+            $cacheKey = $phone ? 'driver_layout_' . md5($phone) : 'driver_layout_guest';
+            $data = cache()->remember($cacheKey, 300, function () use ($phone) {
+                $driverName = __('driver.driver');
+                if ($phone) {
+                    $variants = $this->driverPhoneVariants($phone);
+                    $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+                    if ($vehicle && $vehicle->driver_name) {
+                        $driverName = $vehicle->driver_name;
+                    }
                 }
-            }
-            $driverInitial = mb_substr($driverName, 0, 1);
-            $view->with(compact('driverName', 'driverInitial'));
+                return ['driverName' => $driverName, 'driverInitial' => mb_substr($driverName, 0, 1)];
+            });
+            $view->with($data);
         });
     }
 
@@ -128,18 +133,16 @@ class AppServiceProvider extends ServiceProvider
     {
         try {
             $path = Setting::get('site_logo_path');
-            if (!$path) {
-                return null;
+            if ($path) {
+                $fullPath = storage_path('app/public/' . $path);
+                if (file_exists($fullPath)) {
+                    $url = asset('storage/' . $path);
+                    return $url . '?v=' . filemtime($fullPath);
+                }
             }
-            $url = asset('storage/' . $path);
-            $fullPath = storage_path('app/public/' . $path);
-            if (file_exists($fullPath)) {
-                $url .= '?v=' . filemtime($fullPath);
-            }
-            return $url;
+            return asset('images/serv.x logo.png');
         } catch (\Throwable $e) {
-            // Table may not exist in tests
+            return asset('images/serv.x logo.png');
         }
-        return null;
     }
 }

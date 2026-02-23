@@ -7,16 +7,16 @@
 --}}
 @php
     $siteUrl = rtrim(config('seo.site_url', config('app.url')), '/');
-    $siteName = config('seo.site_name', $siteName ?? config('app.name', 'SERV.X'));
+    $siteName = config('seo.site_name', $siteName ?? config('app.name', 'Servx Motors'));
 @endphp
 @if($type === 'organization' || $type === 'all')
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "Organization",
+    "@@context": "https://schema.org",
+    "@@type": "Organization",
     "name": "{{ $siteName }}",
     "url": "{{ $siteUrl }}",
-    "logo": "{{ $siteLogoUrl ?? $siteUrl . '/images/logo.png' }}",
+    "logo": "{{ $siteLogoUrl ?? $siteUrl . '/images/serv.x logo.png' }}",
     "description": "{{ config('seo.default_description') }}"
 }
 </script>
@@ -24,12 +24,12 @@
 @if($type === 'website' || $type === 'all')
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
+    "@@context": "https://schema.org",
+    "@@type": "WebSite",
     "name": "{{ $siteName }}",
     "url": "{{ $siteUrl }}",
     "potentialAction": {
-        "@type": "SearchAction",
+        "@@type": "SearchAction",
         "target": "{{ $siteUrl }}/?s={search_term_string}",
         "query-input": "required name=search_term_string"
     }
@@ -39,12 +39,12 @@
 @if(($type === 'breadcrumb' || $type === 'all') && !empty($breadcrumbs))
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
     "itemListElement": [
         @foreach($breadcrumbs as $i => $item)
         {
-            "@type": "ListItem",
+            "@@type": "ListItem",
             "position": {{ $i + 1 }},
             "name": "{{ $item['name'] ?? $item['title'] ?? 'Item' }}",
             "item": "{{ str_starts_with($item['url'] ?? '', 'http') ? $item['url'] : $siteUrl . ($item['url'] ?? '/') }}"
@@ -57,21 +57,21 @@
 @if($type === 'article' && !empty($article))
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "Article",
+    "@@context": "https://schema.org",
+    "@@type": "Article",
     "headline": "{{ $article['title'] ?? $article['headline'] ?? '' }}",
     "description": "{{ $article['description'] ?? '' }}",
     "datePublished": "{{ $article['datePublished'] ?? now()->toIso8601String() }}",
     "dateModified": "{{ $article['dateModified'] ?? ($article['datePublished'] ?? now()->toIso8601String()) }}",
     "author": {
-        "@type": "Organization",
+        "@@type": "Organization",
         "name": "{{ $siteName }}"
     },
     "publisher": {
-        "@type": "Organization",
+        "@@type": "Organization",
         "name": "{{ $siteName }}",
         "logo": {
-            "@type": "ImageObject",
+            "@@type": "ImageObject",
             "url": "{{ $article['image'] ?? $siteUrl . '/images/logo.png' }}"
         }
     }

@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', __('vehicles.vehicle_details') . ' | ' . ($vehicle->plate_number ?? 'SERV.X'))
+@section('title', __('vehicles.vehicle_details') . ' | ' . ($vehicle->plate_number ?? 'Servx Motors'))
 @section('page_title', __('vehicles.vehicle_details'))
 @section('subtitle', $vehicle->plate_number . ' — ' . trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')))
 
@@ -18,10 +18,17 @@
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors">
                 <i class="fa-solid fa-pen"></i> {{ __('vehicles.edit_vehicle') }}
             </a>
-            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/30 bg-slate-800/30 text-slate-400 font-bold cursor-not-allowed"
-                title="{{ __('vehicles.tracking_coming_soon') }}">
-                <i class="fa-solid fa-location-dot"></i> {{ __('vehicles.tracking') }}
-            </span>
+            @if ($vehicle->imei)
+                <a href="{{ route('company.vehicles.track', $vehicle) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors">
+                    <i class="fa-solid fa-location-dot"></i> {{ __('tracking.track_vehicle') }}
+                </a>
+            @else
+                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/30 bg-slate-800/30 text-slate-400 font-bold cursor-not-allowed"
+                    title="{{ __('tracking.imei_required') }}">
+                    <i class="fa-solid fa-location-dot"></i> {{ __('tracking.track_vehicle') }}
+                </span>
+            @endif
         </div>
     </div>
 

@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'api_not_configured' => 'Tracking API is not configured. Please add your API key and Base URL in Settings.',
+    'api_error' => 'Tracking API error',
+    'invalid_response' => 'Invalid response from tracking API.',
+    'imei_required' => 'Vehicle IMEI is required for tracking.',
+    'company_not_found' => 'Company not found.',
+
+    'track_vehicle' => 'Track',
+    'tracking_page' => 'Vehicle Tracking',
+    'live_updates' => 'Live updates every 2 seconds',
+    'last_update' => 'Last update',
+    'speed' => 'Speed',
+    'address' => 'Address',
+    'plate' => 'Plate',
+    'vehicle_name' => 'Vehicle Name',
+    'no_location' => 'No location data yet',
+    'fetching' => 'Fetching location...',
+    'odometer' => 'Odometer',
+    'machine_status' => 'Engine',
+    'engine_on' => 'ON',
+    'engine_off' => 'OFF',
+    'engine_hours' => 'Engine hours',
+    'fuel_level' => 'Fuel level',
+    'km' => 'km',
+    'kmh' => 'km/h',
+
+    'status_moving' => 'Moving',
+    'status_stopped' => 'Stopped',
+    'status_idle' => 'Idle',
+
+    'settings_title' => 'Tracking API Settings',
+    'settings_desc' => 'Enter your tracking provider API credentials. These are used to fetch vehicle locations by IMEI.',
+    'api_key' => 'API Key',
+    'base_url' => 'Base URL',
+    'api_key_placeholder' => 'Your tracking API key',
+    'api_key_hint' => 'Leave blank to keep the current key. Enter a new key to update.',
+    'base_url_placeholder' => 'https://api.your-provider.com or full URL from Postman (e.g. https://x.com/api/positions)',
+    'save_settings' => 'Save tracking settings',
+    'settings_saved' => 'Tracking API settings saved successfully.',
+];

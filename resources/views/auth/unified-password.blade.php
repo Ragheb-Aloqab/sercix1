@@ -1,41 +1,63 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{{ __('login.password_title') }} — {{ $siteName ?? 'SERV.X' }}</title>
+    <title>{{ __('login.password_title') }} — {{ $siteName ?? 'Servx Motors' }}</title>
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { theme: { extend: { boxShadow: { 'soft': '0 25px 50px -12px rgba(0,0,0,.15)' } } } }</script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        servx: {
+                            black: '#0B0B0D',
+                            'black-soft': '#111111',
+                            'black-card': '#151515',
+                            red: '#DC2626',
+                            'red-hover': '#EF4444',
+                            silver: '#B8B8B8',
+                            'silver-light': '#E5E5E5',
+                        }
+                    },
+                    fontFamily: { servx: ['Rajdhani', 'Tajawal', 'system-ui', 'sans-serif'] },
+                    boxShadow: { 'servx-card': '0 8px 32px rgba(0,0,0,0.5)' }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>body{font-family:'Inter',system-ui,sans-serif}</style>
+    @vite(['resources/css/style.css'])
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800">
+<body class="page-auth min-h-screen bg-servx-black text-servx-silver-light antialiased overflow-x-hidden font-servx">
 <div class="min-h-screen flex items-center justify-center px-4 py-10">
     <div class="w-full max-w-sm">
-        <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6">
+        <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6 group">
             @if($siteLogoUrl ?? null)
-                <img src="{{ $siteLogoUrl }}" alt="" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
+                <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="h-11 w-11 rounded-full object-cover border-2 border-servx-red/50 group-hover:border-servx-red transition-colors">
             @else
-                <div class="h-11 w-11 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
+                <div class="h-11 w-11 rounded-full bg-servx-black-card border-2 border-servx-red/50 flex items-center justify-center text-servx-red font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
             @endif
-            <span class="text-xl font-bold text-slate-800">{{ $siteName ?? 'SERV.X' }}</span>
+            <span class="text-xl font-bold text-servx-silver-light group-hover:text-white transition-colors">{{ $siteName ?? 'Servx Motors' }}</span>
         </a>
 
-        <div class="bg-white rounded-2xl shadow-soft border border-slate-200/80 p-6 sm:p-8">
-            <h1 class="text-xl font-semibold text-slate-900">{{ __('login.password_title') }}</h1>
-            <p class="mt-1 text-sm text-slate-500 mb-6">{{ __('login.password_subtitle') }}: <span class="font-semibold text-slate-700">{{ $email }}</span></p>
+        <div class="bg-servx-black-card rounded-xl border border-servx-red/30 shadow-servx-card p-6 sm:p-8">
+            <h1 class="text-xl font-bold text-white">{{ __('login.password_title') }}</h1>
+            <p class="mt-1 text-sm text-servx-silver mb-6">{{ __('login.password_subtitle') }}: <span class="font-semibold text-servx-silver-light">{{ $email }}</span></p>
             @if (!empty($requiresOtp) && !empty($phone))
-                <p class="mt-1 text-sm text-slate-500 mb-4">{{ __('login.verify_sent') }}: <span class="font-semibold text-slate-700">{{ $phone }}</span></p>
+                <p class="mt-1 text-sm text-servx-silver mb-4">{{ __('login.verify_sent') }}: <span class="font-semibold text-servx-silver-light">{{ $phone }}</span></p>
             @endif
 
             @if ($errors->any())
-                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                <div class="mb-4 rounded-lg border border-servx-red/50 bg-servx-red/10 px-3 py-2 text-sm text-servx-silver-light">
                     <ul class="list-disc ms-5 space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
                 </div>
             @endif
@@ -44,34 +66,34 @@
                 @csrf
                 @if (!empty($requiresOtp))
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">{{ __('login.verify_otp_label') }}</label>
+                    <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.verify_otp_label') }}</label>
                     <input name="otp" type="text" inputmode="numeric" maxlength="6" placeholder="{{ __('login.verify_otp_placeholder') }}"
-                        class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-center tracking-widest font-bold outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200" />
+                        class="mt-1.5 block w-full rounded-lg border border-servx-red/30 bg-servx-black-soft px-3 py-2.5 text-sm text-center tracking-widest font-bold text-servx-silver-light placeholder-servx-silver outline-none focus:border-servx-red focus:ring-2 focus:ring-servx-red/20" />
                 </div>
                 @endif
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">{{ __('login.password_label') }}</label>
+                    <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.password_label') }}</label>
                     <input name="password" type="password" required autocomplete="current-password"
-                        class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200" />
+                        class="mt-1.5 block w-full rounded-lg border border-servx-red/30 bg-servx-black-soft px-3 py-2.5 text-servx-silver-light placeholder-servx-silver outline-none focus:border-servx-red focus:ring-2 focus:ring-servx-red/20" />
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" name="remember" id="remember" class="h-4 w-4 rounded border-slate-300 text-slate-800 focus:ring-slate-400" />
-                    <label for="remember" class="text-sm text-slate-600">{{ __('login.remember_me') }}</label>
+                    <input type="checkbox" name="remember" id="remember" class="h-4 w-4 rounded border-servx-red/30 bg-servx-black-soft text-servx-red focus:ring-servx-red/20" />
+                    <label for="remember" class="text-sm text-servx-silver">{{ __('login.remember_me') }}</label>
                 </div>
-                <button type="submit" class="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
+                <button type="submit" class="w-full rounded-lg bg-servx-red hover:bg-servx-red-hover px-4 py-2.5 min-h-[44px] text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]">
                     {{ __('login.sign_in') }}
                 </button>
             </form>
-            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-medium text-slate-600 hover:text-slate-800">
+            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-medium text-servx-silver hover:text-servx-red transition-colors">
                 {{ __('login.change_email') }}
             </a>
         </div>
-        <div class="mt-6 flex items-center justify-center gap-3 text-xs text-slate-500">
-            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-slate-700' : 'hover:text-slate-700' }}">العربية</a>
+        <div class="mt-6 flex items-center justify-center gap-3 text-xs text-servx-silver">
+            <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">العربية</a>
             <span>·</span>
-            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-slate-700' : 'hover:text-slate-700' }}">English</a>
+            <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-slate-500">© {{ date('Y') }} {{ $siteName ?? 'SERV.X' }}</p>
+        <p class="mt-4 text-center text-xs text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
     </div>
 </div>
 </body>

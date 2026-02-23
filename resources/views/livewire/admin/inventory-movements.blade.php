@@ -72,7 +72,7 @@
 
     {{-- Table --}}
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow overflow-x-auto">
-        <table class="w-full text-sm text-right">
+        <table class="w-full text-sm text-end">
             <thead class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-200">
                 <tr>
                     <th class="p-3">{{ __('livewire.date') }}</th>

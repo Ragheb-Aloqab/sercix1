@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', __('fuel.title') . ' | ' . ($siteName ?? 'SERV.X'))
+@section('title', __('fuel.title') . ' | ' . ($siteName ?? 'Servx Motors'))
 @section('page_title', __('fuel.title'))
 @section('subtitle', __('fuel.subtitle'))
 

@@ -19,7 +19,7 @@ class SystemBranding extends Component
 
     public function mount()
     {
-        $this->site_name = Setting::get('site_name', 'SERV.X');
+        $this->site_name = Setting::get('site_name', 'Servx Motors');
         $this->site_logo_path = Setting::get('site_logo_path');
         $this->contact_email = Setting::get('contact_email', 'b2b@oilgo.com');
         $this->contact_whatsapp = Setting::get('contact_whatsapp', '05xxxxxxxx');

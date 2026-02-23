@@ -49,8 +49,8 @@
                                         <span>{{ __('livewire.task_progress') }}</span>
                                         <span class="font-bold">{{ $row->progress }}%</span>
                                     </div>
-                                    <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                                        <div class="h-full rounded-full bg-slate-900 dark:bg-white/80" style="width: {{ $row->progress }}%"></div>
+                                    <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex">
+                                        <div class="progress-bar-fill h-full rounded-full bg-slate-900 dark:bg-white/80 transition-[width]" style="width: {{ $row->progress }}%"></div>
                                     </div>
                                 </div>
                             </div>

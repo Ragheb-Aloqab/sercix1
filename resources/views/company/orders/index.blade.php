@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'طلباتي | SERV.X')
+@section('title', 'طلباتي | Servx Motors')
 @section('page_title', __('dashboard.orders'))
 @section('subtitle', __('orders.orders_list_desc') ?? 'قائمة الطلبات')
 
