@@ -152,7 +152,10 @@ class VehicleTrackingApiService
         $address = $data['address'] ?? $data['data']['address'] ?? $data['location']['address'] ?? null;
         $status = $data['status'] ?? $data['data']['status'] ?? null;
         $status = $status ? (string) $status : $this->inferStatusFromSpeed($speed);
-        $odometer = $data['odometer'] ?? $data['data']['odometer'] ?? $data['mileage'] ?? null;
+        $params = $data['params'] ?? [];
+        $odometer = $data['odometer'] ?? $data['data']['odometer'] ?? $data['mileage'] ?? null
+            ?? ($params['odometer'] ?? $params['odo'] ?? $params['mileage'] ?? $params['km'] ?? $params['total_km'] ?? $params['total_odo'] ?? null)
+            ?? $this->extractOdometerFromSensList($data['sens_list'] ?? []);
         $engineHours = $data['engine_hours'] ?? $data['data']['engine_hours'] ?? null;
         $fuelLevel = $data['fuel_level'] ?? $data['data']['fuel_level'] ?? $data['fuel'] ?? null;
         $machineStatus = $this->extractMachineStatus($data);
@@ -304,6 +307,26 @@ class VehicleTrackingApiService
     }
 
     /**
+     * Extract odometer from Bostman sens_list (type odometer, odo, mileage).
+     */
+    protected function extractOdometerFromSensList(array $sensList): ?float
+    {
+        if (! is_array($sensList)) {
+            return null;
+        }
+        foreach ($sensList as $s) {
+            $type = strtolower($s['type'] ?? '');
+            if (in_array($type, ['odometer', 'odo', 'mileage', 'km'], true)) {
+                $val = $s['value'] ?? $s['val'] ?? $s['val_f'] ?? null;
+                if ($val !== null && $val !== '') {
+                    return (float) $val;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Extract machine/engine status from Bostman sens_list or params.io1.
      */
     protected function extractMachineStatus(array $data): ?string
@@ -311,7 +334,7 @@ class VehicleTrackingApiService
         $sensList = $data['sens_list'] ?? [];
         if (is_array($sensList)) {
             foreach ($sensList as $s) {
-                $type = ($s['type'] ?? '').toLowerCase();
+                $type = strtolower($s['type'] ?? '');
                 if ($type === 'acc' || $type === 'ignition') {
                     $val = (string) ($s['value'] ?? $s['val'] ?? '');
                     $text1 = $s['text_1'] ?? 'ON';

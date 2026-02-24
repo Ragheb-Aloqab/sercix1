@@ -5,7 +5,7 @@
     $isSingle = $mode === 'single';
     $vehicle = $isSingle ? $vehicles->first() : null;
     $hasVehicles = $vehicles->isNotEmpty();
-    $mapId = 'vehicle-map-' . uniqid();
+    $mapId = $isSingle && $vehicle ? 'vehicle-map-' . $vehicle->id : 'vehicle-map-all';
 @endphp
 
 @push('styles')
@@ -166,7 +166,6 @@
             const markers = {};
             let singleMarker = null;
             const lastKnownPositions = {};
-            const cachedInfoEls = { speed: null, odometer: null, timestamp: null, machineStatus: null, address: null, machineDot: null };
 
             if (!isSingle) {
                 markerCluster = L.markerClusterGroup({ chunkedLoading: true, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
@@ -176,8 +175,7 @@
             function safeGetInfoEl(key) {
                 const idMap = { machineStatus: 'machine-status', address: 'address', machineDot: 'machine-dot' };
                 const elId = idMap[key] || key;
-                if (!cachedInfoEls[key]) cachedInfoEls[key] = document.getElementById(mapId + '-' + elId);
-                return cachedInfoEls[key];
+                return document.getElementById(mapId + '-' + elId);
             }
 
             function createOrUpdateMarker(vehicleId, data, fallbackIndex) {
@@ -193,7 +191,15 @@
                     lat = parseFloat(safeData.lat);
                     lng = parseFloat(safeData.lng);
                     if (lat < -90 || lat > 90) { [lat, lng] = [lng, lat]; }
-                    lastKnownPositions[vehicleId] = { lat, lng, speed: safeData.speed, odometer: safeData.odometer, tracker_timestamp: safeData.tracker_timestamp, machine_status: safeData.machine_status, address: safeData.address };
+                    const prev = lastKnownPositions[vehicleId];
+                    lastKnownPositions[vehicleId] = {
+                        lat, lng,
+                        speed: safeData.speed,
+                        odometer: safeData.odometer != null ? safeData.odometer : (prev?.odometer),
+                        tracker_timestamp: safeData.tracker_timestamp,
+                        machine_status: safeData.machine_status ?? prev?.machine_status,
+                        address: safeData.address ?? prev?.address,
+                    };
                 } else if (lastKnown) {
                     lat = lastKnown.lat;
                     lng = lastKnown.lng;
@@ -215,11 +221,14 @@
                         singleMarker.setLatLng([lat, lng]);
                         singleMarker.setIcon(icon);
                         singleMarker.setPopupContent(buildPopup(vehicleId, locData));
+                        if (!map.getBounds().contains([lat, lng])) {
+                            map.panTo([lat, lng], { animate: true, duration: 0.5 });
+                        }
                     } else {
                         singleMarker = L.marker([lat, lng], { icon }).addTo(map);
                         singleMarker.bindPopup(buildPopup(vehicleId, locData));
+                        map.setView([lat, lng], map.getZoom());
                     }
-                    map.setView([lat, lng], map.getZoom());
                     const speedEl = safeGetInfoEl('speed');
                     const odometerEl = safeGetInfoEl('odometer');
                     const tsEl = safeGetInfoEl('timestamp');
@@ -234,9 +243,11 @@
                     if (dotEl) dotEl.className = 'w-2 h-2 rounded-full ' + (locData.machine_status && !['OFF','0','false','إيقاف'].includes(locData.machine_status) ? 'bg-emerald-500' : 'bg-slate-500');
                 } else {
                     if (markers[vehicleId]) {
+                        markerCluster.removeLayer(markers[vehicleId]);
                         markers[vehicleId].setLatLng([lat, lng]);
                         markers[vehicleId].setIcon(icon);
                         markers[vehicleId].setPopupContent(buildPopup(vehicleId, locData));
+                        markerCluster.addLayer(markers[vehicleId]);
                     } else {
                         const m = L.marker([lat, lng], { icon });
                         m.bindPopup(buildPopup(vehicleId, locData));
