@@ -16,10 +16,6 @@
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: { boxShadow: { 'soft': '0 25px 50px -12px rgba(0,0,0,.15)' } } } }
-    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @livewireStyles

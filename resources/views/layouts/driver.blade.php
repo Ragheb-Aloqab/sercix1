@@ -13,7 +13,6 @@
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/style.css'])
     <x-vite-cdn-fallback />

@@ -6,17 +6,24 @@ Use this checklist before uploading to Hostinger.
 
 ## ⚠️ FIX: Pages Show Without Styling
 
-If your site loads but has **no CSS/styling**, do these in order:
+If your site loads but has **no CSS/styling**, check these causes:
 
-1. **Set `APP_ENV=production`** in `.env` on Hostinger (critical – otherwise Vite loads from dev server which doesn't exist)
-2. **Run `npm run build`** on your local machine before uploading
-3. **Upload the entire `public/build/` folder** – must include:
-   - `public/build/manifest.json`
-   - `public/build/assets/*.css`
-   - `public/build/assets/*.js`
-4. **Document root** must point to the `public` folder (e.g. `public_html/public` or `domains/yourdomain.com/public_html/public`)
-5. **Set `APP_URL`** to your live URL (e.g. `https://servxmotors.com`) – no trailing slash
-6. **Clear config cache** on server: `php artisan config:clear && php artisan config:cache`
+| Cause | Fix |
+|-------|-----|
+| **`public/hot` file exists** | Delete it. This file makes Laravel load from Vite dev server (localhost:5173) which doesn't exist on production. |
+| **`APP_ENV` not production** | Set `APP_ENV=production` in `.env` or Laravel may try Vite dev server. |
+| **Build folder missing** | Run `npm run build` and upload `public/build/` (manifest.json + assets/*.css + assets/*.js). |
+| **Wrong document root** | Point to `public` folder (e.g. `public_html/public`). |
+| **Wrong `APP_URL`** | Set to your live URL (e.g. `https://servxmotors.com`) – no trailing slash. |
+| **Mixed content** | If site is HTTPS, use `https://` in APP_URL. |
+| **`fallback.css` missing** | Upload `public/css/fallback.css` for CDN fallback when build fails. |
+
+**Steps to fix:**
+1. Delete `public/hot` if it exists (do not deploy it)
+2. Set `APP_ENV=production` and `APP_URL=https://yourdomain.com` in `.env`
+3. Run `npm run build` before uploading
+4. Upload `public/build/` and `public/css/`
+5. Clear config cache: `php artisan config:clear && php artisan config:cache`
 
 **Verify:** Visit `https://yourdomain.com/build/manifest.json` – it should return JSON, not 404.
 

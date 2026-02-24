@@ -16,28 +16,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        servx: {
-                            black: '#0B0B0D',
-                            'black-soft': '#111111',
-                            'black-card': '#151515',
-                            red: '#DC2626',
-                            'red-hover': '#EF4444',
-                            silver: '#B8B8B8',
-                            'silver-light': '#E5E5E5',
-                        }
-                    },
-                    fontFamily: { servx: ['Rajdhani', 'Tajawal', 'system-ui', 'sans-serif'] },
-                    boxShadow: { 'servx-card': '0 8px 32px rgba(0,0,0,0.5)' }
-                }
-            }
-        }
-    </script>
     @vite(['resources/css/style.css'])
     <x-vite-cdn-fallback />
 </head>
