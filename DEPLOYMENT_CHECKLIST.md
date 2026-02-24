@@ -43,6 +43,7 @@ If your site loads but has **no CSS/styling**, do these in order:
 - [ ] **Run `npm run build`** – Vite assets must be built before deploy (required for styling)
 - [ ] **Run `composer install --optimize-autoloader --no-dev`** – On server or before upload
 - [ ] **Upload `public/build/`** – The entire folder: `manifest.json` + `assets/*.css` + `assets/*.js`
+- [ ] **Upload `public/css/`** – Contains `fallback.css` for CDN fallback when build fails
 
 ---
 
