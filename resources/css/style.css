@@ -3,6 +3,8 @@
  * Brand colors from logo: Black, Red accent, Silver typography
  * Full RTL/LTR support via logical properties
  */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
