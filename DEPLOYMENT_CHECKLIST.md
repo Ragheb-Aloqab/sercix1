@@ -4,6 +4,24 @@ Use this checklist before uploading to Hostinger.
 
 ---
 
+## ⚠️ FIX: Pages Show Without Styling
+
+If your site loads but has **no CSS/styling**, do these in order:
+
+1. **Set `APP_ENV=production`** in `.env` on Hostinger (critical – otherwise Vite loads from dev server which doesn't exist)
+2. **Run `npm run build`** on your local machine before uploading
+3. **Upload the entire `public/build/` folder** – must include:
+   - `public/build/manifest.json`
+   - `public/build/assets/*.css`
+   - `public/build/assets/*.js`
+4. **Document root** must point to the `public` folder (e.g. `public_html/public` or `domains/yourdomain.com/public_html/public`)
+5. **Set `APP_URL`** to your live URL (e.g. `https://servxmotors.com`) – no trailing slash
+6. **Clear config cache** on server: `php artisan config:clear && php artisan config:cache`
+
+**Verify:** Visit `https://yourdomain.com/build/manifest.json` – it should return JSON, not 404.
+
+---
+
 ## 1. Environment & Security
 
 - [ ] **Never upload `.env`** – It's in `.gitignore`. Create `.env` on Hostinger manually.
@@ -22,9 +40,9 @@ Use this checklist before uploading to Hostinger.
 
 ## 2. Build & Dependencies
 
-- [ ] **Run `npm run build`** – Vite assets must be built before deploy
+- [ ] **Run `npm run build`** – Vite assets must be built before deploy (required for styling)
 - [ ] **Run `composer install --optimize-autoloader --no-dev`** – On server or before upload
-- [ ] **Upload `public/build/`** – The built CSS/JS assets
+- [ ] **Upload `public/build/`** – The entire folder: `manifest.json` + `assets/*.css` + `assets/*.js`
 
 ---
 

@@ -107,7 +107,7 @@
      * - wire:poll.visible.30s + positions-updated event; client fetch for responsiveness.
      */
     (function() {
-        const INTERVAL_MOVING_MS = 3000;   // 2–5s: vehicles moving (speed > 0)
+        const INTERVAL_MOVING_MS = 1500;   // ~1.5s: near-instant updates when car moves
         const INTERVAL_STOPPED_MS = 12000; // 10–15s: vehicles stopped (speed = 0)
 
         function initVehicleMap() {
