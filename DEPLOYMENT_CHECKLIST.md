@@ -51,12 +51,14 @@ If your site loads but has **no CSS/styling**, check these causes:
 - [ ] **Run `composer install --optimize-autoloader --no-dev`** – On server or before upload
 - [ ] **Upload `public/build/`** – The entire folder: `manifest.json` + `assets/*.css` + `assets/*.js`
 - [ ] **Upload `public/css/`** – Contains `fallback.css` for CDN fallback when build fails
+- [ ] **Do NOT upload `public/hot`** – Delete it if it exists on server (forces dev server, breaks styling)
 
 ---
 
 ## 3. Laravel Setup (on Hostinger)
 
-- [ ] **Document root** – Point to `/public` (Hostinger: Domains → Document Root)
+- [ ] **Document root** – Point to `public` folder (Hostinger: Domains → Document Root → `public_html/public`)
+- [ ] **If you cannot change document root:** The project includes a root `.htaccess` that redirects requests to `public/`. Ensure the root `.htaccess` is uploaded (in the same folder as `app/`, `config/`, etc.)
 - [ ] **Storage link:** `php artisan storage:link`
 - [ ] **Run migrations:** `php artisan migrate --force`
 - [ ] **Optimize:** `php artisan config:cache && php artisan route:cache && php artisan view:cache`

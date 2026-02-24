@@ -1,6 +1,6 @@
 # Styling Troubleshooting
 
-This document explains why pages may load without CSS and how to fix it.
+This document explains why pages may load without CSS and how to fix it. See also `DEPLOYMENT_CHECKLIST.md` for full hosting setup.
 
 ---
 
