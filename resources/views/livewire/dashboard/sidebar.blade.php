@@ -5,7 +5,7 @@
     {{ $role === 'company' ? 'bg-servx-black border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
     <div class="px-6 py-6 border-b {{ $role === 'company' ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-between">
         <a href="{{ route('index') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="" class="w-11 h-11 rounded-full object-cover flex-shrink-0">
+            <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="" width="44" height="44" class="w-11 h-11 rounded-full object-cover flex-shrink-0">
             <div class="min-w-0">
                 <p class="font-extrabold leading-5 truncate {{ $role === 'company' ? 'text-white' : '' }}">
                     {{ $siteName ?? 'Servx Motors' }}

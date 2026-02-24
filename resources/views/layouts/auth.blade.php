@@ -33,7 +33,7 @@
             {{-- Logo --}}
             <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-8">
                 @if($siteLogoUrl ?? null)
-                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? config('app.name', 'Servx Motors') }}" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
+                    <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? config('app.name', 'Servx Motors') }}" width="44" height="44" class="h-11 w-11 rounded-xl object-cover ring-2 ring-white shadow-lg">
                 @else
                     <div class="h-11 w-11 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}

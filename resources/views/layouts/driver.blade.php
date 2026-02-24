@@ -25,7 +25,7 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 w-full">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
             <a href="{{ route('driver.dashboard') }}" class="font-extrabold text-lg flex items-center gap-2 min-w-0 truncate shrink-0">
-                @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" class="h-8 w-8 rounded-lg object-cover shrink-0">@endif
+                @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" width="32" height="32" class="h-8 w-8 rounded-lg object-cover shrink-0">@endif
                 <span class="truncate">{{ $siteName ?? 'Servx Motors' }}</span>
             </a>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">

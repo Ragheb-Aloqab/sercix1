@@ -76,7 +76,7 @@
             <p class="text-sm text-slate-400 mb-4 text-end">{{ __('vehicles.car_image') }}:</p>
             @if($vehicle->image_path)
                 <a href="{{ asset('storage/' . $vehicle->image_path) }}" target="_blank" class="block rounded-xl overflow-hidden border border-slate-500/30 mb-3">
-                    <img src="{{ asset('storage/' . $vehicle->image_path) }}" alt="{{ __('vehicles.car_image') }}" class="w-full h-24 object-cover" />
+                    <img src="{{ asset('storage/' . $vehicle->image_path) }}" alt="{{ __('vehicles.car_image') }}" width="320" height="96" class="w-full h-24 object-cover" loading="lazy" decoding="async" />
                 </a>
             @endif
             <a href="{{ route('company.vehicles.edit', $vehicle) }}"

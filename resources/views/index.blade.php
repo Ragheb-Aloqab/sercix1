@@ -13,49 +13,24 @@
     ])
     @if ($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
+        <link rel="preload" href="{{ $siteLogoUrl }}" as="image" />
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="preload" href="{{ asset('images/serv.x logo.png') }}" as="image" />
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" /></noscript>
     @vite(['resources/css/style.css'])
 
     @include('components.structured-data', [
         'type' => 'all',
         'breadcrumbs' => [['name' => $siteName ?? 'Servx Motors', 'url' => '/']],
     ])
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        servx: {
-                            black: '#0B0B0D',
-                            'black-soft': '#111111',
-                            'black-card': '#151515',
-                            red: '#DC2626',
-                            'red-hover': '#EF4444',
-                            silver: '#B8B8B8',
-                            'silver-light': '#E5E5E5',
-                        }
-                    },
-                    fontFamily: {
-                        servx: ['Rajdhani', 'Tajawal', 'system-ui', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        soft: '0 4px 24px rgba(0,0,0,0.4)',
-                        'servx-card': '0 8px 32px rgba(0,0,0,0.5)',
-                    }
-                }
-            },
-        }
-    </script>
 </head>
 
 <body class="page-index bg-servx-black text-servx-silver-light antialiased overflow-x-hidden min-h-screen font-servx">
@@ -67,7 +42,7 @@
             <!-- Logo -->
             <a href="{{ url('/') }}" class="flex items-center gap-3 group">
                 <div class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden shrink-0 border-2 border-servx-red/50">
-                    <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
+                    <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="48" height="48" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
                 </div>
                 <div class="min-w-0">
                     <div class="text-lg font-bold leading-5 truncate text-servx-silver-light group-hover:text-white transition-colors" id="brandName">{{ $siteName ?? 'Servx Motors' }}</div>
@@ -184,7 +159,7 @@
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-servx-silver-light" id="numbersTitle">{{ __('index.numbersTitle') }}</h1>
                     <div class="mt-4 flex items-center justify-center lg:justify-start gap-2">
                         <span class="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">Servex Motors</span>
-                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="" class="h-10 sm:h-12 lg:h-14 w-auto object-contain" aria-hidden="true" />
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="" width="56" height="56" class="h-10 sm:h-12 lg:h-14 w-auto object-contain" aria-hidden="true" loading="lazy" decoding="async" />
                     </div>
                     <p class="mt-2 text-lg sm:text-xl font-bold tracking-[0.25em] text-servx-red flex items-center justify-center lg:justify-start gap-1 flex-wrap">M<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>T<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>RS</p>
                 </div>
@@ -215,7 +190,7 @@
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="flex justify-center order-2 lg:order-1 rtl:lg:order-2">
                     <div class="servx-card servx-card-accent w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center p-6">
-                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" />
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="128" height="128" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" decoding="async" />
                     </div>
                 </div>
                 <div class="order-1 lg:order-2 rtl:lg:order-1 text-start">
@@ -360,7 +335,7 @@
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="text-start order-1 rtl:md:order-3">
                     <div class="flex flex-row items-center gap-3">
-                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" class="h-10 w-10 rounded-full object-cover border-2 border-servx-red/50" loading="lazy" decoding="async" />
+                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="40" height="40" class="h-10 w-10 rounded-full object-cover border-2 border-servx-red/50" loading="lazy" decoding="async" />
                         <div>
                             <div class="text-lg font-bold text-white">{{ $siteName ?? 'Servx Motors' }}</div>
                             <div class="text-xs text-servx-silver" id="footerTag">{{ __('index.footerTag') }}</div>
