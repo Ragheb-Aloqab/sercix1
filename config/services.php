@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'authentica' => [
+        'api_key' => env('AUTHENTICA_API_KEY'),
+    ],
+
 ];

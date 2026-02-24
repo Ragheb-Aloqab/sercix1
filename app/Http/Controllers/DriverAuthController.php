@@ -37,19 +37,21 @@ class DriverAuthController extends Controller
         Session::put('driver_otp.code', $otp);
         Session::put('driver_otp.expires_at', now()->addMinutes(10)->timestamp);
 
-        $hasOtpApi = !empty(config('services.authentica.api_key', '')) || !empty(env('AUTHENTICA_API_KEY'));
-        $sendViaApi = $hasOtpApi && !app()->environment('local');
+        $hasOtpApi = !empty(config('services.authentica.api_key'));
+        $sendViaApi = $hasOtpApi;
 
         if (!$sendViaApi) {
-            // No API or local env: write OTP to storage/logs/laravel.log so you can copy it
-            Log::channel('single')->info('[OTP-DEV] Driver Login — OTP (no API or local)', [
+            Log::channel('single')->info('[OTP-DEV] Driver Login — OTP (no API key)', [
                 'phone' => $phone,
                 'otp'   => $otp,
                 'hint'  => 'Copy the "otp" value and paste it on the verify screen.',
             ]);
         }
         if ($sendViaApi) {
-            OtpService::send($phone, $otp);
+            $response = OtpService::send($phone, $otp);
+            if (!empty($response['success']) && $response['success'] === false) {
+                return back()->withErrors(['phone' => __('messages.otp_send_error')])->withInput();
+            }
         }
 
         return redirect()->route('driver.verify')->with('success', __('messages.driver_otp_sent'));

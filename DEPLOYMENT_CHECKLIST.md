@@ -29,6 +29,13 @@ If your site loads but has **no CSS/styling**, check these causes:
 
 ---
 
+## 0. OTP / SMS (Company & Driver Login)
+
+- [ ] **Set `AUTHENTICA_API_KEY`** in `.env` — OTP will not be sent without it. Get your key from [Authentica](https://authentica.sa).
+- [ ] After adding, run `php artisan config:clear && php artisan config:cache`
+
+---
+
 ## 1. Environment & Security
 
 - [ ] **Never upload `.env`** – It's in `.gitignore`. Create `.env` on Hostinger manually.
@@ -59,7 +66,12 @@ If your site loads but has **no CSS/styling**, check these causes:
 
 - [ ] **Document root** – Point to `public` folder (Hostinger: Domains → Document Root → `public_html/public`)
 - [ ] **If you cannot change document root:** The project includes a root `.htaccess` that redirects requests to `public/`. Ensure the root `.htaccess` is uploaded (in the same folder as `app/`, `config/`, etc.)
-- [ ] **Storage link:** `php artisan storage:link`
+- [ ] **Storage link** – Hostinger often disables `exec()` and `symlink()`, so `php artisan storage:link` may fail. Create it manually via SSH:
+  ```bash
+  cd /home/u654853714/domains/yourdomain.com/public_html
+  ln -s ../storage/app/public public/storage
+  ```
+  Or use Hostinger File Manager to create a symbolic link: `public/storage` → `../storage/app/public`
 - [ ] **Run migrations:** `php artisan migrate --force`
 - [ ] **Optimize:** `php artisan config:cache && php artisan route:cache && php artisan view:cache`
 

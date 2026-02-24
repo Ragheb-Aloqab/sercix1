@@ -31,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Override storage:link for Hostinger (exec/symlink disabled)
+        $this->app->singleton(
+            \Illuminate\Foundation\Console\StorageLinkCommand::class,
+            \App\Console\Commands\StorageLinkCommand::class
+        );
+
         Schema::defaultStringLength(191);
 
         Invoice::observe(InvoiceObserver::class);

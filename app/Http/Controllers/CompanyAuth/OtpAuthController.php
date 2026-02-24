@@ -40,19 +40,22 @@ class OtpAuthController extends Controller
         Session::put('otp.code', $otp);
         Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
 
-        $hasOtpApi = !empty(config('services.authentica.api_key', '')) || !empty(env('AUTHENTICA_API_KEY'));
-        $sendViaApi = $hasOtpApi && !app()->environment('local');
+        $hasOtpApi = !empty(config('services.authentica.api_key'));
+        $sendViaApi = $hasOtpApi; // Send when API key is set (local or production)
 
         if (!$sendViaApi) {
-            Log::channel('single')->info('[OTP-DEV] Company Login — OTP (no API or local)', [
+            Log::channel('single')->info('[OTP-DEV] Company Login — OTP (no API key)', [
                 'phone' => $phone,
                 'otp'   => $otp,
-                'hint'  => 'Copy the "otp" value and paste it on the verify screen.',
+                'hint'  => 'Add AUTHENTICA_API_KEY to .env to send real SMS. Copy "otp" for now.',
             ]);
         }
         if ($sendViaApi) {
             $response = OtpService::send($phone, $otp);
             Log::info('Authentica OTP Response', $response);
+            if (!empty($response['success']) && $response['success'] === false) {
+                return redirect()->back()->with('error', __('messages.otp_send_error'))->withInput();
+            }
         }
 
         return redirect()
@@ -85,21 +88,19 @@ class OtpAuthController extends Controller
 
         // 3) إرسال OTP مباشرة هنا
         try {
-            if (app()->environment('local')) {
-                // الإنتاج: إرسال SMS حقيقي
-                Log::info("[OTP-DEV] Company Login OTP", [
-                    'phone' => $phone,
-                    'otp' => $otp,
-                ]);
+            $hasOtpApi = !empty(config('services.authentica.api_key'));
+            if (!$hasOtpApi) {
+                Log::info("[OTP-DEV] Company Register OTP", ['phone' => $phone, 'otp' => $otp]);
             } else {
-                // في الإنتاج يرسل SMS حقيقي
                 $response = OtpService::send($phone, $otp);
                 Log::info('Authentica OTP Response', $response);
-
+                if (!empty($response['success']) && $response['success'] === false) {
+                    return redirect()->back()->with('error', __('messages.otp_send_error'))->withInput();
+                }
             }
         } catch (\Exception $e) {
             Log::error("Failed to send OTP before registration: " . $e->getMessage());
-            return redirect()->back()->with('error', __('messages.otp_send_error'));
+            return redirect()->back()->with('error', __('messages.otp_send_error'))->withInput();
         }
 
         // 4) حفظ OTP في الجلسة

@@ -283,11 +283,10 @@ class UnifiedAuthController extends Controller
 
     private function logOrSendOtp(string $phone, string $otp, string $label): void
     {
-        $sendViaApi = !empty(config('services.authentica.api_key', '')) || !empty(env('AUTHENTICA_API_KEY'));
-        $sendViaApi = $sendViaApi && !app()->environment('local');
+        $sendViaApi = !empty(config('services.authentica.api_key'));
 
         if (!$sendViaApi) {
-            Log::channel('single')->info("[OTP-DEV] {$label} Login — OTP (no API or local)", [
+            Log::channel('single')->info("[OTP-DEV] {$label} Login — OTP (no API key)", [
                 'phone' => $phone,
                 'otp'   => $otp,
                 'hint'  => 'Copy the "otp" value and paste it on the verify screen.',
