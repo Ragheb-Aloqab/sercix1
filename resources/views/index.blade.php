@@ -24,6 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/style.css'])
+    <x-vite-cdn-fallback />
 
     @include('components.structured-data', [
         'type' => 'all',

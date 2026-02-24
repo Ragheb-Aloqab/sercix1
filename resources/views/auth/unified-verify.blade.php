@@ -35,6 +35,7 @@
         }
     </script>
     @vite(['resources/css/style.css'])
+    <x-vite-cdn-fallback />
 </head>
 <body class="page-auth min-h-screen bg-servx-black text-servx-silver-light antialiased overflow-x-hidden font-servx">
 <div class="min-h-screen flex items-center justify-center px-4 py-10">

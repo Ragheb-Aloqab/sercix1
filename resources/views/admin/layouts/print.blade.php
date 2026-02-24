@@ -6,6 +6,7 @@
 
     {{-- Tailwind + custom styles (includes print rules) --}}
     @vite(['resources/css/app.css'])
+    <x-vite-cdn-fallback />
 </head>
 <body class="bg-white text-gray-900">
 

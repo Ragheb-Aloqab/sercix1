@@ -22,6 +22,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <x-vite-cdn-fallback />
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">

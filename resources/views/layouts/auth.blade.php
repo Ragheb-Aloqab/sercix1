@@ -24,6 +24,7 @@
 
     @livewireStyles
     @vite(['resources/js/app.js', 'resources/css/style.css'])
+    <x-vite-cdn-fallback />
 </head>
 <body class="page-auth min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 text-slate-800 antialiased overflow-x-hidden">
     <div class="min-h-screen flex flex-col justify-center items-center px-4 py-10 sm:py-14">
