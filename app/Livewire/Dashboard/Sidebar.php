@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Company;
+use App\Models\VehicleQuotaRequest;
+use App\Services\ExpiryMonitoringService;
+use App\Services\VehicleInspectionService;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class Sidebar extends Component
 {
@@ -12,6 +15,11 @@ class Sidebar extends Component
 
     public $companies = [];
     public ?int $selectedCompanyId = null;
+
+    public int $pendingQuotaRequests = 0;
+    public int $unreadNotifications = 0;
+    public int $expiringDocumentsCount = 0;
+    public int $inspectionPendingCount = 0;
 
     public function mount(): void
     {
@@ -24,6 +32,16 @@ class Sidebar extends Component
                 ->get()
                 ->toArray();
             $this->selectedCompanyId = session('admin_company_id');
+            $this->pendingQuotaRequests = VehicleQuotaRequest::where('status', VehicleQuotaRequest::STATUS_PENDING)->count();
+            $user = auth('web')->user();
+            $this->unreadNotifications = $user ? (int) $user->unreadNotifications()->count() : 0;
+            $this->expiringDocumentsCount = app(ExpiryMonitoringService::class)->countExpiringForAdmin();
+        } elseif ($this->role === 'company') {
+            $company = auth('company')->user();
+            if ($company) {
+                $this->expiringDocumentsCount = app(ExpiryMonitoringService::class)->countExpiringForCompany($company->id);
+                $this->inspectionPendingCount = app(VehicleInspectionService::class)->getPendingCount($company);
+            }
         }
     }
 
@@ -51,11 +69,8 @@ class Sidebar extends Component
             return 'company';
         }
         $webUser = auth('web')->user();
-        if ($webUser && ($webUser->role ?? '') === 'admin') {
+        if ($webUser && in_array($webUser->role ?? '', ['admin', 'super_admin'])) {
             return 'admin';
-        }
-        if ($webUser && ($webUser->role ?? '') === 'technician') {
-            return 'technician';
         }
         if (session()->has('driver_phone')) {
             return 'driver';
@@ -84,14 +99,12 @@ class Sidebar extends Component
             : 'w-9 h-9 rounded-xl bg-white/15 dark:bg-slate-900/10 flex items-center justify-center';
         $overviewHref = match ($role) {
             'admin' => route('admin.dashboard'),
-            'technician' => route('tech.dashboard'),
             'company' => route('company.dashboard'),
             'driver' => route('driver.dashboard'),
             default => url('/'),
         };
         $overviewActive = match ($role) {
             'admin' => request()->routeIs('admin.dashboard'),
-            'technician' => request()->routeIs('tech.dashboard'),
             'company' => request()->routeIs('company.dashboard'),
             'driver' => request()->routeIs('driver.dashboard'),
             default => false,

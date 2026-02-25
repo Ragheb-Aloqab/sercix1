@@ -33,17 +33,20 @@
         </div>
     </div>
 
-    @if (empty($company->tracking_base_url) || empty($company->tracking_api_key))
+    @php
+        $apiConfigured = !empty($company->tracking_base_url) && !empty($company->tracking_api_key);
+        $hasDeviceApiVehicles = $company->vehicles()->where('tracking_source', 'device_api')->whereNotNull('imei')->where('imei', '!=', '')->exists();
+    @endphp
+    @if (!$apiConfigured && $hasDeviceApiVehicles)
         <div class="mb-6 p-4 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-400/50">
             {{ __('tracking.api_not_configured') }}
             <a href="{{ route('company.settings') }}" class="underline ms-2">{{ __('dashboard.settings') }}</a>
         </div>
-    @else
-        <livewire:company.vehicle-tracking-map
-            map-height="550px"
-            :show-info-panel="false"
-        />
     @endif
+    <livewire:company.vehicle-tracking-map
+        map-height="550px"
+        :show-info-panel="false"
+    />
 
     @include('company.partials.glass-end')
 @endsection

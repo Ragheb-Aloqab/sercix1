@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\Company;
+use App\Models\Vehicle;
 
 class GlobalSearch extends Component
 {
@@ -21,11 +22,6 @@ class GlobalSearch extends Component
         if ($role === 'company') {
             return \Illuminate\Support\Facades\Route::has('company.orders.show')
                 ? route('company.orders.show', $order)
-                : null;
-        }
-        if ($role === 'technician') {
-            return \Illuminate\Support\Facades\Route::has('tech.orders.show')
-                ? route('tech.orders.show', $order)
                 : null;
         }
         return null;
@@ -51,6 +47,7 @@ class GlobalSearch extends Component
     {
         $orders = collect();
         $companies = collect();
+        $vehicles = collect();
 
         $actor = $this->actor();
         $role  = $actor['role'];
@@ -81,10 +78,6 @@ class GlobalSearch extends Component
                 $ordersQuery->where('company_id', $user->getKey());
             }
 
-            if ($role === 'technician') {
-                $ordersQuery->where('technician_id', $user->getKey());
-            }
-
             $orders = $ordersQuery->limit(5)->get();
 
             // -------------------------
@@ -100,6 +93,19 @@ class GlobalSearch extends Component
                     ->latest()
                     ->limit(5)
                     ->get();
+
+                $vehicles = Vehicle::query()
+                    ->with('company:id,company_name')
+                    ->where(function ($query) use ($q) {
+                        $query->where('plate_number', 'like', "%{$q}%")
+                            ->orWhere('make', 'like', "%{$q}%")
+                            ->orWhere('model', 'like', "%{$q}%")
+                            ->orWhere('driver_name', 'like', "%{$q}%")
+                            ->orWhere('driver_phone', 'like', "%{$q}%");
+                    })
+                    ->latest()
+                    ->limit(5)
+                    ->get();
             }
         }
 
@@ -109,15 +115,23 @@ class GlobalSearch extends Component
         });
 
         $companiesWithRoutes = $companies->map(function ($company) {
-            $companyShowRoute = \Illuminate\Support\Facades\Route::has('admin.customers.edit')
-                ? route('admin.customers.edit', $company)
+            $companyShowRoute = \Illuminate\Support\Facades\Route::has('admin.companies.show')
+                ? route('admin.companies.show', $company)
                 : null;
             return (object) ['company' => $company, 'companyShowRoute' => $companyShowRoute];
+        });
+
+        $vehiclesWithRoutes = $vehicles->map(function ($vehicle) {
+            $vehicleRoute = $vehicle->company_id && \Illuminate\Support\Facades\Route::has('admin.companies.show')
+                ? route('admin.companies.show', $vehicle->company_id)
+                : null;
+            return (object) ['vehicle' => $vehicle, 'vehicleRoute' => $vehicleRoute];
         });
 
         return view('livewire.dashboard.global-search', [
             'ordersWithRoutes' => $ordersWithRoutes,
             'companiesWithRoutes' => $companiesWithRoutes,
+            'vehiclesWithRoutes' => $vehiclesWithRoutes,
             'role' => $role,
         ]);
     }

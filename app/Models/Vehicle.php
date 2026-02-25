@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vehicle extends Model
 {
+    public const TRACKING_DEVICE_API = 'device_api';
+    public const TRACKING_MOBILE = 'mobile';
+
     protected $fillable = [
         'company_id',
         'company_branch_id',
@@ -17,12 +20,36 @@ class Vehicle extends Model
         'year',
         'plate_number',
         'imei',
+        'tracking_source',
         'color',
         'image_path',
+        'registration_document_path',
+        'registration_expiry_date',
+        'insurance_document_path',
+        'insurance_expiry_date',
         'driver_name',
         'driver_phone',
         'is_active',
     ];
+
+    protected $casts = [
+        'registration_expiry_date' => 'date',
+        'insurance_expiry_date' => 'date',
+    ];
+
+    protected $attributes = [
+        'tracking_source' => self::TRACKING_DEVICE_API,
+    ];
+
+    public function usesMobileTracking(): bool
+    {
+        return $this->tracking_source === self::TRACKING_MOBILE;
+    }
+
+    public function usesDeviceApiTracking(): bool
+    {
+        return $this->tracking_source === self::TRACKING_DEVICE_API;
+    }
 
   
     use HasFactory;
@@ -53,6 +80,16 @@ class Vehicle extends Model
     public function latestLocation()
     {
         return $this->hasOne(VehicleLocation::class)->latestOfMany('tracker_timestamp');
+    }
+
+    public function inspections()
+    {
+        return $this->hasMany(VehicleInspection::class)->orderByDesc('inspection_date');
+    }
+
+    public function latestInspection()
+    {
+        return $this->hasOne(VehicleInspection::class)->latestOfMany('inspection_date');
     }
 
     /** Display name: name or make+model */

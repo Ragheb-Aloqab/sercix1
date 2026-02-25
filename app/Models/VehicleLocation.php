@@ -7,8 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VehicleLocation extends Model
 {
+    public const SOURCE_DEVICE_API = 'device_api';
+    public const SOURCE_MOBILE = 'mobile';
+
     protected $fillable = [
         'vehicle_id',
+        'source',
+        'driver_phone',
         'lat',
         'lng',
         'speed',

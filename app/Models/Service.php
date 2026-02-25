@@ -33,8 +33,4 @@ class Service extends Model
             ->withPivot(['base_price', 'estimated_minutes', 'is_enabled'])
             ->withTimestamps();
     }
-    public function inventory()
-    {
-        return $this->hasOne(InventoryItem::class);
-    }
 }

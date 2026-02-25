@@ -48,7 +48,7 @@
             <p class="text-sm text-slate-500 mb-3">{{ __('driver.upload_invoice_help') }}</p>
             <form method="POST" action="{{ route('driver.request.invoice', $order) }}" enctype="multipart/form-data">
                 @csrf
-                <input type="file" name="invoice" accept=".pdf,.jpg,.jpeg,.png" required class="block w-full text-sm text-slate-500 file:me-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-sky-50 file:text-sky-700 file:font-semibold">
+                <input type="file" name="invoice" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required class="block w-full text-sm text-slate-500 file:me-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-sky-50 file:text-sky-700 file:font-semibold">
                 @error('invoice')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 <button type="submit" class="mt-3 w-full rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold py-3">
                     <i class="fa-solid fa-upload me-2"></i>{{ __('driver.upload_invoice_btn') }}

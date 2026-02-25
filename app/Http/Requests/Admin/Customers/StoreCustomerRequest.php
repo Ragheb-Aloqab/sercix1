@@ -14,14 +14,14 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comapny_name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'company_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:50', 'unique:companies,phone'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'email' => ['nullable', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
-            'notes' => ['nullable', 'string', 'max:3000'],
-          //  'status' => ['nullable', 'enum'],
-            'status' => ['required', 'in:active,suspended'],
+            'status' => ['nullable', 'in:active,suspended'],
+            'vehicle_quota' => ['nullable', 'integer', 'min:1', 'max:9999'],
         ];
     }
 

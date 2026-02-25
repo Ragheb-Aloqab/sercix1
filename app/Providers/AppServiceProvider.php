@@ -11,6 +11,10 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Vehicle;
+use App\Models\Company;
+use App\Models\VehicleLocation;
+use App\Observers\CompanyObserver;
+use App\Observers\VehicleLocationObserver;
 use App\Observers\FuelRefillObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\OrderObserver;
@@ -39,10 +43,12 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
+        Company::observe(CompanyObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Order::observe(OrderObserver::class);
         FuelRefill::observe(FuelRefillObserver::class);
         Vehicle::observe(VehicleObserver::class);
+        VehicleLocation::observe(VehicleLocationObserver::class);
 
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly

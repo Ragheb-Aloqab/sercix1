@@ -49,15 +49,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function technicianLocations()
-    {
-        return $this->hasMany(TechnicianLocation::class, 'technician_id');
-    }
-
-    public function assignedOrders()
-    {
-        return $this->hasMany(Order::class, 'technician_id');
-    }
     public function notifications()
     {
         return $this->morphMany(Notification::class, 'notifiable')->latest();

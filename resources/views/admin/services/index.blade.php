@@ -1,19 +1,22 @@
-{{-- resources/views/admin/services/index.blade.php --}}
 @extends('admin.layouts.app')
 
-@section('content')
-    <div class="max-w-7xl mx-auto p-6">
+@section('title', __('dashboard.services') . ' | ' . ($siteName ?? 'Servx Motors'))
+@section('page_title', __('dashboard.services'))
 
+@section('content')
+    <div class="dashboard-glass min-h-[calc(100vh-8rem)] mx-0 px-4 sm:px-6 py-6 sm:py-8 rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl">
+        <div class="dashboard-content max-w-7xl mx-auto space-y-6">
         {{-- Header --}}
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-black">
-                    الخدمات
+            <div class="text-center sm:text-start">
+                <h1 class="dash-page-title">
+                    {{ __('dashboard.services') }}
                     @if (!empty($company))
-                        : <span class="text-emerald-700">{{ $company->company_name }}</span>
+                        <span class="text-emerald-400">— {{ $company->company_name }}</span>
                     @endif
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">
+                <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
+                <p class="text-sm text-slate-400 mt-1">
                     إدارة الخدمات العامة
                     @if (!empty($company))
                         + خدمات الشركة المختارة (company_services)
@@ -22,24 +25,26 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.services.create') }}"
-                    class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-                    <i class="fa-solid fa-plus me-2"></i> إضافة خدمة
+                <a href="{{ route('admin.services.create') }}" class="dash-btn dash-btn-primary">
+                    <i class="fa-solid fa-plus me-2"></i>{{ __('common.add') }} {{ __('dashboard.services') }}
+                </a>
+                <a href="{{ route('admin.dashboard') }}" class="dash-btn dash-btn-secondary">
+                    <i class="fa-solid fa-arrow-left rtl:rotate-180"></i>{{ __('common.back') }}
                 </a>
             </div>
         </div>
 
         {{-- Flash messages --}}
         @if (session('success'))
-            <div class="mt-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">
+            <div class="dash-card border-emerald-500/30 bg-emerald-500/10">
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
             <div class="mt-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-800">
-                <p class="font-bold mb-2">يوجد أخطاء:</p>
-                <ul class="list-disc ms-6">
+                <p class="font-bold mb-2 text-rose-400">{{ __('validation.error') ?? 'Errors' }}</p>
+                <ul class="list-disc ms-6 text-rose-300">
                     @foreach ($errors->all() as $error)
                         <li class="text-sm">{{ $error }}</li>
                     @endforeach
@@ -48,7 +53,7 @@
         @endif
 
         {{-- Filters --}}
-        <div class="mt-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
+        <div class="dash-card">
             <form method="GET" action="{{ route('admin.services.index') }}"
                 class="grid grid-cols-1 lg:grid-cols-12 gap-3">
 
@@ -83,9 +88,8 @@
         </div>
 
         {{-- Table --}}
-        <div
-            class="mt-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="dash-card overflow-hidden p-0">
+            <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
                 <p class="font-bold">قائمة الخدمات</p>
                 <p class="text-sm text-slate-500">
                     {{ $services->total() }} خدمة
@@ -259,10 +263,10 @@
             </div>
 
             {{-- Pagination --}}
-            <div class="px-5 py-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="px-5 py-4 border-t border-slate-700">
                 {{ $services->links() }}
             </div>
         </div>
-
+        </div>
     </div>
 @endsection

@@ -31,6 +31,9 @@ class OrderAttachmentController extends Controller
         if ($attachment->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachment->file_path)) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->file_path);
         }
+        if ($attachment->maintenance_invoice_pdf_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachment->maintenance_invoice_pdf_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->maintenance_invoice_pdf_path);
+        }
         $attachment->delete();
 
         return back()->with('success', __('messages.attachment_deleted'));

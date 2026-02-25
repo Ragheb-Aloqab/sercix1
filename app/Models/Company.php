@@ -11,15 +11,15 @@ class Company extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // لو جدولك اسمه companies فمو لازم، لكن اتركه إذا تحب
-    // protected $table = 'companies';
-
     protected $fillable = [
         'company_name',
         'phone',
         'email',
         'status',
+        'vehicle_quota',
         'password',
+        'city',
+        'address',
         'tracking_api_key',
         'tracking_base_url',
     ];
@@ -55,9 +55,73 @@ class Company extends Authenticatable
     {
         return $this->hasMany(\App\Models\Vehicle::class);
     }
+
+    public function inspectionSettings()
+    {
+        return $this->hasOne(\App\Models\CompanyInspectionSetting::class);
+    }
+
+    public function vehicleInspections()
+    {
+        return $this->hasMany(\App\Models\VehicleInspection::class);
+    }
+    public function orderTemplates()
+    {
+        return $this->hasMany(\App\Models\OrderTemplate::class);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function vehicleQuotaRequests()
+    {
+        return $this->hasMany(VehicleQuotaRequest::class);
+    }
+
+    /** Effective vehicle quota (null = unlimited) */
+    public function getVehicleQuotaLimit(): ?int
+    {
+        return $this->vehicle_quota;
+    }
+
+    /** Whether company can add more vehicles (under quota or has pending/approved request) */
+    public function canAddVehicle(): bool
+    {
+        $quota = $this->getVehicleQuotaLimit();
+        if ($quota === null) {
+            return true;
+        }
+        $current = $this->vehicles()->count();
+        if ($current < $quota) {
+            return true;
+        }
+        $approvedExtra = $this->vehicleQuotaRequests()
+            ->where('status', VehicleQuotaRequest::STATUS_APPROVED)
+            ->sum('requested_count');
+        return ($current + $approvedExtra) < ($quota + $approvedExtra); // Has approved increase
+    }
+
+    /** Current vehicles count vs quota (for display) */
+    public function getQuotaUsage(): array
+    {
+        $current = $this->vehicles()->count();
+        $quota = $this->getVehicleQuotaLimit();
+        $pending = $this->vehicleQuotaRequests()->where('status', VehicleQuotaRequest::STATUS_PENDING)->count();
+        return [
+            'current' => $current,
+            'quota' => $quota,
+            'pending_requests' => $pending,
+            'at_limit' => $quota !== null && $current >= $quota,
+            'usage_percent' => $quota > 0 ? min(100, round(($current / $quota) * 100, 1)) : 0,
+        ];
+    }
+
+    /** Check if company has pending quota request */
+    public function hasPendingQuotaRequest(): bool
+    {
+        return $this->vehicleQuotaRequests()->where('status', VehicleQuotaRequest::STATUS_PENDING)->exists();
     }
 
     public function otpVerifications()

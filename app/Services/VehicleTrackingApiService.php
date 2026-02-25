@@ -205,6 +205,7 @@ class VehicleTrackingApiService
     public function fetchAllForCompany(Company $company): array
     {
         $vehicles = $company->vehicles()
+            ->where('tracking_source', Vehicle::TRACKING_DEVICE_API)
             ->whereNotNull('imei')
             ->where('imei', '!=', '')
             ->get();
@@ -286,6 +287,7 @@ class VehicleTrackingApiService
 
         VehicleLocation::create([
             'vehicle_id' => $vehicle->id,
+            'source' => VehicleLocation::SOURCE_DEVICE_API,
             'lat' => $data['lat'],
             'lng' => $data['lng'],
             'speed' => $data['speed'],

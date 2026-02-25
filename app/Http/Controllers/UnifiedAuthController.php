@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\LoginAudit;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\OtpService;
@@ -72,7 +73,7 @@ class UnifiedAuthController extends Controller
             ])->withInput();
         }
 
-        if (!in_array($user->role ?? '', ['admin', 'technician'])) {
+        if (!in_array($user->role ?? '', ['admin', 'super_admin'])) {
             return back()->withErrors([
                 'identifier' => __('login.email_not_staff'),
             ])->withInput();
@@ -98,7 +99,7 @@ class UnifiedAuthController extends Controller
         $company = Company::whereIn('phone', $variants)->first();
         $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
         $user = User::whereIn('phone', $variants)
-            ->whereIn('role', ['admin', 'technician'])
+            ->whereIn('role', ['admin', 'super_admin'])
             ->first();
 
         if ($company) {
@@ -167,10 +168,27 @@ class UnifiedAuthController extends Controller
 
         if (!Auth::guard('web')->attempt(['email' => $email, 'password' => $data['password']], $request->boolean('remember'))) {
             RateLimiter::hit($this->emailThrottleKey($email));
+            LoginAudit::create([
+                'guard' => 'web',
+                'email' => $email,
+                'status' => 'failed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
             throw ValidationException::withMessages([
                 'password' => trans('auth.failed'),
             ]);
         }
+
+        $user = Auth::guard('web')->user();
+        LoginAudit::create([
+            'guard' => 'web',
+            'email' => $email,
+            'user_id' => $user?->id,
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         RateLimiter::clear($this->emailThrottleKey($email));
         Session::forget(['login_email', 'login_user_role', 'staff_otp.phone', 'staff_otp.code', 'staff_otp.expires_at']);
@@ -340,6 +358,13 @@ class UnifiedAuthController extends Controller
         }
 
         if ($request->input('otp') !== $code) {
+            LoginAudit::create([
+                'guard' => 'company',
+                'email' => $phone,
+                'status' => 'failed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
             return back()->withErrors(['otp' => __('messages.otp_invalid')]);
         }
 
@@ -350,6 +375,14 @@ class UnifiedAuthController extends Controller
         }
 
         Auth::guard('company')->login($company, true);
+        LoginAudit::create([
+            'guard' => 'company',
+            'email' => $company->email ?? $phone,
+            'user_id' => $company->id,
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
         Session::forget(['login_role', 'otp.phone', 'otp.code', 'otp.expires_at']);
         Session::regenerate();
 
@@ -368,9 +401,23 @@ class UnifiedAuthController extends Controller
         }
 
         if ($request->input('otp') !== $code) {
+            LoginAudit::create([
+                'guard' => 'driver',
+                'email' => $phone,
+                'status' => 'failed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
             return back()->withErrors(['otp' => __('messages.otp_invalid')]);
         }
 
+        LoginAudit::create([
+            'guard' => 'driver',
+            'email' => $phone,
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
         Session::forget(['login_role', 'driver_otp.phone', 'driver_otp.code', 'driver_otp.expires_at']);
         Session::put('driver_phone', $phone);
         Session::regenerate();

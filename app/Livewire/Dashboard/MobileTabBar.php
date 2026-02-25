@@ -27,31 +27,28 @@ class MobileTabBar extends Component
         $is = fn(string $pattern) => request()->routeIs($pattern);
 
         $overviewHref = match ($role) {
-            'admin' => route('admin.dashboard'),
-            'technician' => route('tech.dashboard'),
+            'admin', 'super_admin' => route('admin.dashboard'),
             'company' => route('company.dashboard'),
             default => url('/'),
         };
 
+        $adminItems = [
+            ['href' => $overviewHref, 'label' => __('dashboard.overview'), 'icon' => 'fa-chart-line', 'active' => $is('admin.dashboard')],
+            ['href' => route('admin.companies.index'), 'label' => __('admin_dashboard.companies_overview'), 'icon' => 'fa-building', 'active' => $is('admin.companies.*')],
+            ['href' => route('admin.vehicles.index'), 'label' => __('admin_dashboard.vehicles_overview'), 'icon' => 'fa-car', 'active' => $is('admin.vehicles.index')],
+            ['href' => route('admin.orders.index'), 'label' => __('dashboard.orders'), 'icon' => 'fa-receipt', 'active' => $is('admin.orders.*')],
+            ['href' => route('admin.services.index'), 'label' => __('dashboard.services'), 'icon' => 'fa-screwdriver-wrench', 'active' => $is('admin.services.*')],
+            ['href' => route('admin.customers.index'), 'label' => __('dashboard.customers'), 'icon' => 'fa-users', 'active' => $is('admin.customers.*')],
+            ['href' => route('admin.activities.index'), 'label' => __('dashboard.activity_log'), 'icon' => 'fa-clock-rotate-left', 'active' => $is('admin.activities.*')],
+            ['href' => route('admin.notifications.index'), 'label' => __('common.notifications'), 'icon' => 'fa-bell', 'active' => $is('admin.notifications.*')],
+            ['href' => route('admin.settings'), 'label' => __('dashboard.settings'), 'icon' => 'fa-gear', 'active' => $is('admin.settings')],
+        ];
+        if (config('servx.payments_enabled', false)) {
+            $adminItems[] = ['href' => route('admin.bank-transfers.index'), 'label' => __('dashboard.bank_transfers'), 'icon' => 'fa-landmark', 'active' => $is('admin.bank-transfers.*')];
+        }
+
         return match ($role) {
-            'admin' => [
-                ['href' => $overviewHref, 'label' => __('dashboard.overview'), 'icon' => 'fa-chart-line', 'active' => $is('admin.dashboard')],
-                ['href' => route('admin.orders.index'), 'label' => __('dashboard.orders'), 'icon' => 'fa-receipt', 'active' => $is('admin.orders.*')],
-                ['href' => route('admin.services.index'), 'label' => __('dashboard.services'), 'icon' => 'fa-screwdriver-wrench', 'active' => $is('admin.services.*')],
-                ['href' => route('admin.bank-transfers.index'), 'label' => __('dashboard.bank_transfers'), 'icon' => 'fa-landmark', 'active' => $is('admin.bank-transfers.*')],
-                ['href' => route('admin.technicians.index'), 'label' => __('dashboard.technicians'), 'icon' => 'fa-user-gear', 'active' => $is('admin.technicians.*')],
-                ['href' => route('admin.maps.technicians'), 'label' => __('dashboard.technicians_map'), 'icon' => 'fa-map-location-dot', 'active' => $is('admin.maps.technicians')],
-                ['href' => route('admin.customers.index'), 'label' => __('dashboard.customers'), 'icon' => 'fa-users', 'active' => $is('admin.customers.*')],
-                ['href' => route('admin.inventory.index'), 'label' => __('dashboard.inventory'), 'icon' => 'fa-boxes-stacked', 'active' => $is('admin.inventory.index')],
-                ['href' => route('admin.inventory.movements'), 'label' => __('dashboard.movements'), 'icon' => 'fa-arrows-left-right', 'active' => $is('admin.inventory.movements')],
-                ['href' => route('admin.activities.index'), 'label' => __('dashboard.activity_log'), 'icon' => 'fa-clock-rotate-left', 'active' => $is('admin.activities.*')],
-                ['href' => route('admin.settings'), 'label' => __('dashboard.settings'), 'icon' => 'fa-gear', 'active' => $is('admin.settings')],
-            ],
-            'technician' => [
-                ['href' => $overviewHref, 'label' => __('dashboard.overview'), 'icon' => 'fa-chart-line', 'active' => $is('tech.dashboard')],
-                ['href' => route('tech.tasks.index'), 'label' => __('dashboard.tasks'), 'icon' => 'fa-list-check', 'active' => $is('tech.tasks.*')],
-                ['href' => route('tech.settings'), 'label' => __('dashboard.settings'), 'icon' => 'fa-gear', 'active' => $is('tech.settings')],
-            ],
+            'admin', 'super_admin' => $adminItems,
             'company' => [
                 ['href' => $overviewHref, 'label' => __('dashboard.overview'), 'icon' => 'fa-chart-line', 'active' => $is('company.dashboard')],
                 ['href' => route('company.orders.index'), 'label' => __('dashboard.orders'), 'icon' => 'fa-receipt', 'active' => $is('company.orders.*')],

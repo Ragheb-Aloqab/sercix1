@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\Announcement;
 use App\Models\Order;
+use App\Services\ExpiryMonitoringService;
+use App\Services\VehicleInspectionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -62,6 +65,24 @@ class DashboardController extends Controller
             ];
         });
 
+        // Announcements fetched fresh (not cached) so new ones appear immediately
+        $announcements = Announcement::published()
+            ->forCompany($company->id)
+            ->orderByRaw('COALESCE(published_at, created_at) DESC')
+            ->limit(5)
+            ->get();
+
+        // Document expiry alerts (fresh)
+        $expiryService = app(ExpiryMonitoringService::class);
+        $expiringDocuments = $expiryService->getExpiringForCompany($company->id)->take(10);
+        $expiringDocumentsCount = $expiryService->countExpiringForCompany($company->id);
+
+        // Vehicle inspection compliance (fresh)
+        $inspectionService = app(VehicleInspectionService::class);
+        $inspectionPendingCount = $inspectionService->getPendingCount($company);
+        $inspectionOverdueCount = $inspectionService->getOverdueCount($company);
+        $inspectionPendingVehicles = $inspectionService->getPendingVehicles($company)->take(5);
+
         $maintenanceIndicator = $data['maintenanceIndicator'];
         $fuelIndicator = $data['fuelIndicator'];
         $operatingIndicator = $data['operatingIndicator'];
@@ -80,6 +101,7 @@ class DashboardController extends Controller
         $operatingUI = $indicatorUI($operatingIndicator['direction'] ?? 'stable');
 
         return view('company.dashboard.index', array_merge($data, [
+            'announcements' => $announcements,
             'company' => $company,
             'maintenanceUI' => $maintenanceUI,
             'fuelUI' => $fuelUI,
@@ -87,6 +109,12 @@ class DashboardController extends Controller
             'maintenanceTrend' => $maintenanceTrend,
             'fuelTrend' => $fuelTrend,
             'vehiclesTrend' => $vehiclesTrend,
+            'expiringDocuments' => $expiringDocuments,
+            'expiringDocumentsCount' => $expiringDocumentsCount,
+            'expiryService' => $expiryService,
+            'inspectionPendingCount' => $inspectionPendingCount,
+            'inspectionOverdueCount' => $inspectionOverdueCount,
+            'inspectionPendingVehicles' => $inspectionPendingVehicles,
         ]));
     }
 }

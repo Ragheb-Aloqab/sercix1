@@ -11,7 +11,7 @@
                     <i class="fa-solid fa-receipt"></i>
                 </div>
             </div>
-            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ __('dashboard.unassigned') }}: {{ $unassigned }}</p>
+            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ __('dashboard.pending') }}: {{ $pending ?? 0 }}</p>
         </div>
 
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
@@ -24,7 +24,7 @@
                     <i class="fa-solid fa-person-walking"></i>
                 </div>
             </div>
-            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ __('dashboard.active_techs') }}: {{ $activeTechs }}</p>
+            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ __('dashboard.orders_need_followup') }}</p>
         </div>
 
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
@@ -52,7 +52,7 @@
                         <div class="min-w-0">
                             <p class="font-bold truncate">{{ __('dashboard.order') }} #{{ $o->id }} — {{ $o->status }}</p>
                             <p class="text-xs sm:text-sm text-slate-500 truncate">
-                                {{ __('dashboard.company_label') }}: {{ $o->company?->company_name }} — {{ __('dashboard.technician_label') }}: {{ $o->technician?->name ?? __('dashboard.unassigned_label') }}
+                                {{ __('dashboard.company_label') }}: {{ $o->company?->company_name }}
                             </p>
                         </div>
 
@@ -70,8 +70,8 @@
         <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft p-4 sm:p-5 min-w-0">
             <h2 class="text-lg font-black">{{ __('dashboard.alerts') }}</h2>
             <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
-                <li>• {{ __('dashboard.unassigned') }}: {{ $unassigned }}</li>
-                <li>• {{ __('dashboard.active_techs') }}: {{ $activeTechs }}</li>
+                <li>• {{ __('dashboard.pending') }}: {{ $pending ?? 0 }}</li>
+                <li>• {{ __('dashboard.in_progress') }}: {{ $inProgress ?? 0 }}</li>
             </ul>
         </div>
     </div>

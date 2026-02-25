@@ -14,6 +14,7 @@ use App\Http\Controllers\Company\ServicesController;
 use App\Http\Controllers\Company\NotificationsController;
 use App\Http\Controllers\Company\BranchesController;
 use App\Http\Controllers\Company\TrackingController;
+use App\Http\Controllers\Company\VehicleInspectionController;
 use App\Livewire\Company\Settings;
 
 /*
@@ -63,29 +64,19 @@ Route::middleware(['company'])
             ->name('invoices.pdf')
             ->whereNumber('invoice');
 
-        // Payments
-        Route::get('/payments', [PaymentsController::class, 'index'])
-            ->name('payments.index');
+        Route::get('/invoices/{invoice}/maintenance-pdf', [InvoicesController::class, 'downloadMaintenancePdf'])
+            ->name('invoices.maintenance-pdf')
+            ->whereNumber('invoice');
 
-        Route::get('/payments/{payment}', [PaymentsController::class, 'show'])
-            ->name('payments.show')
-            ->whereNumber('payment');
-
-        Route::post('/payments/{payment}/tap', [PaymentsController::class, 'payWithTap'])
-            ->name('payments.tap')
-            ->whereNumber('payment');
-
-        Route::post('/payments/{payment}/tap-charge', [PaymentsController::class, 'chargeWithToken'])
-            ->name('payments.tap.charge')
-            ->whereNumber('payment');
-
-        Route::post('/payments/{payment}/cash', [PaymentsController::class, 'payCash'])
-            ->name('payments.cash')
-            ->whereNumber('payment');
-
-        Route::post('/payments/{payment}/bank-receipt', [PaymentsController::class, 'uploadBankReceipt'])
-            ->name('payments.bank.receipt')
-            ->whereNumber('payment');
+        // Payments (only when config servx.payments_enabled = true)
+        Route::middleware('payments')->group(function () {
+            Route::get('/payments', [PaymentsController::class, 'index'])->name('payments.index');
+            Route::get('/payments/{payment}', [PaymentsController::class, 'show'])->name('payments.show')->whereNumber('payment');
+            Route::post('/payments/{payment}/tap', [PaymentsController::class, 'payWithTap'])->name('payments.tap')->whereNumber('payment');
+            Route::post('/payments/{payment}/tap-charge', [PaymentsController::class, 'chargeWithToken'])->name('payments.tap.charge')->whereNumber('payment');
+            Route::post('/payments/{payment}/cash', [PaymentsController::class, 'payCash'])->name('payments.cash')->whereNumber('payment');
+            Route::post('/payments/{payment}/bank-receipt', [PaymentsController::class, 'uploadBankReceipt'])->name('payments.bank.receipt')->whereNumber('payment');
+        });
 
         // Services
         Route::get('/services', [ServicesController::class, 'index'])
@@ -111,6 +102,12 @@ Route::middleware(['company'])
         Route::get('/vehicles/create', [VehiclesController::class, 'create'])
             ->name('vehicles.create');
 
+        Route::get('/vehicles/quota-request', [\App\Http\Controllers\Company\VehicleQuotaRequestController::class, 'show'])
+            ->name('vehicles.quota-request');
+
+        Route::post('/vehicles/quota-request', [\App\Http\Controllers\Company\VehicleQuotaRequestController::class, 'store'])
+            ->name('vehicles.quota-request.store');
+
         Route::post('/vehicles', [VehiclesController::class, 'store'])
             ->name('vehicles.store');
 
@@ -124,6 +121,28 @@ Route::middleware(['company'])
 
         Route::patch('/vehicles/{vehicle}', [VehiclesController::class, 'update'])
             ->name('vehicles.update')
+            ->whereNumber('vehicle');
+
+        Route::post('/vehicles/{vehicle}/documents/registration', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'uploadRegistration'])
+            ->name('vehicles.documents.registration')
+            ->whereNumber('vehicle');
+        Route::post('/vehicles/{vehicle}/documents/insurance', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'uploadInsurance'])
+            ->name('vehicles.documents.insurance')
+            ->whereNumber('vehicle');
+        Route::patch('/vehicles/{vehicle}/documents/expiry', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'updateExpiryDates'])
+            ->name('vehicles.documents.expiry')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/documents/registration/preview', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'previewRegistration'])
+            ->name('vehicles.documents.registration.preview')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/documents/insurance/preview', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'previewInsurance'])
+            ->name('vehicles.documents.insurance.preview')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/documents/registration/download', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'downloadRegistration'])
+            ->name('vehicles.documents.registration.download')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/documents/insurance/download', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'downloadInsurance'])
+            ->name('vehicles.documents.insurance.download')
             ->whereNumber('vehicle');
 
         // Tracking
@@ -155,6 +174,28 @@ Route::middleware(['company'])
         Route::patch('/branches/{branch}', [BranchesController::class, 'update'])
             ->name('branches.update')
             ->whereNumber('branch');
+        // Vehicle Inspections
+        Route::get('/inspections', [VehicleInspectionController::class, 'index'])
+            ->name('inspections.index');
+        Route::get('/inspections/{inspection}', [VehicleInspectionController::class, 'show'])
+            ->name('inspections.show')
+            ->whereNumber('inspection');
+        Route::get('/inspections/{inspection}/photo/{photo}', [VehicleInspectionController::class, 'servePhoto'])
+            ->name('inspections.photo')
+            ->whereNumber(['inspection', 'photo']);
+        Route::patch('/inspections/{inspection}/approve', [VehicleInspectionController::class, 'approve'])
+            ->name('inspections.approve')
+            ->whereNumber('inspection');
+        Route::patch('/inspections/{inspection}/reject', [VehicleInspectionController::class, 'reject'])
+            ->name('inspections.reject')
+            ->whereNumber('inspection');
+        Route::get('/inspections/{inspection}/download', [VehicleInspectionController::class, 'downloadZip'])
+            ->name('inspections.download')
+            ->whereNumber('inspection');
+        Route::post('/vehicles/{vehicle}/request-inspection', [VehicleInspectionController::class, 'requestInspection'])
+            ->name('vehicles.request-inspection')
+            ->whereNumber('vehicle');
+
         // Notifications
         Route::get('/notifications', [NotificationsController::class, 'index'])
             ->name('notifications.index');

@@ -11,7 +11,6 @@ class Order extends Model
     protected $fillable = [
         'company_id',
         'vehicle_id',
-        'technician_id',
         'status',
         'scheduled_at',
         'city',
@@ -31,11 +30,6 @@ class Order extends Model
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class);
-    }
-
-    public function technician()
-    {
-        return $this->belongsTo(User::class, 'technician_id');
     }
 
     public function statusLogs()

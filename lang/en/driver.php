@@ -17,7 +17,7 @@ return [
     'vehicle' => 'Vehicle',
     'start_service' => 'Start service',
     'upload_invoice' => 'Upload invoice',
-    'upload_invoice_help' => 'Upload your invoice (PDF, JPG, PNG) after completing the service.',
+    'upload_invoice_help' => 'Upload your invoice image (JPG or PNG) after completing the service. A PDF will be generated automatically.',
     'upload_invoice_btn' => 'Upload invoice',
     'nav_home' => 'Home',
     'nav_service' => 'Service',

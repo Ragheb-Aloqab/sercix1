@@ -27,7 +27,7 @@
                 @endforeach
             @endif
 
-            {{-- Companies (Admin فقط) --}}
+            {{-- Companies (Admin only) --}}
             @if ($companiesWithRoutes->count())
                 <div
                     class="px-4 py-2 text-xs font-bold text-slate-500 border-t border-slate-200/70 dark:border-slate-800">
@@ -46,7 +46,26 @@
                 @endforeach
             @endif
 
-            @if (!$ordersWithRoutes->count() && !$companiesWithRoutes->count())
+            {{-- Vehicles (Admin only) --}}
+            @if ($vehiclesWithRoutes->count())
+                <div
+                    class="px-4 py-2 text-xs font-bold text-slate-500 border-t border-slate-200/70 dark:border-slate-800">
+                    {{ __('dashboard.vehicles') }}
+                </div>
+
+                @foreach ($vehiclesWithRoutes as $row)
+                    @if ($row->vehicleRoute)
+                        <a href="{{ $row->vehicleRoute }}" wire:navigate
+                            class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
+                            {{ $row->vehicle->plate_number ?? $row->vehicle->display_name }} — {{ $row->vehicle->company?->company_name }}
+                        </a>
+                    @else
+                        <div class="px-4 py-2 text-sm">{{ $row->vehicle->plate_number ?? $row->vehicle->display_name }}</div>
+                    @endif
+                @endforeach
+            @endif
+
+            @if (!$ordersWithRoutes->count() && !$companiesWithRoutes->count() && !$vehiclesWithRoutes->count())
                 <div class="px-4 py-3 text-sm text-slate-500">{{ __('dashboard.no_results') }}</div>
             @endif
         </div>

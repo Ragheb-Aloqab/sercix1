@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelRefill;
 use App\Models\Invoice;
 use App\Models\Vehicle;
+use App\Services\AnalyticsService;
 use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
 
 class FuelController extends Controller
 {
+    public function __construct(
+        private AnalyticsService $analytics
+    ) {}
+
     /**
      * Company-wide fuel expenses report.
      */
@@ -56,6 +61,8 @@ class FuelController extends Controller
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model']);
 
+        $analytics = $this->analytics->getFuelAnalytics($from, $to, $company->id, $vehicleId ?: null);
+
         return view('company.fuel.index', compact(
             'company',
             'refills',
@@ -66,7 +73,8 @@ class FuelController extends Controller
             'vehicles',
             'from',
             'to',
-            'vehicleId'
+            'vehicleId',
+            'analytics'
         ));
     }
 

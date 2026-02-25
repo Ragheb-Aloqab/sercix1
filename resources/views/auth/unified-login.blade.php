@@ -32,8 +32,7 @@
         </a>
 
         <div class="bg-servx-black-card rounded-xl border border-servx-red/30 shadow-servx-card p-6 sm:p-8">
-            <h1 class="text-xl font-bold text-white">{{ __('login.title') }}</h1>
-            <p class="mt-1 text-sm text-servx-silver mb-6">{{ __('login.unified_subtitle') }}</p>
+            <h1 class="text-xl font-bold text-white mb-6">{{ __('login.title') }}</h1>
 
             @if (session('success'))<div class="mb-4 rounded-lg border border-servx-red/30 bg-servx-red/10 px-3 py-2 text-sm text-servx-silver-light">{{ session('success') }}</div>@endif
             @if (session('error'))<div class="mb-4 rounded-lg border border-servx-red/50 bg-servx-red/10 px-3 py-2 text-sm text-servx-silver-light">{{ session('error') }}</div>@endif
@@ -51,10 +50,6 @@
                     {{ __('login.continue') }}
                 </button>
             </form>
-
-            <p class="mt-4 text-xs text-servx-silver text-center">
-                {{ __('login.identifier_hint') }}
-            </p>
 
             <a href="{{ route('company.register') }}" class="mt-4 block w-full text-center rounded-lg border border-servx-red/50 px-4 py-2.5 min-h-[44px] flex items-center justify-center text-sm font-semibold text-servx-silver-light hover:bg-servx-red/20 hover:text-white transition-colors active:scale-[0.99]">
                 {{ __('login.create_company_account') }}

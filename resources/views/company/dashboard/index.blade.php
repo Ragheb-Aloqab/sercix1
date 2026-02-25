@@ -25,8 +25,85 @@
                 <a href="{{ route('company.invoices.index') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-file-invoice"></i>{{ __('company.invoices') }}
                 </a>
+                <a href="{{ route('company.inspections.index') }}" class="dash-btn dash-btn-secondary">
+                    <i class="fa-solid fa-camera"></i>{{ __('inspections.title') }}
+                </a>
             </div>
         </div>
+
+        {{-- Document expiry alerts --}}
+        @if(($expiringDocumentsCount ?? 0) > 0)
+            <div class="dash-card border-amber-500/40 bg-amber-500/5">
+                <h2 class="dash-section-title flex items-center gap-2">
+                    <i class="fa-solid fa-file-circle-exclamation text-amber-400"></i>
+                    {{ __('vehicles.expiring_documents') }} ({{ $expiringDocumentsCount }})
+                </h2>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    @foreach($expiringDocuments ?? [] as $item)
+                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 transition-colors">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'expired' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
+                                <i class="fa-solid fa-car text-xs"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-white">{{ $item->vehicle->plate_number ?? $item->vehicle->display_name }} — {{ $item->type === \App\Services\ExpiryMonitoringService::DOC_REGISTRATION ? __('vehicles.registration') : __('vehicles.insurance') }}</p>
+                                <p class="text-xs text-slate-400">{{ $item->date?->translatedFormat('d M Y') }} · {{ $item->days_remaining !== null ? ($item->days_remaining < 0 ? abs($item->days_remaining) . ' ' . __('vehicles.days_ago') : $item->days_remaining . ' ' . __('vehicles.days_remaining')) : '-' }}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $expiryService->getStatusBadgeClass($item->status) }}">{{ __('vehicles.' . $item->status) }}</span>
+                            <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
+                        </a>
+                    @endforeach
+                </div>
+                <a href="{{ route('company.vehicles.index') }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('common.view_all') }}</a>
+            </div>
+        @endif
+
+        {{-- Vehicles pending inspection --}}
+        @if(($inspectionPendingCount ?? 0) > 0)
+            <div class="dash-card {{ ($inspectionOverdueCount ?? 0) > 0 ? 'border-red-500/40 bg-red-500/5' : 'border-amber-500/40 bg-amber-500/5' }}">
+                <h2 class="dash-section-title flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-amber-400"></i>
+                    {{ __('inspections.vehicles_pending') }}
+                    @if(($inspectionOverdueCount ?? 0) > 0)
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-500/30 text-red-300 border border-red-400/50">{{ $inspectionOverdueCount }} {{ __('inspections.overdue') }}</span>
+                    @endif
+                </h2>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    @foreach($inspectionPendingVehicles ?? [] as $item)
+                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 transition-colors">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'overdue' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
+                                <i class="fa-solid fa-car text-xs"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-white">{{ $item->vehicle->plate_number ?? $item->vehicle->display_name }}</p>
+                                <p class="text-xs text-slate-400">{{ __('inspections.due_date') }}: {{ $item->due_date?->translatedFormat('d M Y') ?? '—' }}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $item->status === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $item->status) }}</span>
+                            <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
+                        </a>
+                    @endforeach
+                </div>
+                <a href="{{ route('company.inspections.index') }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('inspections.view_all') }}</a>
+            </div>
+        @endif
+
+        {{-- Announcements --}}
+        @if(count($announcements ?? []) > 0)
+            <div class="dash-card border-sky-500/40">
+                <h2 class="dash-section-title flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-sky-400"></i>
+                    {{ __('admin_dashboard.announcements') }}
+                </h2>
+                <div class="space-y-3 max-h-32 overflow-y-auto">
+                    @foreach($announcements as $ann)
+                        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-600/40">
+                            <p class="font-bold text-white">{{ $ann->title }}</p>
+                            <p class="text-sm text-slate-400 mt-1 line-clamp-2">{{ Str::limit(strip_tags($ann->body), 120) }}</p>
+                            <p class="text-xs text-slate-500 mt-1">{{ $ann->published_at?->format('Y-m-d H:i') ?? $ann->created_at->format('Y-m-d H:i') }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         {{-- 2. Top row: 3 KPI cards with trend indicators (reference layout) --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">

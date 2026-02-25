@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateMaintenanceInvoicePdfJob;
 use App\Models\Attachment;
 use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
+use App\Models\VehicleInspection;
+use App\Models\VehicleLocation;
 use App\Support\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class DriverController extends Controller
 {
@@ -33,7 +37,12 @@ class DriverController extends Controller
             return (object) ['request' => $r, 'statusLabel' => $statusLabel];
         });
 
-        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay'));
+        $vehicleIds = $vehicles->pluck('id');
+        $pendingInspectionsCount = VehicleInspection::whereIn('vehicle_id', $vehicleIds)
+            ->where('status', VehicleInspection::STATUS_PENDING)
+            ->count();
+
+        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount'));
     }
 
     public function createRequest()
@@ -211,19 +220,33 @@ class DriverController extends Controller
         }
 
         $request->validate([
-            'invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'], // 10MB max
+            'invoice' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:10240'], // 10MB, images only for PDF generation
         ]);
+
+        // Delete old driver_invoice attachments and their generated PDFs
+        $oldAttachments = $order->attachments()->where('type', 'driver_invoice')->get();
+        foreach ($oldAttachments as $old) {
+            if ($old->file_path) {
+                Storage::disk('public')->delete($old->file_path);
+            }
+            if ($old->maintenance_invoice_pdf_path) {
+                Storage::disk('public')->delete($old->maintenance_invoice_pdf_path);
+            }
+            $old->delete();
+        }
 
         $path = $request->file('invoice')->store('driver-invoices/' . $order->id, 'public');
         $file = $request->file('invoice');
 
-        $order->attachments()->create([
+        $attachment = $order->attachments()->create([
             'type' => 'driver_invoice',
             'file_path' => $path,
             'original_name' => $file->getClientOriginalName(),
             'file_size' => $file->getSize(),
             'uploaded_by' => null,
         ]);
+
+        GenerateMaintenanceInvoicePdfJob::dispatch($attachment);
 
         $order->update(['status' => OrderStatus::PENDING_CONFIRMATION]);
         return redirect()->route('driver.request.show', $order)->with('success', __('messages.driver_invoice_uploaded'));
@@ -289,6 +312,73 @@ class DriverController extends Controller
         ]);
 
         return redirect()->route('driver.dashboard')->with('success', __('messages.driver_fuel_success'));
+    }
+
+    /**
+     * GET /driver/tracking — Show mobile tracking page (only for vehicles with tracking_source=mobile).
+     */
+    public function tracking(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        $vehicleId = (int) $request->query('vehicle');
+
+        $vehicle = Vehicle::where('id', $vehicleId)
+            ->whereIn('driver_phone', $phoneVariants)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$vehicle) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+        if (!$vehicle->usesMobileTracking() && !empty($vehicle->imei)) {
+            abort(403, __('messages.driver_tracking_not_mobile'));
+        }
+
+        return view('driver.tracking', compact('vehicle'));
+    }
+
+    /**
+     * POST /driver/tracking/report — Receive GPS coordinates from driver's browser.
+     * Returns 403 if vehicle's tracking_source is not mobile.
+     */
+    public function reportTracking(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        if (!$phone) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'speed' => ['nullable', 'numeric', 'min:0', 'max:500'],
+        ]);
+
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])
+            ->whereIn('driver_phone', $phoneVariants)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'vehicle_not_linked'], 403);
+        }
+        if (!$vehicle->usesMobileTracking() && !empty($vehicle->imei)) {
+            return response()->json(['error' => 'tracking_source_not_mobile'], 403);
+        }
+
+        VehicleLocation::create([
+            'vehicle_id' => $vehicle->id,
+            'source' => VehicleLocation::SOURCE_MOBILE,
+            'driver_phone' => $vehicle->driver_phone,
+            'lat' => $data['lat'],
+            'lng' => $data['lng'],
+            'speed' => $data['speed'] ?? null,
+            'tracker_timestamp' => now(),
+        ]);
+
+        return response()->json(['ok' => true]);
     }
 
     /** Match DB whether company saved +966... or 05... */

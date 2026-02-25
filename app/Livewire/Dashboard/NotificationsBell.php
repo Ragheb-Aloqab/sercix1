@@ -101,8 +101,6 @@ class NotificationsBell extends Component
             if ($orderId) {
                 if (Auth::guard('company')->check()) {
                     $url = route('company.orders.show', $orderId);
-                } elseif (Auth::guard('web')->check() && ($actor->role ?? null) === 'technician') {
-                    $url = route('tech.tasks.show', $orderId);
                 } else {
                     $url = route('admin.orders.show', $orderId);
                 }

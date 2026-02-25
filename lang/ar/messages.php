@@ -18,6 +18,7 @@ return [
     'driver_otp_invalid' => 'رمز التحقق غير صحيح.',
     'driver_login_success' => 'تم تسجيل الدخول.',
     'driver_phone_not_registered' => 'رقم الجوال غير مسجّل كسائق لمركبة. تواصل مع شركتك لإضافة جوالك.',
+    'driver_tracking_not_mobile' => 'هذه المركبة تستخدم تتبع جهاز GPS. التتبع عبر الجوال غير متاح.',
 
     // Vehicles (Company)
     'vehicle_added' => 'تم إضافة المركبة بنجاح',
@@ -35,6 +36,10 @@ return [
     'order_assigned' => 'تم إسناد الطلب للفني بنجاح.',
     'assignment_disabled' => 'إسناد الفني معطّل مؤقتاً.',
     'order_status_updated' => 'تم تحديث حالة الطلب بنجاح',
+    'order_completed' => 'تم إكمال الطلب.',
+    'order_completed_subject' => 'تم إكمال الطلب',
+    'select_at_least_one' => 'حدد طلباً واحداً على الأقل.',
+    'bulk_update' => 'تحديث جماعي',
     'order_completed_no_change' => 'لا يمكن تغيير طلب مكتمل.',
     'order_cancelled_no_change' => 'لا يمكن تغيير طلب ملغي.',
     'order_override_note_required' => 'هذا انتقال غير قياسي (تجاوز). الرجاء كتابة سبب التغيير.',
@@ -53,6 +58,7 @@ return [
     'invoice_created' => 'تم إنشاء الفاتورة.',
     'invoice_already_exists' => 'الفاتورة موجودة بالفعل.',
     'fuel_invoice_requires_receipt' => 'يجب رفع صورة الإيصال أولاً لإنشاء فاتورة وقود.',
+    'maintenance_invoice_pdf_not_available' => 'فاتورة الصيانة بصيغة PDF غير متاحة. يجب أن يرفع السائق صورة (JPG/PNG) أولاً.',
 
     // Payment
     'payment_recorded' => 'تم تسجيل بيانات الدفع.',

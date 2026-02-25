@@ -21,7 +21,6 @@ class OrdersController extends Controller
 
         $company = auth('company')->user();
         $order->load([
-            'technician:id,name,phone',
             'attachments',
             'invoice',
             'services',
@@ -118,11 +117,18 @@ class OrdersController extends Controller
     {
         $this->authorize('cancel', $order);
 
-        if ($order->technician_id) {
+        if (!in_array($order->status ?? '', [\App\Support\OrderStatus::PENDING_APPROVAL, \App\Support\OrderStatus::APPROVED], true)) {
             return back()->with('error', __('messages.order_in_progress_cancel'));
         }
 
-        // Admin notifications removed - only Company ↔ Driver
+        $from = $order->status;
+        $order->update(['status' => \App\Support\OrderStatus::CANCELLED]);
+        $order->statusLogs()->create([
+            'from_status' => $from,
+            'to_status' => \App\Support\OrderStatus::CANCELLED,
+            'note' => __('messages.order_cancel_requested'),
+            'changed_by' => null,
+        ]);
 
         return back()->with('success', __('messages.order_cancel_requested'));
     }

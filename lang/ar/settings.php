@@ -30,4 +30,17 @@ return [
     'email_placeholder_user' => 'الإيميل',
     'phone_placeholder_optional' => 'الجوال (اختياري)',
     'save' => 'حفظ',
+
+    // Sessions / Devices
+    'sessions_devices' => 'الجلسات والأجهزة',
+    'sessions_devices_desc' => 'الأجهزة التي تم تسجيل الدخول فيها على حسابك.',
+    'this_device' => 'هذا الجهاز',
+    'unknown_device' => 'جهاز غير معروف',
+    'mobile_device' => 'جهاز محمول',
+    'no_sessions' => 'لا توجد جلسات نشطة.',
+    'logout_other_devices' => 'تسجيل الخروج من جميع الأجهزة الأخرى',
+    'logout_other_devices_desc' => 'تسجيل الخروج من جميع الأجهزة الأخرى. ستبقى مسجلاً هنا.',
+    'password_confirm_placeholder' => 'كلمة المرور',
+    'invalid_password' => 'كلمة المرور غير صحيحة.',
+    'logged_out_other_devices' => 'تم تسجيل الخروج من جميع الأجهزة الأخرى.',
 ];

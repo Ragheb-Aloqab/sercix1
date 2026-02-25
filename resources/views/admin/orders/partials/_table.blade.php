@@ -4,6 +4,7 @@
         <div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
             {{-- Top --}}
             <div class="flex items-start justify-between gap-3">
+                <input type="checkbox" wire:model="selectedIds" value="{{ $order->id }}" class="mt-1 rounded accent-sky-500">
                 <div>
                     <p class="font-black text-slate-900 dark:text-white">#{{ $order->id }}</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">
@@ -66,6 +67,7 @@
         <table class="min-w-[1000px] w-full text-sm bg-white dark:bg-slate-900">
             <thead class="text-slate-500 dark:text-slate-400">
                 <tr class="text-start">
+                    <th class="py-3 px-4 w-10"><input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded accent-sky-500" title="{{ __('common.all') }}"></th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.number') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.company') }}</th>
                     <th class="py-3 px-4 font-semibold">{{ __('common.services') }}</th>
@@ -78,6 +80,7 @@
             <tbody class="divide-y divide-slate-200/70 dark:divide-slate-800">
                 @forelse($orders as $order)
                     <tr class="align-top">
+                        <td class="py-4 px-4"><input type="checkbox" wire:model="selectedIds" value="{{ $order->id }}" class="rounded accent-sky-500"></td>
                         <td class="py-4 px-4 font-bold">#{{ $order->id }}</td>
 
                         <td class="py-4 px-4">
@@ -123,7 +126,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-slate-500">
+                        <td colspan="7" class="py-8 text-center text-slate-500">
                             {{ __('common.no_orders') }}
                         </td>
                     </tr>

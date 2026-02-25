@@ -71,10 +71,17 @@
             </div>
             <div class="sm:col-span-2">
                 <label class="text-sm font-bold">{{ __('tracking.api_key') }}</label>
-                <input wire:model.defer="tracking_api_key" type="password"
-                    placeholder="{{ __('tracking.api_key_placeholder') }}"
-                    class="mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent px-4 py-3 outline-none"
-                    autocomplete="new-password">
+                <div class="mt-2 flex gap-2">
+                    <input wire:model.defer="tracking_api_key"
+                        type="{{ $show_api_key ? 'text' : 'password' }}"
+                        placeholder="{{ __('tracking.api_key_placeholder') }}"
+                        class="flex-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent px-4 py-3 outline-none"
+                        autocomplete="new-password">
+                    <button type="button" wire:click="$toggle('show_api_key')"
+                        class="shrink-0 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-sm">
+                        {{ $show_api_key ? __('common.hide') : __('common.show') }}
+                    </button>
+                </div>
                 <p class="text-xs text-slate-500 mt-1">{{ __('tracking.api_key_hint') }}</p>
                 @error('tracking_api_key')
                     <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
@@ -126,5 +133,11 @@
             </button>
         </div>
     </div>
+
+    {{-- Vehicle Inspection --}}
+    <livewire:company.vehicle-inspection-settings />
+
+    {{-- Sessions / Devices --}}
+    <livewire:dashboard.settings.sessions-devices />
 
 </div>

@@ -93,4 +93,7 @@
         </div>
     </div>
 
+    {{-- Sessions / Devices --}}
+    <livewire:dashboard.settings.sessions-devices />
+
 </div>

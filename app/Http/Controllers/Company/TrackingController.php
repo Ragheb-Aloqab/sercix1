@@ -59,8 +59,17 @@ class TrackingController extends Controller
     {
         $company = auth('company')->user();
         $vehicles = $company->vehicles()
-            ->whereNotNull('imei')
-            ->where('imei', '!=', '')
+            ->where(function ($q) {
+                $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('imei')->orWhere('imei', '');
+                    })
+                    ->orWhere(function ($q2) {
+                        $q2->where('tracking_source', Vehicle::TRACKING_DEVICE_API)
+                            ->whereNotNull('imei')
+                            ->where('imei', '!=', '');
+                    });
+            })
             ->with('latestLocation')
             ->get();
 
@@ -103,6 +112,26 @@ class TrackingController extends Controller
             return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
         }
 
+        if ($vehicle->usesMobileTracking() || empty($vehicle->imei)) {
+            $loc = $vehicle->latestLocation;
+            if (!$loc) {
+                return response()->json(['success' => false, 'error' => __('tracking.no_location')], 422);
+            }
+            $speed = $loc->speed ? (float) $loc->speed : null;
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'lat' => (float) $loc->lat,
+                    'lng' => (float) $loc->lng,
+                    'speed' => $speed,
+                    'address' => $loc->address,
+                    'status' => $loc->status ?? $this->inferStatus($speed),
+                    'tracker_timestamp' => $loc->tracker_timestamp?->toIso8601String(),
+                    'odometer' => $loc->odometer ? (float) $loc->odometer : null,
+                ],
+            ]);
+        }
+
         $result = $this->trackingService->fetchAndStoreLocation($vehicle);
 
         if (!$result['success']) {
@@ -124,6 +153,32 @@ class TrackingController extends Controller
         $data = [];
         foreach ($results as $vehicleId => $result) {
             $data[$vehicleId] = $result['success'] ? $result['data'] : ['error' => $result['error'] ?? 'Unknown error'];
+        }
+
+        // Include mobile-tracking vehicles (locations from driver reports)
+        $mobileVehicles = $company->vehicles()
+            ->where(function ($q) {
+                $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('imei')->orWhere('imei', '');
+                    });
+            })
+            ->with('latestLocation')
+            ->get();
+        foreach ($mobileVehicles as $v) {
+            $loc = $v->latestLocation;
+            if ($loc) {
+                $speed = $loc->speed ? (float) $loc->speed : null;
+                $data[$v->id] = [
+                    'lat' => (float) $loc->lat,
+                    'lng' => (float) $loc->lng,
+                    'speed' => $speed,
+                    'address' => $loc->address,
+                    'status' => $loc->status ?? $this->inferStatus($speed),
+                    'tracker_timestamp' => $loc->tracker_timestamp?->toIso8601String(),
+                    'odometer' => $loc->odometer ? (float) $loc->odometer : null,
+                ];
+            }
         }
 
         return response()->json(['success' => true, 'data' => $data]);

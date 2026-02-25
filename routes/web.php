@@ -79,6 +79,11 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::post('/request/{order}/invoice', [\App\Http\Controllers\DriverController::class, 'uploadInvoice'])->name('request.invoice')->whereNumber('order');
         Route::get('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'createFuelRefill'])->name('fuel-refill.create');
         Route::post('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'storeFuelRefill'])->name('fuel-refill.store');
+        Route::get('/tracking', [\App\Http\Controllers\DriverController::class, 'tracking'])->name('tracking');
+        Route::post('/tracking/report', [\App\Http\Controllers\DriverController::class, 'reportTracking'])->name('tracking.report')->middleware('throttle:60,1');
+        Route::get('/inspections', [\App\Http\Controllers\DriverInspectionController::class, 'index'])->name('inspections.index');
+        Route::get('/inspections/{inspection}/upload', [\App\Http\Controllers\DriverInspectionController::class, 'showUploadForm'])->name('inspections.upload')->whereNumber('inspection');
+        Route::post('/inspections/{inspection}/upload', [\App\Http\Controllers\DriverInspectionController::class, 'upload'])->name('inspections.upload.store')->whereNumber('inspection');
     });
 });
 Route::domain('{company}.servexmotors.com')->group(function(){
@@ -94,6 +99,9 @@ Route::prefix('company')->name('company.')->group(function () {
     Route::post('/login/send-otp', [OtpAuthController::class, 'sendOtp'])
         ->middleware('throttle:5,1')
         ->name('send_otp');
+    Route::post('/register/resend-otp', [OtpAuthController::class, 'resendRegisterOtp'])
+        ->middleware('throttle:5,1')
+        ->name('resend_register_otp');
     Route::get('/login/verify', [OtpAuthController::class, 'showVerifyForm'])->name('verify');
     Route::post('/login/verify', [OtpAuthController::class, 'verifyOtp'])
         ->middleware('throttle:10,1')
@@ -128,6 +136,9 @@ Route::middleware(['auth:web', 'active'])->group(function () {
 |--------------------------------------------------------------------------
 | No auth required - redirects to appropriate dashboard or sign-in.
 */
+// Technician routes removed - redirect to admin
+Route::get('/tech/{any?}', fn () => redirect()->route('admin.dashboard'))->where('any', '.*')->name('tech.redirect');
+
 Route::get('/dashboard', function () {
     if (Auth::guard('company')->check()) {
         return redirect()->route('company.dashboard');
@@ -137,8 +148,8 @@ Route::get('/dashboard', function () {
     }
     if (Auth::guard('web')->check()) {
         $user = Auth::guard('web')->user();
-        if (in_array($user->role ?? '', ['admin', 'technician'])) {
-            return redirect()->route($user->role === 'technician' ? 'tech.dashboard' : 'admin.dashboard');
+        if (in_array($user->role ?? '', ['admin', 'super_admin'])) {
+            return redirect()->route('admin.dashboard');
         }
     }
     return redirect()->route('sign-in.index');
@@ -166,5 +177,4 @@ Route::middleware(['company'])
 */
 require __DIR__ . '/admin.php';
 require __DIR__ . '/company.php';
-require __DIR__ . '/technic.php';
 require __DIR__ . '/auth.php';

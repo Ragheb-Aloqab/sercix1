@@ -17,7 +17,7 @@ return [
     'vehicle' => 'المركبة',
     'start_service' => 'بدء تنفيذ الخدمة',
     'upload_invoice' => 'رفع الفاتورة',
-    'upload_invoice_help' => 'ارفع فاتورتك (PDF، JPG، PNG) بعد إكمال الخدمة.',
+    'upload_invoice_help' => 'ارفع صورة فاتورتك (JPG أو PNG) بعد إكمال الخدمة. سيتم إنشاء PDF تلقائياً.',
     'upload_invoice_btn' => 'رفع الفاتورة',
     'nav_home' => 'الرئيسية',
     'nav_service' => 'الخدمة',

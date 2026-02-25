@@ -51,7 +51,7 @@
             </div>
         </form>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
                 <p class="text-amber-400 text-sm mb-2 text-end">{{ __('fuel.total_fuel_cost') }}</p>
                 <p class="text-2xl font-black text-white text-end">{{ number_format($totalCost, 2) }} {{ __('company.sar') }}</p>
@@ -64,7 +64,21 @@
                 <p class="text-slate-400 text-sm mb-2 text-end">{{ __('fuel.refill_count') }}</p>
                 <p class="text-2xl font-black text-white text-end">{{ $refillCount }}</p>
             </div>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300" title="{{ __('reports.avg_per_vehicle') }}">
+                <p class="text-slate-400 text-sm mb-2 text-end">{{ __('reports.avg_per_vehicle') }}</p>
+                <p class="text-2xl font-black text-white text-end">{{ number_format($analytics['avg_per_vehicle'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300" title="{{ __('reports.avg_per_transaction') }}">
+                <p class="text-slate-400 text-sm mb-2 text-end">{{ __('reports.avg_per_transaction') }}</p>
+                <p class="text-2xl font-black text-white text-end">{{ number_format($analytics['avg_per_transaction'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+            </div>
         </div>
+        @if (isset($analytics['cost_per_km']) && $analytics['cost_per_km'] !== null)
+        <div class="rounded-2xl bg-amber-500/10 border border-amber-400/30 p-4 mb-6">
+            <p class="text-amber-300 text-sm mb-1">{{ __('reports.cost_per_km') }} <span class="text-slate-500 text-xs">({{ __('reports.fuel') }})</span></p>
+            <p class="text-xl font-black text-amber-300">{{ number_format($analytics['cost_per_km'], 2) }} {{ __('company.sar') }} / {{ __('common.km') }}</p>
+        </div>
+        @endif
 
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 overflow-hidden">
             <div class="p-5 border-b border-slate-600/50">

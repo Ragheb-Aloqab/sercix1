@@ -15,6 +15,7 @@ class Settings extends Component
 
     public string $tracking_api_key = '';
     public string $tracking_base_url = '';
+    public bool $show_api_key = false;
 
     public string $current_password = '';
     public string $password = '';
@@ -33,8 +34,8 @@ class Settings extends Component
         $this->name  = (string) ($company->company_name ?? $company->name ?? '');
         $this->email = (string) ($company->email ?? '');
         $this->phone = (string) ($company->phone ?? '');
-        // Do not load API key for security - user enters new value to update
         $this->tracking_base_url = (string) ($company->tracking_base_url ?? '');
+        $this->tracking_api_key = (string) ($company->tracking_api_key ?? '');
     }
 
     public function saveProfile()

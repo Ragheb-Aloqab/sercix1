@@ -23,12 +23,7 @@
         </div>
     </div>
 
-    @if (empty($vehicle->imei))
-        <div class="mb-6 p-4 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-400/50">
-            {{ __('tracking.imei_required') }} {{ __('vehicles.edit_vehicle') }}
-            <a href="{{ route('company.vehicles.edit', $vehicle) }}" class="underline ms-2">{{ __('common.edit') }}</a>
-        </div>
-    @elseif (empty($company->tracking_base_url) || empty($company->tracking_api_key))
+    @if ($vehicle->usesDeviceApiTracking() && !empty($vehicle->imei) && (empty($company->tracking_base_url) || empty($company->tracking_api_key)))
         <div class="mb-6 p-4 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-400/50">
             {{ __('tracking.api_not_configured') }}
             <a href="{{ route('company.settings') }}" class="underline ms-2">{{ __('dashboard.settings') }}</a>

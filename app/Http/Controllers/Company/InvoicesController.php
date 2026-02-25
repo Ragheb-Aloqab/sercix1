@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Vehicle;
+use App\Services\MaintenanceInvoicePdfService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class InvoicesController extends Controller
 {
@@ -213,5 +215,47 @@ class InvoicesController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
-   
+
+    /**
+     * Download maintenance invoice PDF (CamScanner-style: image only on A4).
+     * Only for service invoices with driver_invoice image attachment.
+     */
+    public function downloadMaintenancePdf(Invoice $invoice)
+    {
+        $this->authorize('view', $invoice);
+
+        $att = $invoice->order?->attachments()->where('type', 'driver_invoice')->first();
+        if (!$att || !$att->file_path) {
+            return redirect()->route('company.invoices.show', $invoice)
+                ->with('error', __('messages.maintenance_invoice_pdf_not_available'));
+        }
+
+        $ext = strtolower(pathinfo($att->file_path, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['jpg', 'jpeg', 'png'])) {
+            return redirect()->route('company.invoices.show', $invoice)
+                ->with('error', __('messages.maintenance_invoice_pdf_not_available'));
+        }
+
+        $pdfPath = $att->maintenance_invoice_pdf_path;
+        if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
+            try {
+                $service = app(MaintenanceInvoicePdfService::class);
+                $path = $service->generateAndSave($att);
+                $att->update(['maintenance_invoice_pdf_path' => $path]);
+                $pdfPath = $path;
+            } catch (\Throwable $e) {
+                report($e);
+                return redirect()->route('company.invoices.show', $invoice)
+                    ->with('error', __('messages.invoice_pdf_error'));
+            }
+        }
+
+        $filename = 'maintenance-invoice-' . ($invoice->invoice_number ?? $invoice->id) . '.pdf';
+        $content = Storage::disk('public')->get($pdfPath);
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 }

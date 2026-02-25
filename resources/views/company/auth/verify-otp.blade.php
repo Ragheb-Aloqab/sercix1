@@ -36,6 +36,29 @@
     </script>
     @vite(['resources/css/style.css'])
     <x-vite-cdn-fallback />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const expiresAt = {{ $expiresAt ?? 0 }};
+            const timerEl = document.getElementById('otp-timer');
+            const timerVal = document.getElementById('otp-timer-value');
+            const resendWrap = document.getElementById('otp-resend-wrap');
+
+            function updateTimer() {
+                const now = Math.floor(Date.now() / 1000);
+                const left = Math.max(0, expiresAt - now);
+                if (left <= 0) {
+                    if (timerEl) timerEl.style.display = 'none';
+                    if (resendWrap) resendWrap.style.display = 'flex';
+                    return;
+                }
+                const m = Math.floor(left / 60);
+                const s = left % 60;
+                if (timerVal) timerVal.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+                setTimeout(updateTimer, 1000);
+            }
+            updateTimer();
+        });
+    </script>
 </head>
 
 <body class="page-auth min-h-screen bg-servx-black text-servx-silver-light antialiased overflow-x-hidden font-servx">
@@ -90,18 +113,31 @@
                         {{ app()->getLocale() === 'ar' ? 'تحقق ودخول' : 'Verify & sign in' }}
                     </button>
 
-                    <div class="flex items-center justify-between text-sm">
-                        <a href="{{ route('sign-in.index') }}" class="font-medium text-servx-silver hover:text-servx-red transition-colors">
-                            {{ app()->getLocale() === 'ar' ? 'تعديل رقم الجوال' : 'Change phone number' }}
-                        </a>
-
-                        <form method="POST" action="{{ route('company.send_otp') }}" class="inline">
-                            @csrf
-                            <input type="hidden" name="phone" value="{{ $phone }}">
-                            <button type="submit" class="font-medium text-servx-red hover:text-servx-red-hover transition-colors">
-                                {{ app()->getLocale() === 'ar' ? 'إعادة إرسال' : 'Resend' }}
-                            </button>
-                        </form>
+                    <div class="mt-4 space-y-2">
+                        <p id="otp-timer" class="text-sm text-servx-silver">
+                            {{ app()->getLocale() === 'ar' ? 'إعادة الإرسال خلال:' : 'Resend in:' }} <span id="otp-timer-value" class="font-mono font-bold text-servx-silver-light">02:00</span>
+                        </p>
+                        <div id="otp-resend-wrap" class="flex items-center justify-between text-sm" style="display:none">
+                            <a href="{{ $isRegistration ?? false ? route('company.register') : route('sign-in.index') }}" class="font-medium text-servx-silver hover:text-servx-red transition-colors">
+                                {{ app()->getLocale() === 'ar' ? 'تعديل رقم الجوال' : 'Change phone number' }}
+                            </a>
+                            @if($isRegistration ?? false)
+                                <form method="POST" action="{{ route('company.resend_register_otp') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" id="otp-resend-btn" class="font-medium text-servx-red hover:text-servx-red-hover transition-colors">
+                                        {{ app()->getLocale() === 'ar' ? 'إعادة إرسال الرمز' : 'Send again' }}
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('company.send_otp') }}" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="phone" value="{{ $phone }}">
+                                    <button type="submit" id="otp-resend-btn" class="font-medium text-servx-red hover:text-servx-red-hover transition-colors">
+                                        {{ app()->getLocale() === 'ar' ? 'إعادة إرسال' : 'Send again' }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                 </form>
             </div>

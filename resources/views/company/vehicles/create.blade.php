@@ -46,10 +46,20 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-bold text-slate-400">IMEI *</label>
+                    <label class="text-sm font-bold text-slate-400">{{ __('tracking.tracking_source') }}</label>
+                    <select name="tracking_source" id="tracking_source"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white">
+                        <option value="device_api" @selected(old('tracking_source', 'device_api') === 'device_api')>{{ __('tracking.source_device_api') }}</option>
+                        <option value="mobile" @selected(old('tracking_source') === 'mobile')>{{ __('tracking.source_mobile') }}</option>
+                    </select>
+                    <p class="text-xs text-slate-500 mt-1">{{ __('tracking.tracking_source_hint') }}</p>
+                </div>
+
+                <div id="imei-field">
+                    <label class="text-sm font-bold text-slate-400">IMEI <span id="imei-required">*</span></label>
                     <input type="text" name="imei" value="{{ old('imei') }}"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white placeholder-slate-500 font-mono"
-                        placeholder="123456789012345" required maxlength="20"
+                        placeholder="123456789012345" maxlength="20"
                         pattern="[0-9]{10,20}" title="{{ __('tracking.imei_required') }}">
                     <p class="text-xs text-slate-500 mt-1">{{ __('tracking.imei_required') }}</p>
                 </div>
@@ -132,5 +142,14 @@
             </div>
         </form>
 
+<script>
+document.getElementById('tracking_source')?.addEventListener('change', function() {
+    var isDeviceApi = this.value === 'device_api';
+    var inp = document.querySelector('input[name="imei"]');
+    if (inp) inp.required = isDeviceApi;
+    document.getElementById('imei-required').style.display = isDeviceApi ? '' : 'none';
+});
+document.getElementById('tracking_source')?.dispatchEvent(new Event('change'));
+</script>
 @include('company.partials.glass-end')
 @endsection

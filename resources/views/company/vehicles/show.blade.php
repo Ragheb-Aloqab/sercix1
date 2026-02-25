@@ -18,7 +18,7 @@
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors">
                 <i class="fa-solid fa-pen"></i> {{ __('vehicles.edit_vehicle') }}
             </a>
-            @if ($vehicle->imei)
+            @if ($vehicle->imei || $vehicle->usesMobileTracking())
                 <a href="{{ route('company.vehicles.track', $vehicle) }}"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors">
                     <i class="fa-solid fa-location-dot"></i> {{ __('tracking.track_vehicle') }}
@@ -86,6 +86,90 @@
         </div>
     </div>
 
+    {{-- Vehicle Documents --}}
+    @php
+        $expiryService = app(\App\Services\ExpiryMonitoringService::class);
+        $docStatus = $expiryService->getVehicleDocumentStatus($vehicle);
+    @endphp
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm mb-6 sm:mb-8">
+        <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('vehicles.vehicle_documents') }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Registration --}}
+            <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-bold text-white">{{ __('vehicles.registration') }}</span>
+                    @php $reg = $docStatus['registration']; $regClass = $expiryService->getStatusBadgeClass($reg['status']); @endphp
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $regClass }}">
+                        {{ __('vehicles.' . $reg['status']) }}
+                    </span>
+                </div>
+                @if ($reg['date'])
+                    <p class="text-sm text-slate-400 mb-1">{{ __('vehicles.expiry_date') }}: {{ $reg['date']->translatedFormat('d M Y') }}</p>
+                    @if ($reg['days_remaining'] !== null)
+                        <p class="text-sm font-bold {{ $reg['status'] === 'expired' ? 'text-red-400' : ($reg['status'] === 'expiring_soon' ? 'text-amber-400' : 'text-emerald-400') }}">
+                            {{ $reg['days_remaining'] < 0 ? __('vehicles.expired') . ' (' . abs($reg['days_remaining']) . ' ' . __('vehicles.days_ago') . ')' : __('vehicles.days_remaining') . ': ' . $reg['days_remaining'] }}
+                        </p>
+                    @endif
+                @else
+                    <p class="text-sm text-slate-500">{{ __('vehicles.missing') }}</p>
+                @endif
+                <div class="mt-3 mb-2 flex flex-wrap items-center gap-3">
+                    @if ($vehicle->registration_document_path)
+                        <a href="{{ route('company.vehicles.documents.registration.preview', $vehicle) }}" target="_blank"
+                            class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-600/30 text-sky-300 border border-sky-400/50 text-sm font-bold hover:bg-sky-600/50 whitespace-nowrap">
+                            <i class="fa-solid fa-eye"></i> {{ __('vehicles.preview_registration') }}
+                        </a>
+                        <a href="{{ route('company.vehicles.documents.registration.download', $vehicle) }}"
+                            class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-500/50 text-slate-300 text-sm font-bold hover:bg-slate-600/50 whitespace-nowrap">
+                            <i class="fa-solid fa-download"></i> {{ __('vehicles.download_registration') }}
+                        </a>
+                    @endif
+                    <a href="{{ route('company.vehicles.edit', $vehicle) }}#documents"
+                        class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-500/50 text-slate-300 text-sm font-bold hover:bg-slate-600/50 whitespace-nowrap">
+                        <i class="fa-solid fa-arrow-up"></i> {{ $vehicle->registration_document_path ? __('vehicles.replace_document') : __('vehicles.upload_registration') }}
+                    </a>
+                </div>
+            </div>
+
+            {{-- Insurance --}}
+            <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-bold text-white">{{ __('vehicles.insurance') }}</span>
+                    @php $ins = $docStatus['insurance']; $insClass = $expiryService->getStatusBadgeClass($ins['status']); @endphp
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $insClass }}">
+                        {{ __('vehicles.' . $ins['status']) }}
+                    </span>
+                </div>
+                @if ($ins['date'])
+                    <p class="text-sm text-slate-400 mb-1">{{ __('vehicles.expiry_date') }}: {{ $ins['date']->translatedFormat('d M Y') }}</p>
+                    @if ($ins['days_remaining'] !== null)
+                        <p class="text-sm font-bold {{ $ins['status'] === 'expired' ? 'text-red-400' : ($ins['status'] === 'expiring_soon' ? 'text-amber-400' : 'text-emerald-400') }}">
+                            {{ $ins['days_remaining'] < 0 ? __('vehicles.expired') . ' (' . abs($ins['days_remaining']) . ' ' . __('vehicles.days_ago') . ')' : __('vehicles.days_remaining') . ': ' . $ins['days_remaining'] }}
+                        </p>
+                    @endif
+                @else
+                    <p class="text-sm text-slate-500">{{ __('vehicles.missing') }}</p>
+                @endif
+                <div class="mt-3 mb-2 flex flex-wrap items-center gap-3">
+                    @if ($vehicle->insurance_document_path)
+                        <a href="{{ route('company.vehicles.documents.insurance.preview', $vehicle) }}" target="_blank"
+                            class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-600/30 text-sky-300 border border-sky-400/50 text-sm font-bold hover:bg-sky-600/50 whitespace-nowrap">
+                            <i class="fa-solid fa-eye"></i> {{ __('vehicles.preview_insurance') }}
+                        </a>
+                        <a href="{{ route('company.vehicles.documents.insurance.download', $vehicle) }}"
+                            class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-500/50 text-slate-300 text-sm font-bold hover:bg-slate-600/50 whitespace-nowrap">
+                            <i class="fa-solid fa-download"></i> {{ __('vehicles.download_insurance') }}
+                        </a>
+                    @endif
+                    <a href="{{ route('company.vehicles.edit', $vehicle) }}#documents"
+                        class="inline-flex shrink-0 items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-500/50 text-slate-300 text-sm font-bold hover:bg-slate-600/50 whitespace-nowrap">
+                        <i class="fa-solid fa-arrow-up"></i> {{ $vehicle->insurance_document_path ? __('vehicles.replace_document') : __('vehicles.upload_insurance') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Summary cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
@@ -105,6 +189,54 @@
             <p class="text-2xl font-black text-white text-end">{{ number_format($totalFuelLiters, 1) }}</p>
         </div>
     </div>
+
+    {{-- Vehicle inspection --}}
+    @php $inspStatus = $inspectionStatus ?? null; @endphp
+    @if ($inspStatus && ($inspStatus['status'] === 'pending' || $inspStatus['status'] === 'overdue'))
+        <div class="rounded-2xl {{ $inspStatus['status'] === 'overdue' ? 'bg-red-500/10 border-red-400/50' : 'bg-amber-500/10 border-amber-400/50' }} border p-5 sm:p-6 mb-6 sm:mb-8">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-white mb-1">{{ __('inspections.vehicles_pending') }}</h2>
+                    <p class="text-sm text-slate-400">{{ __('inspections.due_date') }}: {{ $inspStatus['due_date']?->translatedFormat('d M Y') ?? '—' }}</p>
+                    <span class="inline-block mt-2 px-2 py-1 rounded-xl text-xs font-bold border {{ $inspStatus['status'] === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $inspStatus['status']) }}</span>
+                </div>
+                <form method="POST" action="{{ route('company.vehicles.request-inspection', $vehicle) }}" class="inline">
+                    @csrf
+                    <button type="submit" class="px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold">
+                        <i class="fa-solid fa-bell me-2"></i>{{ __('inspections.request_inspection') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    {{-- Inspection history timeline --}}
+    @if (($vehicleInspections ?? collect())->count() > 0)
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 mb-6 sm:mb-8">
+            <h2 class="text-base font-bold text-slate-300 mb-4 text-end">{{ __('inspections.title') }}</h2>
+            <div class="space-y-3">
+                @foreach ($vehicleInspections as $insp)
+                    @php
+                        $statusClass = match($insp->status) {
+                            'approved' => 'border-emerald-400/50 text-emerald-300',
+                            'rejected' => 'border-red-400/50 text-red-300',
+                            'submitted' => 'border-sky-400/50 text-sky-300',
+                            default => 'border-amber-400/50 text-amber-300',
+                        };
+                    @endphp
+                    <a href="{{ route('company.inspections.show', $insp) }}" class="flex items-center justify-between p-4 rounded-xl bg-slate-700/50 border border-slate-500/30 hover:border-slate-400/50 transition-colors">
+                        <div>
+                            <span class="font-bold text-white">{{ $insp->inspection_date->translatedFormat('d M Y') }}</span>
+                            <span class="ms-2 px-2 py-1 rounded-lg text-xs font-bold border {{ $statusClass }}">{{ __('inspections.' . $insp->status) }}</span>
+                            <p class="text-sm text-slate-400 mt-1">{{ $insp->driver_name ?? '—' }} · {{ $insp->odometer_reading ? number_format($insp->odometer_reading) . ' ' . __('common.km') : '—' }}</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} text-sky-400"></i>
+                    </a>
+                @endforeach
+            </div>
+            <a href="{{ route('company.inspections.index') }}?vehicle_id={{ $vehicle->id }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('inspections.view_all') }}</a>
+        </div>
+    @endif
 
     {{-- Fuel refills --}}
     <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 mb-6 sm:mb-8">

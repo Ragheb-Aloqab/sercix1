@@ -15,7 +15,7 @@ class NotificationsController extends Controller
     {
         $user = Auth()->user();
 
-        $filter = $request->string('filter')->toString(); // all | unread | read
+        $filter = $request->get('filter', 'all'); // all | unread | read
 
         $query = $user->notifications()->latest();
 

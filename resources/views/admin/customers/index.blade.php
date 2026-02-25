@@ -1,87 +1,102 @@
 @extends('admin.layouts.app')
 
-@section('title', 'العملاء | Servx Motors')
-@section('page_title', 'إدارة العملاء')
+@section('title', __('dashboard.customers') . ' | ' . ($siteName ?? 'Servx Motors'))
+@section('page_title', __('dashboard.customers'))
 
 @section('content')
-    <div class="flex items-center justify-between gap-3 mb-4">
-        <form class="flex items-center gap-2" method="GET">
-            <input name="q" value="{{ $q }}"
-                class="w-72 max-w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                placeholder="بحث بالاسم/الإيميل/الجوال..." />
-            <button class="px-3 py-2 rounded-xl border border-slate-200 text-sm font-semibold">{{ __('common.search') }}</button>
-        </form>
-        <!--
-        <a href="{{ route('admin.customers.create') }}"
-            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
-            <i class="fa-solid fa-plus ms-2"></i> إضافة عميل
-        </a> -->
-    </div>
+    <div class="dashboard-glass min-h-[calc(100vh-8rem)] mx-0 px-4 sm:px-6 py-6 sm:py-8 rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl">
+        <div class="dashboard-content max-w-7xl mx-auto space-y-6">
+            {{-- Header --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="text-center sm:text-start w-full sm:w-auto">
+                    <h1 class="dash-page-title">{{ __('dashboard.customers') }}</h1>
+                    <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.customers.create') }}" class="dash-btn dash-btn-primary">
+                        <i class="fa-solid fa-plus"></i>{{ __('admin_dashboard.quick_add_company') }}
+                    </a>
+                    <a href="{{ route('admin.dashboard') }}" class="dash-btn dash-btn-secondary">
+                        <i class="fa-solid fa-arrow-left rtl:rotate-180"></i>{{ __('common.back') }}
+                    </a>
+                </div>
+            </div>
 
-    @if (session('success'))
-        <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">
-            {{ session('success') }}
+            @if (session('success'))
+                <div class="dash-card border-emerald-500/30 bg-emerald-500/10">
+                    <p class="text-emerald-400">{{ session('success') }}</p>
+                </div>
+            @endif
+
+            {{-- Search --}}
+            <div class="dash-card">
+                <form method="GET" class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <i class="fa-solid fa-search absolute start-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input name="q" value="{{ $q ?? '' }}"
+                            class="w-full ps-10 pe-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-600/50 text-white placeholder-slate-400 focus:border-sky-500/50"
+                            placeholder="{{ __('admin_dashboard.filter_by_company') }}" />
+                    </div>
+                    <button type="submit" class="dash-btn dash-btn-primary">
+                        <i class="fa-solid fa-magnifying-glass"></i>{{ __('common.search') }}
+                    </button>
+                </form>
+            </div>
+
+            {{-- Table --}}
+            <div class="dash-card overflow-hidden p-0">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-800/50 border-b border-slate-700">
+                            <tr>
+                                <th class="p-4 text-start font-semibold text-slate-300">{{ __('common.company') }}</th>
+                                <th class="p-4 text-start font-semibold text-slate-300">{{ __('admin_dashboard.phone') }}</th>
+                                <th class="p-4 text-start font-semibold text-slate-300">{{ __('admin_dashboard.subscription_status') }}</th>
+                                <th class="p-4 text-end font-semibold text-slate-300">{{ __('common.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700">
+                            @forelse($customers as $customer)
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="p-4">
+                                        <p class="font-semibold text-white">{{ $customer->company_name }}</p>
+                                        <p class="text-xs text-slate-400">{{ $customer->email ?? '' }}</p>
+                                    </td>
+                                    <td class="p-4 text-slate-300">{{ $customer->phone ?? '—' }}</td>
+                                    <td class="p-4">
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $customer->status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }}">
+                                            {{ $customer->status === 'active' ? __('admin_dashboard.active') : __('admin_dashboard.inactive') }}
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-end">
+                                        <div class="flex flex-wrap gap-2 justify-end">
+                                            <a href="{{ route('admin.customers.edit', $customer) }}" class="dash-btn dash-btn-secondary !py-2 !px-3 text-sm">
+                                                <i class="fa-solid fa-pen-to-square"></i>{{ __('common.edit') }}
+                                            </a>
+                                            <form method="POST" action="{{ route('admin.customers.destroy', $customer) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete') ?? 'Delete permanently?' }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dash-btn !py-2 !px-3 text-sm bg-rose-600 hover:bg-rose-700 border-rose-600">
+                                                    <i class="fa-solid fa-trash"></i>{{ __('common.delete') }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-slate-400">{{ __('admin_dashboard.no_companies') }}</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if($customers->hasPages())
+                    <div class="p-4 border-t border-slate-700">
+                        {{ $customers->links() }}
+                    </div>
+                @endif
+            </div>
         </div>
-    @endif
-
-    <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                    <th class="p-3 text-start">الاسم</th>
-                    <th class="p-3 text-start">الجوال</th>
-                    <th class="p-3 text-start">المدينة</th>
-                    <th class="p-3 text-start">الحالة</th>
-                    <th class="p-3 text-start">إجراءات</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y">
-                @forelse($customers as $customer)
-                
-                    <tr>
-                        <td class="p-3 font-semibold">
-                            {{ $customer->company_name }}
-                            <div class="text-xs text-slate-500">{{ $customer->email ?? '' }}</div>
-                        </td>
-                        <td class="p-3">{{ $customer->phone ?? '—' }}</td>
-                        <td class="p-3">{{ $customer->city ?? '—' }}</td>
-                        <td class="p-3">
-
-                            @if ($customer->status==="active")
-                                <span
-                                    class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">نشط</span>
-                            @else
-                                <span class="px-2 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold">موقوف</span>
-                            @endif
-                        </td>
-                        <td class="p-3">
-                            <div class="flex flex-wrap gap-2">
-                                <a href="{{ route('admin.customers.edit', $customer) }}"
-                                    class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold">
-                                    تعديل
-                                </a>
-
-                                <form method="POST" action="{{ route('admin.customers.destroy', $customer) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button
-                                        class="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold"
-                                        onclick="return confirm('حذف العميل نهائياً؟')">
-                                        حذف
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="p-6 text-center text-slate-500">لا يوجد عملاء.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
     </div>
-
-    <div class="mt-4">{{ $customers->links() }}</div>
 @endsection

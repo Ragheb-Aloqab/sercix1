@@ -30,7 +30,7 @@ class EnsureAdmin
             return redirect()->route('sign-in.index')->with('error', __('messages.account_suspended'));
         }
 
-        if ($user->role !== 'admin') {
+        if (!in_array($user->role ?? '', ['admin', 'super_admin'])) {
             LogUnauthorizedAccess::log($request, 'admin', 'web:' . ($user->role ?? 'unknown'));
             abort(403, __('errors.forbidden_message'));
         }

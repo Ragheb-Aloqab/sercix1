@@ -15,20 +15,25 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin />
         <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin />
     @endif
-    <style>.vehicle-marker { background: transparent !important; border: none !important; }</style>
+    <style>
+        .vehicle-marker { background: transparent !important; border: none !important; }
+        .vehicle-marker-inner { will-change: transform; }
+        .vehicle-map-container { opacity: 0; transition: opacity 0.5s ease-out; }
+        .vehicle-map-container.vehicle-map-ready { opacity: 1; }
+        .map-style-option[data-active="true"] { background: rgba(56, 189, 248, 0.2); color: rgb(125, 211, 252); }
+    </style>
 @endpush
 
-@if (!$hasVehicles && !$isSingle)
+@if (!$hasVehicles)
     <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-12 text-center">
-        <p class="text-slate-400">{{ __('tracking.imei_required') }}</p>
-        <p class="text-sm text-slate-500 mt-2">{{ __('vehicles.add_vehicle') }} {{ __('vehicles.edit_vehicle') }}</p>
+        <p class="text-slate-400">{{ __('vehicles.no_vehicles') ?? __('vehicles.add_vehicle') }}</p>
         <a href="{{ route('company.vehicles.index') }}" class="inline-block mt-4 px-4 py-2 rounded-2xl bg-sky-600 text-white font-bold">{{ __('vehicles.vehicles_list') }}</a>
     </div>
 @else
-<div class="vehicle-tracking-map" wire:poll.visible.30s="refreshPositions">
-    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 overflow-hidden backdrop-blur-sm">
+<div class="vehicle-tracking-map" wire:poll.visible.3s="refreshPositions">
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 overflow-hidden backdrop-blur-sm relative">
         <div id="{{ $mapId }}" wire:ignore
-             class="w-full min-h-[400px]"
+             class="vehicle-map-container w-full min-h-[400px] transition-opacity duration-500"
              style="height: {{ $mapHeight }};"
              data-config="{{ base64_encode(json_encode([
                  'vehicles' => $vehicles->map(fn($v) => ['id' => $v->id, 'name' => $v->display_name, 'plate' => $v->plate_number ?? '—', 'type' => $v->type ?? 'car'])->values(),
@@ -36,6 +41,8 @@
                  'isSingle' => $isSingle,
                  'fetchUrl' => $isSingle ? route('company.vehicles.track.fetch', $vehicle) : route('company.tracking.fetch_all'),
                  'trackBaseUrl' => url('/company/vehicles'),
+                 'companyId' => auth('company')->id(),
+                 'defaultMapStyle' => config('servx.default_map_style'),
                  'csrf' => csrf_token(),
                  'translations' => [
                      'plate' => __('tracking.plate'),
@@ -48,8 +55,42 @@
                      'machine_status' => __('tracking.machine_status'),
                      'track_vehicle' => __('tracking.track_vehicle'),
                      'no_location' => __('tracking.no_location'),
+                     'map_style' => __('tracking.map_style'),
+                     'map_style_carto_dark' => __('tracking.map_style_carto_dark'),
+                     'map_style_osm_humanitarian' => __('tracking.map_style_osm_humanitarian'),
+                     'map_style_stadia_alidade' => __('tracking.map_style_stadia_alidade'),
+                     'map_style_esri_imagery' => __('tracking.map_style_esri_imagery'),
                  ],
              ])) }}"></div>
+        {{-- Map style switcher: top-end (LTR) / top-start (RTL) --}}
+        <div id="{{ $mapId }}-style-switcher" class="absolute top-3 end-3 ms-auto z-[1000] vehicle-map-style-switcher" dir="ltr" style="display:none">
+            <div class="rounded-xl bg-slate-900/95 backdrop-blur-md border border-slate-600/50 shadow-xl overflow-hidden">
+                <button type="button" class="map-style-trigger flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-700/50 transition-colors w-full"
+                    aria-haspopup="listbox" aria-expanded="false" aria-label="{{ __('tracking.map_style') }}">
+                    <i class="fa-solid fa-layer-group text-sky-400"></i>
+                    <span class="map-style-current-name">{{ __('tracking.map_style_carto_dark') }}</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform map-style-chevron"></i>
+                </button>
+                <div class="map-style-dropdown hidden border-t border-slate-600/50 py-1 max-h-56 overflow-y-auto">
+                    <button type="button" class="map-style-option w-full flex items-center gap-2 px-3 py-2 text-sm text-start hover:bg-slate-700/50 transition-colors data-[active]:bg-sky-500/20 data-[active]:text-sky-300" data-style="carto_dark">
+                        <i class="fa-solid fa-moon w-4 text-center"></i>
+                        <span>{{ __('tracking.map_style_carto_dark') }}</span>
+                    </button>
+                    <button type="button" class="map-style-option w-full flex items-center gap-2 px-3 py-2 text-sm text-start hover:bg-slate-700/50 transition-colors data-[active]:bg-sky-500/20 data-[active]:text-sky-300" data-style="osm_humanitarian">
+                        <i class="fa-solid fa-people-group w-4 text-center"></i>
+                        <span>{{ __('tracking.map_style_osm_humanitarian') }}</span>
+                    </button>
+                    <button type="button" class="map-style-option w-full flex items-center gap-2 px-3 py-2 text-sm text-start hover:bg-slate-700/50 transition-colors data-[active]:bg-sky-500/20 data-[active]:text-sky-300" data-style="stadia_alidade">
+                        <i class="fa-solid fa-map w-4 text-center"></i>
+                        <span>{{ __('tracking.map_style_stadia_alidade') }}</span>
+                    </button>
+                    <button type="button" class="map-style-option w-full flex items-center gap-2 px-3 py-2 text-sm text-start hover:bg-slate-700/50 transition-colors data-[active]:bg-sky-500/20 data-[active]:text-sky-300" data-style="esri_imagery">
+                        <i class="fa-solid fa-satellite w-4 text-center"></i>
+                        <span>{{ __('tracking.map_style_esri_imagery') }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if ($showInfoPanel && $isSingle && $vehicle)
@@ -99,16 +140,14 @@
     @endif
     <script>
     /**
-     * Livewire-native vehicle tracking map.
-     * - Dynamic interval: 3s when moving (speed>0), 12s when stopped.
-     * - Markers: update in-place (setLatLng, setIcon, setPopupContent); no recreation.
-     * - MarkerCluster for multi-vehicle; lightweight divIcons.
-     * - Safe API: lastKnownPositions fallback on error; no crash.
-     * - wire:poll.visible.30s + positions-updated event; client fetch for responsiveness.
+     * Smooth vehicle tracking - Uber/Careem-style
+     * - 60fps interpolation via requestAnimationFrame
+     * - Bearing-based rotation, Kalman smoothing, spike filtering
+     * - Polling (1-2s when moving) + optional WebSocket-ready
      */
     (function() {
-        const INTERVAL_MOVING_MS = 1500;   // ~1.5s: near-instant updates when car moves
-        const INTERVAL_STOPPED_MS = 12000; // 10–15s: vehicles stopped (speed = 0)
+        const INTERVAL_MOVING_MS = 1500;
+        const INTERVAL_STOPPED_MS = 12000;
 
         function initVehicleMap() {
             const el = document.querySelector('[id^="vehicle-map-"]');
@@ -116,31 +155,48 @@
             const mapId = el.id;
             if (window['_vehicleMap_' + mapId]) return;
 
+            const VehicleTrackerEngine = window.VehicleTrackerEngine;
+            if (!VehicleTrackerEngine) {
+                setTimeout(initVehicleMap, 100);
+                return;
+            }
+
             let config;
-            try {
-                config = JSON.parse(atob(el.dataset.config || ''));
-            } catch (e) { return; }
+            try { config = JSON.parse(atob(el.dataset.config || '')); } catch (e) { return; }
             if (!config) return;
 
-            const { vehicles, initialLocations, isSingle, fetchUrl, trackBaseUrl, csrf, translations } = config;
+            const { vehicles, initialLocations, isSingle, fetchUrl, trackBaseUrl, companyId, defaultMapStyle, csrf, translations } = config;
             const defaultCenter = [24.7136, 46.6753];
             const defaultZoom = isSingle ? 13 : 10;
 
             const map = L.map(mapId, { zoomControl: false, attributionControl: false }).setView(defaultCenter, defaultZoom);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            const MapStyleManagerClass = window.MapStyleManager;
+            const MAP_STYLES = window.MAP_STYLES || {};
+            let styleManager = null;
+            if (MapStyleManagerClass) {
+                styleManager = new MapStyleManagerClass(map, {
+                    storageKey: 'vehicle_map_style',
+                    defaultStyle: defaultMapStyle || null,
+                });
+                styleManager.init();
+            } else {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            }
 
             const statusColors = { moving: '#10b981', stopped: '#ef4444', idle: '#f59e0b' };
-            const getIcon = (vehicleType, status) => {
+            const getIcon = (vehicleType, status, bearingDeg = 0) => {
                 const color = statusColors[status] || statusColors.idle;
                 let iconClass = 'fa-car';
                 const t = (vehicleType || '').toLowerCase();
                 if (t.includes('truck') || t.includes('bus') || t.includes('van')) iconClass = 'fa-truck';
                 else if (t.includes('motorcycle') || t.includes('bike')) iconClass = 'fa-motorcycle';
+                const size = isSingle ? 40 : 36;
                 return L.divIcon({
                     className: 'vehicle-marker',
-                    html: `<div style="width:${isSingle ? 40 : 36}px;height:${isSingle ? 40 : 36}px;background:${color};border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3)"><i class="fa-solid ${iconClass}" style="color:white;font-size:${isSingle ? 16 : 14}px"></i></div>`,
-                    iconSize: [isSingle ? 40 : 36, isSingle ? 40 : 36],
-                    iconAnchor: [isSingle ? 20 : 18, isSingle ? 20 : 18],
+                    html: `<div class="vehicle-marker-inner" style="width:${size}px;height:${size}px;background:${color};border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);transform:rotate(${bearingDeg}deg)"><i class="fa-solid ${iconClass}" style="color:white;font-size:${isSingle ? 16 : 14}px"></i></div>`,
+                    iconSize: [size, size],
+                    iconAnchor: [size / 2, size / 2],
                 });
             };
 
@@ -165,101 +221,150 @@
             let markerCluster = null;
             const markers = {};
             let singleMarker = null;
-            const lastKnownPositions = {};
+            const lastMeta = {};
+
+            const engine = new VehicleTrackerEngine({
+                onFrame: (vehicleId, { lat, lng, bearing: bearingDeg, meta, speed, isInstant }) => {
+                    const v = (vehicles || []).find(x => x.id == vehicleId);
+                    if (!v) return;
+                    const locData = { lat, lng, speed, ...meta };
+                    lastMeta[vehicleId] = locData;
+                    const speedVal = parseFloat(speed) || 0;
+                    const status = (meta?.status || (speedVal > 0 ? 'moving' : (speedVal === 0 ? 'stopped' : 'idle'))).toLowerCase();
+                    const icon = getIcon(v.type, status, bearingDeg);
+
+                    if (isSingle) {
+                        if (singleMarker) {
+                            singleMarker.setLatLng([lat, lng]);
+                            singleMarker.setIcon(icon);
+                            singleMarker.setPopupContent(buildPopup(vehicleId, locData));
+                            if (!map.getBounds().contains([lat, lng]) && isInstant) {
+                                map.panTo([lat, lng], { animate: true, duration: 0.5 });
+                            }
+                        }
+                        const speedEl = document.getElementById(mapId + '-speed');
+                        const odometerEl = document.getElementById(mapId + '-odometer');
+                        const tsEl = document.getElementById(mapId + '-timestamp');
+                        const machineEl = document.getElementById(mapId + '-machine-status');
+                        const addrEl = document.getElementById(mapId + '-address');
+                        if (speedEl) speedEl.textContent = speed != null ? Math.round(speed) + ' ' + (translations.kmh || 'km/h') : '—';
+                        if (odometerEl) odometerEl.textContent = meta?.odometer != null ? parseFloat(meta.odometer).toFixed(1) + ' ' + (translations.km || 'km') : '—';
+                        if (tsEl) tsEl.textContent = meta?.tracker_timestamp || '—';
+                        if (machineEl) machineEl.textContent = meta?.machine_status || '—';
+                        if (addrEl) { addrEl.textContent = meta?.address || '—'; addrEl.title = meta?.address || ''; }
+                        const dotEl = document.getElementById(mapId + '-machine-dot');
+                        if (dotEl) dotEl.className = 'w-2 h-2 rounded-full ' + (meta?.machine_status && !['OFF','0','false','إيقاف'].includes(meta.machine_status) ? 'bg-emerald-500' : 'bg-slate-500');
+                    } else {
+                        if (markers[vehicleId]) {
+                            markerCluster.removeLayer(markers[vehicleId]);
+                            markers[vehicleId].setLatLng([lat, lng]);
+                            markers[vehicleId].setIcon(icon);
+                            markers[vehicleId].setPopupContent(buildPopup(vehicleId, locData));
+                            markerCluster.addLayer(markers[vehicleId]);
+                        }
+                    }
+                },
+            });
 
             if (!isSingle) {
                 markerCluster = L.markerClusterGroup({ chunkedLoading: true, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
                 map.addLayer(markerCluster);
             }
 
-            function safeGetInfoEl(key) {
-                const idMap = { machineStatus: 'machine-status', address: 'address', machineDot: 'machine-dot' };
-                const elId = idMap[key] || key;
-                return document.getElementById(mapId + '-' + elId);
+            const switcherEl = document.getElementById(mapId + '-style-switcher');
+            function updateStyleSwitcherUI(styleId) {
+                const label = translations['map_style_' + styleId] || MAP_STYLES[styleId]?.name || styleId;
+                const nameEl = switcherEl?.querySelector('.map-style-current-name');
+                if (nameEl) nameEl.textContent = label;
+                switcherEl?.querySelectorAll('.map-style-option').forEach(btn => {
+                    btn.dataset.active = btn.dataset.style === styleId ? 'true' : '';
+                });
+            }
+            if (switcherEl && styleManager) {
+                switcherEl.style.display = '';
+                const currentId = styleManager.getSavedStyle();
+                updateStyleSwitcherUI(currentId);
+                const trigger = switcherEl.querySelector('.map-style-trigger');
+                const dropdown = switcherEl.querySelector('.map-style-dropdown');
+                const chevron = switcherEl.querySelector('.map-style-chevron');
+                trigger?.addEventListener('click', () => {
+                    const open = !dropdown?.classList.contains('hidden');
+                    dropdown?.classList.toggle('hidden', open);
+                    chevron?.style.setProperty('transform', open ? '' : 'rotate(180deg)');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!switcherEl.contains(e.target)) {
+                        dropdown?.classList.add('hidden');
+                        chevron?.style.setProperty('transform', '');
+                    }
+                });
+                switcherEl.querySelectorAll('.map-style-option').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const sid = btn.dataset.style;
+                        if (sid && styleManager.applyStyle(sid)) {
+                            updateStyleSwitcherUI(sid);
+                            dropdown?.classList.add('hidden');
+                            chevron?.style.setProperty('transform', '');
+                        }
+                    });
+                });
             }
 
-            function createOrUpdateMarker(vehicleId, data, fallbackIndex) {
+            requestAnimationFrame(() => el.classList.add('vehicle-map-ready'));
+
+            function applyPositionUpdate(vehicleId, data, fallbackIndex) {
                 const v = (vehicles || []).find(x => x.id == vehicleId);
                 if (!v) return;
-
                 let safeData = (data && typeof data === 'object' && !data.error) ? data : null;
-                const lastKnown = lastKnownPositions[vehicleId];
-                const hasValidCoords = safeData && safeData.lat != null && safeData.lng != null;
+                const state = engine.getState(vehicleId);
+                const hasCoords = safeData && safeData.lat != null && safeData.lng != null;
 
-                let lat, lng;
-                if (hasValidCoords) {
-                    lat = parseFloat(safeData.lat);
-                    lng = parseFloat(safeData.lng);
-                    if (lat < -90 || lat > 90) { [lat, lng] = [lng, lat]; }
-                    const prev = lastKnownPositions[vehicleId];
-                    lastKnownPositions[vehicleId] = {
-                        lat, lng,
-                        speed: safeData.speed,
-                        odometer: safeData.odometer != null ? safeData.odometer : (prev?.odometer),
-                        tracker_timestamp: safeData.tracker_timestamp,
-                        machine_status: safeData.machine_status ?? prev?.machine_status,
-                        address: safeData.address ?? prev?.address,
-                    };
-                } else if (lastKnown) {
-                    lat = lastKnown.lat;
-                    lng = lastKnown.lng;
-                    safeData = { ...(safeData || {}), lat, lng, speed: lastKnown.speed, odometer: lastKnown.odometer, tracker_timestamp: lastKnown.tracker_timestamp, machine_status: lastKnown.machine_status, address: lastKnown.address };
+                if (hasCoords) {
+                    engine.pushUpdate(vehicleId, safeData);
+                } else if (state && state.lat != null) {
+                    engine.onFrame(vehicleId, {
+                        lat: state.lat, lng: state.lng, bearing: state.bearingDeg,
+                        meta: state.meta, speed: state.speed, isInstant: true,
+                    });
                 } else {
                     const offset = (fallbackIndex ?? 0) * 0.002;
-                    lat = defaultCenter[0] + offset;
-                    lng = defaultCenter[1] + offset;
-                    safeData = { lat, lng, tracker_timestamp: null, address: null, speed: null, odometer: null };
-                }
-
-                const locData = safeData;
-                const speedVal = parseFloat(locData.speed) || 0;
-                const status = (locData.status || (speedVal > 0 ? 'moving' : (speedVal === 0 ? 'stopped' : 'idle'))).toLowerCase();
-                const icon = getIcon(v.type, status);
-
-                if (isSingle) {
-                    if (singleMarker) {
-                        singleMarker.setLatLng([lat, lng]);
-                        singleMarker.setIcon(icon);
-                        singleMarker.setPopupContent(buildPopup(vehicleId, locData));
-                        if (!map.getBounds().contains([lat, lng])) {
-                            map.panTo([lat, lng], { animate: true, duration: 0.5 });
-                        }
-                    } else {
-                        singleMarker = L.marker([lat, lng], { icon }).addTo(map);
-                        singleMarker.bindPopup(buildPopup(vehicleId, locData));
-                        map.setView([lat, lng], map.getZoom());
-                    }
-                    const speedEl = safeGetInfoEl('speed');
-                    const odometerEl = safeGetInfoEl('odometer');
-                    const tsEl = safeGetInfoEl('timestamp');
-                    const machineEl = safeGetInfoEl('machineStatus');
-                    const addrEl = safeGetInfoEl('address');
-                    if (speedEl) speedEl.textContent = locData.speed != null ? Math.round(locData.speed) + ' ' + (translations.kmh || 'km/h') : '—';
-                    if (odometerEl) odometerEl.textContent = locData.odometer != null ? parseFloat(locData.odometer).toFixed(1) + ' ' + (translations.km || 'km') : '—';
-                    if (tsEl) tsEl.textContent = locData.tracker_timestamp || '—';
-                    if (machineEl) machineEl.textContent = locData.machine_status || '—';
-                    if (addrEl) { addrEl.textContent = locData.address || '—'; addrEl.title = locData.address || ''; }
-                    const dotEl = safeGetInfoEl('machineDot');
-                    if (dotEl) dotEl.className = 'w-2 h-2 rounded-full ' + (locData.machine_status && !['OFF','0','false','إيقاف'].includes(locData.machine_status) ? 'bg-emerald-500' : 'bg-slate-500');
-                } else {
-                    if (markers[vehicleId]) {
-                        markerCluster.removeLayer(markers[vehicleId]);
-                        markers[vehicleId].setLatLng([lat, lng]);
-                        markers[vehicleId].setIcon(icon);
-                        markers[vehicleId].setPopupContent(buildPopup(vehicleId, locData));
-                        markerCluster.addLayer(markers[vehicleId]);
-                    } else {
-                        const m = L.marker([lat, lng], { icon });
-                        m.bindPopup(buildPopup(vehicleId, locData));
-                        markers[vehicleId] = m;
-                        markerCluster.addLayer(m);
-                    }
+                    engine.setInitialPosition(vehicleId, {
+                        lat: defaultCenter[0] + offset,
+                        lng: defaultCenter[1] + offset,
+                        tracker_timestamp: null, address: null, speed: null, odometer: null,
+                    });
+                    engine.pushUpdate(vehicleId, {
+                        lat: defaultCenter[0] + offset,
+                        lng: defaultCenter[1] + offset,
+                        tracker_timestamp: null, address: null, speed: null, odometer: null,
+                    });
                 }
             }
 
-            (vehicles || []).forEach((v, idx) => {
+            (vehicles || []).forEach((v) => {
                 const loc = (initialLocations && initialLocations[v.id]) ? initialLocations[v.id] : null;
-                try { createOrUpdateMarker(v.id, loc, idx); } catch (err) { console.warn('Vehicle map init error:', err); }
+                engine.setInitialPosition(v.id, loc);
+            });
+
+            (vehicles || []).forEach((v) => {
+                const loc = (initialLocations && initialLocations[v.id]) ? initialLocations[v.id] : null;
+                const state = engine.getState(v.id);
+                if (!state || state.lat == null) return;
+                const speedVal = parseFloat(state.speed) || 0;
+                const status = (state.meta?.status || (speedVal > 0 ? 'moving' : (speedVal === 0 ? 'stopped' : 'idle'))).toLowerCase();
+                const icon = getIcon(v.type, status, state.bearingDeg);
+                const locData = { lat: state.lat, lng: state.lng, speed: state.speed, ...state.meta };
+
+                if (isSingle) {
+                    singleMarker = L.marker([state.lat, state.lng], { icon }).addTo(map);
+                    singleMarker.bindPopup(buildPopup(v.id, locData));
+                    map.setView([state.lat, state.lng], map.getZoom());
+                } else {
+                    const m = L.marker([state.lat, state.lng], { icon });
+                    m.bindPopup(buildPopup(v.id, locData));
+                    markers[v.id] = m;
+                    markerCluster.addLayer(m);
+                }
             });
 
             let pollTimer = null;
@@ -273,8 +378,13 @@
             }
 
             function doFetch() {
-                fetch(fetchUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' } })
-                    .then(r => r.json())
+                fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'same-origin',
+                })
+                    .then(r => r.ok ? r.json() : null)
                     .catch(() => null)
                     .then(res => {
                         if (!res || !res.success) { scheduleNextFetch(true); return; }
@@ -282,34 +392,61 @@
                         if (!data || typeof data !== 'object') { scheduleNextFetch(); return; }
 
                         let maxSpeed = 0;
-                        if (isSingle && vehicles && vehicles[0]) {
-                            const d = safeData(data);
-                            if (d) maxSpeed = Math.max(0, parseFloat(d.speed) || 0);
-                            try { createOrUpdateMarker(vehicles[0].id, d, 0); } catch (err) { console.warn('Map update error:', err); }
+                        if (isSingle && vehicles?.[0]) {
+                            const d = data?.lat != null ? data : null;
+                            if (d) {
+                                maxSpeed = Math.max(0, parseFloat(d.speed) || 0);
+                                applyPositionUpdate(vehicles[0].id, d, 0);
+                                if (d.lat != null && d.lng != null && !engine.getState(vehicles[0].id)?.animation) {
+                                    map.panTo([parseFloat(d.lat), parseFloat(d.lng)], { animate: true, duration: 0.5 });
+                                }
+                            }
                         } else {
+                            const validBounds = [];
                             Object.keys(data).forEach((id, idx) => {
-                                const d = safeData(data[id]);
-                                if (d) maxSpeed = Math.max(maxSpeed, parseFloat(d.speed) || 0);
-                                try { createOrUpdateMarker(parseInt(id), d, idx); } catch (err) { console.warn('Map update error:', err); }
+                                const d = data[id];
+                                if (d && d.lat != null && d.lng != null && !d.error) {
+                                    maxSpeed = Math.max(maxSpeed, parseFloat(d.speed) || 0);
+                                    applyPositionUpdate(parseInt(id), d, idx);
+                                    validBounds.push([parseFloat(d.lat), parseFloat(d.lng)]);
+                                }
                             });
+                            if (validBounds.length > 0) {
+                                const b = L.latLngBounds(validBounds);
+                                if (!map.getBounds().contains(b.getCenter())) {
+                                    map.fitBounds(b, { padding: [30, 30], maxZoom: 16 });
+                                }
+                            }
                         }
                         lastMaxSpeed = maxSpeed;
                         scheduleNextFetch();
                     });
             }
 
-            function safeData(d) {
-                if (!d || typeof d !== 'object' || d.error) return null;
-                return d;
-            }
-
             doFetch();
+            setTimeout(doFetch, 2000);
 
-            function updateLastMaxSpeed(val) {
-                if (typeof val === 'number' && !isNaN(val)) lastMaxSpeed = val;
+            const state = {
+                map, engine, applyPositionUpdate,
+                updateLastMaxSpeed: (val) => { if (typeof val === 'number' && !isNaN(val)) lastMaxSpeed = val; },
+            };
+            window['_vehicleMap_' + mapId] = state;
+
+            if (typeof window.Echo !== 'undefined' && companyId) {
+                try {
+                    window.Echo.channel('company.' + companyId + '.vehicles')
+                        .listen('.location.updated', (e) => {
+                            if (e && e.vehicle_id && state.applyPositionUpdate) {
+                                state.applyPositionUpdate(e.vehicle_id, {
+                                    lat: e.lat, lng: e.lng, speed: e.speed,
+                                    address: e.address, status: e.status,
+                                    tracker_timestamp: e.tracker_timestamp, odometer: e.odometer,
+                                    machine_status: e.machine_status,
+                                });
+                            }
+                        });
+                } catch (err) { console.warn('Echo subscription failed:', err); }
             }
-
-            window['_vehicleMap_' + mapId] = { map, createOrUpdateMarker, updateLastMaxSpeed };
         }
 
         document.addEventListener('livewire:load', initVehicleMap);
@@ -318,17 +455,17 @@
 
         document.addEventListener('livewire:init', () => {
             Livewire.on('positions-updated', (e) => {
-                const positions = e && (e.positions || e);
+                const positions = e?.positions ?? e;
                 const el = document.querySelector('[id^="vehicle-map-"]');
                 if (!el || !positions || typeof positions !== 'object') return;
-                const state = window['_vehicleMap_' + el.id];
-                if (!state || !state.createOrUpdateMarker) return;
+                const state = window['_vehicleMap_' + el?.id];
+                if (!state?.applyPositionUpdate) return;
                 let maxSpeed = 0;
-                Object.keys(positions).forEach(id => {
+                Object.keys(positions).forEach((id, idx) => {
                     const d = positions[id];
                     if (d && !d.error) {
                         if (d.speed != null) maxSpeed = Math.max(maxSpeed, parseFloat(d.speed) || 0);
-                        try { state.createOrUpdateMarker(parseInt(id), d); } catch (err) { console.warn('Map update error:', err); }
+                        try { state.applyPositionUpdate(parseInt(id), d, idx); } catch (err) { console.warn('Map update error:', err); }
                     }
                 });
                 if (state.updateLastMaxSpeed) state.updateLastMaxSpeed(maxSpeed);

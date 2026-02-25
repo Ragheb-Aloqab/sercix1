@@ -21,6 +21,7 @@ return [
     'status' => 'Status',
     'date' => 'Date',
     'download_pdf' => 'Download PDF',
+    'download_maintenance_pdf' => 'Download Invoice Image PDF',
     'print' => 'Print',
     'back_to_order' => 'Back to order',
     'create_invoice' => 'Create invoice',
@@ -59,4 +60,7 @@ return [
     'vehicle_year' => 'Year',
     'vehicle_color' => 'Color',
     'uploaded_invoice' => 'Uploaded invoice image',
+    'invoice_details' => 'Invoice details',
+    'overview' => 'Overview',
+    'created_at' => 'Created at',
 ];

@@ -38,7 +38,7 @@ class OtpAuthController extends Controller
 
         Session::put('otp.phone', $phone);
         Session::put('otp.code', $otp);
-        Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
+        Session::put('otp.expires_at', now()->addMinutes(2)->timestamp);
 
         $hasOtpApi = !empty(config('services.authentica.api_key'));
         $sendViaApi = $hasOtpApi; // Send when API key is set (local or production)
@@ -70,7 +70,6 @@ class OtpAuthController extends Controller
 
     public function register(Request $request)
     {
-        // 1) تحقق من البيانات
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:190'],
             'phone' => ['required', 'string', 'max:20', 'unique:companies,phone'],
@@ -83,10 +82,9 @@ class OtpAuthController extends Controller
             $phone = '+966' . substr($phone, 1);
         }
 
-        // 2) توليد OTP
         $otp = (string)random_int(100000, 999999);
 
-        // 3) إرسال OTP مباشرة هنا
+
         try {
             $hasOtpApi = !empty(config('services.authentica.api_key'));
             if (!$hasOtpApi) {
@@ -103,43 +101,74 @@ class OtpAuthController extends Controller
             return redirect()->back()->with('error', __('messages.otp_send_error'))->withInput();
         }
 
-        // 4) حفظ OTP في الجلسة
+        
         Session::put('otp.phone', $phone);
         Session::put('otp.code', $otp);
-        Session::put('otp.expires_at', now()->addMinutes(10)->timestamp);
-
-        // 5) إنشاء الشركة بعد نجاح إرسال OTP
-        $company = Company::create([
-            'company_name' => $data['name'],
+        Session::put('otp.expires_at', now()->addMinutes(2)->timestamp);
+        Session::put('otp.register_data', [
+            'name' => $data['name'],
             'phone' => $phone,
             'email' => $data['email'] ?? null,
-            'password' => Hash::make(Str::random(32)), // كلمة مرور مؤقتة
         ]);
 
-        // 6) تسجيل اللوج للتتبع
-        Log::info("[OTP-DEV] Company Registered with OTP", [
-            'company_id' => $company->id,
+        Log::info("[OTP-DEV] Company Register OTP sent (account pending verification)", [
             'phone' => $phone,
             'otp' => $otp,
-            'expires_at' => now()->addMinutes(10)->toDateTimeString(),
+            'expires_at' => now()->addMinutes(2)->toDateTimeString(),
         ]);
 
-        // 7) تحويل المستخدم لصفحة التحقق
         return redirect()
             ->route('company.verify')
             ->with('success', __('messages.otp_sent'));
     }
 
+    /**
+     * Resend OTP for registration (when timer ends, user stays on verify page).
+     */
+    public function resendRegisterOtp(Request $request)
+    {
+        $registerData = Session::get('otp.register_data');
+        if (!$registerData) {
+            return redirect()->route('company.register')
+                ->withErrors(['otp' => __('messages.otp_no_valid_code')]);
+        }
+
+        $phone = $registerData['phone'];
+        $otp = (string) random_int(100000, 999999);
+
+        try {
+            $hasOtpApi = !empty(config('services.authentica.api_key'));
+            if (!$hasOtpApi) {
+                Log::info('[OTP-DEV] Company Register Resend OTP', ['phone' => $phone, 'otp' => $otp]);
+            } else {
+                $response = OtpService::send($phone, $otp);
+                if (!empty($response['success']) && $response['success'] === false) {
+                    return back()->with('error', __('messages.otp_send_error'));
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to resend OTP: ' . $e->getMessage());
+            return back()->with('error', __('messages.otp_send_error'));
+        }
+
+        Session::put('otp.phone', $phone);
+        Session::put('otp.code', $otp);
+        Session::put('otp.expires_at', now()->addMinutes(2)->timestamp);
+
+        return back()->with('success', __('messages.otp_sent'));
+    }
 
     public function showVerifyForm()
     {
-        // لو ما في رقم محفوظ، رجعه لصفحة الجوال
         if (!Session::has('otp.phone')) {
             return redirect()->route('company.login');
         }
 
+        $expiresAt = (int) Session::get('otp.expires_at', 0);
         return view('company.auth.verify-otp', [
             'phone' => Session::get('otp.phone'),
+            'expiresAt' => $expiresAt,
+            'isRegistration' => Session::has('otp.register_data'),
         ]);
     }
 
@@ -159,7 +188,12 @@ class OtpAuthController extends Controller
         }
 
         if (now()->timestamp > $expiresAt) {
-            Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
+            $hasRegisterData = Session::has('otp.register_data');
+            Session::forget(['otp.phone', 'otp.code', 'otp.expires_at', 'otp.register_data']);
+            if ($hasRegisterData) {
+                return redirect()->route('company.register')
+                    ->withErrors(['otp' => __('messages.otp_expired_resend')]);
+            }
             return redirect()->route('company.login')
                 ->withErrors(['otp' => __('messages.otp_expired_resend')]);
         }
@@ -168,20 +202,27 @@ class OtpAuthController extends Controller
             return back()->withErrors(['otp' => __('messages.otp_invalid_try_again')]);
         }
 
-        // ✅ اجلب الشركة من قاعدة البيانات حسب رقم الجوال
-        $company = Company::query()->where('phone', $savedPhone)->first();
+        $registerData = Session::get('otp.register_data');
 
-        if (!$company) {
+        if ($registerData) {
+            $company = Company::create([
+                'company_name' => $registerData['name'],
+                'phone' => $registerData['phone'],
+                'email' => $registerData['email'] ?? null,
+                'password' => Hash::make(Str::random(32)),
+            ]);
+            Session::forget(['otp.phone', 'otp.code', 'otp.expires_at', 'otp.register_data']);
+        } else {
+            $company = Company::query()->where('phone', $savedPhone)->first();
+            if (!$company) {
+                Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
+                return redirect()->route('company.login')
+                    ->withErrors(['otp' => __('messages.no_company_for_phone')]);
+            }
             Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
-            return redirect()->route('company.login')
-                ->withErrors(['otp' => __('messages.no_company_for_phone')]);
         }
 
-        // ✅ سجل دخول فعلي بالـ guard:company
         Auth::guard('company')->login($company, remember: true);
-
-        // ✅ نظّف بيانات OTP
-        Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
 
         // ✅ وجّه إلى داشبورد الشركة
         return redirect()
@@ -191,13 +232,10 @@ class OtpAuthController extends Controller
 
     public function logout(Request $request)
     {
-        // ✅ خروج فعلي من guard:company
+      
         Auth::guard('company')->logout();
 
-        // تنظيف أي OTP محفوظ
-        Session::forget(['otp.phone', 'otp.code', 'otp.expires_at']);
-
-        // تنظيف الجلسة
+        Session::forget(['otp.phone', 'otp.code', 'otp.expires_at', 'otp.register_data']);
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

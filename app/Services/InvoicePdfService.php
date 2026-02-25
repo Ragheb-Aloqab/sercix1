@@ -38,7 +38,6 @@ class InvoicePdfService
             'order.vehicle',
             'order.company',
             'order.payments',
-            'order.technician:id,name',
             'order.attachments',
             'fuelRefill.vehicle',
             'fuelRefill.company',

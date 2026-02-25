@@ -19,7 +19,6 @@ class OrderShow extends Component
     public function mount(Order $order): void
     {
         $this->order = $order->load([
-            'technician:id,name,phone',
             'attachments',
             'invoice',
             'services',
@@ -118,14 +117,21 @@ class OrderShow extends Component
         $company = auth('company')->user();
         abort_unless((int) $this->order->company_id === (int) $company->id, 403);
 
-        if ($this->order->technician_id && !in_array($this->order->status, [OrderStatus::PENDING_APPROVAL, OrderStatus::APPROVED], true)) {
-            session()->flash('error', 'الطلب قيد التنفيذ ولا يمكن إلغاؤه مباشرة.');
+        if (!in_array($this->order->status, [OrderStatus::PENDING_APPROVAL, OrderStatus::APPROVED], true)) {
+            session()->flash('error', __('messages.order_in_progress_cancel'));
             return;
         }
 
-        // Admin notifications removed - only Company ↔ Driver
-
-        session()->flash('success', 'تم إرسال طلب الإلغاء للمدير.');
+        $from = $this->order->status;
+        $this->order->update(['status' => OrderStatus::CANCELLED]);
+        $this->order->statusLogs()->create([
+            'from_status' => $from,
+            'to_status' => OrderStatus::CANCELLED,
+            'note' => 'Company cancelled',
+            'changed_by' => null,
+        ]);
+        $this->order->refresh();
+        session()->flash('success', __('messages.order_cancel_requested'));
     }
 
     public function render(): View

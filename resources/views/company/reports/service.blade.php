@@ -25,7 +25,7 @@
         </div>
 
         <form method="GET" action="{{ route('company.reports.service') }}" class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                 <div>
                     <label class="text-sm font-bold text-slate-400">{{ __('fuel.from_date') }}</label>
                     <input type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="mt-1 w-full rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white px-4 py-2" />
@@ -43,6 +43,15 @@
                         @endforeach
                     </select>
                 </div>
+                <div>
+                    <label class="text-sm font-bold text-slate-400">{{ __('reports.services') }}</label>
+                    <select name="service_type_id" class="mt-1 w-full rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white px-4 py-2">
+                        <option value="">{{ __('common.all') }}</option>
+                        @foreach ($services ?? [] as $s)
+                            <option value="{{ $s->id }}" @selected(($serviceTypeId ?? 0) == $s->id)>{{ $s->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="flex items-end">
                     <button type="submit" class="w-full px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors">
                         <i class="fa-solid fa-filter me-2"></i>{{ __('fuel.apply_filter') }}
@@ -51,7 +60,7 @@
             </div>
         </form>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="rounded-2xl bg-emerald-500/20 border border-emerald-400/50 p-4">
                 <p class="text-emerald-300 text-sm">{{ __('reports.total_service_cost') }}</p>
                 <p class="text-2xl font-black mt-1 text-emerald-300">{{ number_format($totalCost, 2) }} {{ __('company.sar') }}</p>
@@ -60,7 +69,43 @@
                 <p class="text-slate-500 text-sm">{{ __('reports.order_count') }}</p>
                 <p class="text-2xl font-black mt-1 text-white">{{ $orderCount }}</p>
             </div>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm" title="{{ __('reports.avg_per_vehicle') }}">
+                <p class="text-slate-400 text-sm">{{ __('reports.avg_per_vehicle') }}</p>
+                <p class="text-2xl font-black mt-1 text-white">{{ number_format($analytics['avg_per_vehicle'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm" title="{{ __('reports.avg_per_order') }}">
+                <p class="text-slate-400 text-sm">{{ __('reports.avg_per_order') }}</p>
+                <p class="text-2xl font-black mt-1 text-white">{{ number_format($analytics['avg_per_order'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+            </div>
         </div>
+
+        @if (count($byServiceType ?? []) > 0)
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 sm:p-5 mb-6">
+            <h3 class="text-sm font-bold text-slate-400 mb-3">{{ __('reports.by_service_type') }}</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-600/50 text-slate-400">
+                            <th class="text-end py-2 font-bold">{{ __('reports.services') }}</th>
+                            <th class="text-end py-2 font-bold">{{ __('company.cost') }}</th>
+                            <th class="text-end py-2 font-bold">{{ __('reports.order_count') }}</th>
+                            <th class="text-end py-2 font-bold">{{ __('reports.avg_per_order') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($byServiceType as $row)
+                        <tr class="border-b border-slate-600/30">
+                            <td class="py-2 text-white text-end">{{ $row['service_name'] }}</td>
+                            <td class="py-2 font-bold text-white text-end">{{ number_format($row['total'], 2) }} {{ __('company.sar') }}</td>
+                            <td class="py-2 text-slate-300 text-end">{{ $row['order_count'] }}</td>
+                            <td class="py-2 text-slate-300 text-end">{{ number_format($row['avg_per_order'], 2) }} {{ __('company.sar') }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 backdrop-blur-sm overflow-hidden">
             <div class="p-5 border-b border-slate-500/30">

@@ -36,6 +36,22 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('livewire.latest_orders') }}</p>
                 <h2 class="text-lg font-black">{{ __('livewire.orders_list') }}</h2>
             </div>
+            @if(count($selectedIds ?? []) > 0)
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500">{{ count($selectedIds) }} {{ __('common.selected') }}</span>
+                    <select wire:model="bulkStatus" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm">
+                        <option value="">{{ __('livewire.change_status') }}</option>
+                        @foreach($statusOptions ?? [] as $st)
+                            <option value="{{ $st }}">{{ $st }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" wire:click="bulkUpdateStatus" wire:loading.attr="disabled"
+                            class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold disabled:opacity-70">
+                        {{ __('common.apply') }}
+                    </button>
+                    <button type="button" wire:click="$set('selectedIds', [])" class="px-3 py-2 rounded-xl border text-sm">{{ __('common.cancel') }}</button>
+                </div>
+            @endif
         </div>
         <div class="p-4 sm:p-5 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
             @include('admin.orders.partials._table', ['orders' => $orders])

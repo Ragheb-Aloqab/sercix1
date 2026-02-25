@@ -14,8 +14,7 @@ class OrderPolicy
     public function viewAny(User|Company $user): bool
     {
         return $this->isAdmin($user)
-            || $this->isCompany($user)
-            || $this->isTechnician($user);
+            || $this->isCompany($user);
     }
 
     /**
@@ -28,9 +27,6 @@ class OrderPolicy
         }
         if ($this->isCompany($user)) {
             return (int) $order->company_id === (int) $user->id;
-        }
-        if ($this->isTechnician($user)) {
-            return (int) $order->technician_id === (int) $user->id;
         }
         return false;
     }
@@ -59,18 +55,13 @@ class OrderPolicy
         return false;
     }
 
-    public function assignTechnician(User|Company $user, Order $order): bool
-    {
-        return $this->isAdmin($user);
-    }
-
     public function changeStatus(User|Company $user, Order $order): bool
     {
         if ($this->isAdmin($user)) {
             return true;
         }
-        if ($this->isTechnician($user)) {
-            return (int) $order->technician_id === (int) $user->id;
+        if ($this->isCompany($user)) {
+            return (int) $order->company_id === (int) $user->id;
         }
         return false;
     }
@@ -125,8 +116,4 @@ class OrderPolicy
         return $user instanceof Company;
     }
 
-    private function isTechnician(User|Company $user): bool
-    {
-        return $user instanceof User && $user->role === 'technician';
-    }
 }

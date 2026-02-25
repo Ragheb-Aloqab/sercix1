@@ -34,6 +34,14 @@
                             class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
                             <i class="fa-solid fa-file-pdf me-1"></i> {{ __('invoice.download_pdf') }}
                         </a>
+                        @php $driverInv = $order->attachments->where('type', 'driver_invoice')->first(); @endphp
+                        @if ($driverInv && in_array(strtolower(pathinfo($driverInv->file_path ?? '', PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png']))
+                            <a href="{{ route('admin.orders.invoice.maintenance-pdf', $order) }}"
+                                download
+                                class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">
+                                <i class="fa-solid fa-file-image me-1"></i> {{ __('invoice.download_maintenance_pdf') ?? 'Download Invoice Image PDF' }}
+                            </a>
+                        @endif
                         <button onclick="window.print()"
                             class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold">
                             <i class="fa-solid fa-print me-1"></i> {{ __('invoice.print') }}

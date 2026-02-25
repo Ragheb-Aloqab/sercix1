@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\CompanyBranch;
+use App\Services\ExpiryMonitoringService;
+use App\Services\VehicleInspectionService;
 use Illuminate\Http\Request;
 
 class VehiclesController extends Controller
@@ -17,6 +19,7 @@ class VehiclesController extends Controller
     {
         $company = auth('company')->user();
         $q = $request->string('q')->toString();
+        $quotaUsage = $company->getQuotaUsage();
 
         $vehicles = Vehicle::query()
             ->where('company_id', $company->id)
@@ -34,7 +37,12 @@ class VehiclesController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('company.vehicles.index', compact('company', 'vehicles', 'q'));
+        $expiryService = app(ExpiryMonitoringService::class);
+        $inspectionService = app(VehicleInspectionService::class);
+        $vehicles->each(function ($v) use ($inspectionService) {
+            $v->inspection_status = $inspectionService->getVehicleInspectionStatus($v);
+        });
+        return view('company.vehicles.index', compact('company', 'vehicles', 'q', 'quotaUsage', 'expiryService'));
     }
 
     /**
@@ -61,23 +69,42 @@ class VehiclesController extends Controller
     public function store(Request $request)
     {
         $company = auth('company')->user();
+        $company->loadCount('vehicles');
+
+        if (!$company->canAddVehicle()) {
+            if ($company->hasPendingQuotaRequest()) {
+                return redirect()
+                    ->route('company.vehicles.index')
+                    ->with('error', __('admin_dashboard.quota_request_pending'));
+            }
+            return redirect()
+                ->route('company.vehicles.quota-request')
+                ->with('info', __('admin_dashboard.quota_limit_reached'));
+        }
 
         $data = $request->validate([
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
 
-            'name'         => ['nullable', 'string', 'max:150'],
-            'plate_number' => ['required', 'string', 'max:50'],
-            'imei'         => ['required', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
-            'brand'        => ['nullable', 'string', 'max:100'],
-            'model'        => ['nullable', 'string', 'max:100'],
-            'year'         => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'vin'          => ['nullable', 'string', 'max:50'],
+            'name'            => ['nullable', 'string', 'max:150'],
+            'plate_number'    => ['required', 'string', 'max:50'],
+            'imei'            => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
+            'tracking_source' => ['required', 'string', 'in:device_api,mobile'],
+            'brand'           => ['nullable', 'string', 'max:100'],
+            'model'           => ['nullable', 'string', 'max:100'],
+            'year'            => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'vin'             => ['nullable', 'string', 'max:50'],
 
             'notes'        => ['nullable', 'string', 'max:1000'],
             'is_active'    => ['nullable', 'boolean'],
             'driver_name'  => ['nullable', 'string', 'max:100'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
+        if (($data['tracking_source'] ?? '') === 'device_api') {
+            $request->validate(['imei' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/']]);
+            $data['imei'] = $request->input('imei');
+        } else {
+            $data['imei'] = null;
+        }
         $data['make'] = $data['brand'] ?? null;
         unset($data['brand']);
         if (!empty($data['company_branch_id'])) {
@@ -108,7 +135,7 @@ class VehiclesController extends Controller
         $company = auth('company')->user();
         $vehicle->load([
             'branch:id,name',
-            'orders' => fn ($q) => $q->with(['services', 'technician:id,name,phone'])
+            'orders' => fn ($q) => $q->with(['services'])
                 ->latest(),
             'fuelRefills' => fn ($q) => $q->latest('refilled_at'),
         ]);
@@ -152,6 +179,10 @@ class VehiclesController extends Controller
             ];
         });
 
+        $inspectionService = app(VehicleInspectionService::class);
+        $inspectionStatus = $inspectionService->getVehicleInspectionStatus($vehicle);
+        $vehicleInspections = $vehicle->inspections()->with('photos')->latest('inspection_date')->take(10)->get();
+
         return view('company.vehicles.show', compact(
             'company',
             'vehicle',
@@ -161,7 +192,10 @@ class VehiclesController extends Controller
             'totalFuelCost',
             'totalFuelLiters',
             'statusLabels',
-            'ordersWithDisplay'
+            'ordersWithDisplay',
+            'inspectionStatus',
+            'vehicleInspections',
+            'inspectionService'
         ));
     }
 
@@ -195,19 +229,26 @@ class VehiclesController extends Controller
         $data = $request->validate([
             'company_branch_id' => ['nullable', 'integer', 'exists:company_branches,id'],
 
-            'name'         => ['nullable', 'string', 'max:150'],
-            'plate_number' => ['required', 'string', 'max:50'],
-            'imei'         => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
-            'brand'        => ['nullable', 'string', 'max:100'],
-            'model'        => ['nullable', 'string', 'max:100'],
-            'year'         => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'vin'          => ['nullable', 'string', 'max:50'],
+            'name'            => ['nullable', 'string', 'max:150'],
+            'plate_number'    => ['required', 'string', 'max:50'],
+            'imei'            => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
+            'tracking_source' => ['required', 'string', 'in:device_api,mobile'],
+            'brand'           => ['nullable', 'string', 'max:100'],
+            'model'           => ['nullable', 'string', 'max:100'],
+            'year'            => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'vin'             => ['nullable', 'string', 'max:50'],
 
             'notes'        => ['nullable', 'string', 'max:1000'],
             'is_active'    => ['nullable', 'boolean'],
             'driver_name'  => ['nullable', 'string', 'max:100'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
         ]);
+        if (($data['tracking_source'] ?? '') === 'device_api') {
+            $request->validate(['imei' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/']]);
+            $data['imei'] = $request->input('imei');
+        } else {
+            $data['imei'] = null;
+        }
         $data['make'] = $data['brand'] ?? null;
         unset($data['brand']);
 

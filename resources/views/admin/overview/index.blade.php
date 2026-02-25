@@ -1,8 +1,8 @@
 @extends('admin.layouts.app')
 
-@section('title', __('dashboard.overview') . ' | ' . ($siteName ?? 'Servx Motors'))
-@section('page_title', __('dashboard.page_title_default'))
+@section('title', __('admin_dashboard.super_admin_dashboard') . ' | ' . ($siteName ?? 'Servx Motors'))
+@section('page_title', __('admin_dashboard.super_admin_dashboard'))
 
 @section('content')
-    <livewire:dashboard.overview />
+    <livewire:admin.super-dashboard />
 @endsection

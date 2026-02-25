@@ -21,6 +21,7 @@ return [
     'status' => 'الحالة',
     'date' => 'التاريخ',
     'download_pdf' => 'تحميل PDF',
+    'download_maintenance_pdf' => 'تحميل صورة الفاتورة PDF',
     'print' => 'طباعة',
     'back_to_order' => 'رجوع للطلب',
     'create_invoice' => 'إنشاء فاتورة',
@@ -59,4 +60,7 @@ return [
     'vehicle_year' => 'سنة الصنع',
     'vehicle_color' => 'اللون',
     'uploaded_invoice' => 'صورة الفاتورة المرفوعة',
+    'invoice_details' => 'تفاصيل الفاتورة',
+    'overview' => 'نظرة عامة',
+    'created_at' => 'تاريخ الانشاء',
 ];

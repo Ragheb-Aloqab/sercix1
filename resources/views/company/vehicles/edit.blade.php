@@ -53,7 +53,17 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-bold text-slate-400">IMEI ({{ __('common.optional') }})</label>
+                    <label class="text-sm font-bold text-slate-400">{{ __('tracking.tracking_source') }}</label>
+                    <select name="tracking_source" id="tracking_source_edit"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white">
+                        <option value="device_api" @selected(old('tracking_source', $vehicle->tracking_source ?? 'device_api') === 'device_api')>{{ __('tracking.source_device_api') }}</option>
+                        <option value="mobile" @selected(old('tracking_source', $vehicle->tracking_source ?? '') === 'mobile')>{{ __('tracking.source_mobile') }}</option>
+                    </select>
+                    <p class="text-xs text-slate-500 mt-1">{{ __('tracking.tracking_source_hint') }}</p>
+                </div>
+
+                <div id="imei-field-edit">
+                    <label class="text-sm font-bold text-slate-400">IMEI <span id="imei-required-edit">({{ __('common.optional') }})</span></label>
                     <input type="text" name="imei" value="{{ old('imei', $vehicle->imei) }}"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-mono"
                         placeholder="123456789012345" maxlength="20"
@@ -123,6 +133,81 @@
                 </div>
             </div>
 
+            {{-- Vehicle Documents --}}
+            <div id="documents" class="border-t border-slate-600/50 pt-6 mt-6">
+                <h3 class="text-base font-bold text-slate-300 mb-4">{{ __('vehicles.vehicle_documents') }}</h3>
+                <p class="text-xs text-slate-500 mb-4">{{ __('vehicles.max_size') }}</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {{-- Registration --}}
+                    <div class="rounded-xl bg-slate-700/30 border border-slate-500/30 p-4">
+                        <h4 class="font-bold text-white mb-3">{{ __('vehicles.registration') }}</h4>
+                        <form method="POST" action="{{ route('company.vehicles.documents.registration', $vehicle) }}" enctype="multipart/form-data" class="space-y-3">
+                            @csrf
+                            <div>
+                                <label class="text-sm text-slate-400">{{ __('vehicles.expiry_date') }} *</label>
+                                <input type="date" name="expiry_date" value="{{ old('registration_expiry_date', $vehicle->registration_expiry_date?->format('Y-m-d')) }}" required
+                                    class="mt-1 w-full px-4 py-2 rounded-xl border border-slate-500/50 bg-slate-800/40 text-white">
+                            </div>
+                            <div>
+                                <label class="text-sm text-slate-400">{{ $vehicle->registration_document_path ? __('vehicles.replace_document') : __('vehicles.upload_registration') }} *</label>
+                                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required
+                                    class="mt-1 w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-sky-600 file:text-white file:font-bold">
+                            </div>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">
+                                {{ $vehicle->registration_document_path ? __('vehicles.replace_document') : __('vehicles.upload_registration') }}
+                            </button>
+                        </form>
+                    </div>
+
+                    {{-- Insurance --}}
+                    <div class="rounded-xl bg-slate-700/30 border border-slate-500/30 p-4">
+                        <h4 class="font-bold text-white mb-3">{{ __('vehicles.insurance') }}</h4>
+                        <form method="POST" action="{{ route('company.vehicles.documents.insurance', $vehicle) }}" enctype="multipart/form-data" class="space-y-3">
+                            @csrf
+                            <div>
+                                <label class="text-sm text-slate-400">{{ __('vehicles.expiry_date') }} *</label>
+                                <input type="date" name="expiry_date" value="{{ old('insurance_expiry_date', $vehicle->insurance_expiry_date?->format('Y-m-d')) }}" required
+                                    class="mt-1 w-full px-4 py-2 rounded-xl border border-slate-500/50 bg-slate-800/40 text-white">
+                            </div>
+                            <div>
+                                <label class="text-sm text-slate-400">{{ $vehicle->insurance_document_path ? __('vehicles.replace_document') : __('vehicles.upload_insurance') }} *</label>
+                                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required
+                                    class="mt-1 w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-sky-600 file:text-white file:font-bold">
+                            </div>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">
+                                {{ $vehicle->insurance_document_path ? __('vehicles.replace_document') : __('vehicles.upload_insurance') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                @if ($vehicle->registration_document_path || $vehicle->insurance_document_path)
+                <form method="POST" action="{{ route('company.vehicles.documents.expiry', $vehicle) }}" class="mt-4 p-4 rounded-xl bg-slate-700/20 border border-slate-500/20">
+                    @csrf
+                    @method('PATCH')
+                    <p class="text-sm text-slate-400 mb-3">{{ __('vehicles.expiry_updated') }}</p>
+                    <div class="flex flex-wrap gap-4 items-end">
+                        @if ($vehicle->registration_document_path)
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-slate-400">{{ __('vehicles.registration') }}:</label>
+                            <input type="date" name="registration_expiry_date" value="{{ $vehicle->registration_expiry_date?->format('Y-m-d') }}"
+                                class="px-3 py-1.5 rounded-lg border border-slate-500/50 bg-slate-800/40 text-white text-sm">
+                        </div>
+                        @endif
+                        @if ($vehicle->insurance_document_path)
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-slate-400">{{ __('vehicles.insurance') }}:</label>
+                            <input type="date" name="insurance_expiry_date" value="{{ $vehicle->insurance_expiry_date?->format('Y-m-d') }}"
+                                class="px-3 py-1.5 rounded-lg border border-slate-500/50 bg-slate-800/40 text-white text-sm">
+                        </div>
+                        @endif
+                        <button type="submit" class="px-4 py-1.5 rounded-lg bg-slate-600 hover:bg-slate-500 text-white text-sm font-bold">{{ __('livewire.update') }}</button>
+                    </div>
+                </form>
+                @endif
+            </div>
+
             <div class="flex items-center gap-2 pt-4">
                 <button class="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black transition-colors">
                     حفظ التعديل
@@ -134,5 +219,15 @@
             </div>
         </form>
 
+<script>
+document.getElementById('tracking_source_edit')?.addEventListener('change', function() {
+    var isDeviceApi = this.value === 'device_api';
+    var inp = document.querySelector('form input[name="imei"]');
+    if (inp) inp.required = isDeviceApi;
+    var span = document.getElementById('imei-required-edit');
+    if (span) span.textContent = isDeviceApi ? '*' : '({{ __('common.optional') }})';
+});
+document.getElementById('tracking_source_edit')?.dispatchEvent(new Event('change'));
+</script>
 @include('company.partials.glass-end')
 @endsection

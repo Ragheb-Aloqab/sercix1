@@ -29,7 +29,7 @@ class IndexController extends Controller
             $logoutRoute = route('driver.logout');
         } elseif (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
-            $dashboardRoute = ($user->role ?? null) === 'technician' ? route('tech.dashboard') : route('admin.dashboard');
+            $dashboardRoute = route('admin.dashboard');
         }
 
         $waNumber = preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '');

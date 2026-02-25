@@ -39,4 +39,22 @@ return [
     'base_url_placeholder' => 'https://api.your-provider.com or full URL from Postman (e.g. https://x.com/api/positions)',
     'save_settings' => 'Save tracking settings',
     'settings_saved' => 'Tracking API settings saved successfully.',
+
+    'tracking_source' => 'Tracking source',
+    'source_device_api' => 'GPS device (API)',
+    'source_mobile' => 'Driver mobile (browser GPS)',
+    'tracking_source_hint' => 'Device API: physical tracker. Mobile: driver\'s phone GPS.',
+
+    'start_tracking' => 'Start Tracking',
+    'stop_tracking' => 'Stop Tracking',
+    'tracking_active' => 'Tracking active',
+    'tracking_permission_denied' => 'Location permission denied.',
+    'tracking_error' => 'Location error.',
+    'mobile_tracking_hint' => 'Share your location to track this vehicle.',
+
+    'map_style' => 'Map style',
+    'map_style_carto_dark' => 'Carto Dark',
+    'map_style_osm_humanitarian' => 'Humanitarian',
+    'map_style_stadia_alidade' => 'Stadia',
+    'map_style_esri_imagery' => 'Satellite',
 ];

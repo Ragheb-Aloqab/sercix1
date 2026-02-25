@@ -6,7 +6,13 @@
 <div class="max-w-4xl mx-auto w-full">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-black">{{ __('driver.my_vehicles_orders') }}</h1>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
+            @if(($pendingInspectionsCount ?? 0) > 0)
+                <a href="{{ route('driver.inspections.index') }}" class="px-4 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold">
+                    <i class="fa-solid fa-camera me-2"></i>{{ __('inspections.upload_photos') }}
+                    <span class="ms-1 px-1.5 py-0.5 rounded-full bg-white/30 text-xs">{{ $pendingInspectionsCount }}</span>
+                </a>
+            @endif
             <a href="{{ route('driver.fuel-refill.create') }}" class="px-4 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold">
                 <i class="fa-solid fa-gas-pump me-2"></i>{{ __('fuel.fuel_refill_btn') }}
             </a>
@@ -23,13 +29,20 @@
         @else
             <ul class="space-y-3">
                 @foreach($vehicles as $v)
-                    <li class="flex items-center justify-between p-4 rounded-2xl border border-slate-100">
+                    <li class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100">
                         <div>
                             <span class="font-bold">{{ $v->make }} {{ $v->model }}</span>
                             <span class="text-slate-500 text-sm ms-2">— {{ $v->plate_number }}</span>
                             @if($v->company)<p class="text-xs text-slate-500 mt-1">{{ $v->company->company_name }}</p>@endif
                         </div>
-                        <a href="{{ route('driver.request.create') }}?vehicle={{ $v->id }}" class="px-3 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold">{{ __('driver.request_service') }}</a>
+                        <div class="flex items-center gap-2">
+                            @if($v->usesMobileTracking() || empty($v->imei))
+                                <a href="{{ route('driver.tracking', ['vehicle' => $v->id]) }}" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold">
+                                    <i class="fa-solid fa-location-dot me-1"></i>{{ __('tracking.start_tracking') }}
+                                </a>
+                            @endif
+                            <a href="{{ route('driver.request.create') }}?vehicle={{ $v->id }}" class="px-3 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold">{{ __('driver.request_service') }}</a>
+                        </div>
                     </li>
                 @endforeach
             </ul>

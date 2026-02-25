@@ -1,28 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Company;
 
-use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\SettingsController;
-use App\Http\Controllers\Admin\Maps\TechniciansMapController;
 use App\Http\Controllers\Admin\ServicesController;
 
 use App\Http\Controllers\Admin\Orders\OrderController;
-use App\Http\Controllers\Admin\Orders\OrderAssignmentController;
 use App\Http\Controllers\Admin\Orders\OrderStatusController;
 use App\Http\Controllers\Admin\Orders\OrderAttachmentController;
 use App\Http\Controllers\Admin\Orders\OrderPaymentController;
 use App\Http\Controllers\Admin\Orders\OrderInvoiceController;
 
-use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\CustomersController;
-
-use App\Http\Controllers\Admin\DashboardUserController;
 use App\Http\Controllers\Admin\Settings\BankAccountController;
 
 use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\ActivityController;
-use App\Http\Controllers\Admin\InventoryMovementExportController;
+use App\Http\Controllers\Admin\DataExportController;
 // use App\Http\Controllers\Payments\TapWebhookController;
 // Route::post('/webhooks/tap', [TapWebhookController::class, 'handle'])->name('webhooks.tap');
 
@@ -39,28 +34,44 @@ Route::middleware(['auth:web', 'admin'])
      */
     Route::prefix('dashboard')->group(function () {
 
-        // Admin Overview
+        // Admin Overview (Super Dashboard)
         Route::view('/', 'admin.overview.index')->name('dashboard'); // admin.dashboard
+
+        // Companies (Super Admin)
+        Route::get('/companies', fn () => view('admin.companies.index'))->name('companies.index');
+        Route::get('/companies/{company}', fn (Company $company) => view('admin.companies.show', ['company' => $company]))->name('companies.show');
+
+        // Vehicles Overview (Super Admin)
+        Route::get('/vehicles', fn () => view('admin.vehicles.index'))->name('vehicles.index');
+
+        // Vehicle document expiry report
+        Route::get('/vehicles/expiring-documents', [\App\Http\Controllers\Admin\VehicleDocumentExpiryController::class, 'index'])->name('vehicles.expiring-documents');
+        Route::get('/export/expiring-documents', [\App\Http\Controllers\Admin\VehicleDocumentExpiryController::class, 'exportCsv'])->name('export.expiring-documents');
+        Route::get('/export/expiring-documents/excel', [\App\Http\Controllers\Admin\VehicleDocumentExpiryController::class, 'exportExcel'])->name('export.expiring-documents.excel');
+
+        // Vehicle Quota Requests
+        Route::get('/quota-requests', [\App\Http\Controllers\Admin\VehicleQuotaRequestController::class, 'index'])->name('quota-requests.index');
+        Route::post('/quota-requests/{quotaRequest}/approve', [\App\Http\Controllers\Admin\VehicleQuotaRequestController::class, 'approve'])->name('quota-requests.approve');
+        Route::post('/quota-requests/{quotaRequest}/reject', [\App\Http\Controllers\Admin\VehicleQuotaRequestController::class, 'reject'])->name('quota-requests.reject');
 
         // Activities
         Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
 
-        // عامة داخل لوحة الأدمن
-        Route::get('/map', [MapController::class, 'index'])->name('map');
-        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-
-        // =========================
-        // Technicians
-        // =========================
-        Route::prefix('technicians')->group(function () {
-            Route::get('/', [DashboardUserController::class, 'index'])->name('technicians.index');
-            Route::get('/create', [DashboardUserController::class, 'create'])->name('technicians.create');
-            Route::post('/', [DashboardUserController::class, 'store'])->name('technicians.store');
-            Route::get('/{user}/edit', [DashboardUserController::class, 'edit'])->name('technicians.edit');
-            Route::put('/{user}', [DashboardUserController::class, 'update'])->name('technicians.update');
-            Route::patch('/{user}/toggle', [DashboardUserController::class, 'toggle'])->name('technicians.toggle');
-            Route::delete('/{user}', [DashboardUserController::class, 'destroy'])->name('technicians.destroy');
+        // Data Export (CSV + Excel)
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('/orders', [DataExportController::class, 'orders'])->name('orders');
+            Route::get('/orders/excel', [DataExportController::class, 'ordersExcel'])->name('orders.excel');
+            Route::get('/companies', [DataExportController::class, 'companies'])->name('companies');
+            Route::get('/companies/excel', [DataExportController::class, 'companiesExcel'])->name('companies.excel');
+            Route::get('/vehicles', [DataExportController::class, 'vehicles'])->name('vehicles');
+            Route::get('/vehicles/excel', [DataExportController::class, 'vehiclesExcel'])->name('vehicles.excel');
+            Route::get('/services', [DataExportController::class, 'services'])->name('services');
+            Route::get('/services/excel', [DataExportController::class, 'servicesExcel'])->name('services.excel');
+            Route::get('/activities', [DataExportController::class, 'activities'])->name('activities');
+            Route::get('/activities/excel', [DataExportController::class, 'activitiesExcel'])->name('activities.excel');
         });
+
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 
         // =========================
         // Orders
@@ -69,20 +80,22 @@ Route::middleware(['auth:web', 'admin'])
             Route::get('/', [OrderController::class, 'index'])->name('orders.index');
             Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
 
-            Route::post('/{order}/assign', [OrderAssignmentController::class, 'store'])->name('orders.assign');
             Route::post('/{order}/status', [OrderStatusController::class, 'store'])->name('orders.status');
 
             Route::post('/{order}/attachments', [OrderAttachmentController::class, 'store'])->name('orders.attachments.store');
             Route::delete('/attachments/{attachment}', [OrderAttachmentController::class, 'destroy'])->name('orders.attachments.destroy');
 
-            Route::post('/{order}/payments', [OrderPaymentController::class, 'store'])->name('orders.payments.store');
-
             Route::get('/{order}/invoice', [OrderInvoiceController::class, 'show'])->name('orders.invoice.show');
             Route::get('/{order}/invoice/pdf', [OrderInvoiceController::class, 'downloadPdf'])->name('orders.invoice.pdf');
+            Route::get('/{order}/invoice/maintenance-pdf', [OrderInvoiceController::class, 'downloadMaintenancePdf'])->name('orders.invoice.maintenance-pdf');
             Route::post('/{order}/invoice', [OrderInvoiceController::class, 'store'])->name('orders.invoice.store');
         });
 
-        Route::get('/bank-transfers', fn () => view('admin.bank-transfers.index'))->name('bank-transfers.index');
+        // Payments (only when config servx.payments_enabled = true)
+        Route::middleware('payments')->group(function () {
+            Route::post('/orders/{order}/payments', [OrderPaymentController::class, 'store'])->name('orders.payments.store');
+            Route::get('/bank-transfers', fn () => view('admin.bank-transfers.index'))->name('bank-transfers.index');
+        });
 
         // =========================
         // Services
@@ -98,21 +111,30 @@ Route::middleware(['auth:web', 'admin'])
         });
 
         // =========================
-        // Maps
-        // =========================
-        Route::get('/maps/technicians', [TechniciansMapController::class, 'index'])->name('maps.technicians');
-
-        // =========================
-        // Customers + Inventory
+        // Customers (Companies)
         // =========================
         Route::resource('customers', CustomersController::class)->except(['show'])->names('customers');
-        Route::resource('inventory', InventoryController::class)->except(['show'])->names('inventory');
 
-        Route::get('/inventory/movements', fn () => view('admin.inventory.movements'))
-            ->name('inventory.movements');
-        Route::get('/inventory/movements/export', InventoryMovementExportController::class)
-            ->name('inventory.movements.export');
+        // =========================
+        // Admin Users
+        // =========================
+        Route::get('/users', [\App\Http\Controllers\Admin\AdminUsersController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [\App\Http\Controllers\Admin\AdminUsersController::class, 'create'])->name('users.create');
+        Route::post('/users', [\App\Http\Controllers\Admin\AdminUsersController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\AdminUsersController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [\App\Http\Controllers\Admin\AdminUsersController::class, 'update'])->name('users.update');
+        Route::patch('/users/{user}/toggle', [\App\Http\Controllers\Admin\AdminUsersController::class, 'toggleStatus'])->name('users.toggle');
         
+        // =========================
+        // Announcements
+        // =========================
+        Route::get('/announcements', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'index'])->name('announcements.index');
+        Route::get('/announcements/create', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'create'])->name('announcements.create');
+        Route::post('/announcements', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/{announcement}/edit', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'edit'])->name('announcements.edit');
+        Route::put('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'update'])->name('announcements.update');
+        Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
+
         // =========================
         // Notifications
         // =========================

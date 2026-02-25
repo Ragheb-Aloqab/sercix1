@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
-      class="{{ auth('company')->check() || session('ui.theme') === 'dark' ? 'dark' : '' }} h-full scroll-smooth">
+      class="{{ auth('company')->check() || session('ui.theme') === 'dark' || request()->routeIs('admin.*') ? 'dark' : '' }} h-full scroll-smooth">
 
 <head>
     <meta charset="UTF-8" />
@@ -35,10 +35,21 @@
 
 <body class="admin-layout h-full overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard bg-servx-black text-servx-silver-light font-servx' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
 
-<div x-data="{ sidebarOpen: false }"
+<div x-data="{
+        sidebarOpen: false,
+        sidebarCollapsed: false,
+        init() {
+            this.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        },
+        toggleSidebarCollapse() {
+            this.sidebarCollapsed = !this.sidebarCollapsed;
+            localStorage.setItem('sidebar-collapsed', this.sidebarCollapsed);
+        }
+    }"
      @keydown.escape.window="sidebarOpen = false"
      @close-sidebar.window="sidebarOpen = false"
-     class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() ? 'company-dashboard-layout' : '' }}">
+     class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() ? 'company-dashboard-layout' : '' }}"
+     :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     {{-- Mobile backdrop --}}
     <div x-show="sidebarOpen"
          x-cloak
@@ -69,6 +80,36 @@
 
         {{-- Page Content --}}
         <section class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-6 w-full min-w-0 overflow-x-hidden {{ auth('company')->check() ? 'company-dashboard-content' : '' }}">
+            @if (session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="fixed bottom-4 end-4 z-[100] max-w-sm rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400 font-medium shadow-lg backdrop-blur-sm"
+                     role="alert">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="fixed bottom-4 end-4 z-[100] max-w-sm rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400 font-medium shadow-lg backdrop-blur-sm"
+                     role="alert">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+                        {{ session('error') }}
+                    </div>
+                </div>
+            @endif
+            @if (session('info'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="fixed bottom-4 end-4 z-[100] max-w-sm rounded-2xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-400 font-medium shadow-lg backdrop-blur-sm"
+                     role="alert">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-sky-400"></i>
+                        {{ session('info') }}
+                    </div>
+                </div>
+            @endif
             @yield('content')
 
             <div class="mt-8 text-sm {{ auth('company')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">
@@ -84,8 +125,6 @@
 @livewireScripts
 
 {{-- Modal --}}
-@include('admin.partials.modals.create-order')
-
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('ui-theme-changed', ({ theme }) => {
@@ -99,22 +138,6 @@
     });
 </script>
 
-<script>
-    const $ = (id) => document.getElementById(id);
-
-    // Modal: Create Order
-    const modal = $('createOrderModal');
-    const openModal = () => modal?.classList.remove('hidden');
-    const closeModal = () => modal?.classList.add('hidden');
-
-    $('openCreateOrder')?.addEventListener('click', openModal);
-    $('closeCreateOrder')?.addEventListener('click', closeModal);
-    $('cancelCreateOrder')?.addEventListener('click', closeModal);
-
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-    });
-</script>
 
 @stack('scripts')
 </body>

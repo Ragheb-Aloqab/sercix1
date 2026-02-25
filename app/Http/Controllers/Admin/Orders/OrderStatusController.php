@@ -5,9 +5,10 @@ use App\Notifications\OrderCompletedNotification;
 use App\Notifications\OrderUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\ChangeOrderStatusRequest;
-use App\Support\OrderStatus;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\WebhookUrl;
+use App\Support\OrderStatus;
 use App\Services\ActivityLogger;
 class OrderStatusController extends Controller
 {
@@ -54,25 +55,36 @@ class OrderStatusController extends Controller
             'changed_by'  => $user->id,
         ]);
       
-        $admin = User::where('role', 'admin')->first();
-
+        $admins = User::where('role', 'admin')->where('status', 'active')->get();
         if ($to === 'completed') {
-            if ($admin) {
+            foreach ($admins as $admin) {
                 $admin->notify(new OrderCompletedNotification($order));
             }
             $order->company?->notify(new OrderCompletedNotification($order));
         } else {
-            if ($admin) {
+            foreach ($admins as $admin) {
                 $admin->notify(new OrderUpdate($order));
             }
             $order->company?->notify(new OrderUpdate($order));
         }
+
         ActivityLogger::log(
-            action: 'hold_order',
+            action: 'order_status_changed',
             subjectType: 'order',
             subjectId: $order->id,
-            description: 'تم تعليق طلب العميل');
-   
+            description: __('messages.order_status_updated') ?: "Order #{$order->id} status: {$from} → {$to}",
+            oldValues: ['status' => $from],
+            newValues: ['status' => $to],
+        );
+
+        WebhookUrl::dispatch('order_status_changed', [
+            'order_id' => $order->id,
+            'from_status' => $from,
+            'to_status' => $to,
+            'company_id' => $order->company_id,
+            'timestamp' => now()->toIso8601String(),
+        ], $order->company_id);
+
         return back()->with('success', __('messages.order_status_updated'));
     }
 }

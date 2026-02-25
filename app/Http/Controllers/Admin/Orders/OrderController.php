@@ -19,19 +19,12 @@ class OrderController extends Controller
         $order->load([
             'company',
             'vehicle',
-            'technician',
             'services',
             'statusLogs',
             'invoice',
             'attachments',
         ]);
 
-        $technicians = \App\Models\User::query()
-            ->where('role', 'technician')
-            ->where('status', 'active') 
-            ->orderBy('name')
-            ->get(['id', 'name', 'phone']);
-
-        return view('admin.orders.show', compact('order', 'technicians'));
+        return view('admin.orders.show', compact('order'));
     }
 }

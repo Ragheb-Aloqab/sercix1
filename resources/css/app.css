@@ -4,40 +4,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Glass layout: reduced blur on mobile for better performance */
+/* Dashboard/Company glass: Servx Motors watermark + dark overlay */
 @layer components {
     .company-glass,
     .dashboard-glass {
         position: relative;
-        background-image: url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1920');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        background: linear-gradient(135deg, #0B0B0D 0%, #151010 50%, #0B0B0D 100%);
     }
     .company-glass::before,
     .dashboard-glass::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(11, 11, 13, 0.96) 0%, rgba(26, 10, 10, 0.94) 50%, rgba(11, 11, 13, 0.96) 100%);
+        background: linear-gradient(135deg, rgba(11, 11, 13, 0.92) 0%, rgba(26, 10, 10, 0.9) 50%, rgba(11, 11, 13, 0.92) 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+    /* Watermark: Servx logo, 4% opacity, centered, ~60% of container, above overlay */
+    .company-glass::after,
+    .dashboard-glass::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('/images/serv.x%20logo.png');
+        background-size: 55%;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        pointer-events: none;
+        z-index: 2;
     }
     @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
         .company-glass::before,
         .dashboard-glass::before {
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-        @media (min-width: 768px) {
-            .company-glass::before,
-            .dashboard-glass::before {
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-            }
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
         }
     }
     .company-glass .company-glass-content,
     .dashboard-glass .dashboard-content {
         position: relative;
-        z-index: 1;
+        z-index: 3;
     }
 }

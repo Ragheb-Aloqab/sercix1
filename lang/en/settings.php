@@ -30,4 +30,17 @@ return [
     'email_placeholder_user' => 'Email',
     'phone_placeholder_optional' => 'Phone (optional)',
     'save' => 'Save',
+
+    // Sessions / Devices
+    'sessions_devices' => 'Sessions & devices',
+    'sessions_devices_desc' => 'Devices where your account is currently logged in.',
+    'this_device' => 'This device',
+    'unknown_device' => 'Unknown device',
+    'mobile_device' => 'Mobile device',
+    'no_sessions' => 'No active sessions.',
+    'logout_other_devices' => 'Log out from all other devices',
+    'logout_other_devices_desc' => 'Log out from all other devices. You will stay logged in on this device.',
+    'password_confirm_placeholder' => 'Your password',
+    'invalid_password' => 'The provided password is incorrect.',
+    'logged_out_other_devices' => 'You have been logged out from all other devices.',
 ];

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin\Orders;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\MaintenanceInvoicePdfService;
+use Illuminate\Support\Facades\Storage;
 
 class OrderInvoiceController extends Controller
 {
     public function show(Order $order)
     {
-        $order->load(['invoice', 'company', 'vehicle', 'services']);
+        $order->load(['invoice', 'company', 'vehicle', 'services', 'attachments']);
 
         $invoice = $order->invoice;
 
@@ -57,6 +59,46 @@ class OrderInvoiceController extends Controller
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf;
         }, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Download maintenance invoice PDF (CamScanner-style: image only on A4).
+     */
+    public function downloadMaintenancePdf(Order $order)
+    {
+        $att = $order->attachments()->where('type', 'driver_invoice')->first();
+        if (!$att || !$att->file_path) {
+            return redirect()->route('admin.orders.invoice.show', $order)
+                ->with('error', __('messages.maintenance_invoice_pdf_not_available'));
+        }
+
+        $ext = strtolower(pathinfo($att->file_path, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['jpg', 'jpeg', 'png'])) {
+            return redirect()->route('admin.orders.invoice.show', $order)
+                ->with('error', __('messages.maintenance_invoice_pdf_not_available'));
+        }
+
+        $pdfPath = $att->maintenance_invoice_pdf_path;
+        if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
+            try {
+                $service = app(MaintenanceInvoicePdfService::class);
+                $path = $service->generateAndSave($att);
+                $att->update(['maintenance_invoice_pdf_path' => $path]);
+                $pdfPath = $path;
+            } catch (\Throwable $e) {
+                report($e);
+                return redirect()->route('admin.orders.invoice.show', $order)
+                    ->with('error', __('messages.invoice_pdf_error'));
+            }
+        }
+
+        $filename = 'maintenance-invoice-order-' . $order->id . '.pdf';
+        $content = Storage::disk('public')->get($pdfPath);
+
+        return response($content, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);

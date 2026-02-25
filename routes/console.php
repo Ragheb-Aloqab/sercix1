@@ -10,3 +10,12 @@ Artisan::command('inspire', function () {
 
 // Fetch vehicle locations from tracking APIs every 5 minutes
 Schedule::command('tracking:fetch-locations')->everyFiveMinutes();
+
+// Admin alerts: stuck orders, inactive companies, failed jobs (daily at 8:00)
+Schedule::job(new \App\Jobs\NotifyAdminAlertsJob)->dailyAt('08:00');
+
+// Daily admin summary report
+Schedule::command('admin:daily-summary')->dailyAt('09:00');
+
+// Vehicle inspections: schedule monthly inspections daily (creates pending when due)
+Schedule::command('inspections:schedule')->dailyAt('06:00');

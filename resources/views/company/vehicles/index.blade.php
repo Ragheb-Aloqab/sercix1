@@ -34,6 +34,21 @@
         </div>
     </div>
 
+    {{-- Quota usage --}}
+    @if($quotaUsage['quota'] && $quotaUsage['at_limit'])
+        <div class="p-4 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-400/50 mb-6">
+            <p class="font-bold">{{ __('admin_dashboard.quota_limit_reached') }}</p>
+            <p class="text-sm mt-1">{{ __('admin_dashboard.quota_usage') }}: {{ $quotaUsage['current'] }} / {{ $quotaUsage['quota'] }}</p>
+            @if(!$company->hasPendingQuotaRequest())
+                <a href="{{ route('company.vehicles.quota-request') }}" class="inline-block mt-2 px-4 py-2 rounded-xl bg-amber-500/30 hover:bg-amber-500/50 font-bold">
+                    {{ __('admin_dashboard.quota_request') }}
+                </a>
+            @else
+                <p class="text-sm mt-2 text-amber-200/80">{{ __('admin_dashboard.quota_request_pending') }}</p>
+            @endif
+        </div>
+    @endif
+
     {{-- Alerts --}}
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 mb-6">
@@ -62,15 +77,27 @@
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.vehicle') }}</th>
                             <th class="text-end py-3 px-2 font-bold">IMEI</th>
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.branch') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.registration_status') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.insurance_status') }}</th>
                             <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.status') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('inspections.title') }}</th>
                             <th class="text-start py-3 px-2 font-bold">{{ __('vehicles.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-600/50">
                         @foreach ($vehicles as $v)
-                            <tr class="hover:bg-slate-700/30 transition-colors">
+                            @php
+                                $docStatus = $expiryService->getVehicleDocumentStatus($v);
+                                $regStatus = $docStatus['registration']['status'];
+                                $insStatus = $docStatus['insurance']['status'];
+                                $hasWarning = in_array($regStatus, ['expiring_soon', 'expired']) || in_array($insStatus, ['expiring_soon', 'expired']);
+                            @endphp
+                            <tr class="hover:bg-slate-700/30 transition-colors {{ $hasWarning ? 'bg-amber-500/5' : '' }}">
                                 <td class="py-3 px-2 font-bold text-white text-end">
-                                    <a href="{{ route('company.vehicles.show', $v) }}" class="text-sky-400 hover:text-sky-300">
+                                    <a href="{{ route('company.vehicles.show', $v) }}" class="text-sky-400 hover:text-sky-300 inline-flex items-center gap-1">
+                                        @if ($hasWarning)
+                                            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xs" title="{{ __('vehicles.expiring_soon') }}"></i>
+                                        @endif
                                         {{ $v->plate_number }}
                                     </a>
                                 </td>
@@ -91,6 +118,18 @@
                                     {{ $v->branch?->name ?? '-' }}
                                 </td>
                                 <td class="py-3 px-2 text-end">
+                                    @php $regClass = $expiryService->getStatusBadgeClass($regStatus); @endphp
+                                    <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $regClass }}" title="{{ $v->registration_expiry_date?->translatedFormat('d M Y') ?? '—' }}">
+                                        {{ __('vehicles.' . $regStatus) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-2 text-end">
+                                    @php $insClass = $expiryService->getStatusBadgeClass($insStatus); @endphp
+                                    <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $insClass }}" title="{{ $v->insurance_expiry_date?->translatedFormat('d M Y') ?? '—' }}">
+                                        {{ __('vehicles.' . $insStatus) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-2 text-end">
                                     @if ($v->is_active)
                                         <span class="px-2 py-1 rounded-xl bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 text-xs font-bold">
                                             {{ __('vehicles.active') }}
@@ -99,6 +138,16 @@
                                         <span class="px-2 py-1 rounded-xl bg-slate-600/30 text-slate-400 border border-slate-500/50 text-xs font-bold">
                                             {{ __('vehicles.inactive') }}
                                         </span>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-2 text-end">
+                                    @php $insp = $v->inspection_status ?? null; @endphp
+                                    @if ($insp && in_array($insp['status'], ['pending', 'overdue']))
+                                        <a href="{{ route('company.inspections.index') }}?vehicle_id={{ $v->id }}" class="inline-flex items-center gap-1" title="{{ __('inspections.due_date') }}: {{ $insp['due_date']?->translatedFormat('d M Y') ?? '—' }}">
+                                            <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $insp['status'] === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $insp['status']) }}</span>
+                                        </a>
+                                    @else
+                                        <span class="px-2 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-xs font-bold">{{ __('inspections.compliant') }}</span>
                                     @endif
                                 </td>
                                 <td class="py-3 px-2">

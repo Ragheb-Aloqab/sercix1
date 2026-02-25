@@ -19,9 +19,9 @@ class UpdateCustomerRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
-            'notes' => ['nullable', 'string', 'max:3000'],
-           // 'status' => ['nullable', 'enum'],
-            'status' => ['nullable', 'in:active,suspended'],        ];
+            'status' => ['nullable', 'in:active,suspended'],
+            'vehicle_quota' => ['nullable', 'integer', 'min:1', 'max:9999'],
+        ];
     }
 
     protected function prepareForValidation(): void

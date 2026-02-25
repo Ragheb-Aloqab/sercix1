@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Models\Attachment;
 use App\Models\Order;
-use App\Models\User;
 use App\Notifications\OrderUpdate;
 use App\Services\ActivityLogger;
 use App\Support\OrderStatus;
@@ -19,56 +18,22 @@ class OrderShow extends Component
 
     public Order $order;
 
-    /** @var \Illuminate\Support\Collection<int, \App\Models\User> */
-    public $technicians;
-
-    public int $technician_id = 0;
-    public string $assign_note = '';
     public string $to_status = '';
     public string $status_note = '';
     public string $attachment_type = 'signature';
     public $attachment_file = null;
 
-    public function mount(Order $order, $technicians = null): void
+    public function mount(Order $order): void
     {
         $this->order = $order->load([
             'company',
             'vehicle',
-            'technician',
             'services',
             'statusLogs',
             'invoice',
             'attachments',
         ]);
-        $this->technicians = $technicians ?? collect();
         $this->to_status = $order->status;
-    }
-
-    public function assignTechnician(): void
-    {
-        $this->validate([
-            'technician_id' => ['required', 'integer', 'exists:users,id'],
-            'assign_note'   => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $tech = User::query()->where('id', $this->technician_id)->where('role', 'technician')->firstOrFail();
-        $from = $this->order->status;
-        $to = OrderStatus::IN_PROGRESS;
-
-        $this->order->update([
-            'technician_id' => $tech->id,
-            'status'        => $to,
-        ]);
-
-        $this->order->statusLogs()->create([
-            'from_status' => $from,
-            'to_status'   => $to,
-            'note'        => $this->assign_note,
-            'changed_by'  => auth()->id(),
-        ]);
-
-        $this->refreshOrder();
-        session()->flash('success', 'تم إسناد الطلب للفني بنجاح.');
     }
 
     public function changeStatus(): void
@@ -174,7 +139,6 @@ class OrderShow extends Component
         $this->order = $this->order->fresh([
             'company',
             'vehicle',
-            'technician',
             'services',
             'statusLogs',
             'invoice',
@@ -188,9 +152,8 @@ class OrderShow extends Component
         $others = $attachments->whereIn('type', ['signature', 'other']);
 
         return view('livewire.admin.order-show', [
-            'order'       => $this->order,
-            'technicians' => $this->technicians,
-            'others'      => $others,
+            'order'  => $this->order,
+            'others' => $others,
         ]);
     }
 }

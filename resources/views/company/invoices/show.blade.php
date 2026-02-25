@@ -4,7 +4,7 @@
 @section('subtitle', __('invoice.overview') ?? 'Invoice overview')
 
 @section('content')
-@include('company.partials.glass-start', ['title' => __('invoice.invoice') ?? 'فاتورة'] . ' #' . ($invoice->invoice_number ?? $invoice->id))
+@include('company.partials.glass-start', ['title' => (__('invoice.invoice') ?? 'فاتورة') . ' #' . ($invoice->invoice_number ?? $invoice->id)])
 
     <div class="space-y-6">
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
@@ -42,7 +42,7 @@
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
             <p class="text-sm text-slate-400 mb-2 text-end">{{ __('invoice.total') }}</p>
             <p class="text-2xl font-black text-white text-end">
-                {{ number_format($invoice->getTotalAttribute(), 2) }} {{ __('company.sar') }}
+                {{ number_format($invoice->total ?? 0, 2) }} {{ __('company.sar') }}
             </p>
         </div>
 
@@ -120,14 +120,18 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-600/50">
                                     @foreach($invoice->order->services as $svc)
+                                        @php
+                                            $svcName = $svc?->pivot?->custom_service_name ?? $svc?->name ?? '-';
+                                            $pivot = $svc?->pivot;
+                                            $unitPrice = (float)($pivot?->unit_price ?? $pivot?->total_price ?? $svc?->base_price ?? 0);
+                                            $estMins = $pivot?->estimated_minutes ?? $svc?->estimated_minutes ?? '-';
+                                        @endphp
                                         <tr>
-                                            <td class="p-3 font-semibold text-white text-end">{{ $svc->name }}</td>
+                                            <td class="p-3 font-semibold text-white text-end">{{ $svcName }}</td>
                                             <td class="p-3 text-white text-end">
-                                                {{ number_format((float)($svc->pivot->unit_price ?? $svc->pivot->total_price ?? $svc->base_price ?? 0), 2) }} {{ __('company.sar') }}
+                                                {{ number_format($unitPrice, 2) }} {{ __('company.sar') }}
                                             </td>
-                                            <td class="p-3 text-slate-400 text-end">
-                                                {{ $svc->pivot->estimated_minutes ?? '-' }}
-                                            </td>
+                                            <td class="p-3 text-slate-400 text-end">{{ $estMins }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -139,15 +143,24 @@
                 @if($driverInvoiceAtt ?? null)
                     <div class="mt-6">
                         <span class="text-slate-400 block mb-2 text-end">{{ __('invoice.uploaded_invoice') }}</span>
-                        <a href="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" target="_blank" class="inline-block">
-                            @if(str_ends_with(strtolower($driverInvoiceAtt->file_path ?? ''), '.pdf'))
-                                <span class="px-4 py-2 rounded-xl bg-sky-500/30 text-sky-300 font-semibold border border-sky-400/50">
-                                    <i class="fa-solid fa-file-pdf me-2"></i>{{ $driverInvoiceAtt->original_name ?? __('invoice.view_details') }}
-                                </span>
-                            @else
-                                <img src="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" alt="Invoice" class="max-w-xs rounded-xl border border-slate-500/30" />
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" target="_blank" class="inline-block">
+                                @if(str_ends_with(strtolower($driverInvoiceAtt->file_path ?? ''), '.pdf'))
+                                    <span class="px-4 py-2 rounded-xl bg-sky-500/30 text-sky-300 font-semibold border border-sky-400/50">
+                                        <i class="fa-solid fa-file-pdf me-2"></i>{{ $driverInvoiceAtt->original_name ?? __('invoice.view_details') }}
+                                    </span>
+                                @else
+                                    <img src="{{ asset('storage/' . $driverInvoiceAtt->file_path) }}" alt="Invoice" class="max-w-xs rounded-xl border border-slate-500/30" />
+                                @endif
+                            </a>
+                            @if(in_array(strtolower(pathinfo($driverInvoiceAtt->file_path ?? '', PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png']))
+                                <a href="{{ route('company.invoices.maintenance-pdf', $invoice) }}"
+                                   download
+                                   class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors">
+                                    <i class="fa-solid fa-file-pdf me-1"></i> {{ __('invoice.download_maintenance_pdf') ?? 'Download Invoice Image PDF' }}
+                                </a>
                             @endif
-                        </a>
+                        </div>
                     </div>
                 @endif
             </div>

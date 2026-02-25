@@ -18,9 +18,9 @@ class CustomersController extends Controller
 
         $customers = Company::query()
             ->when($q, function ($query) use ($q) {
-                $query->where('name','like',"%{$q}%")
-                      ->orWhere('phone','like',"%{$q}%")
-                      ->orWhere('email','like',"%{$q}%");
+                $query->where('company_name', 'like', "%{$q}%")
+                      ->orWhere('phone', 'like', "%{$q}%")
+                      ->orWhere('email', 'like', "%{$q}%");
             })
             ->latest()
             ->paginate(10)
@@ -36,7 +36,12 @@ class CustomersController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
-        Company::create($request->validated());
+        $data = $request->validated();
+        unset($data['password'], $data['password_confirmation']);
+        $data['password'] = \Illuminate\Support\Facades\Hash::make($request->input('password') ?: \Illuminate\Support\Str::random(12));
+        $data['vehicle_quota'] = $data['vehicle_quota'] ?? config('servx.default_vehicle_quota');
+
+        Company::create($data);
 
         return redirect()
             ->route('admin.customers.index')

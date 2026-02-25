@@ -39,4 +39,22 @@ return [
     'base_url_placeholder' => 'https://api.your-provider.com أو الرابط الكامل من Postman (مثل https://x.com/api/positions)',
     'save_settings' => 'حفظ إعدادات التتبع',
     'settings_saved' => 'تم حفظ إعدادات واجهة التتبع بنجاح.',
+
+    'tracking_source' => 'مصدر التتبع',
+    'source_device_api' => 'جهاز GPS (API)',
+    'source_mobile' => 'جوال السائق (GPS المتصفح)',
+    'tracking_source_hint' => 'جهاز API: متتبع فعلي. جوال: GPS هاتف السائق.',
+
+    'start_tracking' => 'بدء التتبع',
+    'stop_tracking' => 'إيقاف التتبع',
+    'tracking_active' => 'التتبع نشط',
+    'tracking_permission_denied' => 'تم رفض إذن الموقع.',
+    'tracking_error' => 'خطأ في الموقع.',
+    'mobile_tracking_hint' => 'شارك موقعك لتتبع هذه المركبة.',
+
+    'map_style' => 'نمط الخريطة',
+    'map_style_carto_dark' => 'كارتو داكن',
+    'map_style_osm_humanitarian' => 'إنساني',
+    'map_style_stadia_alidade' => 'ستاديا',
+    'map_style_esri_imagery' => 'الأقمار الصناعية',
 ];

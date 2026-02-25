@@ -46,9 +46,19 @@ class VehicleTrackingMap extends Component
     public function getVehiclesProperty(): Collection
     {
         $company = auth('company')->user();
+        // Include: device_api with IMEI, mobile tracking, or no IMEI (mobile by default)
         $query = $company->vehicles()
-            ->whereNotNull('imei')
-            ->where('imei', '!=', '')
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
+                    ->orWhereNull('imei')
+                    ->orWhere('imei', '')
+                    ->orWhere(function ($q2) {
+                        $q2->where('tracking_source', Vehicle::TRACKING_DEVICE_API)
+                            ->whereNotNull('imei')
+                            ->where('imei', '!=', '');
+                    });
+            })
             ->with('latestLocation');
 
         if ($this->vehicleId) {
@@ -94,11 +104,31 @@ class VehicleTrackingMap extends Component
         $company = auth('company')->user();
 
         if ($this->vehicleId) {
-            $vehicle = Vehicle::where('company_id', $company->id)->find($this->vehicleId);
-            if ($vehicle && $vehicle->imei) {
+            $vehicle = Vehicle::where('company_id', $company->id)->with('latestLocation')->find($this->vehicleId);
+            if (!$vehicle) {
+                return;
+            }
+            if ($vehicle->usesDeviceApiTracking() && $vehicle->imei) {
                 $result = $this->trackingService->fetchAndStoreLocation($vehicle);
                 if ($result['success'] && isset($result['data'])) {
                     $this->dispatch('positions-updated', positions: [$vehicle->id => $result['data']]);
+                }
+            } else {
+                // Mobile / no IMEI: use latest from DB (driver reports)
+                $loc = $vehicle->latestLocation;
+                if ($loc) {
+                    $this->dispatch('positions-updated', positions: [
+                        $vehicle->id => [
+                            'lat' => (float) $loc->lat,
+                            'lng' => (float) $loc->lng,
+                            'speed' => $loc->speed ? (float) $loc->speed : null,
+                            'address' => $loc->address,
+                            'status' => $loc->status ?? $this->inferStatus($loc->speed ? (float) $loc->speed : null),
+                            'tracker_timestamp' => $loc->tracker_timestamp?->toIso8601String(),
+                            'odometer' => $loc->odometer ? (float) $loc->odometer : null,
+                            'machine_status' => null,
+                        ],
+                    ]);
                 }
             }
         } else {
@@ -107,6 +137,31 @@ class VehicleTrackingMap extends Component
             foreach ($results as $vehicleId => $result) {
                 if ($result['success'] && isset($result['data'])) {
                     $positions[$vehicleId] = $result['data'];
+                }
+            }
+            // Include mobile-tracking vehicles (locations from driver reports)
+            $mobileVehicles = $company->vehicles()
+                ->where(function ($q) {
+                    $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
+                        ->orWhere(function ($q2) {
+                            $q2->whereNull('imei')->orWhere('imei', '');
+                        });
+                })
+                ->with('latestLocation')
+                ->get();
+            foreach ($mobileVehicles as $v) {
+                $loc = $v->latestLocation;
+                if ($loc) {
+                    $positions[$v->id] = [
+                        'lat' => (float) $loc->lat,
+                        'lng' => (float) $loc->lng,
+                        'speed' => $loc->speed ? (float) $loc->speed : null,
+                        'address' => $loc->address,
+                        'status' => $loc->status ?? $this->inferStatus($loc->speed ? (float) $loc->speed : null),
+                        'tracker_timestamp' => $loc->tracker_timestamp?->toIso8601String(),
+                        'odometer' => $loc->odometer ? (float) $loc->odometer : null,
+                        'machine_status' => null,
+                    ];
                 }
             }
             if (!empty($positions)) {

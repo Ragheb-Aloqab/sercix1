@@ -11,8 +11,9 @@ class Attachment extends Model
 
     protected $fillable = [
         'order_id',
-        'type',           // before_photo | after_photo | signature | other
+        'type',           // before_photo | after_photo | signature | other | driver_invoice | quotation_invoice
         'file_path',
+        'maintenance_invoice_pdf_path',  // CamScanner-style PDF generated from image
         'original_name',
         'file_size',
         'uploaded_by',

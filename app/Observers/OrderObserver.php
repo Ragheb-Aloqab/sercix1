@@ -3,10 +3,9 @@
 namespace App\Observers;
 
 use App\Models\Order;
-use App\Models\User;
+use App\Models\WebhookUrl;
 use Illuminate\Support\Facades\Cache;
 use App\Events\OrderCreated;
-use App\Events\OrderAssignedToTechnician;
 use App\Notifications\DriverServiceRequestNotification;
 use App\Services\InvoicePdfService;
 
@@ -15,11 +14,17 @@ class OrderObserver
     /**
      * Handle the Order "created" event.
      */
+    private function invalidateAdminStats(): void
+    {
+        Cache::put('admin_stats_version', (Cache::get('admin_stats_version', 1) + 1));
+    }
+
     public function created(Order $order): void
     {
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
         }
+        $this->invalidateAdminStats();
         if ($order->status === 'pending_approval') {
             $company = $order->company;
             if ($company) {
@@ -27,6 +32,12 @@ class OrderObserver
             }
         } else {
             event(new OrderCreated($order));
+            WebhookUrl::dispatch('order_created', [
+                'order_id' => $order->id,
+                'company_id' => $order->company_id,
+                'status' => $order->status,
+                'timestamp' => now()->toIso8601String(),
+            ], $order->company_id);
         }
     }
 
@@ -38,6 +49,7 @@ class OrderObserver
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
         }
+        $this->invalidateAdminStats();
         // Admin notifications removed - only Company ↔ Driver notifications
 
         // Auto-create invoice when order is completed
@@ -45,24 +57,13 @@ class OrderObserver
             $this->createInvoiceForOrder($order);
         }
 
-        if (
-            $order->isDirty('technician_id') &&
-            $order->technician_id !== null
-        ) {
-            event(
-                new OrderAssignedToTechnician(
-                    $order,
-                    $order->technician
-                )
-            );
-        }
     }
     /**
      * Handle the Order "deleted" event.
      */
     public function deleted(Order $order): void
     {
-        //
+        $this->invalidateAdminStats();
     }
 
     /**

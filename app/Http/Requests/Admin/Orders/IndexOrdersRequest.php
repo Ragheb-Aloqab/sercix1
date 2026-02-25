@@ -16,8 +16,6 @@ class IndexOrdersRequest extends FormRequest
         return [
             'status' => ['nullable', 'string'],
             'company_id' => ['nullable', 'integer', 'exists:companies,id'],
-            'technician_id' => ['nullable', 'integer', 'exists:users,id'],
-
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date', 'after_or_equal:from'],
 

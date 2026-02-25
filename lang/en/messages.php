@@ -18,6 +18,7 @@ return [
     'driver_otp_invalid' => 'Invalid verification code.',
     'driver_login_success' => 'Logged in successfully.',
     'driver_phone_not_registered' => 'Phone number is not registered as a driver. Contact your company to add your phone.',
+    'driver_tracking_not_mobile' => 'This vehicle uses GPS device tracking. Mobile tracking is not available.',
 
     // Vehicles (Company)
     'vehicle_added' => 'Vehicle added successfully.',
@@ -35,6 +36,10 @@ return [
     'order_assigned' => 'Order assigned to technician successfully.',
     'assignment_disabled' => 'Technician assignment is temporarily disabled.',
     'order_status_updated' => 'Order status updated successfully.',
+    'order_completed' => 'Order completed.',
+    'order_completed_subject' => 'Order completed',
+    'select_at_least_one' => 'Select at least one order.',
+    'bulk_update' => 'Bulk update',
     'order_completed_no_change' => 'Cannot change a completed order.',
     'order_cancelled_no_change' => 'Cannot change a cancelled order.',
     'order_override_note_required' => 'This is a non-standard transition (override). Please provide a reason.',
@@ -53,6 +58,7 @@ return [
     'invoice_created' => 'Invoice created successfully.',
     'invoice_already_exists' => 'Invoice already exists.',
     'fuel_invoice_requires_receipt' => 'Receipt image must be uploaded first to generate a fuel invoice.',
+    'maintenance_invoice_pdf_not_available' => 'Maintenance invoice PDF is not available. The driver must upload an image (JPG/PNG) first.',
 
     // Payment
     'payment_recorded' => 'Payment recorded successfully.',

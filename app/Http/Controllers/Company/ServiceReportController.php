@@ -4,12 +4,18 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Service;
 use App\Models\Vehicle;
+use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ServiceReportController extends Controller
 {
+    public function __construct(
+        private AnalyticsService $analytics
+    ) {}
+
     /**
      * Company-wide service/maintenance report.
      */
@@ -24,6 +30,7 @@ class ServiceReportController extends Controller
             ? \Carbon\Carbon::parse($request->to)->endOfDay()
             : now()->endOfDay();
         $vehicleId = $request->integer('vehicle_id', 0);
+        $serviceTypeId = $request->integer('service_type_id', 0);
 
         $query = Order::query()
             ->where('company_id', $company->id)
@@ -37,12 +44,17 @@ class ServiceReportController extends Controller
             }
         }
 
+        if ($serviceTypeId > 0) {
+            $query->whereHas('orderServices', fn ($q) => $q->where('service_id', $serviceTypeId));
+        }
+
         $orders = $query->latest('created_at')->paginate(25)->withQueryString();
 
         $totalsQuery = Order::query()
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$from, $to])
-            ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId));
+            ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->when($serviceTypeId > 0, fn ($q) => $q->whereHas('orderServices', fn ($qq) => $qq->where('service_id', $serviceTypeId)));
 
         $orderIds = (clone $totalsQuery)->pluck('id');
         $totalCost = (float) (DB::table('order_services')
@@ -52,6 +64,9 @@ class ServiceReportController extends Controller
         $orderCount = $orderIds->count();
 
         $totals = ['total_cost' => $totalCost, 'order_count' => $orderCount];
+
+        $analytics = $this->analytics->getMaintenanceAnalytics($from, $to, $company->id, $vehicleId ?: null, $serviceTypeId ?: null);
+        $byServiceType = $this->analytics->getMaintenanceByServiceType($from, $to, $company->id, $vehicleId ?: null);
 
         $ordersWithDisplay = $orders->map(function ($order) {
             $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
@@ -71,6 +86,8 @@ class ServiceReportController extends Controller
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model']);
 
+        $services = Service::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
         return view('company.reports.service', compact(
             'company',
             'orders',
@@ -79,9 +96,13 @@ class ServiceReportController extends Controller
             'orderCount',
             'ordersWithDisplay',
             'vehicles',
+            'services',
             'from',
             'to',
-            'vehicleId'
+            'vehicleId',
+            'serviceTypeId',
+            'analytics',
+            'byServiceType'
         ));
     }
 }

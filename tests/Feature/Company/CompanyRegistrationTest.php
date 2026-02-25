@@ -53,6 +53,7 @@ class CompanyRegistrationTest extends TestCase
         $response->assertSessionHas('success');
         $response->assertSessionHas('otp.phone');
         $response->assertSessionHas('otp.code');
+        $response->assertSessionHas('otp.register_data');
 
         $otp = session('otp.code');
         $this->assertNotNull($otp);
@@ -75,11 +76,15 @@ class CompanyRegistrationTest extends TestCase
 
     public function test_company_registration_normalizes_phone_with_leading_zero(): void
     {
-        $this->post(route('company.register.store'), [
+        $response = $this->post(route('company.register.store'), [
             'name' => 'Test Company',
             'phone' => '0512345678',
             'email' => null,
         ]);
+
+        $response->assertRedirect(route('company.verify'));
+        $otp = session('otp.code');
+        $this->post(route('company.verify_otp'), ['otp' => $otp]);
 
         $this->assertDatabaseHas('companies', [
             'company_name' => 'Test Company',
@@ -96,6 +101,9 @@ class CompanyRegistrationTest extends TestCase
         ]);
 
         $response->assertRedirect(route('company.verify'));
+        $otp = session('otp.code');
+        $this->post(route('company.verify_otp'), ['otp' => $otp]);
+
         $this->assertDatabaseHas('companies', [
             'company_name' => 'Test Company',
             'phone' => '+966599999999',
