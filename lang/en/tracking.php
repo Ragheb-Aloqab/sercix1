@@ -45,6 +45,7 @@ return [
     'source_mobile' => 'Driver mobile (browser GPS)',
     'tracking_source_hint' => 'Device API: physical tracker. Mobile: driver\'s phone GPS.',
 
+    'tracking' => 'Tracking',
     'start_tracking' => 'Start Tracking',
     'stop_tracking' => 'Stop Tracking',
     'tracking_active' => 'Tracking active',

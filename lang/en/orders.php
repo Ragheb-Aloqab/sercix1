@@ -3,6 +3,7 @@
 return [
     'orders_list' => 'Orders list',
     'orders_list_desc' => 'Browse company orders with filters',
+    'search_placeholder' => 'Search: order # / driver / plate',
     'new_service_request' => 'New service request',
     'status' => 'Status',
     'all_statuses' => 'All statuses',

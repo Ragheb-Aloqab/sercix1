@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('company.vehicles.update', $vehicle->id) }}"
+        <form id="vehicle-edit-form" method="POST" action="{{ route('company.vehicles.update', $vehicle->id) }}"
             class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm space-y-4">
             @csrf
             @method('PATCH')
@@ -133,8 +133,20 @@
                 </div>
             </div>
 
-            {{-- Vehicle Documents --}}
-            <div id="documents" class="border-t border-slate-600/50 pt-6 mt-6">
+            <div class="flex items-center gap-2 pt-4">
+                <button type="submit" class="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black transition-colors">
+                    حفظ التعديل
+                </button>
+                <a href="{{ route('company.vehicles.index') }}"
+                    class="px-5 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-black hover:border-slate-400/50 transition-colors">
+                    إلغاء
+                </a>
+            </div>
+        </form>
+
+        {{-- Vehicle Documents (separate forms - cannot nest forms in HTML) --}}
+        <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm mt-6">
+            <div id="documents">
                 <h3 class="text-base font-bold text-slate-300 mb-4">{{ __('vehicles.vehicle_documents') }}</h3>
                 <p class="text-xs text-slate-500 mb-4">{{ __('vehicles.max_size') }}</p>
 
@@ -207,22 +219,12 @@
                 </form>
                 @endif
             </div>
-
-            <div class="flex items-center gap-2 pt-4">
-                <button class="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black transition-colors">
-                    حفظ التعديل
-                </button>
-                <a href="{{ route('company.vehicles.index') }}"
-                    class="px-5 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-black hover:border-slate-400/50 transition-colors">
-                    إلغاء
-                </a>
-            </div>
-        </form>
+        </div>
 
 <script>
 document.getElementById('tracking_source_edit')?.addEventListener('change', function() {
     var isDeviceApi = this.value === 'device_api';
-    var inp = document.querySelector('form input[name="imei"]');
+    var inp = document.querySelector('#vehicle-edit-form input[name="imei"]');
     if (inp) inp.required = isDeviceApi;
     var span = document.getElementById('imei-required-edit');
     if (span) span.textContent = isDeviceApi ? '*' : '({{ __('common.optional') }})';

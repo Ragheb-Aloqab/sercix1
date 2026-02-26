@@ -72,6 +72,7 @@ Route::prefix('driver')->name('driver.')->group(function () {
 
     Route::middleware('driver')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DriverController::class, 'dashboard'])->name('dashboard');
+        Route::get('/history', [\App\Http\Controllers\DriverController::class, 'history'])->name('history');
         Route::get('/request', [\App\Http\Controllers\DriverController::class, 'createRequest'])->name('request.create');
         Route::post('/request', [\App\Http\Controllers\DriverController::class, 'storeRequest'])->name('request.store');
         Route::get('/request/{order}', [\App\Http\Controllers\DriverController::class, 'showRequest'])->name('request.show')->whereNumber('order');
@@ -80,10 +81,16 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::get('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'createFuelRefill'])->name('fuel-refill.create');
         Route::post('/fuel-refill', [\App\Http\Controllers\DriverController::class, 'storeFuelRefill'])->name('fuel-refill.store');
         Route::get('/tracking', [\App\Http\Controllers\DriverController::class, 'tracking'])->name('tracking');
+        Route::post('/tracking/start', [\App\Http\Controllers\DriverController::class, 'startTracking'])->name('tracking.start');
+        Route::post('/tracking/stop', [\App\Http\Controllers\DriverController::class, 'stopTracking'])->name('tracking.stop');
+        Route::get('/tracking/status', [\App\Http\Controllers\DriverController::class, 'trackingStatus'])->name('tracking.status');
         Route::post('/tracking/report', [\App\Http\Controllers\DriverController::class, 'reportTracking'])->name('tracking.report')->middleware('throttle:60,1');
         Route::get('/inspections', [\App\Http\Controllers\DriverInspectionController::class, 'index'])->name('inspections.index');
+        Route::post('/inspections/request/{vehicle}', [\App\Http\Controllers\DriverInspectionController::class, 'requestInspection'])->name('inspections.request')->whereNumber('vehicle');
         Route::get('/inspections/{inspection}/upload', [\App\Http\Controllers\DriverInspectionController::class, 'showUploadForm'])->name('inspections.upload')->whereNumber('inspection');
         Route::post('/inspections/{inspection}/upload', [\App\Http\Controllers\DriverInspectionController::class, 'upload'])->name('inspections.upload.store')->whereNumber('inspection');
+        Route::get('/notifications', [\App\Http\Controllers\Driver\NotificationsController::class, 'index'])->name('notifications.index');
+        Route::match(['get', 'patch', 'post'], '/notifications/{notification}/read', [\App\Http\Controllers\Driver\NotificationsController::class, 'markRead'])->name('notifications.read');
     });
 });
 Route::domain('{company}.servexmotors.com')->group(function(){

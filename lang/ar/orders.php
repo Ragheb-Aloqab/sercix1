@@ -3,6 +3,7 @@
 return [
     'orders_list' => 'قائمة الطلبات',
     'orders_list_desc' => 'تصفّح طلبات الشركة مع الفلاتر',
+    'search_placeholder' => 'بحث: رقم الطلب / السائق / اللوحة',
     'new_service_request' => 'طلب خدمة',
     'status' => 'الحالة',
     'all_statuses' => 'كل الحالات',

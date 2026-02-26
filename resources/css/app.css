@@ -9,14 +9,14 @@
     .company-glass,
     .dashboard-glass {
         position: relative;
-        background: linear-gradient(135deg, #0B0B0D 0%, #151010 50%, #0B0B0D 100%);
+        background: linear-gradient(135deg, #1A1A1A 0%, #1E1E1E 50%, #1A1A1A 100%);
     }
     .company-glass::before,
     .dashboard-glass::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(11, 11, 13, 0.92) 0%, rgba(26, 10, 10, 0.9) 50%, rgba(11, 11, 13, 0.92) 100%);
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.92) 50%, rgba(26, 26, 26, 0.95) 100%);
         pointer-events: none;
         z-index: 1;
     }

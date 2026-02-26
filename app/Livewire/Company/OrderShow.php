@@ -4,6 +4,7 @@ namespace App\Livewire\Company;
 
 use App\Models\Order;
 use App\Support\OrderStatus;
+use App\Services\DriverNotificationService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -53,6 +54,7 @@ class OrderShow extends Component
             'note' => 'Company approved',
         ]);
         $this->order->refresh();
+        app(DriverNotificationService::class)->notifyOrderApproved($this->order);
         session()->flash('success', 'تمت الموافقة على الطلب. يمكن للسائق تنفيذ الخدمة الآن.');
     }
 
@@ -88,6 +90,7 @@ class OrderShow extends Component
             'note' => $this->rejection_reason ?: 'Company rejected',
         ]);
         $this->order->refresh();
+        app(DriverNotificationService::class)->notifyOrderStatusChanged($this->order);
         $this->showRejectModal = false;
         $this->rejection_reason = '';
         session()->flash('success', 'تم رفض الطلب.');
@@ -109,6 +112,7 @@ class OrderShow extends Component
             'note' => 'Company confirmed completion',
         ]);
         $this->order->refresh();
+        app(DriverNotificationService::class)->notifyOrderCompleted($this->order);
         session()->flash('success', 'تم تأكيد إكمال الطلب.');
     }
 

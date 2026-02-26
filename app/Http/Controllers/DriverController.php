@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\GenerateMaintenanceInvoicePdfJob;
 use App\Models\Attachment;
+use App\Services\ImageOptimizationService;
 use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Service;
@@ -42,7 +43,31 @@ class DriverController extends Controller
             ->where('status', VehicleInspection::STATUS_PENDING)
             ->count();
 
-        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount'));
+        $firstTrackableVehicle = $vehicles->first(fn ($v) => $v->usesMobileTracking() || empty($v->imei));
+        $trackingUrl = $firstTrackableVehicle
+            ? route('driver.tracking', ['vehicle' => $firstTrackableVehicle->id])
+            : route('driver.dashboard');
+
+        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount', 'trackingUrl'));
+    }
+
+    public function history()
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $requests = Order::whereIn('driver_phone', $phoneVariants)
+            ->with(['vehicle', 'company:id,company_name'])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $requestsWithDisplay = $requests->map(function ($r) {
+            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $r->status), 'common.') ? $r->status : __('common.status_' . $r->status);
+            return (object) ['request' => $r, 'statusLabel' => $statusLabel];
+        });
+
+        return view('driver.history', compact('requests', 'requestsWithDisplay'));
     }
 
     public function createRequest()
@@ -235,8 +260,8 @@ class DriverController extends Controller
             $old->delete();
         }
 
-        $path = $request->file('invoice')->store('driver-invoices/' . $order->id, 'public');
         $file = $request->file('invoice');
+        $path = app(ImageOptimizationService::class)->optimizeAndStore($file, 'driver-invoices/' . $order->id, 'public');
 
         $attachment = $order->attachments()->create([
             'type' => 'driver_invoice',
@@ -339,6 +364,101 @@ class DriverController extends Controller
     }
 
     /**
+     * POST /driver/tracking/start — Start tracking session (persists to DB).
+     */
+    public function startTracking(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        if (!$phone) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        $data = $request->validate(['vehicle_id' => ['required', 'integer', 'exists:vehicles,id']]);
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])
+            ->whereIn('driver_phone', $phoneVariants)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'vehicle_not_linked'], 403);
+        }
+        if (!$vehicle->usesMobileTracking() && !empty($vehicle->imei)) {
+            return response()->json(['error' => 'tracking_source_not_mobile'], 403);
+        }
+
+        // Stop any other active tracking for this driver's vehicles (prevent duplicates)
+        Vehicle::whereIn('driver_phone', $phoneVariants)
+            ->where('is_tracking_active', true)
+            ->update(['is_tracking_active' => false, 'tracking_driver_phone' => null]);
+
+        $vehicle->update([
+            'is_tracking_active' => true,
+            'tracking_driver_phone' => $phone,
+        ]);
+
+        return response()->json(['ok' => true, 'vehicle_id' => $vehicle->id]);
+    }
+
+    /**
+     * POST /driver/tracking/stop — Stop tracking session.
+     */
+    public function stopTracking(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        if (!$phone) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        $data = $request->validate(['vehicle_id' => ['required', 'integer', 'exists:vehicles,id']]);
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])
+            ->whereIn('driver_phone', $phoneVariants)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'vehicle_not_linked'], 403);
+        }
+
+        if ($vehicle->is_tracking_active && in_array($vehicle->tracking_driver_phone, $phoneVariants)) {
+            $vehicle->update(['is_tracking_active' => false, 'tracking_driver_phone' => null]);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * GET /driver/tracking/status — Return active tracking session for current driver.
+     */
+    public function trackingStatus(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        if (!$phone) {
+            return response()->json(['active' => false]);
+        }
+
+        $phoneVariants = $this->driverPhoneVariants($phone);
+        $vehicle = Vehicle::whereIn('driver_phone', $phoneVariants)
+            ->where('is_tracking_active', true)
+            ->whereIn('tracking_driver_phone', $phoneVariants)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['active' => false]);
+        }
+
+        return response()->json([
+            'active' => true,
+            'vehicle_id' => $vehicle->id,
+            'plate_number' => $vehicle->plate_number,
+            'display_name' => $vehicle->display_name,
+        ]);
+    }
+
+    /**
      * POST /driver/tracking/report — Receive GPS coordinates from driver's browser.
      * Returns 403 if vehicle's tracking_source is not mobile.
      */
@@ -366,6 +486,9 @@ class DriverController extends Controller
         }
         if (!$vehicle->usesMobileTracking() && !empty($vehicle->imei)) {
             return response()->json(['error' => 'tracking_source_not_mobile'], 403);
+        }
+        if (!$vehicle->is_tracking_active || !in_array($vehicle->tracking_driver_phone, $phoneVariants)) {
+            return response()->json(['error' => 'tracking_not_active'], 403);
         }
 
         VehicleLocation::create([

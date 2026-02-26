@@ -27,7 +27,7 @@ class VehicleInspectionController extends Controller
 
         $inspections = VehicleInspection::query()
             ->where('company_id', $company->id)
-            ->with(['vehicle:id,plate_number,make,model,name', 'photos'])
+            ->with(['vehicle:id,plate_number,make,model,name,driver_phone', 'photos'])
             ->when($request->filled('vehicle_id'), fn ($q) => $q->where('vehicle_id', $request->vehicle_id))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('from'), fn ($q) => $q->where('inspection_date', '>=', $request->from))

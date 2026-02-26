@@ -23,18 +23,24 @@
             </a>
         </div>
         <div class="p-4 sm:p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="md:col-span-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="text-xs font-semibold text-slate-400">{{ __('vehicles.search_placeholder') }}</label>
+                    <input type="text" wire:model.live.debounce.300ms="search"
+                           placeholder="{{ __('orders.search_placeholder') }}"
+                           class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white placeholder-slate-500">
+                </div>
+                <div>
                     <label class="text-xs font-semibold text-slate-400">{{ __('orders.status') }}</label>
                     <select wire:model.live="status"
                             class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white">
                         <option value="">{{ __('orders.all_statuses') }}</option>
-                                @foreach ($statuses as $s)
+                        @foreach ($statuses as $s)
                             <option value="{{ $s }}">{{ \Illuminate\Support\Str::startsWith(__('common.status_' . $s), 'common.') ? $s : __('common.status_' . $s) }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="md:col-span-2 flex items-end gap-2">
+                <div class="flex items-end">
                     <button type="button" wire:click="clearFilters"
                             class="w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white text-center font-bold hover:bg-slate-700/50 transition-colors">
                         {{ __('vehicles.clear') }}

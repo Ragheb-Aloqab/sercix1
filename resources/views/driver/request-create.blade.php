@@ -4,17 +4,17 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto w-full">
-    <h1 class="text-2xl font-black mb-6">طلب خدمة جديد</h1>
-    <p class="text-slate-600 mb-6">اختر المركبة وخدمة واحدة (من القائمة أو خدمة مخصصة) مع إدخال السعر. الطلب سيكون قيد الموافقة حتى توافق الشركة.</p>
+    <h1 class="dash-page-title mb-6">طلب خدمة جديد</h1>
+    <p class="text-servx-silver mb-6">اختر المركبة وخدمة واحدة (من القائمة أو خدمة مخصصة) مع إدخال السعر. الطلب سيكون قيد الموافقة حتى توافق الشركة.</p>
 
-    @if ($errors->any())<div class="mb-6 p-4 rounded-2xl border border-rose-200 bg-rose-50 text-rose-800"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+    @if ($errors->any())<div class="mb-6 p-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 text-rose-400"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
-    <form method="POST" action="{{ route('driver.request.store') }}" enctype="multipart/form-data" class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6 space-y-4" id="driver-request-form">
+    <form method="POST" action="{{ route('driver.request.store') }}" enctype="multipart/form-data" class="dash-card space-y-4" id="driver-request-form">
         @csrf
         <input type="hidden" name="service_type" id="service_type" value="existing">
         <div>
-            <label class="text-sm font-bold text-slate-700">المركبة *</label>
-            <select name="vehicle_id" required class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 min-h-[44px] outline-none focus:ring-4 focus:ring-emerald-100" id="vehicle_id">
+            <label class="text-sm font-bold text-servx-silver-light">المركبة *</label>
+            <select name="vehicle_id" required class="mt-2 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 min-h-[44px] text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20" id="vehicle_id">
                 <option value="">— اختر المركبة —</option>
                 @foreach($vehicles as $v)
                     <option value="{{ $v->id }}" @selected(($selectedVehicleId ?? null) == $v->id)>{{ $v->plate_number }} — {{ $v->make ?? '' }} {{ $v->model ?? '' }}</option>
@@ -24,13 +24,13 @@
 
         {{-- Service type toggle --}}
         <div>
-            <label class="text-sm font-bold text-slate-700">نوع الخدمة *</label>
+            <label class="text-sm font-bold text-servx-silver-light">نوع الخدمة *</label>
             <div class="mt-2 flex gap-2">
-                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 active:scale-[0.99]">
+                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border border-slate-600/50 cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/20 text-servx-silver-light active:scale-[0.99]">
                     <input type="radio" name="service_type_radio" value="existing" checked class="sr-only" id="type_existing">
                     <span class="font-bold text-center">خدمة من القائمة</span>
                 </label>
-                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 active:scale-[0.99]">
+                <label class="flex-1 p-3 min-h-[44px] rounded-2xl border border-slate-600/50 cursor-pointer flex items-center justify-center has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/20 text-servx-silver-light active:scale-[0.99]">
                     <input type="radio" name="service_type_radio" value="custom" class="sr-only" id="type_custom">
                     <span class="font-bold text-center">خدمة أخرى (مخصصة)</span>
                 </label>
@@ -39,67 +39,67 @@
 
         {{-- Existing service --}}
         <div id="existing-wrap">
-            <label class="text-sm font-bold text-slate-700">{{ __('common.required_services') }} *</label>
-            <p class="text-slate-500 text-sm mt-1 mb-2">اختر خدمة واحدة وأدخل السعر.</p>
-            <div id="services-list" class="mt-2 space-y-2 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 p-3 bg-slate-50"></div>
+            <label class="text-sm font-bold text-servx-silver-light">{{ __('common.required_services') }} *</label>
+            <p class="text-servx-silver text-sm mt-1 mb-2">اختر خدمة واحدة وأدخل السعر.</p>
+            <div id="services-list" class="mt-2 space-y-2 max-h-48 overflow-y-auto rounded-2xl border border-slate-600/50 p-3 bg-slate-800/40"></div>
             <div class="mt-2" id="price-wrap-existing">
-                <label class="text-sm font-bold text-slate-700">سعر الخدمة (ر.س) *</label>
-                <input type="number" name="service_price" id="service_price" step="0.01" min="0.01" placeholder="0.00" value="{{ old('service_price') }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">
-                @error('service_price')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                <label class="text-sm font-bold text-servx-silver-light">سعر الخدمة (ر.س) *</label>
+                <input type="number" name="service_price" id="service_price" step="0.01" min="0.01" placeholder="0.00" value="{{ old('service_price') }}" class="mt-1 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">
+                @error('service_price')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
             </div>
-            @error('service_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+            @error('service_id')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
         </div>
 
         {{-- Custom service --}}
         <div id="custom-wrap" class="hidden space-y-3">
             <div>
-                <label class="text-sm font-bold text-slate-700">اسم الخدمة *</label>
-                <input type="text" name="custom_service_name" id="custom_service_name" value="{{ old('custom_service_name') }}" placeholder="مثال: تغيير إطارات" maxlength="255" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">
-                @error('custom_service_name')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                <label class="text-sm font-bold text-servx-silver-light">اسم الخدمة *</label>
+                <input type="text" name="custom_service_name" id="custom_service_name" value="{{ old('custom_service_name') }}" placeholder="مثال: تغيير إطارات" maxlength="255" class="mt-1 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">
+                @error('custom_service_name')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="text-sm font-bold text-slate-700">وصف الخدمة *</label>
-                <textarea name="custom_service_description" id="custom_service_description" rows="3" placeholder="وصف تفصيلي للخدمة المطلوبة" maxlength="1000" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">{{ old('custom_service_description') }}</textarea>
-                @error('custom_service_description')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                <label class="text-sm font-bold text-servx-silver-light">وصف الخدمة *</label>
+                <textarea name="custom_service_description" id="custom_service_description" rows="3" placeholder="وصف تفصيلي للخدمة المطلوبة" maxlength="1000" class="mt-1 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">{{ old('custom_service_description') }}</textarea>
+                @error('custom_service_description')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="text-sm font-bold text-slate-700">سعر الخدمة (ر.س) *</label>
-                <input type="number" name="custom_service_price" id="custom_service_price" step="0.01" min="0.01" placeholder="0.00" value="{{ old('custom_service_price') }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">
-                @error('custom_service_price')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                <label class="text-sm font-bold text-servx-silver-light">سعر الخدمة (ر.س) *</label>
+                <input type="number" name="custom_service_price" id="custom_service_price" step="0.01" min="0.01" placeholder="0.00" value="{{ old('custom_service_price') }}" class="mt-1 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">
+                @error('custom_service_price')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
             </div>
         </div>
 
         {{-- Quotation invoice (required) --}}
         <div>
-            <label class="text-sm font-bold text-slate-700">{{ __('driver.upload_quotation_invoice') }} *</label>
-            <p class="text-slate-500 text-sm mt-1 mb-2">{{ __('driver.upload_quotation_invoice_help') }}</p>
+            <label class="text-sm font-bold text-servx-silver-light">{{ __('driver.upload_quotation_invoice') }} *</label>
+            <p class="text-servx-silver text-sm mt-1 mb-2">{{ __('driver.upload_quotation_invoice_help') }}</p>
             <input type="file" name="quotation_invoice" id="quotation_invoice" accept=".pdf,.jpg,.jpeg,.png"
-                   class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100 file:me-2 file:rounded-xl file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-emerald-700 file:font-semibold">
+                   class="mt-2 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20 file:me-2 file:rounded-xl file:border-0 file:bg-emerald-500/20 file:px-4 file:py-2 file:text-emerald-400 file:font-semibold">
             @error('quotation_invoice')
-                <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                <p class="mt-1 text-sm text-rose-400">{{ $message }}</p>
             @enderror
             <div id="quotation-preview" class="mt-3 hidden">
-                <p class="text-sm font-semibold text-slate-600 mb-2">{{ __('driver.quotation_preview') }}:</p>
-                <div id="quotation-preview-content" class="rounded-xl border border-slate-200 overflow-hidden max-w-xs bg-slate-50"></div>
-                <p id="quotation-filename" class="text-xs text-slate-500 mt-1"></p>
+                <p class="text-sm font-semibold text-servx-silver mb-2">{{ __('driver.quotation_preview') }}:</p>
+                <div id="quotation-preview-content" class="rounded-xl border border-slate-600/50 overflow-hidden max-w-xs bg-slate-800/40"></div>
+                <p id="quotation-filename" class="text-xs text-servx-silver mt-1"></p>
             </div>
         </div>
 
         <div>
-            <label class="text-sm font-bold text-slate-700">المدينة (اختياري)</label>
-            <input type="text" name="city" value="{{ old('city') }}" placeholder="الرياض، جدة، ..." class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100" />
+            <label class="text-sm font-bold text-servx-silver-light">المدينة (اختياري)</label>
+            <input type="text" name="city" value="{{ old('city') }}" placeholder="الرياض، جدة، ..." class="mt-2 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20" />
         </div>
         <div>
-            <label class="text-sm font-bold text-slate-700">العنوان / موقع الخدمة (اختياري)</label>
-            <textarea name="address" rows="3" placeholder="الحي، الشارع، معلم..." class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">{{ old('address') }}</textarea>
+            <label class="text-sm font-bold text-servx-silver-light">العنوان / موقع الخدمة (اختياري)</label>
+            <textarea name="address" rows="3" placeholder="الحي، الشارع، معلم..." class="mt-2 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">{{ old('address') }}</textarea>
         </div>
         <div>
-            <label class="text-sm font-bold text-slate-700">ملاحظات (اختياري)</label>
-            <textarea name="notes" rows="2" placeholder="أي تفاصيل إضافية..." class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-100">{{ old('notes') }}</textarea>
+            <label class="text-sm font-bold text-servx-silver-light">ملاحظات (اختياري)</label>
+            <textarea name="notes" rows="2" placeholder="أي تفاصيل إضافية..." class="mt-2 w-full rounded-2xl border border-slate-600/50 bg-slate-800/60 px-4 py-3 text-servx-silver-light outline-none focus:ring-4 focus:ring-emerald-500/20">{{ old('notes') }}</textarea>
         </div>
         <div class="flex gap-3 pt-4">
-            <button type="submit" class="flex-1 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 disabled:opacity-50 disabled:cursor-not-allowed" id="submit-btn" disabled><i class="fa-solid fa-paper-plane me-2"></i>{{ __('driver.submit_request') ?? 'إرسال الطلب' }}</button>
-            <a href="{{ route('driver.dashboard') }}" class="px-6 py-3 rounded-2xl border border-slate-200 font-bold">{{ __('common.cancel') }}</a>
+            <button type="submit" class="flex-1 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 disabled:opacity-50 disabled:cursor-not-allowed" id="submit-btn" disabled><i class="fa-solid fa-paper-plane me-2"></i>{{ __('driver.submit_request') ?? 'إرسال الطلب' }}</button>
+            <a href="{{ route('driver.dashboard') }}" class="px-6 py-3 rounded-2xl border border-slate-600/50 hover:bg-slate-700/50 font-bold text-servx-silver-light">{{ __('common.cancel') }}</a>
         </div>
     </form>
 </div>
@@ -160,14 +160,14 @@
         }
         var services = vehicleServices[vid];
         if (!services || services.length === 0) {
-            list.innerHTML = '<p class="text-amber-700 p-3">لا توجد خدمات مسجّلة. اختر "خدمة أخرى" أو تواصل مع شركتك.</p>';
+            list.innerHTML = '<p class="text-amber-400 p-3">لا توجد خدمات مسجّلة. اختر "خدمة أخرى" أو تواصل مع شركتك.</p>';
             if (submitBtn) submitBtn.disabled = true;
             return;
         }
         var oldId = (form.querySelector('input[name="service_id"]:checked') || {}).value;
         services.forEach(function (s) {
             var label = document.createElement('label');
-            label.className = 'flex items-center gap-3 p-2 rounded-xl hover:bg-white cursor-pointer';
+            label.className = 'flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/50 cursor-pointer text-servx-silver-light';
             var radio = document.createElement('input');
             radio.type = 'radio';
             radio.name = 'service_id';
@@ -203,7 +203,7 @@
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    previewContent.innerHTML = '<div class="p-4 text-center"><i class="fa-solid fa-file-pdf text-4xl text-rose-600"></i><p class="text-sm mt-2">PDF</p></div>';
+                    previewContent.innerHTML = '<div class="p-4 text-center"><i class="fa-solid fa-file-pdf text-4xl text-rose-400"></i><p class="text-sm mt-2 text-servx-silver">PDF</p></div>';
                 }
             } else {
                 preview.classList.add('hidden');

@@ -45,6 +45,7 @@ return [
     'source_mobile' => 'جوال السائق (GPS المتصفح)',
     'tracking_source_hint' => 'جهاز API: متتبع فعلي. جوال: GPS هاتف السائق.',
 
+    'tracking' => 'التتبع',
     'start_tracking' => 'بدء التتبع',
     'stop_tracking' => 'إيقاف التتبع',
     'tracking_active' => 'التتبع نشط',

@@ -27,8 +27,10 @@ return [
     'vehicles_pending' => 'Vehicles Pending Inspection',
     'view_all' => 'View all',
     'no_pending' => 'All vehicles are compliant.',
+    'upload_when_compliant' => 'You can still upload inspection photos for any of your vehicles.',
     'no_inspections' => 'No inspections yet.',
     'due_date' => 'Due date',
+    'uploaded_at' => 'Uploaded',
     'request_inspection' => 'Request inspection',
 
     'photo_front' => 'Front',
@@ -38,6 +40,7 @@ return [
     'photo_interior' => 'Interior',
     'photo_odometer' => 'Odometer',
     'photo_other' => 'Other',
+    'photo_example' => 'Example: take a clear photo of this angle',
 
     'upload_photos' => 'Upload inspection photos',
     'upload_required' => 'Required photos must be uploaded.',
@@ -47,6 +50,7 @@ return [
     'inspection_submitted' => 'Inspection submitted successfully.',
 
     'gallery' => 'Inspection gallery',
+    'view_details' => 'View details',
     'filter_vehicle' => 'Vehicle',
     'filter_date_range' => 'Date range',
     'filter_driver' => 'Driver',

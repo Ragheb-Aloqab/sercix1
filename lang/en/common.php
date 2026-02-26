@@ -90,6 +90,8 @@ return [
     'selected' => 'selected',
     'unread' => 'Unread',
     'read' => 'Read',
+    'mark_read' => 'Mark read',
+    'notification' => 'Notification',
     'city' => 'City',
     'address' => 'Address',
     'confirm_delete' => 'Are you sure you want to delete? This action cannot be undone.',

@@ -9,23 +9,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== SERVX Brand Variables ========== */
+/* ========== SERVX Brand Variables (Dashboard Design Palette) ========== */
 :root {
-    /* Primary */
-    --servx-black: #0B0B0D;
-    --servx-black-soft: #111111;
-    --servx-black-card: #151515;
-    --servx-red: #DC2626;
-    --servx-red-hover: #EF4444;
-    --servx-red-muted: rgba(220, 38, 38, 0.15);
-    --servx-red-glow: rgba(220, 38, 38, 0.25);
+    /* Primary - dark theme from design */
+    --servx-black: #1A1A1A;
+    --servx-black-soft: #1E1E1E;
+    --servx-black-card: #252525;
+    --servx-red: #EF4444;
+    --servx-red-hover: #F87171;
+    --servx-red-muted: rgba(239, 68, 68, 0.2);
+    --servx-red-glow: rgba(239, 68, 68, 0.25);
     /* Typography */
     --servx-silver: #B8B8B8;
     --servx-silver-light: #E5E5E5;
     --servx-white: #FFFFFF;
-    /* Gradients (black → dark red only) */
-    --servx-gradient-subtle: linear-gradient(135deg, #0B0B0D 0%, #1a0a0a 50%, #0B0B0D 100%);
-    --servx-gradient-red-glow: linear-gradient(90deg, transparent 0%, rgba(220, 38, 38, 0.08) 50%, transparent 100%);
+    /* Gradients */
+    --servx-gradient-subtle: linear-gradient(135deg, #1A1A1A 0%, #1E1E1E 50%, #1A1A1A 100%);
+    --servx-gradient-red-glow: linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.06) 50%, transparent 100%);
     /* Shadows */
     --servx-shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
     --servx-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -133,7 +133,7 @@ body.page-figtree {
     border-radius: 0.75rem;
     padding: 1.25rem 1.5rem;
     box-shadow: var(--servx-shadow-soft);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: border-color var(--servx-transition), box-shadow var(--servx-transition);
 }
 .servx-card:hover {
@@ -437,7 +437,7 @@ body.page-figtree {
     --servx-blue-hover: #60A5FA;
     --servx-green: #22C55E;
     --servx-green-muted: rgba(34, 197, 94, 0.2);
-    --servx-red-muted: rgba(239, 68, 68, 0.2);
+    --servx-red-trend: #EF4444;
 }
 
 /* Page title with blue accent underline */
@@ -480,26 +480,26 @@ body.page-figtree {
     transform: translateY(-1px);
 }
 .dash-btn-secondary {
-    background: rgba(51, 65, 85, 0.8);
+    background: rgba(37, 37, 37, 0.9);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 .dash-btn-secondary:hover {
-    background: rgba(71, 85, 105, 0.9);
+    background: rgba(45, 45, 45, 1);
     border-color: rgba(59, 130, 246, 0.4);
     transform: translateY(-1px);
 }
 
-/* Company Dashboard Cards */
+/* Company Dashboard Cards - white border per design */
 .dash-card {
     border-radius: 1rem;
     background: var(--servx-black-card);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1.25rem 1.5rem;
     transition: all var(--servx-transition);
 }
 .dash-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 .dash-card-kpi,
@@ -565,7 +565,7 @@ body.page-figtree {
     color: var(--servx-green);
 }
 .dash-trend-down {
-    color: #EF4444;
+    color: var(--servx-red-trend);
 }
 .dash-trend-stable {
     color: var(--servx-blue);
@@ -578,7 +578,8 @@ body.page-figtree {
 .dash-stat-mini {
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
-    background: rgba(51, 65, 85, 0.5);
+    background: rgba(37, 37, 37, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     min-width: 4rem;
 }
 .dash-stat-mini-label {
@@ -643,13 +644,13 @@ body.page-figtree {
 .dash-vehicle-card {
     padding: 0.75rem;
     border-radius: 0.75rem;
-    background: rgba(51, 65, 85, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(37, 37, 37, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all var(--servx-transition);
 }
 .dash-vehicle-card:hover {
     border-color: rgba(59, 130, 246, 0.4);
-    background: rgba(51, 65, 85, 0.7);
+    background: rgba(45, 45, 45, 0.9);
 }
 .dash-vehicle-card-empty {
     display: flex;
@@ -668,7 +669,7 @@ body.page-figtree {
 .dash-indicator-check {
     width: 18px;
     height: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 4px;
     flex-shrink: 0;
     transition: all var(--servx-transition);
@@ -712,8 +713,8 @@ body.page-figtree {
     justify-content: space-between;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(37, 37, 37, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all var(--servx-transition);
 }
 .dash-order-row:hover {
@@ -727,11 +728,12 @@ body.page-figtree {
     align-items: center;
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
-    background: rgba(51, 65, 85, 0.3);
+    background: rgba(37, 37, 37, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     transition: background var(--servx-transition);
 }
 .dash-invoice-row:hover {
-    background: rgba(51, 65, 85, 0.5);
+    background: rgba(45, 45, 45, 0.7);
 }
 
 /* Service tag */
@@ -741,8 +743,8 @@ body.page-figtree {
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     border-radius: 0.75rem;
-    background: rgba(51, 65, 85, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(37, 37, 37, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 0.875rem;
 }
 

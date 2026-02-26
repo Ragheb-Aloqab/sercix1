@@ -40,13 +40,13 @@
                 </h2>
                 <div class="space-y-2 max-h-40 overflow-y-auto">
                     @foreach($expiringDocuments ?? [] as $item)
-                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 transition-colors">
+                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-servx-inner hover:bg-servx-inner-hover border border-servx-border transition-colors">
                             <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'expired' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
                                 <i class="fa-solid fa-car text-xs"></i>
                             </span>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-white">{{ $item->vehicle->plate_number ?? $item->vehicle->display_name }} — {{ $item->type === \App\Services\ExpiryMonitoringService::DOC_REGISTRATION ? __('vehicles.registration') : __('vehicles.insurance') }}</p>
-                                <p class="text-xs text-slate-400">{{ $item->date?->translatedFormat('d M Y') }} · {{ $item->days_remaining !== null ? ($item->days_remaining < 0 ? abs($item->days_remaining) . ' ' . __('vehicles.days_ago') : $item->days_remaining . ' ' . __('vehicles.days_remaining')) : '-' }}</p>
+                                <p class="text-xs text-servx-silver">{{ $item->date?->translatedFormat('d M Y') }} · {{ $item->days_remaining !== null ? ($item->days_remaining < 0 ? abs($item->days_remaining) . ' ' . __('vehicles.days_ago') : $item->days_remaining . ' ' . __('vehicles.days_remaining')) : '-' }}</p>
                             </div>
                             <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $expiryService->getStatusBadgeClass($item->status) }}">{{ __('vehicles.' . $item->status) }}</span>
                             <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
@@ -69,13 +69,13 @@
                 </h2>
                 <div class="space-y-2 max-h-40 overflow-y-auto">
                     @foreach($inspectionPendingVehicles ?? [] as $item)
-                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 transition-colors">
+                        <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-servx-inner hover:bg-servx-inner-hover border border-servx-border transition-colors">
                             <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'overdue' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
                                 <i class="fa-solid fa-car text-xs"></i>
                             </span>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-white">{{ $item->vehicle->plate_number ?? $item->vehicle->display_name }}</p>
-                                <p class="text-xs text-slate-400">{{ __('inspections.due_date') }}: {{ $item->due_date?->translatedFormat('d M Y') ?? '—' }}</p>
+                                <p class="text-xs text-servx-silver">{{ __('inspections.due_date') }}: {{ $item->due_date?->translatedFormat('d M Y') ?? '—' }}</p>
                             </div>
                             <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $item->status === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $item->status) }}</span>
                             <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
@@ -95,10 +95,10 @@
                 </h2>
                 <div class="space-y-3 max-h-32 overflow-y-auto">
                     @foreach($announcements as $ann)
-                        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-600/40">
+                        <div class="p-3 rounded-xl bg-servx-inner border border-servx-border">
                             <p class="font-bold text-white">{{ $ann->title }}</p>
-                            <p class="text-sm text-slate-400 mt-1 line-clamp-2">{{ Str::limit(strip_tags($ann->body), 120) }}</p>
-                            <p class="text-xs text-slate-500 mt-1">{{ $ann->published_at?->format('Y-m-d H:i') ?? $ann->created_at->format('Y-m-d H:i') }}</p>
+                            <p class="text-sm text-servx-silver mt-1 line-clamp-2">{{ Str::limit(strip_tags($ann->body), 120) }}</p>
+                            <p class="text-xs text-servx-silver mt-1">{{ $ann->published_at?->format('Y-m-d H:i') ?? $ann->created_at->format('Y-m-d H:i') }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -194,7 +194,7 @@
                                 <i class="fa-solid fa-caret-down"></i>
                             @endif
                         </span>
-                        <span class="text-sm text-slate-400">{{ number_format(abs($sevenMonthPercent ?? 0), 1) }}%</span>
+                        <span class="text-sm text-servx-silver">{{ number_format(abs($sevenMonthPercent ?? 0), 1) }}%</span>
                     </div>
                 </div>
             </div>
@@ -208,12 +208,12 @@
                         @if(isset($top5[$i]))
                             @php $v = $top5[$i]; @endphp
                             <a href="{{ route('company.vehicles.show', $v->id) }}" class="dash-vehicle-card block">
-                                <p class="text-xs text-slate-400 truncate">{{ $v->make ?? '' }} {{ $v->model ?? '' }}</p>
+                                <p class="text-xs text-servx-silver truncate">{{ $v->make ?? '' }} {{ $v->model ?? '' }}</p>
                                 <p class="text-sm font-bold text-white truncate">{{ number_format($v->total_cost ?? $v->total_service_cost ?? 0, 0) }}</p>
                             </a>
                         @else
                             <div class="dash-vehicle-card dash-vehicle-card-empty">
-                                <span class="text-slate-500 text-sm">—</span>
+                                <span class="text-servx-silver text-sm">—</span>
                             </div>
                         @endif
                     @endfor
@@ -226,15 +226,15 @@
                 <div class="space-y-4">
                     <label class="dash-indicator-row">
                         <span class="dash-indicator-check {{ str_contains($maintenanceUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
-                        <span class="text-sm {{ $maintenanceUI['textClass'] ?? 'text-slate-400' }}">{{ $maintenanceUI['text'] ?? __('company.stable_indicator') }}</span>
+                        <span class="text-sm {{ $maintenanceUI['textClass'] ?? 'text-servx-silver' }}">{{ $maintenanceUI['text'] ?? __('company.stable_indicator') }}</span>
                     </label>
                     <label class="dash-indicator-row">
                         <span class="dash-indicator-check {{ str_contains($fuelUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
-                        <span class="text-sm {{ $fuelUI['textClass'] ?? 'text-slate-400' }}">{{ $fuelUI['text'] ?? __('company.stable_indicator') }}</span>
+                        <span class="text-sm {{ $fuelUI['textClass'] ?? 'text-servx-silver' }}">{{ $fuelUI['text'] ?? __('company.stable_indicator') }}</span>
                     </label>
                     <label class="dash-indicator-row">
                         <span class="dash-indicator-check {{ str_contains($operatingUI['textClass'] ?? '', 'green') ? 'dash-indicator-check-active' : '' }}"></span>
-                        <span class="text-sm {{ $operatingUI['textClass'] ?? 'text-slate-400' }}">{{ $operatingUI['text'] ?? __('company.stable_indicator') }}</span>
+                        <span class="text-sm {{ $operatingUI['textClass'] ?? 'text-servx-silver' }}">{{ $operatingUI['text'] ?? __('company.stable_indicator') }}</span>
                     </label>
                 </div>
             </div>
@@ -271,12 +271,12 @@
                     <a href="{{ route('company.orders.show', $o) }}" class="dash-order-row">
                         <div class="min-w-0 flex-1">
                             <p class="font-semibold text-white truncate">{{ __('dashboard.order') }} #{{ $o->id }} — {{ $o->status }}</p>
-                            <p class="text-xs text-slate-400 truncate">{{ $o->city ?? '-' }} · {{ \Illuminate\Support\Str::limit($o->address ?? '', 35) }}</p>
+                            <p class="text-xs text-servx-silver truncate">{{ $o->city ?? '-' }} · {{ \Illuminate\Support\Str::limit($o->address ?? '', 35) }}</p>
                         </div>
                         <span class="text-sky-400 text-sm shrink-0"><i class="fa-solid fa-arrow-left ms-1"></i></span>
                     </a>
                 @empty
-                    <p class="text-slate-500 text-sm py-6 text-center">{{ __('orders.no_orders') }}</p>
+                    <p class="text-servx-silver text-sm py-6 text-center">{{ __('orders.no_orders') }}</p>
                 @endforelse
             </div>
         </div>
@@ -293,12 +293,12 @@
                         @foreach($recentInvoices->take(5) as $inv)
                             <a href="{{ route('company.invoices.show', $inv) }}" class="dash-invoice-row">
                                 <span class="text-white font-medium">{{ $inv->invoice_number ?? '#' . $inv->id }}</span>
-                                <span class="text-slate-300 font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} {{ __('company.sar') }}</span>
+                                <span class="text-servx-silver-light font-semibold">{{ number_format((float)($inv->total ?? 0), 2) }} {{ __('company.sar') }}</span>
                             </a>
                         @endforeach
                     </div>
                 @else
-                    <p class="text-slate-500 text-sm py-6">{{ __('company.no_invoices_yet') }}</p>
+                    <p class="text-servx-silver text-sm py-6">{{ __('company.no_invoices_yet') }}</p>
                 @endif
             </div>
             <div class="dash-card">
@@ -307,10 +307,10 @@
                     @forelse($enabledServices ?? [] as $s)
                         <span class="dash-service-tag">
                             <span class="text-white font-medium">{{ $s->name }}</span>
-                            <span class="text-slate-400">{{ $s->pivot->base_price ?? $s->base_price }} {{ __('company.sar') }}</span>
+                            <span class="text-servx-silver">{{ $s->pivot->base_price ?? $s->base_price }} {{ __('company.sar') }}</span>
                         </span>
                     @empty
-                        <p class="text-slate-500 text-sm">{{ __('dashboard.no_services_enabled') }}</p>
+                        <p class="text-servx-silver text-sm">{{ __('dashboard.no_services_enabled') }}</p>
                     @endforelse
                 </div>
             </div>

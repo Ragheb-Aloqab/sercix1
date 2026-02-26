@@ -21,6 +21,8 @@ class Vehicle extends Model
         'plate_number',
         'imei',
         'tracking_source',
+        'is_tracking_active',
+        'tracking_driver_phone',
         'color',
         'image_path',
         'registration_document_path',
@@ -35,6 +37,7 @@ class Vehicle extends Model
     protected $casts = [
         'registration_expiry_date' => 'date',
         'insurance_expiry_date' => 'date',
+        'is_tracking_active' => 'boolean',
     ];
 
     protected $attributes = [

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Orders;
 use App\Notifications\OrderCompletedNotification;
 use App\Notifications\OrderUpdate;
 use App\Http\Controllers\Controller;
+use App\Services\DriverNotificationService;
 use App\Http\Requests\Admin\Orders\ChangeOrderStatusRequest;
 use App\Models\Order;
 use App\Models\User;
@@ -61,11 +62,19 @@ class OrderStatusController extends Controller
                 $admin->notify(new OrderCompletedNotification($order));
             }
             $order->company?->notify(new OrderCompletedNotification($order));
+            app(DriverNotificationService::class)->notifyOrderCompleted($order);
+        } elseif ($to === OrderStatus::APPROVED) {
+            foreach ($admins as $admin) {
+                $admin->notify(new OrderUpdate($order));
+            }
+            $order->company?->notify(new OrderUpdate($order));
+            app(DriverNotificationService::class)->notifyOrderApproved($order);
         } else {
             foreach ($admins as $admin) {
                 $admin->notify(new OrderUpdate($order));
             }
             $order->company?->notify(new OrderUpdate($order));
+            app(DriverNotificationService::class)->notifyOrderStatusChanged($order);
         }
 
         ActivityLogger::log(

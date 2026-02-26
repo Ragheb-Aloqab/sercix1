@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Vehicle;
+use App\Models\DriverNotification;
 use App\Models\Company;
 use App\Models\VehicleLocation;
 use App\Observers\CompanyObserver;
@@ -106,22 +107,31 @@ class AppServiceProvider extends ServiceProvider
             $view->with(compact('before', 'after', 'others'));
         });
 
-        // Driver layout: driver name and initial from first linked vehicle (cached per session)
+        // Driver layout: driver name, initial, and unread notification count
         View::composer('layouts.driver', function ($view) {
             $phone = Session::get('driver_phone');
-            $cacheKey = $phone ? 'driver_layout_' . md5($phone) : 'driver_layout_guest';
-            $data = cache()->remember($cacheKey, 300, function () use ($phone) {
-                $driverName = __('driver.driver');
-                if ($phone) {
-                    $variants = $this->driverPhoneVariants($phone);
+            $driverName = __('driver.driver');
+            $driverInitial = mb_substr($driverName, 0, 1);
+            $driverNotificationCount = 0;
+            if ($phone) {
+                $variants = $this->driverPhoneVariants($phone);
+                $cacheKey = 'driver_layout_' . md5($phone);
+                $cached = cache()->remember($cacheKey, 300, function () use ($variants) {
                     $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
-                    if ($vehicle && $vehicle->driver_name) {
-                        $driverName = $vehicle->driver_name;
-                    }
-                }
-                return ['driverName' => $driverName, 'driverInitial' => mb_substr($driverName, 0, 1)];
-            });
-            $view->with($data);
+                    $name = ($vehicle && $vehicle->driver_name) ? $vehicle->driver_name : __('driver.driver');
+                    return ['driverName' => $name, 'driverInitial' => mb_substr($name, 0, 1)];
+                });
+                $driverName = $cached['driverName'];
+                $driverInitial = $cached['driverInitial'] ?? mb_substr($driverName, 0, 1);
+                $driverNotificationCount = DriverNotification::whereIn('driver_phone', $variants)
+                    ->whereNull('read_at')
+                    ->count();
+            }
+            $view->with([
+                'driverName' => $driverName,
+                'driverInitial' => $driverInitial,
+                'driverNotificationCount' => $driverNotificationCount,
+            ]);
         });
     }
 

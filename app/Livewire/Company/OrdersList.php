@@ -13,9 +13,16 @@ class OrdersList extends Component
 
     public string $status = '';
 
-    protected $queryString = ['status' => ['except' => '']];
+    public string $search = '';
+
+    protected $queryString = ['status' => ['except' => ''], 'search' => ['except' => '']];
 
     public function updatedStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
     {
         $this->resetPage();
     }
@@ -23,6 +30,7 @@ class OrdersList extends Component
     public function clearFilters(): void
     {
         $this->status = '';
+        $this->search = '';
         $this->resetPage();
     }
 
@@ -33,6 +41,17 @@ class OrdersList extends Component
         return Order::query()
             ->where('company_id', $company->id)
             ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))
+            ->when($this->search !== '', function ($q) {
+                $term = '%' . trim($this->search) . '%';
+                $q->where(function ($q) use ($term) {
+                    $q->where('id', 'like', $term)
+                        ->orWhere('requested_by_name', 'like', $term)
+                        ->orWhere('requested_by_phone', 'like', $term)
+                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', $term)
+                            ->orWhere('make', 'like', $term)
+                            ->orWhere('model', 'like', $term));
+                });
+            })
             ->with(['vehicle:id,plate_number,make,model', 'services'])
             ->latest();
     }

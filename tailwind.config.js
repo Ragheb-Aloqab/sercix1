@@ -14,13 +14,19 @@ export default {
         extend: {
             colors: {
                 servx: {
-                    black: '#0B0B0D',
-                    'black-soft': '#111111',
-                    'black-card': '#151515',
-                    red: '#DC2626',
-                    'red-hover': '#EF4444',
+                    black: '#1A1A1A',
+                    'black-soft': '#1E1E1E',
+                    'black-card': '#252525',
+                    'inner': 'rgba(37,37,37,0.8)',
+                    'inner-hover': 'rgba(45,45,45,0.9)',
+                    'border': 'rgba(255,255,255,0.1)',
+                    red: '#EF4444',
+                    'red-hover': '#F87171',
                     silver: '#B8B8B8',
                     'silver-light': '#E5E5E5',
+                    blue: '#3B82F6',
+                    'blue-hover': '#60A5FA',
+                    green: '#22C55E',
                 },
             },
             fontFamily: {

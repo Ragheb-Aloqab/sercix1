@@ -26,6 +26,9 @@ class VehicleObserver
 
     public function created(Vehicle $vehicle): void
     {
+        if ($vehicle->company_id) {
+            Cache::forget("company_dashboard_{$vehicle->company_id}");
+        }
         $this->invalidateAdminStats();
         $desc = ($vehicle->plate_number ?? $vehicle->make . ' ' . $vehicle->model) . ' (Company #' . $vehicle->company_id . ')';
         ActivityLogger::log('vehicle_created', 'vehicle', $vehicle->id, "Vehicle created: {$desc}");
@@ -33,6 +36,9 @@ class VehicleObserver
 
     public function updated(Vehicle $vehicle): void
     {
+        if ($vehicle->company_id) {
+            Cache::forget("company_dashboard_{$vehicle->company_id}");
+        }
         $this->invalidateAdminStats();
         if ($vehicle->wasChanged()) {
             ActivityLogger::log('vehicle_updated', 'vehicle', $vehicle->id, 'Vehicle #' . $vehicle->id . ' updated', $vehicle->getOriginal(), $vehicle->getChanges());

@@ -6,6 +6,8 @@ use App\Models\CompanyInspectionSetting;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
 use App\Models\VehicleInspectionPhoto;
+use App\Services\ImageOptimizationService;
+use App\Services\VehicleInspectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -49,6 +51,30 @@ class DriverInspectionController extends Controller
             ->get();
 
         return view('driver.inspections.index', compact('vehicles', 'pendingInspections'));
+    }
+
+    /**
+     * POST /driver/inspections/request/{vehicle}
+     * Create a pending inspection for the vehicle and redirect to upload form.
+     */
+    public function requestInspection(Vehicle $vehicle)
+    {
+        $phone = Session::get('driver_phone');
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $linked = Vehicle::where('id', $vehicle->id)->whereIn('driver_phone', $phoneVariants)->first();
+        if (!$linked) {
+            abort(403, __('messages.driver_vehicle_not_linked'));
+        }
+
+        if (!$vehicle->is_active) {
+            return redirect()->route('driver.inspections.index')->with('error', __('messages.driver_vehicle_not_linked'));
+        }
+
+        $inspectionService = app(VehicleInspectionService::class);
+        $inspection = $inspectionService->createOrUpdateInspection($vehicle, VehicleInspection::REQUEST_MANUAL);
+
+        return redirect()->route('driver.inspections.upload', $inspection);
     }
 
     /**
@@ -102,10 +128,11 @@ class DriverInspectionController extends Controller
 
         $basePath = 'vehicles/' . $vehicle->id . '/inspections/' . $inspection->id . '/';
 
+        $imageService = app(ImageOptimizationService::class);
         foreach ($requiredTypes as $type) {
             $file = $request->file('photo_' . $type);
             if ($file) {
-                $path = $file->store($basePath, 'private');
+                $path = $imageService->optimizeAndStore($file, $basePath, 'private');
                 $this->maybeDeleteExisting($inspection, $type);
                 VehicleInspectionPhoto::create([
                     'vehicle_inspection_id' => $inspection->id,
@@ -121,7 +148,7 @@ class DriverInspectionController extends Controller
         if ($request->hasFile('photo_other')) {
             $sortOrder = count($requiredTypes);
             foreach ($request->file('photo_other') as $file) {
-                $path = $file->store($basePath, 'private');
+                $path = $imageService->optimizeAndStore($file, $basePath, 'private');
                 VehicleInspectionPhoto::create([
                     'vehicle_inspection_id' => $inspection->id,
                     'photo_type' => 'other',

@@ -27,8 +27,10 @@ return [
     'vehicles_pending' => 'مركبات بانتظار الفحص',
     'view_all' => 'عرض الكل',
     'no_pending' => 'جميع المركبات متوافقة.',
+    'upload_when_compliant' => 'يمكنك رفع صور الفحص لأي من مركباتك.',
     'no_inspections' => 'لا توجد فحوصات بعد.',
     'due_date' => 'تاريخ الاستحقاق',
+    'uploaded_at' => 'تاريخ الرفع',
     'request_inspection' => 'طلب فحص',
 
     'photo_front' => 'أمامي',
@@ -38,6 +40,7 @@ return [
     'photo_interior' => 'داخلي',
     'photo_odometer' => 'عداد الكيلومترات',
     'photo_other' => 'أخرى',
+    'photo_example' => 'مثال: التقط صورة واضحة لهذه الزاوية',
 
     'upload_photos' => 'رفع صور الفحص',
     'upload_required' => 'يجب رفع الصور المطلوبة.',
@@ -47,6 +50,7 @@ return [
     'inspection_submitted' => 'تم إرسال الفحص بنجاح.',
 
     'gallery' => 'معرض الفحوصات',
+    'view_details' => 'عرض التفاصيل',
     'filter_vehicle' => 'المركبة',
     'filter_date_range' => 'نطاق التاريخ',
     'filter_driver' => 'السائق',
