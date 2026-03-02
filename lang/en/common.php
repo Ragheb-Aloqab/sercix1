@@ -58,6 +58,7 @@ return [
     'actions' => 'Actions',
     'back' => 'Back',
     'apply' => 'Apply',
+    'filter' => 'Filter',
     'all' => 'All',
     'optional' => 'optional',
     'uploaded' => 'Uploaded',
@@ -96,4 +97,9 @@ return [
     'address' => 'Address',
     'confirm_delete' => 'Are you sure you want to delete? This action cannot be undone.',
     'name' => 'Name',
+    'status' => 'Status',
+    'date' => 'Date',
+    'reset' => 'Reset',
+    'reject' => 'Reject',
+    'confirm_reject' => 'Confirm reject?',
 ];

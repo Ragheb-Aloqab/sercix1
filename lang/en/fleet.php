@@ -1,0 +1,105 @@
+<?php
+
+return [
+    'dashboard' => 'Dashboard',
+    'dashboard_desc' => 'Overview and quick stats',
+    'my_vehicles' => 'My Vehicles',
+    'my_vehicles_desc' => 'Manage fleet vehicles',
+    'maintenance' => 'Maintenance',
+    'maintenance_desc' => 'Requests, offers & invoices',
+    'maintenance_requests' => 'Maintenance Requests',
+    'maintenance_offers' => 'Maintenance Offers',
+    'maintenance_invoices' => 'Maintenance Invoices',
+    'fuel' => 'Fuel',
+    'fuel_desc' => 'Fuel balance & top-up',
+    'tracking' => 'Tracking',
+    'tracking_desc' => 'Live vehicle tracking',
+    'reports' => 'Reports',
+    'reports_desc' => 'Export & analytics',
+    'settings' => 'Settings',
+    'settings_desc' => 'Profile & preferences',
+
+    // Vehicles
+    'add_vehicle' => 'Add New Vehicle',
+    'plate_number' => 'Plate Number',
+    'vehicle_name' => 'Vehicle Name',
+    'model' => 'Model',
+    'status' => 'Status',
+    'assigned_driver' => 'Assigned Driver',
+    'view' => 'View',
+    'edit' => 'Edit',
+
+    // Maintenance Requests
+    'create_request' => 'Create Maintenance Request',
+    'select_vehicle' => 'Select Vehicle',
+    'describe_issue' => 'Describe Issue',
+    'upload_images' => 'Upload Images',
+    'priority' => 'Priority',
+    'priority_low' => 'Low',
+    'priority_medium' => 'Medium',
+    'priority_high' => 'High',
+    'status_pending' => 'Pending',
+    'status_offers_received' => 'Offers Received',
+    'status_approved' => 'Approved',
+    'status_in_progress' => 'In Progress',
+    'status_completed' => 'Completed',
+    'status_rejected' => 'Rejected',
+    'filter_vehicle' => 'Vehicle',
+    'filter_date' => 'Date',
+    'filter_status' => 'Status',
+
+    // Maintenance Offers
+    'service_center_name' => 'Service Center',
+    'offered_price' => 'Offered Price',
+    'estimated_completion' => 'Estimated Completion',
+    'notes_from_center' => 'Notes',
+    'offer_status' => 'Offer Status',
+    'view_details' => 'View Details',
+    'approve_offer' => 'Approve Offer',
+    'offers_grouped_by_request' => 'Offers grouped by Maintenance Request',
+    'approved_highlight' => 'Approved',
+
+    // Maintenance Invoices
+    'total_amount' => 'Total Amount',
+    'invoice_date' => 'Invoice Date',
+    'payment_status' => 'Payment Status',
+    'paid' => 'Paid',
+    'unpaid' => 'Unpaid',
+    'download_pdf' => 'Download PDF',
+    'total_maintenance_cost' => 'Total Maintenance Cost',
+
+    // Fuel
+    'total_fuel_balance' => 'Total Fuel Balance',
+    'remaining_duration_expiry' => 'Remaining Duration Until Balance Expiry',
+    'expiry_note' => 'Calculated based on previous fuel consumption rate',
+    'current_balance' => 'Current Balance',
+    'add_balance' => 'Add Balance',
+    'add_balance_all' => 'Add Balance to All Vehicles',
+    'enter_amount' => 'Enter Amount',
+    'payment_method' => 'Payment Method',
+    'bank_transfer' => 'Bank Transfer (Company Account)',
+    'payment_receipt' => 'Payment Receipt',
+    'fuel_payment_history' => 'Fuel Payment History',
+
+    // Tracking
+    'moving' => 'Moving',
+    'stopped' => 'Stopped',
+    'offline' => 'Offline',
+    'last_update' => 'Last Update',
+    'filter_by_vehicle' => 'Filter by Vehicle',
+
+    // Reports
+    'maintenance_cost_report' => 'Maintenance Cost Report',
+    'fuel_consumption_report' => 'Fuel Consumption Report',
+    'vehicle_usage_report' => 'Vehicle Usage Report',
+    'export_pdf' => 'Export PDF',
+    'export_excel' => 'Export Excel',
+    'date_range' => 'Date Range',
+
+    // Settings
+    'edit_profile' => 'Edit Company Profile',
+    'update_contact' => 'Update Contact Information',
+    'manage_drivers' => 'Manage Drivers',
+    'subscription_plan' => 'Subscription Plan',
+    'change_password' => 'Change Password',
+];

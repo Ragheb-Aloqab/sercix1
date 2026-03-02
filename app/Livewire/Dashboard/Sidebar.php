@@ -60,13 +60,16 @@ class Sidebar extends Component
 
     /**
      * Resolve the current user's role from auth state.
-     * Order matters: company guard first, then web roles, then driver session.
+     * Order matters: company guard first, then maintenance_center, then web roles, then driver session.
      * Used in both mount() and render() so the public $role property and view data stay in sync.
      */
     private function resolveRole(): string
     {
         if (auth('company')->check()) {
             return 'company';
+        }
+        if (auth('maintenance_center')->check()) {
+            return 'maintenance_center';
         }
         $webUser = auth('web')->user();
         if ($webUser && in_array($webUser->role ?? '', ['admin', 'super_admin'])) {
@@ -97,31 +100,42 @@ class Sidebar extends Component
         $iconWrapActive = $isCompany
             ? 'w-9 h-9 rounded-xl bg-sky-500/40 flex items-center justify-center text-sky-400'
             : 'w-9 h-9 rounded-xl bg-white/15 dark:bg-slate-900/10 flex items-center justify-center';
+        $mcUser = auth('maintenance_center')->user();
         $overviewHref = match ($role) {
             'admin' => route('admin.dashboard'),
             'company' => route('company.dashboard'),
             'driver' => route('driver.dashboard'),
+            'maintenance_center' => route('maintenance-center.dashboard'),
             default => url('/'),
         };
         $overviewActive = match ($role) {
             'admin' => request()->routeIs('admin.dashboard'),
             'company' => request()->routeIs('company.dashboard'),
             'driver' => request()->routeIs('driver.dashboard'),
+            'maintenance_center' => request()->routeIs('maintenance-center.dashboard'),
             default => false,
         };
         $displayName = match (true) {
             $isCompany => $companyUser->company_name ?? 'Company',
             $role === 'driver' => __('driver.driver'),
+            $role === 'maintenance_center' => $mcUser?->name ?? __('maintenance.center'),
             default => $webUser?->name ?? 'User',
         };
-        $displayEmail = $isCompany ? ($companyUser->email ?? '') : ($webUser?->email ?? '');
+        $displayEmail = match (true) {
+            $isCompany => $companyUser->email ?? '',
+            $role === 'maintenance_center' => $mcUser?->email ?? '',
+            default => $webUser?->email ?? '',
+        };
         $avatarLetter = strtoupper(substr($displayName, 0, 1));
+
+        $isSuperAdmin = ($webUser?->role ?? '') === 'super_admin';
 
         return view('livewire.dashboard.sidebar', [
             'isCompany' => $isCompany,
             'companyUser' => $companyUser,
             'webUser' => $webUser,
             'role' => $role,
+            'isSuperAdmin' => $isSuperAdmin,
             'link' => $link,
             'active' => $active,
             'iconWrap' => $iconWrap,

@@ -20,10 +20,13 @@ class NewOrderForAdmin extends Notification
     public function toArray(object $notifiable): array
     {
         $companyName = $this->order->company ? $this->order->company->company_name : null;
+        $message = $companyName
+            ? __('messages.new_order_message', ['company' => $companyName])
+            : __('messages.new_order_message_fallback');
         return [
             'type' => 'new_order',
-            'title' => 'طلب جديد',
-            'message' => $companyName ? "طلب جديد من الشركة: {$companyName}" : 'طلب جديد من عميل',
+            'title' => __('messages.new_order_title'),
+            'message' => $message,
             'order_id' => $this->order->id,
             'company_name' => $companyName,
             'driver_phone' => $this->order->driver_phone,

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DriverNotification;
+use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\Log;
@@ -124,6 +125,99 @@ class DriverNotificationService
             'title' => __('messages.order_completed') ?: 'Order completed',
             'message' => __('driver.request') . ' #' . $order->id . ' ' . (__('messages.order_completed') ?: 'has been completed.'),
             'order_id' => $order->id,
+            'url' => $url,
+            'route' => $url,
+        ]);
+    }
+
+    /**
+     * Notify driver when company approves a maintenance center for their request.
+     */
+    public function notifyMaintenanceCenterApproved(MaintenanceRequest $request): void
+    {
+        $phone = $request->driver_phone ?? null;
+        if (!$phone) {
+            return;
+        }
+
+        $center = $request->approvedCenter;
+        $centerName = $center?->name ?? __('maintenance.center');
+        $url = route('driver.maintenance-request.show', $request);
+
+        $title = __('maintenance.center_approved_for_driver') ?: 'Center approved for your request';
+        $message = __('maintenance.driver_center_approved_message', [
+            'center' => $centerName,
+            'request_id' => $request->id,
+        ]);
+        if (str_starts_with($message, 'maintenance.')) {
+            $message = "{$centerName} " . __('maintenance.center_approved_for_request') . " #{$request->id}";
+        }
+
+        $this->notify($phone, 'maintenance_center_approved', [
+            'title' => $title,
+            'message' => $message,
+            'maintenance_request_id' => $request->id,
+            'center_name' => $centerName,
+            'url' => $url,
+            'route' => $url,
+        ]);
+    }
+
+    /**
+     * Notify driver when company rejects their maintenance request.
+     */
+    public function notifyMaintenanceRequestRejected(MaintenanceRequest $request): void
+    {
+        $phone = $request->driver_phone ?? null;
+        if (!$phone) {
+            return;
+        }
+
+        $url = route('driver.maintenance-request.show', $request);
+        $reason = $request->rejection_reason ?? '';
+        $reasonSuffix = $reason ? ' ' . __('maintenance.reason') . ': ' . $reason : '';
+
+        $title = __('maintenance.request_rejected_title') ?: 'Request rejected';
+        $message = __('maintenance.request_rejected_message', [
+            'request_id' => $request->id,
+            'reason' => $reasonSuffix,
+        ]);
+        if (str_starts_with($message, 'maintenance.')) {
+            $message = __('maintenance.maintenance_request') . " #{$request->id} " . __('maintenance.was_rejected') . $reasonSuffix;
+        }
+
+        $this->notify($phone, 'maintenance_request_rejected', [
+            'title' => $title,
+            'message' => $message,
+            'maintenance_request_id' => $request->id,
+            'rejection_reason' => $reason,
+            'url' => $url,
+            'route' => $url,
+        ]);
+    }
+
+    /**
+     * Notify driver when their maintenance request is completed (closed).
+     */
+    public function notifyMaintenanceRequestClosed(MaintenanceRequest $request): void
+    {
+        $phone = $request->driver_phone ?? null;
+        if (!$phone) {
+            return;
+        }
+
+        $url = route('driver.maintenance-request.show', $request);
+
+        $title = __('maintenance.request_closed_title') ?: 'Request completed';
+        $message = __('maintenance.request_closed_message', ['request_id' => $request->id]);
+        if (str_starts_with($message, 'maintenance.')) {
+            $message = __('maintenance.maintenance_request') . " #{$request->id} " . __('maintenance.has_been_completed');
+        }
+
+        $this->notify($phone, 'maintenance_request_closed', [
+            'title' => $title,
+            'message' => $message,
+            'maintenance_request_id' => $request->id,
             'url' => $url,
             'route' => $url,
         ]);

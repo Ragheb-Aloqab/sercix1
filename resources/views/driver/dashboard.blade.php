@@ -8,7 +8,7 @@
 
     {{-- Services grid: 2x2 on mobile, 4 columns on larger screens --}}
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-8">
-        <a href="{{ route('driver.request.create') }}"
+        <a href="{{ route('driver.maintenance-request.create') }}"
            class="dash-card dash-card-interactive p-6 flex flex-col items-center justify-center active:scale-95 transition duration-200">
             <span class="w-14 h-14 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-400">
                 <i class="fa-solid fa-screwdriver-wrench text-xl"></i>
@@ -56,11 +56,11 @@
                             <p class="text-xs text-servx-silver mt-1">{{ __('driver.status') }}: {{ $row->statusLabel }} — {{ $row->request->created_at->format('Y-m-d H:i') }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('driver.request.show', $row->request) }}" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">{{ __('common.view') }}</a>
+                            <a href="{{ route('driver.maintenance-request.show', $row->request) }}" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">{{ __('common.view') }}</a>
                             <span class="px-3 py-1 rounded-xl text-sm font-semibold
-                                @if($row->request->status === 'pending_approval') bg-amber-500/20 text-amber-400
+                                @if($row->request->status === 'new_request') bg-amber-500/20 text-amber-400
                                 @elseif($row->request->status === 'rejected') bg-rose-500/20 text-rose-400
-                                @elseif($row->request->status === 'completed') bg-emerald-500/20 text-emerald-400
+                                @elseif($row->request->status === 'closed') bg-emerald-500/20 text-emerald-400
                                 @else bg-slate-600/50 text-slate-300 @endif">{{ $row->statusLabel }}</span>
                         </div>
                     </li>

@@ -34,9 +34,15 @@ class NotificationsBell extends Component
 
     private function actor()
     {
-        
-        if (Auth::guard('company')->check()) return Auth::guard('company')->user();
-        if (Auth::guard('web')->check()) return Auth::guard('web')->user();
+        if (Auth::guard('company')->check()) {
+            return Auth::guard('company')->user();
+        }
+        if (Auth::guard('maintenance_center')->check()) {
+            return Auth::guard('maintenance_center')->user();
+        }
+        if (Auth::guard('web')->check()) {
+            return Auth::guard('web')->user();
+        }
         return null;
     }
 
@@ -97,14 +103,23 @@ class NotificationsBell extends Component
         if (! $url) {
             $orderId = data_get($notification->data, 'order_id');
             $paymentId = data_get($notification->data, 'payment_id');
+            $maintenanceRequestId = data_get($notification->data, 'maintenance_request_id');
 
-            if ($orderId) {
+            if ($maintenanceRequestId) {
+                if (Auth::guard('company')->check()) {
+                    $url = route('company.maintenance-requests.show', $maintenanceRequestId);
+                } elseif (Auth::guard('maintenance_center')->check()) {
+                    $url = route('maintenance-center.rfq.show', $maintenanceRequestId);
+                }
+            }
+            if (! $url && $orderId) {
                 if (Auth::guard('company')->check()) {
                     $url = route('company.orders.show', $orderId);
                 } else {
                     $url = route('admin.orders.show', $orderId);
                 }
-            } elseif ($paymentId) {
+            }
+            if (! $url && $paymentId) {
                 $maybeOrderId = data_get($notification->data, 'order_id');
                 if ($maybeOrderId) {
                     $url = Auth::guard('company')->check()

@@ -89,6 +89,14 @@ Route::middleware(['company'])
         Route::get('/fuel', [FuelController::class, 'index'])
             ->name('fuel.index');
 
+        // Fuel Balance (fleet fuel cards)
+        Route::get('/fuel-balance', [\App\Http\Controllers\Company\FuelBalanceController::class, 'index'])
+            ->name('fuel-balance');
+        Route::post('/fuel-balance/add', [\App\Http\Controllers\Company\FuelBalanceController::class, 'addBalance'])
+            ->name('fuel-balance.add');
+        Route::post('/fuel-balance/add-all', [\App\Http\Controllers\Company\FuelBalanceController::class, 'addBalanceAll'])
+            ->name('fuel-balance.add-all');
+
         Route::post('/fuel/{fuelRefill}/generate-invoice', [FuelController::class, 'generateInvoice'])
             ->name('fuel.generate-invoice')
             ->whereNumber('fuelRefill');
@@ -174,6 +182,53 @@ Route::middleware(['company'])
         Route::patch('/branches/{branch}', [BranchesController::class, 'update'])
             ->name('branches.update')
             ->whereNumber('branch');
+        // Maintenance Requests (RFQ workflow)
+        Route::get('/maintenance-requests/create', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'create'])
+            ->name('maintenance-requests.create');
+        Route::post('/maintenance-requests', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'store'])
+            ->name('maintenance-requests.store');
+        Route::get('/maintenance-requests', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'index'])
+            ->name('maintenance-requests.index');
+        Route::get('/maintenance-requests/{maintenanceRequest}', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'show'])
+            ->name('maintenance-requests.show')
+            ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/reject', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'reject'])
+            ->name('maintenance-requests.reject')
+            ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/send-rfq', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'sendRfq'])
+            ->name('maintenance-requests.send-rfq')
+            ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/approve-center/{quotation}', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'approveCenter'])
+            ->name('maintenance-requests.approve-center')
+            ->whereNumber(['maintenanceRequest', 'quotation']);
+        Route::post('/maintenance-requests/{maintenanceRequest}/reject-all-quotes', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'rejectAllQuotes'])
+            ->name('maintenance-requests.reject-all-quotes')
+            ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/approve-invoice', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'approveInvoice'])
+            ->name('maintenance-requests.approve-invoice')
+            ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/reject-invoice', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'rejectInvoice'])
+            ->name('maintenance-requests.reject-invoice')
+            ->whereNumber('maintenanceRequest');
+
+        // Maintenance Offers (quotations grouped by request)
+        Route::get('/maintenance-offers', [\App\Http\Controllers\Company\MaintenanceOffersController::class, 'index'])
+            ->name('maintenance-offers.index');
+
+        // Maintenance Centers (read-only list of active centers available for RFQ)
+        Route::get('/maintenance-centers', [\App\Http\Controllers\Company\MaintenanceCenterController::class, 'index'])
+            ->name('maintenance-centers.index');
+
+        // Maintenance Invoice Archive (view & download final invoices)
+        Route::get('/maintenance-invoices', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'index'])
+            ->name('maintenance-invoices.index');
+        Route::get('/maintenance-invoices/{maintenanceRequest}/view', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'stream'])
+            ->name('maintenance-invoices.view')
+            ->whereNumber('maintenanceRequest');
+        Route::get('/maintenance-invoices/{maintenanceRequest}/download', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'download'])
+            ->name('maintenance-invoices.download')
+            ->whereNumber('maintenanceRequest');
+
         // Vehicle Inspections
         Route::get('/inspections', [VehicleInspectionController::class, 'index'])
             ->name('inspections.index');

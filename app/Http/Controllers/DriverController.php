@@ -27,14 +27,14 @@ class DriverController extends Controller
             ->where('is_active', true)
             ->get();
 
-        $requests = Order::whereIn('driver_phone', $phoneVariants)
+        $requests = \App\Models\MaintenanceRequest::whereIn('driver_phone', $phoneVariants)
             ->with(['vehicle', 'company:id,company_name'])
             ->latest()
             ->take(10)
             ->get();
 
         $requestsWithDisplay = $requests->map(function ($r) {
-            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $r->status), 'common.') ? $r->status : __('common.status_' . $r->status);
+            $statusLabel = $r->status_label;
             return (object) ['request' => $r, 'statusLabel' => $statusLabel];
         });
 
@@ -56,14 +56,14 @@ class DriverController extends Controller
         $phone = Session::get('driver_phone');
         $phoneVariants = $this->driverPhoneVariants($phone);
 
-        $requests = Order::whereIn('driver_phone', $phoneVariants)
+        $requests = \App\Models\MaintenanceRequest::whereIn('driver_phone', $phoneVariants)
             ->with(['vehicle', 'company:id,company_name'])
             ->latest()
-            ->take(10)
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
-        $requestsWithDisplay = $requests->map(function ($r) {
-            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $r->status), 'common.') ? $r->status : __('common.status_' . $r->status);
+        $requestsWithDisplay = $requests->getCollection()->map(function ($r) {
+            $statusLabel = $r->status_label;
             return (object) ['request' => $r, 'statusLabel' => $statusLabel];
         });
 

@@ -19,15 +19,13 @@ class OrderAssignedToTechnician extends Notification
     
     public function toArray(object $notifiable): array
     {
-       return 
-         [
+        return [
             'type' => 'order_assigned',
-            'title' => 'تم إسناد طلب جديد لك',
+            'title' => __('messages.order_assigned_title'),
             'order_id' => $this->order->id,
             'customer_name' => $this->order->customer_name ?? null,
             'url' => route('tech.tasks.show', $this->order->id),
             'created_at' => now(),
         ];
-        
     }
 }

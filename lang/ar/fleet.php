@@ -1,0 +1,105 @@
+<?php
+
+return [
+    'dashboard' => 'لوحة التحكم',
+    'dashboard_desc' => 'نظرة عامة وإحصائيات سريعة',
+    'my_vehicles' => 'مركباتي',
+    'my_vehicles_desc' => 'إدارة مركبات الأسطول',
+    'maintenance' => 'الصيانة',
+    'maintenance_desc' => 'طلبات وعروض وفواتير',
+    'maintenance_requests' => 'طلبات الصيانة',
+    'maintenance_offers' => 'عروض الصيانة',
+    'maintenance_invoices' => 'فواتير الصيانة',
+    'fuel' => 'الوقود',
+    'fuel_desc' => 'رصيد الوقود والشحن',
+    'tracking' => 'التتبع',
+    'tracking_desc' => 'تتبع المركبات المباشر',
+    'reports' => 'التقارير',
+    'reports_desc' => 'التصدير والتحليلات',
+    'settings' => 'الإعدادات',
+    'settings_desc' => 'الملف الشخصي والتفضيلات',
+
+    // Vehicles
+    'add_vehicle' => 'إضافة مركبة جديدة',
+    'plate_number' => 'رقم اللوحة',
+    'vehicle_name' => 'اسم المركبة',
+    'model' => 'الموديل',
+    'status' => 'الحالة',
+    'assigned_driver' => 'السائق المعين',
+    'view' => 'عرض',
+    'edit' => 'تعديل',
+
+    // Maintenance Requests
+    'create_request' => 'إنشاء طلب صيانة',
+    'select_vehicle' => 'اختر المركبة',
+    'describe_issue' => 'وصف المشكلة',
+    'upload_images' => 'رفع الصور',
+    'priority' => 'الأولوية',
+    'priority_low' => 'منخفضة',
+    'priority_medium' => 'متوسطة',
+    'priority_high' => 'عالية',
+    'status_pending' => 'قيد الانتظار',
+    'status_offers_received' => 'تم استلام العروض',
+    'status_approved' => 'معتمد',
+    'status_in_progress' => 'قيد التنفيذ',
+    'status_completed' => 'مكتمل',
+    'status_rejected' => 'مرفوض',
+    'filter_vehicle' => 'المركبة',
+    'filter_date' => 'التاريخ',
+    'filter_status' => 'الحالة',
+
+    // Maintenance Offers
+    'service_center_name' => 'مركز الخدمة',
+    'offered_price' => 'السعر المعروض',
+    'estimated_completion' => 'الوقت المتوقع للإنجاز',
+    'notes_from_center' => 'ملاحظات المركز',
+    'offer_status' => 'حالة العرض',
+    'view_details' => 'عرض التفاصيل',
+    'approve_offer' => 'اعتماد العرض',
+    'offers_grouped_by_request' => 'العروض مجمعة حسب طلب الصيانة',
+    'approved_highlight' => 'معتمد',
+
+    // Maintenance Invoices
+    'total_amount' => 'المبلغ الإجمالي',
+    'invoice_date' => 'تاريخ الفاتورة',
+    'payment_status' => 'حالة الدفع',
+    'paid' => 'مدفوع',
+    'unpaid' => 'غير مدفوع',
+    'download_pdf' => 'تحميل PDF',
+    'total_maintenance_cost' => 'إجمالي تكلفة الصيانة',
+
+    // Fuel
+    'total_fuel_balance' => 'الرصيد الإجمالي',
+    'remaining_duration_expiry' => 'المدة المتبقية لانتهاء الرصيد',
+    'expiry_note' => 'محسوبة بناءً على معدل استهلاك الوقود السابق',
+    'current_balance' => 'الرصيد الحالي',
+    'add_balance' => 'إضافة رصيد',
+    'add_balance_all' => 'إضافة رصيد لجميع المركبات',
+    'enter_amount' => 'أدخل المبلغ',
+    'payment_method' => 'طريقة الدفع',
+    'bank_transfer' => 'تحويل بنكي (حساب الشركة)',
+    'payment_receipt' => 'إيصال الدفع',
+    'fuel_payment_history' => 'سجل مدفوعات الوقود',
+
+    // Tracking
+    'moving' => 'متحرك',
+    'stopped' => 'متوقف',
+    'offline' => 'غير متصل',
+    'last_update' => 'آخر تحديث',
+    'filter_by_vehicle' => 'تصفية حسب المركبة',
+
+    // Reports
+    'maintenance_cost_report' => 'تقرير تكلفة الصيانة',
+    'fuel_consumption_report' => 'تقرير استهلاك الوقود',
+    'vehicle_usage_report' => 'تقرير استخدام المركبات',
+    'export_pdf' => 'تصدير PDF',
+    'export_excel' => 'تصدير Excel',
+    'date_range' => 'نطاق التاريخ',
+
+    // Settings
+    'edit_profile' => 'تعديل ملف الشركة',
+    'update_contact' => 'تحديث معلومات الاتصال',
+    'manage_drivers' => 'إدارة السائقين',
+    'subscription_plan' => 'خطة الاشتراك',
+    'change_password' => 'تغيير كلمة المرور',
+];

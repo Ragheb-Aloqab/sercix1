@@ -99,7 +99,7 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('sign-in.index') }}"
+                    <a href="{{ route('login') }}"
                         class="inline-flex items-center gap-2 bg-servx-red hover:bg-servx-red-hover text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 hover:scale-[1.02]">
                         <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
                         <span>{{ __('index.navLogin') }}</span>
@@ -142,7 +142,7 @@
                         <button type="submit" class="w-full text-start py-3 min-h-[44px] flex items-center font-bold rounded-lg px-2 -mx-2 hover:bg-servx-red/10 hover:text-servx-red transition-colors" data-i18n="navLogout">{{ __('index.navLogout') }}</button>
                     </form>
                 @else
-                    <a href="{{ route('sign-in.index') }}" class="py-3 min-h-[44px] flex items-center font-bold rounded-lg px-2 -mx-2 hover:bg-servx-red/10 hover:text-servx-red transition-colors">{{ __('index.navLogin') }}</a>
+                    <a href="{{ route('login') }}" class="py-3 min-h-[44px] flex items-center font-bold rounded-lg px-2 -mx-2 hover:bg-servx-red/10 hover:text-servx-red transition-colors">{{ __('index.navLogin') }}</a>
                 @endif
             </div>
         </div>

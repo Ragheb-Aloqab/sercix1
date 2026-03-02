@@ -65,6 +65,11 @@ class Vehicle extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function maintenanceRequests()
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
     public function branch()
     {
         return $this->belongsTo(\App\Models\CompanyBranch::class, 'company_branch_id');

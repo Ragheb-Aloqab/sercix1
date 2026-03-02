@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
+    // Login is defined in web.php (UnifiedLoginController)
 
     Volt::route('register', 'pages.auth.register')
         ->name('register');

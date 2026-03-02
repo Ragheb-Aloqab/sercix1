@@ -110,4 +110,55 @@
             </div>
         @endif
     </div>
+
+    @if($maintenanceRequests->isNotEmpty())
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300 overflow-hidden mt-8">
+        <div class="p-5 border-b border-slate-600/50">
+            <h2 class="text-base font-bold text-slate-300 text-end">{{ __('maintenance.completed_jobs') ?? 'Completed Maintenance' }}</h2>
+            <p class="text-sm text-slate-500 text-end mt-1">{{ __('maintenance.history_desc') ?? 'Service history from maintenance centers' }}</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[600px]">
+                <thead class="border-b border-slate-600/50">
+                    <tr class="text-slate-400">
+                        <th class="text-end p-4 font-bold">#</th>
+                        <th class="text-end p-4 font-bold">{{ __('maintenance.center_name') }}</th>
+                        <th class="text-end p-4 font-bold">{{ __('orders.status') }}</th>
+                        <th class="text-end p-4 font-bold">{{ __('orders.driver_name') }}</th>
+                        <th class="text-end p-4 font-bold">{{ __('orders.vehicle_plate') }}</th>
+                        <th class="text-end p-4 font-bold">{{ __('orders.vehicle_name') }}</th>
+                        <th class="text-end p-4 font-bold">{{ __('orders.request_date') }}</th>
+                        <th class="text-start p-4 font-bold">{{ __('orders.action') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-600/50">
+                    @foreach($maintenanceRequests as $mr)
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="p-4 font-bold text-white text-end">#{{ $mr->id }}</td>
+                            <td class="p-4 text-white text-end">{{ $mr->approvedCenter?->name ?? '-' }}</td>
+                            <td class="p-4 text-end">
+                                <span class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/30 text-emerald-300 border border-emerald-400/50">{{ $mr->status_label }}</span>
+                            </td>
+                            <td class="p-4 font-semibold text-white text-end">{{ $mr->requested_by_name ?? '—' }}</td>
+                            <td class="p-4 text-white text-end">{{ $mr->vehicle?->plate_number ?? '—' }}</td>
+                            <td class="p-4 text-white text-end">{{ trim(($mr->vehicle?->make ?? '').' '.($mr->vehicle?->model ?? '')) ?: '—' }}</td>
+                            <td class="p-4 text-slate-400 text-end">{{ $mr->completed_at?->format('Y-m-d H:i') ?? $mr->updated_at?->format('Y-m-d H:i') }}</td>
+                            <td class="p-4">
+                                <a href="{{ route('company.maintenance-requests.show', $mr) }}"
+                                    class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors">
+                                    {{ __('orders.view') }}
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @if ($maintenanceRequests->hasPages())
+            <div class="p-5 border-t border-slate-600/50">
+                {{ $maintenanceRequests->links() }}
+            </div>
+        @endif
+    </div>
+    @endif
 </div>

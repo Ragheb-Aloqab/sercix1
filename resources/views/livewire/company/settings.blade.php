@@ -23,7 +23,7 @@
 
     {{-- Profile --}}
     <div class="{{ $cardClass }}">
-        <h2 class="{{ $h2Class }}">{{ __('livewire.company_data') }}</h2>
+        <h2 class="{{ $h2Class }}">{{ __('fleet.edit_profile') }}</h2>
 
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
@@ -102,9 +102,28 @@
         </div>
     </div>
 
+    {{-- Manage Drivers --}}
+    <div class="{{ $cardClass }}">
+        <h2 class="{{ $h2Class }}">{{ __('fleet.manage_drivers') }}</h2>
+        <p class="{{ $descClass }}">{{ __('fleet.assigned_driver') }} — {{ __('fleet.my_vehicles') }}</p>
+        <a href="{{ route('company.vehicles.index') }}" class="dash-btn dash-btn-primary">
+            <i class="fa-solid fa-car me-2"></i>{{ __('fleet.my_vehicles') }}
+        </a>
+    </div>
+
+    {{-- Subscription Plan --}}
+    <div class="{{ $cardClass }}">
+        <h2 class="{{ $h2Class }}">{{ __('fleet.subscription_plan') }}</h2>
+        <p class="{{ $descClass }}">{{ __('fleet.subscription_plan') }} — {{ __('common.view') }}</p>
+        <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-600/50">
+            <p class="font-bold text-white">{{ __('company.vehicles_count') }}: {{ auth('company')->user()?->vehicles()->count() ?? 0 }}</p>
+            <p class="text-sm {{ $isCompany ? 'text-servx-silver' : 'text-slate-500' }} mt-1">{{ __('fleet.subscription_plan') }}</p>
+        </div>
+    </div>
+
     {{-- Password --}}
     <div class="{{ $cardClass }}">
-        <h2 class="{{ $h2Class }}">{{ __('livewire.change_password') }}</h2>
+        <h2 class="{{ $h2Class }}">{{ __('fleet.change_password') }}</h2>
 
         <div class="grid gap-4 sm:grid-cols-2">
             <div>

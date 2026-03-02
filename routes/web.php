@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();
+    $request->session()->forget('two_factor_verified_at');
     $request->session()->invalidate();
     $request->session()->regenerateToken();
     return redirect('/');
@@ -35,26 +36,32 @@ Route::get('/payments/tap/redirect', \App\Http\Controllers\TapRedirectController
 
 /*
 |--------------------------------------------------------------------------
-| Unified Sign-In (Company + Driver) — one form, redirect by role
+| Unified Login — /login (Admin 2FA, Company, Driver, Maintenance Center)
 |--------------------------------------------------------------------------
 */
-Route::prefix('sign-in')->name('sign-in.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\UnifiedAuthController::class, 'showLogin'])->name('index');
-    Route::post('/identify', [\App\Http\Controllers\UnifiedAuthController::class, 'identify'])
-        ->middleware('throttle:5,1')
-        ->name('identify');
-    Route::get('/password', [\App\Http\Controllers\UnifiedAuthController::class, 'showPasswordForm'])->name('password');
-    Route::post('/password', [\App\Http\Controllers\UnifiedAuthController::class, 'authenticatePassword'])
-        ->middleware('throttle:5,1')
-        ->name('authenticate_password');
-    Route::post('/send-otp', [\App\Http\Controllers\UnifiedAuthController::class, 'sendOtp'])
-        ->middleware('throttle:5,1')
-        ->name('send_otp');
-    Route::get('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'showVerify'])->name('verify');
-    Route::post('/verify', [\App\Http\Controllers\UnifiedAuthController::class, 'verifyOtp'])
+Route::get('/login', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showLogin'])->name('login');
+Route::prefix('login')->name('login.')->group(function () {
+    Route::post('/identify', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'identify'])
         ->middleware('throttle:10,1')
-        ->name('verify_otp');
+        ->name('identify');
+    Route::get('/password', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showPasswordForm'])->name('password');
+    Route::post('/password', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'authenticatePassword'])
+        ->middleware('throttle:5,1')
+        ->name('authenticate-password');
+    Route::get('/verify-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showOtpVerify'])->name('verify-otp');
+    Route::post('/verify-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('verify-otp');
+    Route::post('/resend-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'resendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('resend-otp');
+    Route::get('/verify', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showVerify'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'verifyOtpGeneric'])
+        ->middleware('throttle:15,1')
+        ->name('verify');
 });
+
+Route::get('/sign-in', fn () => redirect()->route('login'))->name('sign-in.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -62,7 +69,7 @@ Route::prefix('sign-in')->name('sign-in.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('driver')->name('driver.')->group(function () {
-    Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
+    Route::get('/login', fn () => redirect()->route('login'))->name('login');
     Route::post('/send-otp', [\App\Http\Controllers\DriverAuthController::class, 'sendOtp'])
         ->middleware('throttle:5,1')
         ->name('send_otp');
@@ -73,6 +80,9 @@ Route::prefix('driver')->name('driver.')->group(function () {
     Route::middleware('driver')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DriverController::class, 'dashboard'])->name('dashboard');
         Route::get('/history', [\App\Http\Controllers\DriverController::class, 'history'])->name('history');
+        Route::get('/maintenance-request', [\App\Http\Controllers\Driver\MaintenanceRequestController::class, 'create'])->name('maintenance-request.create');
+        Route::post('/maintenance-request', [\App\Http\Controllers\Driver\MaintenanceRequestController::class, 'store'])->name('maintenance-request.store');
+        Route::get('/maintenance-request/{maintenanceRequest}', [\App\Http\Controllers\Driver\MaintenanceRequestController::class, 'show'])->name('maintenance-request.show')->whereNumber('maintenanceRequest');
         Route::get('/request', [\App\Http\Controllers\DriverController::class, 'createRequest'])->name('request.create');
         Route::post('/request', [\App\Http\Controllers\DriverController::class, 'storeRequest'])->name('request.store');
         Route::get('/request/{order}', [\App\Http\Controllers\DriverController::class, 'showRequest'])->name('request.show')->whereNumber('order');
@@ -96,13 +106,39 @@ Route::prefix('driver')->name('driver.')->group(function () {
 Route::domain('{company}.servexmotors.com')->group(function(){
 
 });
+
+/*
+|--------------------------------------------------------------------------
+| Maintenance Center Auth (OTP only)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('maintenance-center')->name('maintenance-center.')->group(function () {
+    Route::get('/login', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'showLogin'])->name('login');
+    Route::post('/send-otp', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('send-otp');
+    Route::get('/verify', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'showVerify'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('verify');
+    Route::post('/logout', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'logout'])->name('logout');
+
+    Route::middleware('maintenance_center')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\MaintenanceCenter\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/history', [\App\Http\Controllers\MaintenanceCenter\HistoryController::class, 'index'])->name('history.index');
+        Route::get('/rfq/{maintenanceRequest}', [\App\Http\Controllers\MaintenanceCenter\RfqController::class, 'show'])->name('rfq.show')->whereNumber('maintenanceRequest');
+        Route::post('/rfq/{maintenanceRequest}/quotation', [\App\Http\Controllers\MaintenanceCenter\RfqController::class, 'submitQuotation'])->name('rfq.submit-quotation')->whereNumber('maintenanceRequest');
+        Route::post('/rfq/{maintenanceRequest}/start', [\App\Http\Controllers\MaintenanceCenter\RfqController::class, 'markStarted'])->name('rfq.start')->whereNumber('maintenanceRequest');
+        Route::post('/rfq/{maintenanceRequest}/invoice', [\App\Http\Controllers\MaintenanceCenter\RfqController::class, 'uploadInvoice'])->name('rfq.upload-invoice')->whereNumber('maintenanceRequest');
+    });
+});
 /*
 |--------------------------------------------------------------------------
 | Company Auth (OTP) — /company/login redirects to unified sign-in
 |--------------------------------------------------------------------------
 */
 Route::prefix('company')->name('company.')->group(function () {
-    Route::get('/login', fn () => redirect()->route('sign-in.index'))->name('login');
+    Route::get('/login', fn () => redirect()->route('login'))->name('login');
     Route::post('/login/send-otp', [OtpAuthController::class, 'sendOtp'])
         ->middleware('throttle:5,1')
         ->name('send_otp');
@@ -153,29 +189,24 @@ Route::get('/dashboard', function () {
     if (session()->has('driver_phone')) {
         return redirect()->route('driver.dashboard');
     }
+    if (Auth::guard('maintenance_center')->check()) {
+        return redirect()->route('maintenance-center.dashboard');
+    }
     if (Auth::guard('web')->check()) {
         $user = Auth::guard('web')->user();
         if (in_array($user->role ?? '', ['admin', 'super_admin'])) {
             return redirect()->route('admin.dashboard');
         }
     }
-    return redirect()->route('sign-in.index');
+    return redirect()->route('login');
 })->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
-| Companies Dashboard - Placeholder pages (Tracking, Fuel Balance)
+| Company routes are in routes/company.php (prefix /company)
+| Tracking: company.tracking.index, Fuel Balance: company.fuel-balance
 |--------------------------------------------------------------------------
-| Routes under /dashboard/companies for company-authenticated users.
 */
-Route::middleware(['company'])
-    ->prefix('dashboard/companies')
-    ->name('company.')
-    ->group(function () {
-        Route::get('/tracking', [\App\Http\Controllers\Company\TrackingController::class, 'index'])
-            ->name('tracking');
-        Route::get('/fuel-balance', fn () => view('company.dashboard.fuel_balance'))->name('fuel_balance');
-    });
 
 /*
 |--------------------------------------------------------------------------

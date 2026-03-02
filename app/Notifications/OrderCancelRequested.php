@@ -14,14 +14,14 @@ class OrderCancelRequested extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // أو mail لو تريد بريد
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
     {
         return [
-            'title' => 'طلب إلغاء طلب',
-            'message' => 'هناك طلب إلغاء للطلب رقم #' . $this->order->id,
+            'title' => __('messages.order_cancel_requested_title'),
+            'message' => __('messages.order_cancel_requested_message', ['id' => $this->order->id]),
             'order_id' => $this->order->id,
             'url' => route('admin.orders.show', $this->order->id),
         ];

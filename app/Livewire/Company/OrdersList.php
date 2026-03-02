@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Company;
 
+use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Support\OrderStatus;
 use Livewire\Component;
@@ -46,7 +47,7 @@ class OrdersList extends Component
                 $q->where(function ($q) use ($term) {
                     $q->where('id', 'like', $term)
                         ->orWhere('requested_by_name', 'like', $term)
-                        ->orWhere('requested_by_phone', 'like', $term)
+                        ->orWhere('driver_phone', 'like', $term)
                         ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', $term)
                             ->orWhere('make', 'like', $term)
                             ->orWhere('model', 'like', $term));
@@ -56,18 +57,40 @@ class OrdersList extends Component
             ->latest();
     }
 
+    protected function maintenanceQuery()
+    {
+        $company = auth('company')->user();
+
+        return MaintenanceRequest::forCompany($company->id)
+            ->where('status', 'closed')
+            ->when($this->search !== '', function ($q) {
+                $term = '%' . trim($this->search) . '%';
+                $q->where(function ($q) use ($term) {
+                    $q->where('id', 'like', $term)
+                        ->orWhere('requested_by_name', 'like', $term)
+                        ->orWhere('driver_phone', 'like', $term)
+                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', $term)
+                            ->orWhere('make', 'like', $term)
+                            ->orWhere('model', 'like', $term));
+                });
+            })
+            ->with(['vehicle:id,plate_number,make,model', 'approvedCenter'])
+            ->latest('completed_at');
+    }
+
     public function render()
     {
-        $orders = $this->baseQuery()->paginate(15)->withQueryString();
         $statuses = OrderStatus::ALL;
 
-        $ordersWithDisplay = $orders->getCollection()->map(function ($order) {
-            return (object) ['order' => $order];
-        });
+        $orders = $this->baseQuery()->paginate(15)->withQueryString();
+        $ordersWithDisplay = $orders->getCollection()->map(fn ($order) => (object) ['order' => $order, 'maintenanceRequest' => null]);
         $orders->setCollection($ordersWithDisplay);
+
+        $maintenanceRequests = $this->maintenanceQuery()->paginate(15)->withQueryString();
 
         return view('livewire.company.orders-list', [
             'orders' => $orders,
+            'maintenanceRequests' => $maintenanceRequests,
             'statuses' => $statuses,
         ]);
     }

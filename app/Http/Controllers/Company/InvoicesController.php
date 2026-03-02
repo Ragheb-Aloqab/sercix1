@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\MaintenanceRequest;
 use App\Models\Vehicle;
 use App\Services\MaintenanceInvoicePdfService;
 use Carbon\Carbon;
@@ -35,7 +36,7 @@ class InvoicesController extends Controller
                         ->orWhere('invoice_number', 'like', "%{$q}%");
                 });
             })
-            ->when($invoiceType !== '', function ($query) use ($invoiceType) {
+            ->when($invoiceType !== '' && $invoiceType !== 'maintenance', function ($query) use ($invoiceType) {
                 $query->where('invoice_type', $invoiceType);
             })
             ->when($vehicleId > 0, function ($query) use ($vehicleId) {
@@ -49,30 +50,44 @@ class InvoicesController extends Controller
 
         $summary = $this->computeInvoiceSummary($baseQuery);
 
-        $invoices = (clone $baseQuery)
-            ->with([
-                'order.services',
-                'order.vehicle',
-                'fuelRefill.vehicle',
-            ])
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+        $maintenanceInvoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+        $maintenanceSummary = ['total' => 0.0, 'avg' => 0.0, 'count' => 0];
+        if ($invoiceType === 'maintenance' || $invoiceType === '') {
+            $maintenanceQuery = MaintenanceRequest::forCompany($company->id)
+                ->whereNotNull('final_invoice_pdf_path')
+                ->with(['vehicle', 'approvedCenter'])
+                ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId))
+                ->when($from, fn ($q) => $q->where('final_invoice_uploaded_at', '>=', $from))
+                ->when($to, fn ($q) => $q->where('final_invoice_uploaded_at', '<=', $to))
+                ->when($q !== '', fn ($q) => $q->where('id', $q));
+            $maintenanceInvoices = $maintenanceQuery->latest('final_invoice_uploaded_at')->paginate(12)->withQueryString();
+            $maintenanceSummary = $this->computeMaintenanceInvoiceSummary($company->id, $from, $to, $vehicleId);
+        }
 
-        $invoices->getCollection()->transform(function ($invoice) {
-            $total = (float) ($invoice->total ?? 0);
+        if ($invoiceType === 'maintenance') {
+            $invoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+        } else {
+            $invoices = (clone $baseQuery)
+                ->with([
+                    'order.services',
+                    'order.vehicle',
+                    'fuelRefill.vehicle',
+                ])
+                ->latest()
+                ->paginate(12)
+                ->withQueryString();
 
-            $paid = $invoice->order_id
-                ? (float) ($invoice->order?->invoice?->paid_amount ?? 0)
-                : 0.0;
-
-            $remaining = max(0, $total - $paid);
-
-            $invoice->paid_amount = $paid;
-            $invoice->remaining_amount = $remaining;
-
-            return $invoice;
-        });
+            $invoices->getCollection()->transform(function ($invoice) {
+                $total = (float) ($invoice->total ?? 0);
+                $paid = $invoice->order_id
+                    ? (float) ($invoice->order?->invoice?->paid_amount ?? 0)
+                    : 0.0;
+                $remaining = max(0, $total - $paid);
+                $invoice->paid_amount = $paid;
+                $invoice->remaining_amount = $remaining;
+                return $invoice;
+            });
+        }
 
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
@@ -81,8 +96,25 @@ class InvoicesController extends Controller
 
         return view('company.invoices.index', compact(
             'company', 'invoices', 'q',
-            'invoiceType', 'vehicleId', 'vehicles', 'summary', 'from', 'to'
+            'invoiceType', 'vehicleId', 'vehicles', 'summary', 'from', 'to',
+            'maintenanceInvoices', 'maintenanceSummary'
         ));
+    }
+
+    private function computeMaintenanceInvoiceSummary(int $companyId, $from, $to, int $vehicleId): array
+    {
+        $q = MaintenanceRequest::forCompany($companyId)
+            ->whereNotNull('final_invoice_pdf_path')
+            ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->when($from, fn ($q) => $q->where('final_invoice_uploaded_at', '>=', $from))
+            ->when($to, fn ($q) => $q->where('final_invoice_uploaded_at', '<=', $to));
+        $total = (float) (clone $q)->sum(DB::raw('COALESCE(final_invoice_amount, approved_quote_amount, 0)'));
+        $count = (clone $q)->count();
+        return [
+            'total' => round($total, 2),
+            'avg' => $count > 0 ? round($total / $count, 2) : 0.0,
+            'count' => $count,
+        ];
     }
 
     /**

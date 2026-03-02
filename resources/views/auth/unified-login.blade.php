@@ -38,7 +38,7 @@
             @if (session('error'))<div class="mb-4 rounded-lg border border-servx-red/50 bg-servx-red/10 px-3 py-2 text-sm text-servx-silver-light">{{ session('error') }}</div>@endif
             @if ($errors->any())<div class="mb-4 rounded-lg border border-servx-red/50 bg-servx-red/10 px-3 py-2 text-sm text-servx-silver-light"><ul class="list-disc ms-5 space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
-            <form method="POST" action="{{ route('sign-in.identify') }}" class="space-y-4">
+            <form method="POST" action="{{ route('login.identify') }}" class="space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.identifier_label') }}</label>

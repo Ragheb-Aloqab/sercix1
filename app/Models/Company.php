@@ -75,6 +75,17 @@ class Company extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function maintenanceCenters()
+    {
+        return $this->belongsToMany(MaintenanceCenter::class, 'company_maintenance_center')
+            ->withTimestamps();
+    }
+
+    public function maintenanceRequests()
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
     public function vehicleQuotaRequests()
     {
         return $this->hasMany(VehicleQuotaRequest::class);

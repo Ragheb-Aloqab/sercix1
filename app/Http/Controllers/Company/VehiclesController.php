@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\CompanyBranch;
+use App\Models\MaintenanceRequest;
 use App\Services\ExpiryMonitoringService;
+use App\Services\VehicleAnalyticsService;
 use App\Services\VehicleInspectionService;
 use Illuminate\Http\Request;
 
@@ -183,6 +185,50 @@ class VehiclesController extends Controller
         $inspectionStatus = $inspectionService->getVehicleInspectionStatus($vehicle);
         $vehicleInspections = $vehicle->inspections()->with('photos')->latest('inspection_date')->take(10)->get();
 
+        $analyticsService = app(VehicleAnalyticsService::class);
+        $vehicleAnalytics = $analyticsService->getVehicleAnalytics($vehicle);
+        $chartMonths = (int) request('chart_months', 6);
+        if (!in_array($chartMonths, [1, 3, 6, 12], true)) {
+            $chartMonths = 6;
+        }
+        $costVsMarketChart = $analyticsService->getVehicleCostVsMarketChart($vehicle, $chartMonths);
+        $vehicleMarketComparison = $analyticsService->getVehicleMarketComparison($vehicle);
+
+        // Recent operations: MaintenanceRequest + Order (last 10 combined)
+        $recentMaintenance = MaintenanceRequest::where('vehicle_id', $vehicle->id)
+            ->where(function ($q) {
+                $q->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
+            })
+            ->with('approvedCenter')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn ($r) => (object) [
+                'type' => 'maintenance_request',
+                'id' => $r->id,
+                'status' => $r->status,
+                'cost' => (float) ($r->final_invoice_amount ?? $r->approved_quote_amount ?? 0),
+                'date' => $r->created_at,
+                'center' => $r->approvedCenter?->name,
+            ]);
+
+        $recentOrders = $vehicle->orders()->with('services')->latest()->take(5)->get()->map(function ($o) {
+            $total = (float) ($o->total_amount ?? 0);
+            if ($total <= 0 && $o->services) {
+                $total = $o->services->sum(fn ($s) => (float) ($s->pivot->total_price ?? $s->pivot->qty * $s->pivot->unit_price ?? 0));
+            }
+            return (object) [
+                'type' => 'order',
+                'id' => $o->id,
+                'status' => $o->status,
+                'cost' => $total,
+                'date' => $o->created_at,
+                'center' => null,
+            ];
+        });
+
+        $recentOperations = $recentMaintenance->concat($recentOrders)->sortByDesc('date')->take(8)->values();
+
         return view('company.vehicles.show', compact(
             'company',
             'vehicle',
@@ -195,7 +241,12 @@ class VehiclesController extends Controller
             'ordersWithDisplay',
             'inspectionStatus',
             'vehicleInspections',
-            'inspectionService'
+            'inspectionService',
+            'vehicleAnalytics',
+            'costVsMarketChart',
+            'chartMonths',
+            'vehicleMarketComparison',
+            'recentOperations',
         ));
     }
 

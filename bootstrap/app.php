@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'payments/tap/webhook',
         ]);
         $middleware->appendToGroup('web', \App\Http\Middleware\ForceHttps::class);
-        $middleware->redirectGuestsTo(fn () => route('dashboard'));
+        $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->web(append: [
             \App\Http\Middleware\SetLocaleFromSession::class,
             \App\Http\Middleware\UpdateSessionCompanyId::class,
@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'company' => \App\Http\Middleware\EnsureCompany::class,
             'driver' => \App\Http\Middleware\EnsureDriverSession::class,
+            'maintenance_center' => \App\Http\Middleware\EnsureMaintenanceCenter::class,
+            'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'checkrole' => \App\Http\Middleware\CheckRole::class,
             'payments' => \App\Http\Middleware\EnsurePaymentsEnabled::class,

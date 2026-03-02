@@ -24,8 +24,10 @@ class OrderTaskStartedNotification extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        $technicianName = $this->order->technician?->name ?? 'الفني';
-        $statusLabel = $this->status === 'assigned_to_technician' ? 'معيّن لفني' : 'قيد التنفيذ';
+        $technicianName = $this->order->technician?->name ?? __('messages.technician');
+        $statusLabel = $this->status === 'assigned_to_technician'
+            ? __('messages.order_assigned_to_technician')
+            : __('messages.order_in_progress');
 
         $url = $notifiable instanceof Company
             ? route('company.orders.show', $this->order->id)
@@ -33,8 +35,12 @@ class OrderTaskStartedNotification extends Notification implements ShouldQueue
 
         return [
             'type' => 'order_task_started',
-            'title' => 'بدء تنفيذ الطلب',
-            'message' => "{$technicianName} {$statusLabel} - الطلب #{$this->order->id}",
+            'title' => __('messages.order_task_started_title'),
+            'message' => __('messages.order_task_started_message', [
+                'technician' => $technicianName,
+                'status' => $statusLabel,
+                'id' => $this->order->id,
+            ]),
             'order_id' => $this->order->id,
             'technician_name' => $technicianName,
             'status' => $this->status,

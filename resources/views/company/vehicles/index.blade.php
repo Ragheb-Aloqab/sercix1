@@ -24,8 +24,8 @@
         </form>
 
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('company.fuel.index') }}" class="px-4 py-3 rounded-2xl border border-amber-500/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition-colors">
-                <i class="fa-solid fa-gas-pump me-2"></i>{{ __('company.fuel_report') }}
+            <a href="{{ route('company.fuel-balance') }}" class="px-4 py-3 rounded-2xl border border-amber-500/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition-colors">
+                <i class="fa-solid fa-gas-pump me-2"></i>{{ __('fleet.fuel') }}
             </a>
             <a href="{{ route('company.vehicles.create') }}"
                 class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors">
@@ -73,14 +73,11 @@
                 <table class="w-full text-sm min-w-[520px]">
                     <thead>
                         <tr class="text-slate-400 border-b border-slate-600/50">
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.plate') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.vehicle') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">IMEI</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.branch') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.registration_status') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.insurance_status') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('vehicles.status') }}</th>
-                            <th class="text-end py-3 px-2 font-bold">{{ __('inspections.title') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('fleet.plate_number') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('fleet.vehicle_name') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('fleet.model') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('fleet.status') }}</th>
+                            <th class="text-end py-3 px-2 font-bold">{{ __('fleet.assigned_driver') }}</th>
                             <th class="text-start py-3 px-2 font-bold">{{ __('vehicles.actions') }}</th>
                         </tr>
                     </thead>
@@ -102,32 +99,12 @@
                                     </a>
                                 </td>
                                 <td class="py-3 px-2 text-end">
-                                    <a href="{{ route('company.vehicles.show', $v) }}" class="block hover:opacity-80">
-                                        <div class="font-semibold text-white">
-                                            {{ $v->display_name }}
-                                        </div>
-                                        <div class="text-xs text-slate-500">
-                                            {{ __('vehicles.year_label') }}: {{ $v->year ?? '-' }}
-                                        </div>
+                                    <a href="{{ route('company.vehicles.show', $v) }}" class="block hover:opacity-80 font-semibold text-white">
+                                        {{ $v->display_name }}
                                     </a>
                                 </td>
-                                <td class="py-3 px-2 text-end text-slate-400 font-mono text-sm">
-                                    {{ $v->imei ?? '—' }}
-                                </td>
-                                <td class="py-3 px-2 text-white text-end">
-                                    {{ $v->branch?->name ?? '-' }}
-                                </td>
-                                <td class="py-3 px-2 text-end">
-                                    @php $regClass = $expiryService->getStatusBadgeClass($regStatus); @endphp
-                                    <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $regClass }}" title="{{ $v->registration_expiry_date?->translatedFormat('d M Y') ?? '—' }}">
-                                        {{ __('vehicles.' . $regStatus) }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-2 text-end">
-                                    @php $insClass = $expiryService->getStatusBadgeClass($insStatus); @endphp
-                                    <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $insClass }}" title="{{ $v->insurance_expiry_date?->translatedFormat('d M Y') ?? '—' }}">
-                                        {{ __('vehicles.' . $insStatus) }}
-                                    </span>
+                                <td class="py-3 px-2 text-end text-slate-400">
+                                    {{ trim(($v->make ?? '') . ' ' . ($v->model ?? '')) ?: ($v->year ?? '—') }}
                                 </td>
                                 <td class="py-3 px-2 text-end">
                                     @if ($v->is_active)
@@ -140,37 +117,19 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-2 text-end">
-                                    @php $insp = $v->inspection_status ?? null; @endphp
-                                    @if ($insp && in_array($insp['status'], ['pending', 'overdue']))
-                                        <a href="{{ route('company.inspections.index') }}?vehicle_id={{ $v->id }}" class="inline-flex items-center gap-1" title="{{ __('inspections.due_date') }}: {{ $insp['due_date']?->translatedFormat('d M Y') ?? '—' }}">
-                                            <span class="px-2 py-1 rounded-xl text-xs font-bold border {{ $insp['status'] === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $insp['status']) }}</span>
-                                        </a>
-                                    @else
-                                        <span class="px-2 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-xs font-bold">{{ __('inspections.compliant') }}</span>
-                                    @endif
+                                <td class="py-3 px-2 text-end text-slate-400">
+                                    {{ $v->driver_name ?? '—' }}
                                 </td>
                                 <td class="py-3 px-2">
                                     <div class="flex flex-wrap gap-2 justify-start">
                                         <a href="{{ route('company.vehicles.show', $v) }}"
-                                            class="px-3 py-2 min-h-[44px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold inline-flex items-center justify-center gap-2 transition-colors">
-                                            <i class="fa-solid fa-list shrink-0"></i> {{ __('vehicles.details') }}
+                                            class="px-3 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold inline-flex items-center gap-2">
+                                            <i class="fa-solid fa-eye shrink-0"></i> {{ __('fleet.view') }}
                                         </a>
                                         <a href="{{ route('company.vehicles.edit', $v->id) }}"
-                                            class="px-3 py-2 min-h-[44px] rounded-2xl border border-slate-500/50 text-white font-bold hover:bg-slate-700/50 inline-flex items-center justify-center gap-2 transition-colors">
-                                            <i class="fa-solid fa-pen shrink-0"></i> {{ __('common.edit') }}
+                                            class="px-3 py-2 rounded-2xl border border-slate-500/50 text-white font-bold hover:bg-slate-700/50 inline-flex items-center gap-2">
+                                            <i class="fa-solid fa-pen shrink-0"></i> {{ __('fleet.edit') }}
                                         </a>
-                                        @if ($v->imei)
-                                            <a href="{{ route('company.vehicles.track', $v) }}"
-                                                class="px-3 py-2 min-h-[44px] rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold inline-flex items-center justify-center gap-2 transition-colors">
-                                                <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('tracking.track_vehicle') }}
-                                            </a>
-                                        @else
-                                            <span class="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-2xl border border-slate-500/30 text-slate-500 font-bold cursor-not-allowed"
-                                                title="{{ __('tracking.imei_required') }}">
-                                                <i class="fa-solid fa-location-dot shrink-0"></i> {{ __('tracking.track_vehicle') }}
-                                            </span>
-                                        @endif
                                     </div>
                                 </td>
                             </tr>

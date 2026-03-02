@@ -164,10 +164,33 @@ class ExpiryMonitoringService
 
     /**
      * Count expiring/expired items for badge.
+     * Uses optimized query when only count is needed (e.g. mobile dashboard).
      */
     public function countExpiringForCompany(int $companyId): int
     {
-        return $this->getExpiringForCompany($companyId)->count();
+        $today = Carbon::today();
+        $threshold = $today->copy()->addDays(self::ALERT_DAYS_BEFORE);
+
+        $count = \Illuminate\Support\Facades\DB::table('vehicles')
+            ->where('company_id', $companyId)
+            ->where(function ($q) use ($today, $threshold) {
+                $q->where(function ($q) use ($today, $threshold) {
+                    $q->whereNotNull('registration_expiry_date')
+                        ->where('registration_expiry_date', '<=', $threshold);
+                })->orWhere(function ($q) use ($today, $threshold) {
+                    $q->whereNotNull('insurance_expiry_date')
+                        ->where('insurance_expiry_date', '<=', $threshold);
+                });
+            })
+            ->selectRaw('
+                (CASE WHEN registration_expiry_date IS NOT NULL AND registration_expiry_date <= ? THEN 1 ELSE 0 END) +
+                (CASE WHEN insurance_expiry_date IS NOT NULL AND insurance_expiry_date <= ? THEN 1 ELSE 0 END)
+                as cnt
+            ', [$threshold, $threshold])
+            ->get()
+            ->sum(fn ($r) => (int) ($r->cnt ?? 0));
+
+        return (int) $count;
     }
 
     public function countExpiringForAdmin(?int $companyId = null): int

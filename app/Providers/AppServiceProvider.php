@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly
         $brandingViews = [
-            'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*',
+            'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*', 'maintenance-center.*',
             'livewire.dashboard.*', 'components.*', 'errors.*',
         ];
         View::composer($brandingViews, function ($view) {

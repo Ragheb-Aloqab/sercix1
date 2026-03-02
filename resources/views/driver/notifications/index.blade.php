@@ -25,6 +25,9 @@
                     $data = $n->data ?? [];
                     $isUnread = is_null($n->read_at);
                     $link = $data['url'] ?? $data['route'] ?? null;
+                    if (! $link && ! empty($data['maintenance_request_id'])) {
+                        $link = route('driver.maintenance-request.show', $data['maintenance_request_id']);
+                    }
                 @endphp
 
                 <div class="py-4 flex items-start justify-between gap-4 hover:bg-slate-700/30 rounded-xl transition-colors {{ $isUnread ? 'bg-emerald-500/10' : '' }}">

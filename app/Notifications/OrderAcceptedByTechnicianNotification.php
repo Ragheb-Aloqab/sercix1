@@ -50,8 +50,8 @@ class OrderAcceptedByTechnicianNotification extends Notification
         return [
             'order_id' => $this->order->id,
             'technician_id' => $this->technician->id,
-            'title' => 'تم بدء تنفيذ طلبك',
-            'message' => "الفني {$this->technician->name} بدأ بتنفيذ طلبك",
+            'title' => __('messages.order_started_title'),
+            'message' => __('messages.order_started_message', ['name' => $this->technician->name]),
             'url' => route('company.orders.show', $this->order->id),
         ];
     }

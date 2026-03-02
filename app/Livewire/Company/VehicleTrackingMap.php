@@ -46,13 +46,11 @@ class VehicleTrackingMap extends Component
     public function getVehiclesProperty(): Collection
     {
         $company = auth('company')->user();
-        // Include: device_api with IMEI, mobile tracking, or no IMEI (mobile by default)
+        // Only vehicles with active tracking: device_api+IMEI or mobile tracking
         $query = $company->vehicles()
             ->where('is_active', true)
             ->where(function ($q) {
                 $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
-                    ->orWhereNull('imei')
-                    ->orWhere('imei', '')
                     ->orWhere(function ($q2) {
                         $q2->where('tracking_source', Vehicle::TRACKING_DEVICE_API)
                             ->whereNotNull('imei')

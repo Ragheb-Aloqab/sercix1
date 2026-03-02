@@ -13,9 +13,12 @@ class MobileTabBar extends Component
 
     public function getRole(): string
     {
-        // Order matters: company first, then web roles (prevents cross-role menu leakage)
+        // Order matters: company, maintenance_center, then web roles
         if (auth('company')->check()) {
             return 'company';
+        }
+        if (auth('maintenance_center')->check()) {
+            return 'maintenance_center';
         }
         $user = auth('web')->user();
         return $user?->role ?? 'guest';
@@ -29,6 +32,7 @@ class MobileTabBar extends Component
         $overviewHref = match ($role) {
             'admin', 'super_admin' => route('admin.dashboard'),
             'company' => route('company.dashboard'),
+            'maintenance_center' => route('maintenance-center.dashboard'),
             default => url('/'),
         };
 
@@ -47,19 +51,25 @@ class MobileTabBar extends Component
             $adminItems[] = ['href' => route('admin.bank-transfers.index'), 'label' => __('dashboard.bank_transfers'), 'icon' => 'fa-landmark', 'active' => $is('admin.bank-transfers.*')];
         }
 
+        $maintenanceCenterItems = [
+            ['href' => $overviewHref, 'label' => __('maintenance.assigned_rfqs'), 'icon' => 'fa-warehouse', 'active' => $is('maintenance-center.dashboard')],
+            ['href' => route('maintenance-center.history.index'), 'label' => __('maintenance.history'), 'icon' => 'fa-clock-rotate-left', 'active' => $is('maintenance-center.history.*')],
+        ];
+
+        $companyItems = [
+            ['href' => $overviewHref, 'label' => __('fleet.dashboard'), 'icon' => 'fa-chart-line', 'active' => $is('company.dashboard')],
+            ['href' => route('company.vehicles.index'), 'label' => __('fleet.my_vehicles'), 'icon' => 'fa-car', 'active' => $is('company.vehicles.*')],
+            ['href' => route('company.maintenance-requests.index'), 'label' => __('fleet.maintenance_requests'), 'icon' => 'fa-screwdriver-wrench', 'active' => $is('company.maintenance-requests.*')],
+            ['href' => route('company.fuel-balance'), 'label' => __('fleet.fuel'), 'icon' => 'fa-gas-pump', 'active' => $is('company.fuel-balance')],
+            ['href' => route('company.tracking.index'), 'label' => __('fleet.tracking'), 'icon' => 'fa-location-dot', 'active' => $is('company.tracking.*')],
+            ['href' => route('company.reports.index'), 'label' => __('fleet.reports'), 'icon' => 'fa-chart-pie', 'active' => $is('company.reports.*')],
+            ['href' => route('company.settings'), 'label' => __('fleet.settings'), 'icon' => 'fa-gear', 'active' => $is('company.settings')],
+        ];
+
         return match ($role) {
             'admin', 'super_admin' => $adminItems,
-            'company' => [
-                ['href' => $overviewHref, 'label' => __('dashboard.overview'), 'icon' => 'fa-chart-line', 'active' => $is('company.dashboard')],
-                ['href' => route('company.orders.index'), 'label' => __('dashboard.orders'), 'icon' => 'fa-receipt', 'active' => $is('company.orders.*')],
-                ['href' => route('company.vehicles.index'), 'label' => __('dashboard.vehicles'), 'icon' => 'fa-car', 'active' => $is('company.vehicles.*')],
-                ['href' => route('company.invoices.index'), 'label' => __('dashboard.invoices'), 'icon' => 'fa-file-invoice', 'active' => $is('company.invoices.*')],
-                ['href' => route('company.reports.index'), 'label' => __('reports.all_reports'), 'icon' => 'fa-chart-pie', 'active' => $is('company.reports.index')],
-                ['href' => route('company.fuel.index'), 'label' => __('reports.fuel_report'), 'icon' => 'fa-gas-pump', 'active' => $is('company.fuel.*')],
-                ['href' => route('company.reports.service'), 'label' => __('reports.service_report'), 'icon' => 'fa-screwdriver-wrench', 'active' => $is('company.reports.service')],
-                ['href' => route('company.branches.index'), 'label' => __('dashboard.branches'), 'icon' => 'fa-code-branch', 'active' => $is('company.branches.*')],
-                ['href' => route('company.settings'), 'label' => __('dashboard.settings'), 'icon' => 'fa-gear', 'active' => $is('company.settings')],
-            ],
+            'maintenance_center' => $maintenanceCenterItems,
+            'company' => $companyItems,
             default => [],
         };
     }

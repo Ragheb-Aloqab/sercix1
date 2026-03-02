@@ -41,21 +41,20 @@ class PaymentPaidNotification extends Notification
         $companyName = $company?->company_name ?? '—';
 
         $methodLabel = match ($this->payment->method ?? '') {
-            'cash' => 'كاش',
-            'tap'  => 'Tap',
-            'bank' => 'تحويل بنكي',
+            'cash' => __('messages.payment_method_cash'),
+            'tap'  => __('messages.payment_method_tap'),
+            'bank' => __('messages.payment_method_bank'),
             default => $this->payment->method ?? '—',
         };
 
         $amount = number_format((float) $this->payment->amount, 2);
-        $title = 'تم استلام دفعة';
-        $message = sprintf(
-            'شركة %s دفعت %s ر.س (%s) للطلب #%s',
-            $companyName,
-            $amount,
-            $methodLabel,
-            $this->payment->order_id
-        );
+        $title = __('messages.payment_received_title');
+        $message = __('messages.payment_paid_message', [
+            'company' => $companyName,
+            'amount' => $amount,
+            'method' => $methodLabel,
+            'id' => $this->payment->order_id,
+        ]);
 
         return [
             'title'         => $title,

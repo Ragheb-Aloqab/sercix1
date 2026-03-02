@@ -39,4 +39,13 @@ return [
     */
     'default_map_style' => env('DEFAULT_MAP_STYLE'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Market Comparison – Benchmark Rate Per KM
+    |--------------------------------------------------------------------------
+    | Industry benchmark operational cost per kilometer (SAR/km) for fleet comparison.
+    | Used when comparing company actual cost per km vs market average.
+    */
+    'market_avg_per_km' => (float) (env('MARKET_AVG_PER_KM', 0.37)),
+
 ];

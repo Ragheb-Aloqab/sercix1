@@ -142,6 +142,19 @@ Route::middleware(['auth:web', 'admin'])
         Route::patch('/notifications/{notification}/read', [NotificationsController::class, 'markRead'])->name('notifications.read');
 
         // =========================
+        // Maintenance Centers
+        // =========================
+        Route::prefix('maintenance-centers')->name('maintenance-centers.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'store'])->name('store');
+            Route::get('/{maintenanceCenter}', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'show'])->name('show')->whereNumber('maintenanceCenter');
+            Route::get('/{maintenanceCenter}/edit', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'edit'])->name('edit')->whereNumber('maintenanceCenter');
+            Route::put('/{maintenanceCenter}', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'update'])->name('update')->whereNumber('maintenanceCenter');
+            Route::patch('/{maintenanceCenter}/toggle-status', [\App\Http\Controllers\Admin\MaintenanceCenterController::class, 'toggleStatus'])->name('toggle-status')->whereNumber('maintenanceCenter');
+        });
+
+        // =========================
         // Bank Accounts
         // =========================
         Route::prefix('settings/bank-accounts')->group(function () {

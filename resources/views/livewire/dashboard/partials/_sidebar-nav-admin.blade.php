@@ -1,5 +1,16 @@
 {{-- Admin nav links. Rendered only when $role === 'admin' --}}
 @if ($role === 'admin')
+    {{-- Maintenance Centers --}}
+    <p class="sidebar-nav-section-header">{{ __('maintenance.maintenance_centers') ?? 'Maintenance Centers' }}</p>
+    <a href="{{ route('admin.maintenance-centers.index') }}"
+       class="sidebar-nav-item {{ $this->isActive('admin.maintenance-centers.*') ? 'sidebar-nav-item--active' : '' }}"
+       title="{{ __('maintenance.maintenance_centers') }}">
+        <span class="sidebar-nav-icon"><i class="fa-solid fa-warehouse"></i></span>
+        <div class="sidebar-nav-text">
+            <p class="sidebar-nav-label">{{ __('maintenance.maintenance_centers') }}</p>
+        </div>
+    </a>
+
     {{-- Management --}}
     <p class="sidebar-nav-section-header">{{ __('admin_dashboard.sidebar_section_management') }}</p>
     <a href="{{ route('admin.companies.index') }}"
@@ -8,7 +19,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-building"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('admin_dashboard.companies_overview') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('admin_dashboard.all_companies') }}</p>
         </div>
     </a>
     <a href="{{ route('admin.vehicles.index') }}"
@@ -17,7 +27,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-car"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('admin_dashboard.vehicles_overview') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('admin_dashboard.all_vehicles') }}</p>
         </div>
         @if($expiringDocumentsCount > 0)
             <span class="sidebar-nav-badge sidebar-nav-badge--warning" title="{{ __('vehicles.expiring_documents') }}">{{ $expiringDocumentsCount > 99 ? '99+' : $expiringDocumentsCount }}</span>
@@ -29,7 +38,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-users"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.customers') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.customers_desc') }}</p>
         </div>
     </a>
     <a href="{{ route('admin.users.index') }}"
@@ -38,7 +46,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-user-shield"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('admin_dashboard.admin_users') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('admin_dashboard.admin_users_desc') }}</p>
         </div>
     </a>
 
@@ -50,7 +57,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-receipt"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.orders') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.orders_desc') }}</p>
         </div>
     </a>
     <a href="{{ route('admin.quota-requests.index') }}"
@@ -59,7 +65,7 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('admin_dashboard.quota_requests') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('admin_dashboard.quota_requests_desc') }}</p>
+         
         </div>
         @if($pendingQuotaRequests > 0)
             <span class="sidebar-nav-badge sidebar-nav-badge--warning">{{ $pendingQuotaRequests > 99 ? '99+' : $pendingQuotaRequests }}</span>
@@ -72,7 +78,7 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-landmark"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.bank_transfers') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.bank_transfers_desc') }}</p>
+       
         </div>
     </a>
     @endif
@@ -82,7 +88,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.services') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.services_desc') }}</p>
         </div>
     </a>
 
@@ -94,7 +99,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('admin_dashboard.announcements') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('admin_dashboard.announcements_desc') }}</p>
         </div>
     </a>
     <a href="{{ route('admin.activities.index') }}"
@@ -103,7 +107,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.activity_log') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.activity_log_desc') }}</p>
         </div>
     </a>
     <a href="{{ route('admin.notifications.index') }}"
@@ -112,7 +115,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-bell"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('common.notifications') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.notifications_desc') ?? 'View notifications' }}</p>
         </div>
         @if($unreadNotifications > 0)
             <span class="sidebar-nav-badge sidebar-nav-badge--info">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
@@ -124,7 +126,6 @@
         <span class="sidebar-nav-icon"><i class="fa-solid fa-gear"></i></span>
         <div class="sidebar-nav-text">
             <p class="sidebar-nav-label">{{ __('dashboard.settings') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('dashboard.settings_desc') }}</p>
         </div>
     </a>
 @endif

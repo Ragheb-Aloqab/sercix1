@@ -36,4 +36,13 @@ return [
     'verify_otp_placeholder' => '123456',
     'verify_submit' => 'Verify and sign in',
     'change_phone' => 'Change phone number',
+    'change_identifier' => 'Change email/phone',
+    'two_factor_required' => 'Two-factor verification required. Please sign in again.',
+    'verify_2fa_title' => 'Two-Factor Verification',
+    'admin_2fa_note' => 'After password, you will receive an OTP for two-factor verification.',
+    'resend_code' => 'Resend Code',
+    'resend_available_in' => 'Resend available in',
+    'resend_cooldown' => 'Please wait :seconds seconds before resending.',
+    'resend_limit_reached' => 'Resend limit reached. Please request a new code by signing in again.',
+    'otp_check_log' => 'Check log file for OTP in development.',
 ];

@@ -12,7 +12,7 @@ class EnsureAdmin
 {
     /**
      * Handle an incoming request.
-     * Requires: auth:web. Ensures user is active and has admin role.
+     * Requires: auth:web. Ensures user is active, has admin role, and 2FA verified.
      * Aborts 403 with logging for unauthorized access (prevents companies/drivers from accessing admin).
      */
     public function handle(Request $request, Closure $next): Response
@@ -20,19 +20,26 @@ class EnsureAdmin
         $user = $request->user();
 
         if (!$user) {
-            abort(401);
+            return redirect()->route('login');
         }
 
         if (($user->status ?? 'active') !== 'active') {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            return redirect()->route('sign-in.index')->with('error', __('messages.account_suspended'));
+            return redirect()->route('login')->with('error', __('messages.account_suspended'));
         }
 
         if (!in_array($user->role ?? '', ['admin', 'super_admin'])) {
             LogUnauthorizedAccess::log($request, 'admin', 'web:' . ($user->role ?? 'unknown'));
             abort(403, __('errors.forbidden_message'));
+        }
+
+        if (!$request->session()->has('two_factor_verified_at')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('error', __('login.two_factor_required'));
         }
 
         return $next($request);

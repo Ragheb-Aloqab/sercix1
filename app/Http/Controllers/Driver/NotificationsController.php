@@ -61,6 +61,9 @@ class NotificationsController extends Controller
         $notification->markAsRead();
 
         $url = $notification->data['url'] ?? $notification->data['route'] ?? null;
+        if (! $url && ! empty($notification->data['maintenance_request_id'])) {
+            $url = route('driver.maintenance-request.show', $notification->data['maintenance_request_id']);
+        }
         if ($url && $request->isMethod('GET')) {
             return redirect($url);
         }

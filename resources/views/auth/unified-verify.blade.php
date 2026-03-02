@@ -55,7 +55,7 @@
             @if (session('success'))<div class="mt-4 rounded-lg border border-servx-red/30 bg-servx-red/10 p-3 text-sm text-servx-silver-light">{{ session('success') }}</div>@endif
             @if ($errors->any())<div class="mt-4 rounded-lg border border-servx-red/50 bg-servx-red/10 p-3 text-sm text-servx-silver-light"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
-            <form method="POST" action="{{ route('sign-in.verify_otp') }}" class="mt-6 space-y-4">
+            <form method="POST" action="{{ route('login.verify') }}" class="mt-6 space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.verify_otp_label') }}</label>
@@ -66,7 +66,7 @@
                     {{ __('login.verify_submit') }}
                 </button>
             </form>
-            <a href="{{ route('sign-in.index') }}" class="mt-4 block text-center text-sm font-medium text-servx-silver hover:text-servx-red transition-colors">{{ __('login.change_phone') }}</a>
+            <a href="{{ route('login') }}" class="mt-4 block text-center text-sm font-medium text-servx-silver hover:text-servx-red transition-colors">{{ __('login.change_phone') }}</a>
         </div>
         <div class="mt-6 flex items-center justify-center gap-3 text-xs text-servx-silver">
             <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">العربية</a>

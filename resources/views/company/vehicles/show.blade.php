@@ -7,6 +7,86 @@
 @section('content')
 @include('company.partials.glass-start', ['title' => __('vehicles.vehicle_details')])
 
+    @php
+        $va = $vehicleAnalytics ?? [];
+        $vmc = $vehicleMarketComparison ?? null;
+    @endphp
+
+    {{-- 1. Vehicle Header Summary Section --}}
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm mb-6 sm:mb-8">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="flex items-center gap-4 shrink-0">
+                @if($vehicle->image_path)
+                    <img src="{{ asset('storage/' . $vehicle->image_path) }}" alt="{{ $vehicle->display_name }}" class="w-24 h-24 object-cover rounded-xl border border-slate-500/30" />
+                @else
+                    <div class="w-24 h-24 rounded-xl bg-slate-700/50 border border-slate-500/30 flex items-center justify-center">
+                        <i class="fa-solid fa-car text-3xl text-slate-500"></i>
+                    </div>
+                @endif
+                <div>
+                    <h1 class="text-xl font-bold text-white">{{ $vehicle->display_name }}</h1>
+                    <p class="text-slate-400">{{ $vehicle->plate_number ?? '—' }} · {{ trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')) ?: '—' }}</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ __('vehicles.driver_name') }}: {{ $vehicle->driver_name ?? '—' }}</p>
+                    <span class="inline-block mt-2 px-2.5 py-1 rounded-full text-xs font-bold border {{ $vehicle->is_active ? 'border-emerald-400/50 text-emerald-300 bg-emerald-500/20' : 'border-slate-500/50 text-slate-400' }}">
+                        {{ $vehicle->is_active ? __('vehicles.active') : __('vehicles.inactive') }}
+                    </span>
+                </div>
+            </div>
+            <div class="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-3">
+                    <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.current_month_cost') }}</p>
+                    <p class="font-bold text-white">{{ number_format($va['current_month_cost'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                </div>
+                <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-3">
+                    <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.operational_health_score') }}</p>
+                    <p class="font-bold text-white">{{ $va['health_score'] ?? 0 }}/100</p>
+                </div>
+                <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-3">
+                    <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.total_mileage') }}</p>
+                    <p class="font-bold text-white">{{ number_format($va['total_mileage'] ?? 0, 0) }} {{ __('common.km') }}</p>
+                </div>
+                <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-3">
+                    <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.vs_last_month') }}</p>
+                    <p class="font-bold {{ (($va['percent_change'] ?? 0) >= 0 ? 'text-red-400' : 'text-emerald-400') }}">
+                        {{ ($va['percent_change'] ?? 0) >= 0 ? '+' : '' }}{{ $va['percent_change'] ?? 0 }}%
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- 2. Smart Alerts --}}
+    @if(($inspectionStatus['status'] ?? '') === 'overdue')
+        <div class="rounded-2xl bg-red-500/10 border border-red-400/50 p-4 mb-6">
+            <p class="font-bold text-red-400 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> {{ __('vehicles.alert_maintenance_overdue') }}</p>
+        </div>
+    @endif
+    @if(($vehicle->fuel_balance ?? 0) < 100 && ($vehicle->fuel_balance ?? 0) >= 0)
+        <div class="rounded-2xl bg-amber-500/10 border border-amber-400/50 p-4 mb-6">
+            <p class="font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-gas-pump"></i> {{ __('vehicles.alert_fuel_balance_low') }}</p>
+        </div>
+    @endif
+    @if($vmc && ($vmc['percent_difference'] ?? 0) > 10)
+        <div class="rounded-2xl bg-red-500/10 border border-red-400/50 p-4 mb-6">
+            <p class="font-bold text-red-400 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> {{ __('vehicles.alert_exceeds_market') }}</p>
+        </div>
+    @endif
+
+    {{-- 3. Vehicle Performance Tabs --}}
+    <div x-data="{ activeTab: 'overview' }" class="mb-6 sm:mb-8">
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-600/50 pb-4">
+            <button @click="activeTab = 'overview'" :class="activeTab === 'overview' ? 'bg-sky-500/30 text-sky-300 border-sky-400/50' : 'border-slate-500/50 text-slate-400 hover:border-slate-400/50'"
+                class="px-4 py-2 rounded-xl border font-semibold transition-colors">{{ __('vehicles.tab_overview') }}</button>
+            <button @click="activeTab = 'costs'" :class="activeTab === 'costs' ? 'bg-sky-500/30 text-sky-300 border-sky-400/50' : 'border-slate-500/50 text-slate-400 hover:border-slate-400/50'"
+                class="px-4 py-2 rounded-xl border font-semibold transition-colors">{{ __('vehicles.tab_costs') }}</button>
+            <button @click="activeTab = 'operations'" :class="activeTab === 'operations' ? 'bg-sky-500/30 text-sky-300 border-sky-400/50' : 'border-slate-500/50 text-slate-400 hover:border-slate-400/50'"
+                class="px-4 py-2 rounded-xl border font-semibold transition-colors">{{ __('vehicles.tab_operations') }}</button>
+            <button @click="activeTab = 'tracking'; $nextTick(() => setTimeout(() => window.dispatchEvent(new CustomEvent('vehicle-tracking-tab-visible')), 350))" :class="activeTab === 'tracking' ? 'bg-sky-500/30 text-sky-300 border-sky-400/50' : 'border-slate-500/50 text-slate-400 hover:border-slate-400/50'"
+                class="px-4 py-2 rounded-xl border font-semibold transition-colors">{{ __('vehicles.tab_tracking') }}</button>
+        </div>
+
+        {{-- Tab: Overview (existing content) --}}
+        <div x-show="activeTab === 'overview'" x-transition class="space-y-6 sm:space-y-8">
     {{-- Back + Edit --}}
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
         <a href="{{ route('company.vehicles.index') }}"
@@ -342,6 +422,156 @@
         @else
             <p class="text-slate-500 text-sm py-4 text-end">{{ __('vehicles.no_orders') }}</p>
         @endif
+    </div>
+        </div>
+
+        {{-- Tab: Costs --}}
+        <div x-show="activeTab === 'costs'" x-transition class="space-y-6 sm:space-y-8">
+            {{-- Cost vs Market Chart --}}
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-base font-bold text-slate-300">{{ __('vehicles.cost_vs_market') }}</h2>
+                    <div class="flex gap-2">
+                        @foreach([1 => 'last_30_days', 3 => 'last_3_months', 6 => 'last_6_months', 12 => 'last_1_year'] as $m => $label)
+                            <a href="{{ request()->fullUrlWithQuery(['chart_months' => $m]) }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === $m ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50' : 'bg-slate-700/50 text-slate-400 border border-slate-600/50 hover:border-sky-400/30' }}">
+                                {{ __('vehicles.' . $label) }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @php $chartData = $costVsMarketChart ?? []; $maxChart = 1; foreach ($chartData as $c) { $maxChart = max($maxChart, $c['vehicle_cost'] ?? 0, $c['market_cost'] ?? 0); } @endphp
+                <div class="flex gap-2 items-end" style="min-height: 120px;">
+                    @foreach($chartData as $c)
+                        <div class="flex-1 flex flex-col items-center gap-1" title="{{ $c['month_label'] }} {{ $c['year'] }}">
+                            <div class="w-full flex gap-0.5 items-end" style="height: 80px;">
+                                <div class="flex-1 bg-sky-500 rounded-t min-h-[4px]" style="height: {{ max(4, ($c['vehicle_cost'] / $maxChart) * 100) }}%;"></div>
+                                <div class="flex-1 bg-slate-500/70 rounded-t min-h-[4px]" style="height: {{ max(4, ($c['market_cost'] / $maxChart) * 100) }}%;"></div>
+                            </div>
+                            <span class="text-xs text-slate-500">{{ $c['month_label'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="flex gap-4 mt-3 text-xs">
+                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-sky-500"></span> {{ __('company.company_total') }}</span>
+                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-slate-500/70"></span> {{ __('company.market_average') }}</span>
+                </div>
+            </div>
+
+            {{-- Cost Breakdown Donut --}}
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm">
+                <h2 class="text-base font-bold text-slate-300 mb-4">{{ __('vehicles.cost_breakdown') }}</h2>
+                @php $bd = $va['cost_breakdown'] ?? []; $totalBd = $bd['maintenance'] + $bd['fuel'] + $bd['parts'] + $bd['other']; @endphp
+                <div class="flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="relative w-32 h-32 shrink-0">
+                        @if($totalBd > 0)
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                @php
+                                    $circum = 100;
+                                    $colors = ['#0ea5e9', '#22c55e', '#f59e0b', '#64748b'];
+                                    $items = [['maintenance', $bd['maintenance']], ['fuel', $bd['fuel']], ['parts', $bd['parts']], ['other', $bd['other']]];
+                                    $offset = 0;
+                                @endphp
+                                @foreach($items as $i => $item)
+                                    @if($item[1] > 0)
+                                        @php $pct = ($item[1] / $totalBd) * 100; $dash = $pct . ' ' . (100 - $pct); @endphp
+                                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="{{ $colors[$i] }}" stroke-width="3" stroke-dasharray="{{ $dash }}" stroke-dashoffset="{{ -$offset }}" />
+                                        @php $offset += $pct; @endphp
+                                    @endif
+                                @endforeach
+                            </svg>
+                        @else
+                            <div class="w-full h-full rounded-full bg-slate-700/50 flex items-center justify-center"><span class="text-slate-500 text-sm">—</span></div>
+                        @endif
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        @foreach(['maintenance' => __('company.maintenance_cost'), 'fuel' => __('company.total_fuel_cost'), 'parts' => __('maintenance.type_parts'), 'other' => __('company.other')] as $k => $lbl)
+                            @if(($bd[$k] ?? 0) > 0)
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">{{ $lbl }}</span>
+                                    <span class="font-bold text-white">{{ number_format($bd[$k], 0) }} {{ __('company.sar') }} ({{ $totalBd > 0 ? round(($bd[$k] / $totalBd) * 100, 0) : 0 }}%)</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Annual Cost Summary --}}
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm">
+                <h2 class="text-base font-bold text-slate-300 mb-4">{{ __('vehicles.annual_cost_summary') }}</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-4">
+                        <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.total_yearly_cost') }}</p>
+                        <p class="text-xl font-bold text-white">{{ number_format($va['yearly_cost'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-4">
+                        <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.avg_monthly_cost') }}</p>
+                        <p class="text-xl font-bold text-white">{{ number_format($va['avg_monthly_cost'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 p-4">
+                        <p class="text-xs text-slate-500 mb-1">{{ __('vehicles.estimated_yearly_saving') }}</p>
+                        <p class="text-xl font-bold {{ (($vmc['yearly_saving'] ?? 0) > 0) ? 'text-emerald-400' : 'text-slate-400' }}">
+                            {{ number_format(($vmc ?? [])['yearly_saving'] ?? 0, 0) }} {{ __('company.sar') }}
+                        </p>
+                        @if($vmc)
+                            <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold {{ ($vmc['percent_difference'] ?? 0) <= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' }}">
+                                {{ ($vmc['percent_difference'] ?? 0) <= 0 ? __('company.below_average') : __('company.above_average') }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tab: Operations --}}
+        <div x-show="activeTab === 'operations'" x-transition class="space-y-6">
+            <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-base font-bold text-slate-300">{{ __('vehicles.recent_operations') }}</h2>
+                    <a href="{{ route('company.maintenance-requests.index', ['vehicle_id' => $vehicle->id]) }}" class="text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('vehicles.view_all') }}</a>
+                </div>
+                <div class="space-y-2">
+                    @forelse($recentOperations ?? [] as $op)
+                        <a href="{{ $op->type === 'maintenance_request' ? route('company.maintenance-requests.show', $op->id) : route('company.orders.show', $op->id) }}" class="flex items-center justify-between p-3 rounded-xl bg-slate-700/50 border border-slate-500/30 hover:border-sky-400/50 transition-colors">
+                            <div>
+                                <span class="font-bold text-white">{{ $op->type === 'maintenance_request' ? __('maintenance.maintenance_request') . ' #' . $op->id : __('vehicles.order') . ' #' . $op->id }}</span>
+                                <span class="ms-2 px-2 py-0.5 rounded text-xs font-bold {{ in_array($op->status, ['closed', 'completed']) ? 'bg-emerald-500/20 text-emerald-400' : (in_array($op->status, ['in_progress']) ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-500/20 text-slate-400') }}">
+                                    {{ $op->type === 'maintenance_request' ? (\App\Enums\MaintenanceRequestStatus::tryFrom($op->status)?->label() ?? $op->status) : ($statusLabels[$op->status ?? ''] ?? $op->status) }}
+                                </span>
+                                <p class="text-xs text-slate-500 mt-1">{{ $op->date?->translatedFormat('d M Y') }} · {{ $op->center ?? '—' }}</p>
+                            </div>
+                            <span class="font-bold text-sky-400">{{ number_format($op->cost ?? 0, 0) }} {{ __('company.sar') }}</span>
+                        </a>
+                    @empty
+                        <p class="text-slate-500 text-sm py-6 text-center">{{ __('company.no_maintenance_data') }}</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Tab: Tracking --}}
+        <div x-show="activeTab === 'tracking'" x-transition>
+            @if($vehicle->imei || $vehicle->usesMobileTracking())
+                <livewire:company.vehicle-tracking-map
+                    :vehicle-id="$vehicle->id"
+                    map-height="400px"
+                    :show-info-panel="true"
+                />
+            @else
+                <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm">
+                    <p class="text-sm text-slate-400 mb-4">{{ __('vehicles.location') }}:</p>
+                    <div class="rounded-xl bg-slate-700/50 border border-slate-500/30 h-40 sm:h-48 flex items-center justify-center">
+                        <div class="text-center text-slate-500 text-sm">
+                            <i class="fa-solid fa-map-location-dot text-2xl mb-2 block"></i>
+                            {{ __('vehicles.tracking_coming_soon') }}
+                        </div>
+                    </div>
+                    <span class="inline-flex gap-2 mt-4 px-4 py-2 rounded-xl border border-slate-500/30 bg-slate-800/30 text-slate-400 font-bold cursor-not-allowed" title="{{ __('tracking.imei_required') }}">
+                        <i class="fa-solid fa-location-dot"></i> {{ __('tracking.track_vehicle') }}
+                    </span>
+                </div>
+            @endif
+        </div>
     </div>
 
 @include('company.partials.glass-end')

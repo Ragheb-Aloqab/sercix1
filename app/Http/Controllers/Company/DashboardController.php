@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Services\ExpiryMonitoringService;
+use App\Services\MarketComparisonService;
 use App\Services\VehicleInspectionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -83,6 +85,17 @@ class DashboardController extends Controller
         $inspectionOverdueCount = $inspectionService->getOverdueCount($company);
         $inspectionPendingVehicles = $inspectionService->getPendingVehicles($company)->take(5);
 
+        // Maintenance invoices pending approval (not yet accepted or rejected)
+        $pendingInvoiceApprovals = MaintenanceRequest::forCompany($company->id)
+            ->where('status', 'waiting_for_invoice_approval')
+            ->with(['vehicle', 'approvedCenter'])
+            ->latest('final_invoice_uploaded_at')
+            ->limit(10)
+            ->get();
+        $pendingInvoiceApprovalsCount = MaintenanceRequest::forCompany($company->id)
+            ->where('status', 'waiting_for_invoice_approval')
+            ->count();
+
         $maintenanceIndicator = $data['maintenanceIndicator'];
         $fuelIndicator = $data['fuelIndicator'];
         $operatingIndicator = $data['operatingIndicator'];
@@ -100,7 +113,43 @@ class DashboardController extends Controller
         $fuelUI = $indicatorUI($fuelIndicator['direction'] ?? 'stable');
         $operatingUI = $indicatorUI($operatingIndicator['direction'] ?? 'stable');
 
+        // Chart range: 6, 12, or custom (default 6) – used for both chart and market comparison
+        $chartMonths = (int) request('chart_months', 6);
+        if (!in_array($chartMonths, [6, 12], true)) {
+            $chartMonths = 6;
+        }
+
+        $marketService = app(MarketComparisonService::class);
+        $marketComparison = $marketService->getComparisonData($company, $chartMonths);
+        $monthlyChartData = $marketService->getMonthlyComparisonData($company, $chartMonths);
+        $topServiceCenter = $marketService->getTopServiceCenter($company);
+
+        $companyTotal = $marketComparison['company_total'] ?? 0;
+        $marketAvg = $marketComparison['market_average'] ?? 0;
+        $vehiclesCount = $data['vehiclesCount'] ?? 0;
+        $avgCostPerVehicle = $vehiclesCount > 0 ? round($companyTotal / $vehiclesCount, 0) : 0;
+        $totalYearlySavings = max(0, $marketAvg - $companyTotal);
+
+        // Maintenance request counts (non-closed, actionable)
+        $maintenanceRequestCounts = [
+            'waiting_quotes' => MaintenanceRequest::forCompany($company->id)->where('status', 'waiting_for_quotes')->count(),
+            'quote_submitted' => MaintenanceRequest::forCompany($company->id)->where('status', 'quote_submitted')->count(),
+            'in_progress' => MaintenanceRequest::forCompany($company->id)->where('status', 'in_progress')->count(),
+            'total_active' => MaintenanceRequest::forCompany($company->id)->whereNotIn('status', ['closed', 'rejected'])->count(),
+        ];
+
+        // Fuel balance total (from vehicles)
+        $fuelBalanceTotal = (float) \App\Models\Vehicle::where('company_id', $company->id)->where('is_active', true)->sum('fuel_balance');
+
         return view('company.dashboard.index', array_merge($data, [
+            'marketComparison' => $marketComparison,
+            'monthlyChartData' => $monthlyChartData,
+            'chartMonths' => $chartMonths,
+            'topServiceCenter' => $topServiceCenter,
+            'avgCostPerVehicle' => $avgCostPerVehicle,
+            'totalYearlySavings' => $totalYearlySavings,
+            'maintenanceRequestCounts' => $maintenanceRequestCounts,
+            'fuelBalanceTotal' => $fuelBalanceTotal,
             'announcements' => $announcements,
             'company' => $company,
             'maintenanceUI' => $maintenanceUI,
@@ -115,6 +164,8 @@ class DashboardController extends Controller
             'inspectionPendingCount' => $inspectionPendingCount,
             'inspectionOverdueCount' => $inspectionOverdueCount,
             'inspectionPendingVehicles' => $inspectionPendingVehicles,
+            'pendingInvoiceApprovals' => $pendingInvoiceApprovals,
+            'pendingInvoiceApprovalsCount' => $pendingInvoiceApprovalsCount,
         ]));
     }
 }

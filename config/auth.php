@@ -34,6 +34,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'maintenance_center' => [
+            'driver' => 'session',
+            'provider' => 'maintenance_centers',
+        ],
     ],
 
     /*
@@ -50,6 +55,11 @@ return [
         'companies' => [
             'driver' => 'eloquent',
             'model' => App\Models\Company::class,
+        ],
+
+        'maintenance_centers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\MaintenanceCenter::class,
         ],
     ],
 

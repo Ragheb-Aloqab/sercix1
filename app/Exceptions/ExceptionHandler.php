@@ -54,7 +54,7 @@ class ExceptionHandler
             ]);
         }
         return redirect()
-            ->guest(route('sign-in.index'))
+            ->guest(route('login'))
             ->with('error', __('errors.please_login'));
     }
 

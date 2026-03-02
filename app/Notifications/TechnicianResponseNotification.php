@@ -60,16 +60,19 @@ class TechnicianResponseNotification extends Notification
             $url = route('admin.orders.show', $this->order->id);
         }
 
+        $title = $this->status === 'accepted'
+            ? __('messages.technician_accepted_title')
+            : __('messages.technician_rejected_title');
+        $message = $this->status === 'accepted'
+            ? __('messages.technician_accepted_message', ['name' => $this->technician->name])
+            : __('messages.technician_rejected_message', ['name' => $this->technician->name]);
+
         return [
             'order_id' => $this->order->id,
             'technician_id' => $this->technician->id,
             'status' => $this->status,
-            'title' => $this->status === 'accepted'
-                ? 'تم قبول اسناد الطلب'
-                : 'تم رفض اسناد الطلب',
-            'message' => $this->status === 'accepted'
-                ? "الفني {$this->technician->name} قبل تنفيذ الطلب"
-                : "الفني {$this->technician->name} رفض تنفيذ الطلب",
+            'title' => $title,
+            'message' => $message,
             'url' => $url,
         ];
     }
