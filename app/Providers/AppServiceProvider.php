@@ -14,12 +14,14 @@ use App\Models\Vehicle;
 use App\Models\DriverNotification;
 use App\Models\Company;
 use App\Models\VehicleLocation;
+use App\Models\MaintenanceRequest;
 use App\Observers\CompanyObserver;
 use App\Observers\VehicleLocationObserver;
 use App\Observers\FuelRefillObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\OrderObserver;
 use App\Observers\VehicleObserver;
+use App\Observers\MaintenanceRequestObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         FuelRefill::observe(FuelRefillObserver::class);
         Vehicle::observe(VehicleObserver::class);
         VehicleLocation::observe(VehicleLocationObserver::class);
+        MaintenanceRequest::observe(MaintenanceRequestObserver::class);
 
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly

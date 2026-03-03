@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Company;
 
+use App\Enums\MaintenanceType;
 use App\Http\Controllers\Controller;
+use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
@@ -18,6 +20,7 @@ class ServiceReportController extends Controller
 
     /**
      * Company-wide service/maintenance report.
+     * Includes both Orders and MaintenanceRequests.
      */
     public function index(Request $request)
     {
@@ -32,7 +35,7 @@ class ServiceReportController extends Controller
         $vehicleId = $request->integer('vehicle_id', 0);
         $serviceTypeId = $request->integer('service_type_id', 0);
 
-        $query = Order::query()
+        $orderQuery = Order::query()
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$from, $to])
             ->with(['vehicle:id,plate_number,make,model', 'orderServices.service']);
@@ -40,32 +43,33 @@ class ServiceReportController extends Controller
         if ($vehicleId > 0) {
             $vehicle = Vehicle::where('company_id', $company->id)->find($vehicleId);
             if ($vehicle) {
-                $query->where('vehicle_id', $vehicleId);
+                $orderQuery->where('vehicle_id', $vehicleId);
             }
         }
 
         if ($serviceTypeId > 0) {
-            $query->whereHas('orderServices', fn ($q) => $q->where('service_id', $serviceTypeId));
+            $orderQuery->whereHas('orderServices', fn ($q) => $q->where('service_id', $serviceTypeId));
         }
 
-        $orders = $query->latest('created_at')->paginate(25)->withQueryString();
+        $orders = $orderQuery->latest('created_at')->get();
 
-        $totalsQuery = Order::query()
+        $mrQuery = MaintenanceRequest::query()
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$from, $to])
-            ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId))
-            ->when($serviceTypeId > 0, fn ($q) => $q->whereHas('orderServices', fn ($qq) => $qq->where('service_id', $serviceTypeId)));
+            ->whereRaw('(COALESCE(final_invoice_amount, 0) > 0 OR COALESCE(approved_quote_amount, 0) > 0)')
+            ->with(['vehicle:id,plate_number,make,model']);
 
-        $orderIds = (clone $totalsQuery)->pluck('id');
-        $totalCost = (float) (DB::table('order_services')
-            ->whereIn('order_id', $orderIds)
-            ->selectRaw('COALESCE(SUM(COALESCE(total_price, qty * unit_price)), 0) as total')
-            ->value('total') ?? 0);
-        $orderCount = $orderIds->count();
+        if ($vehicleId > 0) {
+            $mrQuery->where('vehicle_id', $vehicleId);
+        }
 
-        $totals = ['total_cost' => $totalCost, 'order_count' => $orderCount];
+        $maintenanceRequests = $mrQuery->latest('created_at')->get();
 
         $analytics = $this->analytics->getMaintenanceAnalytics($from, $to, $company->id, $vehicleId ?: null, $serviceTypeId ?: null);
+        $totalCost = $analytics['total_cost'];
+        $orderCount = $analytics['order_count'];
+        $totals = ['total_cost' => $totalCost, 'order_count' => $orderCount];
+
         $byServiceType = $this->analytics->getMaintenanceByServiceType($from, $to, $company->id, $vehicleId ?: null);
 
         $ordersWithDisplay = $orders->map(function ($order) {
@@ -74,12 +78,45 @@ class ServiceReportController extends Controller
             $serviceName = $firstService?->display_name ?? '-';
             $orderServicesCount = $order->orderServices->count();
             return (object) [
+                'type' => 'order',
                 'order' => $order,
+                'maintenanceRequest' => null,
+                'date' => $order->created_at,
                 'statusLabel' => $statusLabel,
                 'serviceName' => $serviceName,
                 'orderServicesCount' => $orderServicesCount,
+                'amount' => (float) $order->total_amount,
             ];
         });
+
+        $mrsWithDisplay = $maintenanceRequests->map(function ($mr) {
+            $amount = (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0);
+            $serviceName = MaintenanceType::tryFrom($mr->maintenance_type)?->label() ?? $mr->maintenance_type ?? __('reports.maintenance_request');
+            return (object) [
+                'type' => 'maintenance_request',
+                'order' => null,
+                'maintenanceRequest' => $mr,
+                'date' => $mr->created_at,
+                'statusLabel' => $mr->status_label,
+                'serviceName' => $serviceName,
+                'orderServicesCount' => 1,
+                'amount' => $amount,
+            ];
+        });
+
+        $allItems = $ordersWithDisplay->concat($mrsWithDisplay)
+            ->sortByDesc(fn ($r) => $r->date?->timestamp ?? 0)
+            ->values();
+
+        $perPage = 25;
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allItems->forPage($currentPage, $perPage)->values(),
+            $allItems->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
@@ -90,11 +127,10 @@ class ServiceReportController extends Controller
 
         return view('company.reports.service', compact(
             'company',
-            'orders',
             'totals',
             'totalCost',
             'orderCount',
-            'ordersWithDisplay',
+            'paginated',
             'vehicles',
             'services',
             'from',

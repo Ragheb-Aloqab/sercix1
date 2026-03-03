@@ -107,7 +107,18 @@
         </div>
     </a>
 
-    {{-- 7. Settings --}}
+    {{-- 7. My Insurance --}}
+    <a href="{{ route('company.insurances.index') }}"
+       class="sidebar-nav-item {{ $this->isActive('company.insurances.*') ? 'sidebar-nav-item--active' : '' }}"
+       title="{{ __('fleet.my_insurance') }}">
+        <span class="sidebar-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <div class="sidebar-nav-text">
+            <p class="sidebar-nav-label">{{ __('fleet.my_insurance') }}</p>
+            <p class="sidebar-nav-sublabel">{{ __('fleet.my_insurance_desc') }}</p>
+        </div>
+    </a>
+
+    {{-- 8. Settings --}}
     <a href="{{ route('company.settings') }}"
        class="sidebar-nav-item {{ $this->isActive('company.settings') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.settings') }}">

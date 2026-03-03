@@ -23,6 +23,8 @@ class OrderObserver
     {
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
+            Cache::forget("market_comparison_{$order->company_id}_6");
+            Cache::forget("market_comparison_{$order->company_id}_12");
         }
         $this->invalidateAdminStats();
         if ($order->status === 'pending_approval') {
@@ -48,6 +50,8 @@ class OrderObserver
     {
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
+            Cache::forget("market_comparison_{$order->company_id}_6");
+            Cache::forget("market_comparison_{$order->company_id}_12");
         }
         $this->invalidateAdminStats();
         // Admin notifications removed - only Company ↔ Driver notifications

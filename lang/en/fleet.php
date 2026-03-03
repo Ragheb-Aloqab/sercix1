@@ -16,6 +16,8 @@ return [
     'tracking_desc' => 'Live vehicle tracking',
     'reports' => 'Reports',
     'reports_desc' => 'Export & analytics',
+    'my_insurance' => 'My Insurance',
+    'my_insurance_desc' => 'Manage fleet insurance',
     'settings' => 'Settings',
     'settings_desc' => 'Profile & preferences',
 

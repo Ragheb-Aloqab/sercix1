@@ -19,3 +19,7 @@ Schedule::command('admin:daily-summary')->dailyAt('09:00');
 
 // Vehicle inspections: schedule monthly inspections daily (creates pending when due)
 Schedule::command('inspections:schedule')->dailyAt('06:00');
+
+// Monthly mileage: snapshot at month start (1st 00:05), update current month daily (01:00)
+Schedule::command('mileage:capture-monthly')->monthlyOn(1, '00:05');
+Schedule::command('mileage:capture-monthly')->dailyAt('01:00');

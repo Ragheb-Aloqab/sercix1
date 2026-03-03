@@ -17,6 +17,8 @@ class FuelRefillObserver
     {
         if ($fuelRefill->company_id) {
             Cache::forget("company_dashboard_{$fuelRefill->company_id}");
+            Cache::forget("market_comparison_{$fuelRefill->company_id}_6");
+            Cache::forget("market_comparison_{$fuelRefill->company_id}_12");
         }
         if (!$fuelRefill->receipt_path) {
             return;

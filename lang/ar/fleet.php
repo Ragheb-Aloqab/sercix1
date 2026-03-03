@@ -16,6 +16,8 @@ return [
     'tracking_desc' => 'تتبع المركبات المباشر',
     'reports' => 'التقارير',
     'reports_desc' => 'التصدير والتحليلات',
+    'my_insurance' => 'تأميناتي',
+    'my_insurance_desc' => 'إدارة تأمين الأسطول',
     'settings' => 'الإعدادات',
     'settings_desc' => 'الملف الشخصي والتفضيلات',
 

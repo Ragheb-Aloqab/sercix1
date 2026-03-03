@@ -8,9 +8,9 @@
 @include('company.partials.glass-start', ['title' => __('reports.service_report')])
 
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <a href="{{ route('company.vehicles.index') }}"
+            <a href="{{ route('company.reports.index') }}"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:border-slate-400/50 transition-colors">
-                <i class="fa-solid fa-arrow-right"></i> {{ __('fuel.back_to_vehicles') }}
+                <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}"></i> {{ __('reports.back_to_reports') }}
             </a>
             <div class="flex gap-2">
                 <a href="{{ route('company.fuel.index') }}"
@@ -112,7 +112,7 @@
                 <h2 class="text-lg font-black text-white">{{ __('reports.services_log') }}</h2>
             </div>
             <div class="p-5">
-                @if ($orders->count())
+                @if ($paginated->count())
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
@@ -127,39 +127,53 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($ordersWithDisplay as $row)
+                                @foreach ($paginated as $row)
                                     <tr class="border-b border-slate-500/20 hover:bg-slate-700/30 transition-colors">
-                                        <td class="py-3 px-2 text-slate-300">{{ $row->order->created_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
-                                        <td class="py-3 px-2 font-mono text-slate-300">{{ $row->order->id }}</td>
+                                        <td class="py-3 px-2 text-slate-300">{{ $row->date?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                        <td class="py-3 px-2 font-mono text-slate-300">{{ $row->type === 'order' ? $row->order->id : 'MR-' . $row->maintenanceRequest->id }}</td>
                                         <td class="py-3 px-2">
-                                            @if ($row->order->vehicle)
-                                                <a href="{{ route('company.vehicles.show', $row->order->vehicle) }}" class="text-emerald-400 hover:text-emerald-300 hover:underline">
-                                                    {{ $row->order->vehicle->plate_number }} — {{ trim(($row->order->vehicle->make ?? '') . ' ' . ($row->order->vehicle->model ?? '')) }}
+                                            @php $vehicle = $row->order?->vehicle ?? $row->maintenanceRequest?->vehicle; @endphp
+                                            @if ($vehicle)
+                                                <a href="{{ route('company.vehicles.show', $vehicle) }}" class="text-emerald-400 hover:text-emerald-300 hover:underline">
+                                                    {{ $vehicle->plate_number }} — {{ trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')) }}
                                                 </a>
                                             @else
                                                 <span class="text-slate-500">—</span>
                                             @endif
                                         </td>
                                         <td class="py-3 px-2 text-slate-300">{{ $row->serviceName }}{{ $row->orderServicesCount > 1 ? ' +' . ($row->orderServicesCount - 1) : '' }}</td>
-                                        <td class="py-3 px-2 font-bold text-white">{{ number_format((float) $row->order->total_amount, 2) }} {{ __('company.sar') }}</td>
+                                        <td class="py-3 px-2 font-bold text-white">{{ number_format($row->amount, 2) }} {{ __('company.sar') }}</td>
                                         <td class="py-3 px-2">
-                                            <span class="px-2 py-1 rounded-xl text-xs font-semibold
-                                                @if($row->order->status === 'pending_approval') bg-amber-500/30 text-amber-300 border border-amber-400/50
-                                                @elseif($row->order->status === 'rejected') bg-red-500/30 text-red-300 border border-red-400/50
-                                                @elseif($row->order->status === 'completed') bg-emerald-500/30 text-emerald-300 border border-emerald-400/50
-                                                @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
+                                            @if ($row->type === 'order')
+                                                <span class="px-2 py-1 rounded-xl text-xs font-semibold
+                                                    @if($row->order->status === 'pending_approval') bg-amber-500/30 text-amber-300 border border-amber-400/50
+                                                    @elseif($row->order->status === 'rejected') bg-red-500/30 text-red-300 border border-red-400/50
+                                                    @elseif($row->order->status === 'completed') bg-emerald-500/30 text-emerald-300 border border-emerald-400/50
+                                                    @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
+                                            @else
+                                                <span class="px-2 py-1 rounded-xl text-xs font-semibold
+                                                    @if($row->maintenanceRequest->status === 'closed') bg-emerald-500/30 text-emerald-300 border border-emerald-400/50
+                                                    @elseif($row->maintenanceRequest->status === 'rejected') bg-red-500/30 text-red-300 border border-red-400/50
+                                                    @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
+                                            @endif
                                         </td>
                                         <td class="py-3 px-2">
-                                            <a href="{{ route('company.orders.show', $row->order) }}" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
-                                                <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
-                                            </a>
+                                            @if ($row->type === 'order')
+                                                <a href="{{ route('company.orders.show', $row->order) }}" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
+                                                    <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
+                                                </a>
+                                            @else
+                                                <a href="{{ route('company.maintenance-requests.show', $row->maintenanceRequest) }}" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
+                                                    <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
+                                                </a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4">{{ $orders->links() }}</div>
+                    <div class="mt-4">{{ $paginated->links() }}</div>
                 @else
                     <p class="text-slate-500">{{ __('reports.no_services') }}</p>
                 @endif

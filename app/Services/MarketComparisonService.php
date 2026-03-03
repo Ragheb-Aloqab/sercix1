@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class MarketComparisonService
 {
-    private const CACHE_TTL = 86400; // 24 hours
+    private const CACHE_TTL = 300; // 5 minutes for real-time recalculation
     private const MONTHS_BACK = 6;
+    private const INTERNAL_PRECISION = 4;
 
     /**
      * Get market comparison data for company dashboard.
@@ -29,61 +30,61 @@ class MarketComparisonService
     {
         $since = now()->subMonths($months)->startOfDay();
 
-        // 1. Total Expenses = Fuel + Maintenance (for date range)
+        // Step 1 & 2: Total Kilometers + Total Expenses (aggregated queries)
+        $totalKilometers = $this->getCompanyTotalKilometers($company->id, $since);
         $maintenanceTotal = $this->getCompanyMaintenanceTotal($company->id, $since);
         $fuelTotal = $this->getCompanyFuelTotal($company->id, $since);
-        $totalExpenses = $maintenanceTotal + $fuelTotal;
+        $totalExpenses = round($maintenanceTotal + $fuelTotal, self::INTERNAL_PRECISION);
 
-        // 2. Total Kilometers (from fuel refills odometer: MAX - MIN per vehicle)
-        $totalKilometers = $this->getCompanyTotalKilometers($company->id, $since);
-
-        // 3. Market Average per 1,000 KM = Market Rate Per KM × 1000
-        $marketAvgPerKm = (float) config('servx.market_avg_per_km', 0.37);
-        $marketAvgPer1000Km = round($marketAvgPerKm * 1000, 2);
-
-        // 4. Actual Cost per 1,000 KM = (Total Expenses ÷ Total Kilometers) × 1000
-        $actualCostPer1000Km = $totalKilometers > 0
-            ? round(($totalExpenses / $totalKilometers) * 1000, 2)
-            : 0.0;
-
-        // 5. Difference per 1,000 KM = Actual Cost per 1,000 KM − Market Average per 1,000 KM
-        $differencePer1000Km = round($actualCostPer1000Km - $marketAvgPer1000Km, 2);
-
-        // 6. Total Difference = (Difference per 1,000 KM ÷ 1000) × Total Kilometers
-        $totalDifference = $totalKilometers > 0
-            ? round(($differencePer1000Km / 1000) * $totalKilometers, 2)
-            : 0.0;
-
-        // 7. Percentage Difference = (Difference per 1,000 KM ÷ Market Average per 1,000 KM) × 100
-        $percentDiff = $marketAvgPer1000Km > 0
-            ? round(($differencePer1000Km / $marketAvgPer1000Km) * 100, 1)
-            : 0.0;
-
-        // 8. Performance ratio: (Actual Cost per 1,000 KM ÷ Market Avg per 1,000 KM) × 100 (green < 100, red ≥ 100)
-        $performanceRatio = $marketAvgPer1000Km > 0
-            ? round(($actualCostPer1000Km / $marketAvgPer1000Km) * 100, 1)
-            : ($actualCostPer1000Km > 0 ? 100 : 0);
-
-        // 9. Market Average (display total) = Market Avg per 1,000 KM × (Total Kilometers ÷ 1000)
-        $marketAverageDisplay = $totalKilometers > 0
-            ? round($marketAvgPer1000Km * ($totalKilometers / 1000), 2)
-            : 0.0;
-
-        // 10. Top 3 expensive & top 3 saving service types (unchanged)
+        // Step 3: Market Average = quotation-based maintenance + fuel benchmark
         $marketData = $this->getMarketAverageBySegment($since);
+        $marketMaintenanceTotal = $this->getMarketTotalForCompanyJobs($company->id, $since, $marketData);
+        $marketFuelPerKm = (float) config('servx.market_fuel_per_km', 0.15);
+        $marketFuelTotal = round($totalKilometers * $marketFuelPerKm, self::INTERNAL_PRECISION);
+        $marketAverageTotalCost = round($marketMaintenanceTotal + $marketFuelTotal, self::INTERNAL_PRECISION);
+
+        // Fallback: when no quotation data or zero market maintenance, use full km-based benchmark
+        $marketRatePerKm = (float) config('servx.market_avg_per_km', 0.37);
+        if ($marketAverageTotalCost <= 0 && $totalKilometers > 0) {
+            $marketAverageTotalCost = round($totalKilometers * $marketRatePerKm, self::INTERNAL_PRECISION);
+        }
+
+        // Step 4: Actual Cost Per KM (weighted fleet average)
+        $actualCostPerKm = $totalKilometers > 0
+            ? round($totalExpenses / $totalKilometers, self::INTERNAL_PRECISION)
+            : 0.0;
+
+        // Step 5: Difference Total = Total Expenses − Market Average Total Cost
+        $totalDifference = round($totalExpenses - $marketAverageTotalCost, self::INTERNAL_PRECISION);
+
+        // Difference Per KM = Actual Cost Per KM − Market Cost Per KM (effective)
+        $marketCostPerKm = $totalKilometers > 0 ? ($marketAverageTotalCost / $totalKilometers) : $marketRatePerKm;
+        $differencePerKm = round($actualCostPerKm - $marketCostPerKm, self::INTERNAL_PRECISION);
+
+        // Deviation % = (Actual − Market) ÷ Market × 100 (for summary card: +67% above, -15% below)
+        $deviationPercent = $marketAverageTotalCost > 0
+            ? round((($totalExpenses - $marketAverageTotalCost) / $marketAverageTotalCost) * 100, self::INTERNAL_PRECISION)
+            : 0.0;
+
+        // Cost ratio = Actual ÷ Market × 100 (for gauge: 0–200% scale, 100% = equal to market)
+        $costRatio = $marketAverageTotalCost > 0
+            ? round(($totalExpenses / $marketAverageTotalCost) * 100, self::INTERNAL_PRECISION)
+            : ($totalExpenses > 0 ? 100.0 : 0.0);
+
+        // Top 3 expensive & top 3 saving service types (marketData already fetched above)
         $companyJobs = $this->getCompanyMaintenanceJobs($company->id, $since);
         $serviceTypeAnalysis = $this->getServiceTypeAnalysis($company->id, $since, $marketData);
 
         return [
             'company_total' => round($totalExpenses, 2),
-            'market_average' => $marketAverageDisplay,
-            'market_avg_per_km' => round($marketAvgPerKm, 2),
-            'market_avg_per_1000_km' => $marketAvgPer1000Km,
-            'actual_cost_per_1000_km' => $actualCostPer1000Km,
-            'difference_per_1000_km' => $differencePer1000Km,
-            'total_difference' => $totalDifference,
-            'performance_ratio' => $performanceRatio,
-            'percent_difference' => $percentDiff,
+            'market_average' => round($marketAverageTotalCost, 2),
+            'market_avg_per_km' => round($totalKilometers > 0 ? ($marketAverageTotalCost / $totalKilometers) : $marketRatePerKm, 2),
+            'actual_cost_per_km' => round($actualCostPerKm, 2),
+            'difference_per_km' => round($differencePerKm, 2),
+            'total_difference' => round($totalDifference, 2),
+            'deviation_percent' => round($deviationPercent, 2),
+            'percent_difference' => round($deviationPercent, 2),
+            'cost_ratio' => round($costRatio, 2),
             'total_kilometers' => round($totalKilometers, 2),
             'company_jobs' => $companyJobs,
             'top3_expensive' => $serviceTypeAnalysis['expensive'],
@@ -99,9 +100,15 @@ class MarketComparisonService
             ->sum('cost');
     }
 
+    /**
+     * Total Kilometers = Sum of vehicle mileage in date range.
+     * Primary: fuel_refills (MAX - MIN odometer per vehicle) - same source as fuel cost, ensures consistency.
+     * Fallback: vehicle_monthly_mileage (when no fuel odometer data), then vehicle_locations.
+     */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
-        $ranges = DB::table('fuel_refills')
+        // Primary: fuel_refills (MAX - MIN odometer per vehicle) - accurate when fuel data exists
+        $fuelRanges = DB::table('fuel_refills')
             ->where('company_id', $companyId)
             ->where('refilled_at', '>=', $since)
             ->whereNotNull('odometer_km')
@@ -110,21 +117,45 @@ class MarketComparisonService
             ->groupBy('vehicle_id')
             ->get();
 
-        return max(0, (float) $ranges->sum('km_driven'));
+        $totalKm = max(0, (float) $fuelRanges->sum('km_driven'));
+
+        if ($totalKm > 0) {
+            return round($totalKm, self::INTERNAL_PRECISION);
+        }
+
+        // Fallback: vehicle_monthly_mileage (when no fuel odometer data)
+        $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
+        $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
+        if ($totalKm > 0) {
+            return round($totalKm, self::INTERNAL_PRECISION);
+        }
+
+        // Fallback: vehicle_locations
+        $locationRanges = DB::table('vehicle_locations')
+            ->join('vehicles', 'vehicles.id', '=', 'vehicle_locations.vehicle_id')
+            ->where('vehicles.company_id', $companyId)
+            ->where('vehicle_locations.created_at', '>=', $since)
+            ->whereNotNull('vehicle_locations.odometer')
+            ->where('vehicle_locations.odometer', '>', 0)
+            ->selectRaw('vehicle_locations.vehicle_id, MAX(vehicle_locations.odometer) - MIN(vehicle_locations.odometer) as km_driven')
+            ->groupBy('vehicle_locations.vehicle_id')
+            ->get();
+
+        return max(0, round((float) $locationRanges->sum('km_driven'), self::INTERNAL_PRECISION));
     }
 
     private function getCompanyMaintenanceTotal(int $companyId, $since): float
     {
-        // From MaintenanceRequest (approved/final amounts)
-        $mrTotal = MaintenanceRequest::query()
+        // From MaintenanceRequest (aggregated SUM)
+        $mrTotal = (float) MaintenanceRequest::query()
             ->where('company_id', $companyId)
             ->where('created_at', '>=', $since)
             ->where(function ($q) {
                 $q->whereNotNull('approved_quote_amount')
                     ->orWhereNotNull('final_invoice_amount');
             })
-            ->get()
-            ->sum(fn ($r) => (float) ($r->final_invoice_amount ?? $r->approved_quote_amount ?? 0));
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount)), 0) as total')
+            ->value('total');
 
         // From Orders (order_services)
         $orderTotal = (float) DB::table('order_services')

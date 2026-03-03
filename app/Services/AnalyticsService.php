@@ -23,6 +23,7 @@ class AnalyticsService
 
     /**
      * Maintenance analytics for a company (or admin with optional company filter).
+     * Includes both Orders (order_services) and MaintenanceRequests (approved/final amounts).
      */
     public function getMaintenanceAnalytics(
         ?Carbon $dateFrom = null,
@@ -31,7 +32,7 @@ class AnalyticsService
         ?int $vehicleId = null,
         ?int $serviceTypeId = null
     ): array {
-        $baseQ = function () use ($dateFrom, $dateTo, $companyId, $vehicleId, $serviceTypeId) {
+        $baseOrderQ = function () use ($dateFrom, $dateTo, $companyId, $vehicleId, $serviceTypeId) {
             $q = DB::table('order_services')
                 ->join('orders', 'orders.id', '=', 'order_services.order_id');
             if ($companyId) {
@@ -52,13 +53,40 @@ class AnalyticsService
             return $q;
         };
 
-        $totalCost = (float) ($baseQ()
+        $orderCost = (float) ($baseOrderQ()
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0);
 
-        $orderCount = (int) ($baseQ()
+        $orderCount = (int) ($baseOrderQ()
             ->selectRaw('COUNT(DISTINCT orders.id) as cnt')
             ->value('cnt') ?? 0);
+
+        // Maintenance requests with approved/final cost (serviceTypeId filter does not apply to MR)
+        $mrBaseQ = function () use ($dateFrom, $dateTo, $companyId, $vehicleId) {
+            $q = DB::table('maintenance_requests')
+                ->whereRaw('(COALESCE(final_invoice_amount, 0) > 0 OR COALESCE(approved_quote_amount, 0) > 0)');
+            if ($companyId) {
+                $q->where('company_id', $companyId);
+            }
+            if ($dateFrom) {
+                $q->where('created_at', '>=', $dateFrom->copy()->startOfDay());
+            }
+            if ($dateTo) {
+                $q->where('created_at', '<=', $dateTo->copy()->endOfDay());
+            }
+            if ($vehicleId) {
+                $q->where('vehicle_id', $vehicleId);
+            }
+            return $q;
+        };
+
+        $mrCost = (float) ($mrBaseQ()
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount, 0)), 0) as total')
+            ->value('total') ?? 0);
+        $mrCount = (int) ($mrBaseQ()->count());
+
+        $totalCost = round($orderCost + $mrCost, 2);
+        $totalCount = $orderCount + $mrCount;
 
         $vehicleCount = $vehicleId ? 1 : ($companyId
             ? Vehicle::where('company_id', $companyId)->count()
@@ -74,17 +102,18 @@ class AnalyticsService
         }
 
         return [
-            'total_cost' => round($totalCost, 2),
-            'order_count' => $orderCount,
+            'total_cost' => $totalCost,
+            'order_count' => $totalCount,
             'avg_per_vehicle' => $this->safeDivide($totalCost, $vehicleCount),
             'avg_per_company' => $this->safeDivide($totalCost, $companyCount),
             'avg_per_month' => $this->safeDivide($totalCost, $months),
-            'avg_per_order' => $this->safeDivide($totalCost, $orderCount),
+            'avg_per_order' => $this->safeDivide($totalCost, $totalCount),
         ];
     }
 
     /**
      * Maintenance cost per service type.
+     * Includes both Orders (order_services) and MaintenanceRequests (by maintenance_type).
      */
     public function getMaintenanceByServiceType(
         ?Carbon $dateFrom = null,
@@ -92,7 +121,7 @@ class AnalyticsService
         ?int $companyId = null,
         ?int $vehicleId = null
     ): array {
-        $q = DB::table('order_services')
+        $byOrder = DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
             ->leftJoin('services', 'services.id', '=', 'order_services.service_id')
             ->selectRaw('COALESCE(services.name, order_services.custom_service_name, "Custom") as service_name')
@@ -101,24 +130,66 @@ class AnalyticsService
             ->groupByRaw('COALESCE(services.name, order_services.custom_service_name, "Custom")');
 
         if ($companyId) {
-            $q->where('orders.company_id', $companyId);
+            $byOrder->where('orders.company_id', $companyId);
         }
         if ($dateFrom) {
-            $q->where('orders.created_at', '>=', $dateFrom->copy()->startOfDay());
+            $byOrder->where('orders.created_at', '>=', $dateFrom->copy()->startOfDay());
         }
         if ($dateTo) {
-            $q->where('orders.created_at', '<=', $dateTo->copy()->endOfDay());
+            $byOrder->where('orders.created_at', '<=', $dateTo->copy()->endOfDay());
         }
         if ($vehicleId) {
-            $q->where('orders.vehicle_id', $vehicleId);
+            $byOrder->where('orders.vehicle_id', $vehicleId);
         }
 
-        return $q->get()->map(fn ($r) => [
-            'service_name' => $r->service_name ?? 'Custom',
-            'total' => round((float) ($r->total ?? 0), 2),
-            'order_count' => (int) ($r->order_count ?? 0),
-            'avg_per_order' => $this->safeDivide((float) ($r->total ?? 0), (int) ($r->order_count ?? 1)),
-        ])->toArray();
+        $orderRows = $byOrder->get();
+
+        $byMr = DB::table('maintenance_requests')
+            ->whereRaw('(COALESCE(final_invoice_amount, 0) > 0 OR COALESCE(approved_quote_amount, 0) > 0)')
+            ->selectRaw('maintenance_type as service_name')
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount, 0)), 0) as total')
+            ->selectRaw('COUNT(*) as order_count')
+            ->groupBy('maintenance_type');
+
+        if ($companyId) {
+            $byMr->where('company_id', $companyId);
+        }
+        if ($dateFrom) {
+            $byMr->where('created_at', '>=', $dateFrom->copy()->startOfDay());
+        }
+        if ($dateTo) {
+            $byMr->where('created_at', '<=', $dateTo->copy()->endOfDay());
+        }
+        if ($vehicleId) {
+            $byMr->where('vehicle_id', $vehicleId);
+        }
+
+        $mrRows = $byMr->get();
+
+        $merged = [];
+        foreach ($orderRows as $r) {
+            $key = $r->service_name ?? 'Custom';
+            if (!isset($merged[$key])) {
+                $merged[$key] = ['total' => 0, 'order_count' => 0];
+            }
+            $merged[$key]['total'] += (float) ($r->total ?? 0);
+            $merged[$key]['order_count'] += (int) ($r->order_count ?? 0);
+        }
+        foreach ($mrRows as $r) {
+            $key = \App\Enums\MaintenanceType::tryFrom($r->service_name ?? '')?->label() ?? ($r->service_name ?? 'Maintenance');
+            if (!isset($merged[$key])) {
+                $merged[$key] = ['total' => 0, 'order_count' => 0];
+            }
+            $merged[$key]['total'] += (float) ($r->total ?? 0);
+            $merged[$key]['order_count'] += (int) ($r->order_count ?? 0);
+        }
+
+        return collect($merged)->map(fn ($v, $k) => [
+            'service_name' => $k,
+            'total' => round($v['total'], 2),
+            'order_count' => $v['order_count'],
+            'avg_per_order' => $this->safeDivide($v['total'], $v['order_count'] ?: 1),
+        ])->values()->toArray();
     }
 
     /**
@@ -327,7 +398,7 @@ class AnalyticsService
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
             ->with('company:id,company_name');
 
-        $maintenanceByVehicle = DB::table('order_services')
+        $orderMaintByVehicle = DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
             ->whereBetween('orders.created_at', [$dateFrom, $dateTo])
             ->when($companyId, fn ($q) => $q->where('orders.company_id', $companyId))
@@ -336,6 +407,22 @@ class AnalyticsService
             ->groupBy('orders.vehicle_id')
             ->get()
             ->keyBy('vehicle_id');
+
+        $mrMaintByVehicle = DB::table('maintenance_requests')
+            ->whereRaw('(COALESCE(final_invoice_amount, 0) > 0 OR COALESCE(approved_quote_amount, 0) > 0)')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->selectRaw('vehicle_id')
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount, 0)), 0) as total')
+            ->groupBy('vehicle_id')
+            ->get()
+            ->keyBy('vehicle_id');
+
+        $maintenanceByVehicle = collect($orderMaintByVehicle->keys())->merge($mrMaintByVehicle->keys())->unique()->filter()->mapWithKeys(function ($vid) use ($orderMaintByVehicle, $mrMaintByVehicle) {
+            $orderTotal = (float) ($orderMaintByVehicle->get($vid)?->total ?? 0);
+            $mrTotal = (float) ($mrMaintByVehicle->get($vid)?->total ?? 0);
+            return [$vid => (object) ['total' => $orderTotal + $mrTotal]];
+        });
 
         $fuelByVehicle = DB::table('fuel_refills')
             ->whereBetween('refilled_at', [$dateFrom, $dateTo])

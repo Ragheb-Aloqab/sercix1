@@ -41,11 +41,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Market Comparison – Benchmark Rate Per KM
+    | Market Comparison – Benchmark Rates
     |--------------------------------------------------------------------------
-    | Industry benchmark operational cost per kilometer (SAR/km) for fleet comparison.
-    | Used when comparing company actual cost per km vs market average.
+    | market_avg_per_km: Fallback total cost per km (SAR/km) when no quotation data.
+    | market_fuel_per_km: Fuel cost per km (SAR/km) for market fuel estimate.
+    | Main comparison uses: quotation-based maintenance + (km × market_fuel_per_km).
     */
     'market_avg_per_km' => (float) (env('MARKET_AVG_PER_KM', 0.37)),
+    'market_fuel_per_km' => (float) (env('MARKET_FUEL_PER_KM', 0.15)),
 
 ];

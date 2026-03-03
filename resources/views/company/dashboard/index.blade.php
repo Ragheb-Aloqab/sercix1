@@ -17,6 +17,7 @@
                 ['href' => route('company.fuel-balance'), 'icon' => 'fa-gas-pump', 'label' => __('fleet.fuel')],
                 ['href' => route('company.tracking.index'), 'icon' => 'fa-location-dot', 'label' => __('fleet.tracking')],
                 ['href' => route('company.reports.index'), 'icon' => 'fa-chart-pie', 'label' => __('fleet.reports')],
+                ['href' => route('company.insurances.index'), 'icon' => 'fa-shield-halved', 'label' => __('fleet.my_insurance')],
                 ['href' => route('company.settings'), 'icon' => 'fa-gear', 'label' => __('fleet.settings')],
             ];
         @endphp
@@ -191,7 +192,6 @@
                         <div class="p-3 rounded-xl bg-servx-inner border border-servx-border">
                             <p class="font-bold text-white">{{ $ann->title }}</p>
                             <p class="text-sm text-servx-silver mt-1 line-clamp-2">{{ Str::limit(strip_tags($ann->body), 120) }}</p>
-                            <p class="text-xs text-servx-silver mt-1">{{ $ann->published_at?->format('Y-m-d H:i') ?? $ann->created_at->format('Y-m-d H:i') }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -207,7 +207,6 @@
                         <i class="fa-solid fa-minus"></i>
                     </span>
                 </div>
-                <p class="text-xs text-servx-silver mt-1">{{ __('company.sar') }} · {{ __('company.market_comparison_tooltip') }}</p>
             </div>
             <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}">
                 <p class="dash-card-title">{{ __('company.market_average_cost') }}</p>
@@ -215,7 +214,6 @@
                     <p class="dash-card-value">{{ number_format($mcData['market_average'] ?? 0, 0) }} {{ __('company.sar') }}</p>
                     <span class="dash-trend dash-trend-stable"><i class="fa-solid fa-minus"></i></span>
                 </div>
-                <p class="text-xs text-servx-silver mt-1">{{ __('company.sar') }} · {{ __('company.market_comparison_tooltip') }}</p>
             </div>
             <div class="dash-card dash-card-kpi group" title="{{ __('company.difference_saving_over') }}">
                 <p class="dash-card-title">{{ __('company.difference_saving_over') }}</p>
@@ -230,18 +228,17 @@
                         @else<i class="fa-solid fa-minus"></i>@endif
                     </span>
                 </div>
-                <p class="text-xs text-servx-silver mt-1">{{ $percentDiff >= 0 ? '+' : '' }}{{ $percentDiff }}% {{ __('company.percentage_difference') }}</p>
             </div>
             <div class="dash-card dash-card-kpi group" title="{{ __('company.total_active_vehicles') }}">
                 <p class="dash-card-title">{{ __('company.total_active_vehicles') }}</p>
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value">{{ $vehiclesCount ?? 0 }}</p>
-                    <span class="dash-trend dash-trend-up" title="{{ __('company.above_normal') }}"><i class="fa-solid fa-caret-up"></i></span>
+                    <span class="dash-trend dash-trend-up" title="{{ __('company.above_normal') }}">
+                        <i class="fa-solid fa-caret-up"></i>
+                    </span>
                 </div>
-                <p class="text-xs text-servx-silver mt-1">{{ __('company.vehicles') }}</p>
             </div>
         </div>
-
         {{-- Row 2: Visual Analysis (Gauge + Chart) --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {{-- Left: Performance Gauge --}}
@@ -254,17 +251,22 @@
                 </h2>
                 <div class="dash-gauge-wrap">
                     @php
-                        $ratio = min(150, max(0, $mcData['performance_ratio'] ?? 0));
-                        $gaugeColor = $ratio < 100 ? 'var(--servx-green)' : 'var(--servx-red-trend)';
+                        $ratio = $mcData['cost_ratio'] ?? 0;
+                        $gaugeColor = $ratio < 95 ? 'var(--servx-green)' : ($ratio > 105 ? 'var(--servx-red-trend)' : 'var(--servx-amber)');
                         $arcLen = 126;
-                        $strokeDash = ($ratio / 100) * $arcLen;
+                        $normalized = min(1, $ratio / 200);
+                        $strokeDash = $normalized * $arcLen;
                         $strokeOffset = $arcLen - $strokeDash;
+                        $gaugeLabel = $ratio < 95 ? __('company.below_average') : ($ratio > 105 ? __('company.above_average') : __('company.average'));
                     @endphp
                     <svg class="dash-gauge-svg" viewBox="0 0 100 55" preserveAspectRatio="xMidYMin meet">
                         <path class="dash-gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50" />
                         <path class="dash-gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" stroke="{{ $gaugeColor }}" stroke-dasharray="{{ $arcLen }}" stroke-dashoffset="{{ $strokeOffset }}" />
                     </svg>
-                    <span class="dash-gauge-value">{{ $ratio }}%</span>
+                    <div class="dash-gauge-center">
+                        <span class="dash-gauge-value">{{ number_format($ratio, 1) }}%</span>
+                        <span class="dash-gauge-label {{ $ratio < 95 ? 'text-emerald-400' : ($ratio > 105 ? 'text-red-400' : 'text-amber-400') }}">{{ $gaugeLabel }}</span>
+                    </div>
                 </div>
                 <div class="space-y-2 text-sm border-t border-slate-600/50 pt-4">
                     <div class="flex justify-between">
@@ -542,7 +544,7 @@
                             </div>
                             <div class="flex justify-between items-center p-3 rounded-xl bg-servx-inner border border-servx-border">
                                 <span class="text-servx-silver">{{ __('company.percentage_difference') }}</span>
-                                <span class="font-bold {{ ($marketComparison['percent_difference'] ?? 0) >= 0 ? 'text-red-400' : 'text-emerald-400' }}">{{ ($marketComparison['percent_difference'] ?? 0) >= 0 ? '+' : '' }}{{ $marketComparison['percent_difference'] ?? 0 }}%</span>
+                                <span class="font-bold {{ ($marketComparison['percent_difference'] ?? 0) >= 0 ? 'text-red-400' : 'text-emerald-400' }}">{{ ($marketComparison['percent_difference'] ?? 0) >= 0 ? '+' : '' }}{{ number_format($marketComparison['percent_difference'] ?? 0, 2) }}%</span>
                             </div>
                             <div>
                                 <p class="text-sm font-bold text-servx-silver-light mb-2">{{ __('company.top3_expensive_services') }}</p>

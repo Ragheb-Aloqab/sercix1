@@ -107,6 +107,10 @@ Route::middleware(['company'])
         Route::get('/reports/service', [ServiceReportController::class, 'index'])
             ->name('reports.service');
 
+        // Insurances (My Insurance)
+        Route::get('/insurances', [\App\Http\Controllers\Company\InsurancesController::class, 'index'])
+            ->name('insurances.index');
+
         Route::get('/vehicles/create', [VehiclesController::class, 'create'])
             ->name('vehicles.create');
 
