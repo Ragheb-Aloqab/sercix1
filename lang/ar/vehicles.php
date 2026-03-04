@@ -189,4 +189,5 @@ return [
     'current_reading' => 'القراءة الحالية',
     'calculated_difference' => 'الفرق',
     'no_mileage_history' => 'لا يوجد سجل مسافات بعد.',
+    'source_fuel_refill' => 'تعبئة وقود',
 ];

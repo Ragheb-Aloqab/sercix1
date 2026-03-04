@@ -33,7 +33,86 @@ class VehicleMileageService
                 ->sum('trip_distance_km');
         }
 
+        // Fallback: sum monthly mileage from all sources (vehicle_locations, fuel_refills, etc.)
+        if ($fromMonthly <= 0) {
+            $fromMonthly = $this->getAccumulatedMileageFromRawSources($vehicle->id);
+        }
+
         return round($fromMonthly, 2);
+    }
+
+    /**
+     * Compute accumulated mileage from raw sources when vehicle_monthly_mileage is empty.
+     * Uses vehicle_locations (GPS) and fuel_refills - takes the larger of the two.
+     */
+    private function getAccumulatedMileageFromRawSources(int $vehicleId): float
+    {
+        $fromLocations = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->selectRaw('MIN(odometer) as min_odo, MAX(odometer) as max_odo')
+            ->first();
+
+        $locKm = 0.0;
+        if ($fromLocations && $fromLocations->min_odo !== null) {
+            $locKm = max(0, (float) $fromLocations->max_odo - (float) $fromLocations->min_odo);
+        }
+
+        $fromFuel = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->selectRaw('MIN(odometer_km) as min_odo, MAX(odometer_km) as max_odo')
+            ->first();
+
+        $fuelKm = 0.0;
+        if ($fromFuel && $fromFuel->min_odo !== null) {
+            $fuelKm = max(0, (float) $fromFuel->max_odo - (float) $fromFuel->min_odo);
+        }
+
+        return max($locKm, $fuelKm);
+    }
+
+    /**
+     * Get latest odometer from vehicle_locations or fuel_refills when no mileage history exists.
+     */
+    private function getLatestOdometerFromRawSources(int $vehicleId): ?array
+    {
+        $loc = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->orderByDesc('created_at')
+            ->first(['odometer', 'created_at']);
+
+        $fuel = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->orderByDesc('refilled_at')
+            ->first(['odometer_km', 'refilled_at']);
+
+        $current = null;
+        if ($loc && $fuel) {
+            $current = Carbon::parse($loc->created_at)->gte(Carbon::parse($fuel->refilled_at))
+                ? (float) $loc->odometer
+                : (float) $fuel->odometer_km;
+        } elseif ($loc) {
+            $current = (float) $loc->odometer;
+        } elseif ($fuel) {
+            $current = (float) $fuel->odometer_km;
+        }
+
+        if ($current === null) {
+            return null;
+        }
+
+        return [
+            'current' => $current,
+            'previous' => null,
+            'total' => 0,
+        ];
     }
 
     /**
@@ -80,6 +159,18 @@ class VehicleMileageService
             return round($fromDaily, 2);
         }
 
+        // Fallback: vehicle_locations (GPS odometer) - MIN/MAX in month
+        $fromLocations = $this->getMonthlyMileageFromVehicleLocations($vehicle->id, $month, $year);
+        if ($fromLocations > 0) {
+            return round($fromLocations, 2);
+        }
+
+        // Fallback: fuel_refills (odometer at refill) - MIN/MAX in month
+        $fromFuel = $this->getMonthlyMileageFromFuelRefills($vehicle->id, $month, $year);
+        if ($fromFuel > 0) {
+            return round($fromFuel, 2);
+        }
+
         return 0.0;
     }
 
@@ -109,6 +200,52 @@ class VehicleMileageService
             $prev = $curr;
         }
         return $total;
+    }
+
+    /**
+     * Compute monthly mileage from vehicle_locations (GPS): MAX(odometer) - MIN(odometer) in month.
+     */
+    private function getMonthlyMileageFromVehicleLocations(int $vehicleId, int $month, int $year): float
+    {
+        $monthStart = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $range = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->selectRaw('MIN(odometer) as min_odo, MAX(odometer) as max_odo')
+            ->first();
+
+        if (!$range || $range->min_odo === null) {
+            return 0.0;
+        }
+
+        return max(0, (float) $range->max_odo - (float) $range->min_odo);
+    }
+
+    /**
+     * Compute monthly mileage from fuel_refills: MAX(odometer_km) - MIN(odometer_km) in month.
+     */
+    private function getMonthlyMileageFromFuelRefills(int $vehicleId, int $month, int $year): float
+    {
+        $monthStart = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $range = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('refilled_at', [$monthStart, $monthEnd])
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->selectRaw('MIN(odometer_km) as min_odo, MAX(odometer_km) as max_odo')
+            ->first();
+
+        if (!$range || $range->min_odo === null) {
+            return 0.0;
+        }
+
+        return max(0, (float) $range->max_odo - (float) $range->min_odo);
     }
 
     /**
@@ -216,14 +353,74 @@ class VehicleMileageService
     /**
      * Get mileage history for a vehicle (structured history table).
      * Returns records with: vehicle_id, tracking_type, previous_reading, current_reading, calculated_difference, timestamp.
+     * Falls back to fuel_refills and vehicle_locations when vehicle_mileage_history is empty.
      */
-    public function getMileageHistory(Vehicle $vehicle, int $limit = 50): \Illuminate\Database\Eloquent\Collection
+    public function getMileageHistory(Vehicle $vehicle, int $limit = 50): \Illuminate\Support\Collection
     {
-        return VehicleMileageHistory::where('vehicle_id', $vehicle->id)
+        $history = VehicleMileageHistory::where('vehicle_id', $vehicle->id)
             ->orderByDesc('recorded_date')
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
+
+        if ($history->isNotEmpty()) {
+            return $history;
+        }
+
+        return $this->getRawMileageHistoryFromSources($vehicle->id, $limit);
+    }
+
+    /**
+     * Build mileage history from fuel_refills and vehicle_locations when vehicle_mileage_history is empty.
+     */
+    private function getRawMileageHistoryFromSources(int $vehicleId, int $limit): \Illuminate\Support\Collection
+    {
+        $entries = collect();
+
+        $fuelRefills = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->orderBy('refilled_at')
+            ->get(['refilled_at', 'odometer_km']);
+
+        $prevOdo = null;
+        foreach ($fuelRefills as $f) {
+            $curr = (float) $f->odometer_km;
+            $entries->push((object) [
+                'recorded_date' => Carbon::parse($f->refilled_at),
+                'tracking_type' => 'fuel_refill',
+                'previous_reading' => $prevOdo,
+                'current_reading' => $curr,
+                'calculated_difference' => $prevOdo !== null ? max(0, $curr - $prevOdo) : 0,
+            ]);
+            $prevOdo = $curr;
+        }
+
+        $locations = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->orderBy('created_at')
+            ->get(['created_at', 'odometer']);
+
+        $prevOdo = null;
+        foreach ($locations as $loc) {
+            $curr = (float) $loc->odometer;
+            $entries->push((object) [
+                'recorded_date' => Carbon::parse($loc->created_at),
+                'tracking_type' => 'gps',
+                'previous_reading' => $prevOdo,
+                'current_reading' => $curr,
+                'calculated_difference' => $prevOdo !== null ? max(0, $curr - $prevOdo) : 0,
+            ]);
+            $prevOdo = $curr;
+        }
+
+        return $entries
+            ->sortByDesc(fn($e) => $e->recorded_date?->format('Y-m-d H:i:s'))
+            ->take($limit)
+            ->values();
     }
 
     /**
@@ -255,7 +452,10 @@ class VehicleMileageService
             } else {
                 $lastDaily = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vid)->orderByDesc('date')->first();
                 if (!$lastDaily) {
-                    $result[$vid] = ['current_mileage' => 0, 'previous_mileage' => null, 'total_distance' => 0];
+                    $fromRaw = $this->getLatestOdometerFromRawSources($vid);
+                    $result[$vid] = $fromRaw
+                        ? ['current_mileage' => $fromRaw['current'], 'previous_mileage' => $fromRaw['previous'], 'total_distance' => $fromRaw['total']]
+                        : ['current_mileage' => 0, 'previous_mileage' => null, 'total_distance' => 0];
                 } else {
                     $current = (float) $lastDaily->odometer_km;
                     $prev = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vid)->where('date', '<', $lastDaily->date)->orderByDesc('date')->value('odometer_km');
@@ -286,6 +486,15 @@ class VehicleMileageService
                 ->orderByDesc('date')
                 ->first();
             if (!$lastDaily) {
+                // Fallback: latest odometer from vehicle_locations or fuel_refills
+                $fromRaw = $this->getLatestOdometerFromRawSources($vehicle->id);
+                if ($fromRaw) {
+                    return [
+                        'current_mileage' => $fromRaw['current'],
+                        'previous_mileage' => $fromRaw['previous'],
+                        'total_distance' => $fromRaw['total'],
+                    ];
+                }
                 return ['current_mileage' => 0, 'previous_mileage' => null, 'total_distance' => 0];
             }
             $current = (float) $lastDaily->odometer_km;

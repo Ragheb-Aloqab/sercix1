@@ -42,7 +42,7 @@
 
     <div class="rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-6 backdrop-blur-sm shadow-sm dark:shadow-none transition-colors duration-300">
         <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-4">2️⃣ {{ __('vehicles.monthly_mileage') }}</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
                 <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('vehicles.monthly_mileage') }} ({{ now()->translatedFormat('M') }})</p>
                 <p class="text-xl font-bold text-slate-900 dark:text-white">{{ number_format($currentMonthMileage ?? 0, 1) }} {{ __('common.km') }}</p>
@@ -50,10 +50,6 @@
             <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
                 <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('vehicles.estimated_market_cost') }}</p>
                 <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ number_format($estimatedMarketCost ?? 0, 2) }} {{ __('company.sar') }}</p>
-            </div>
-            <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
-                <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('vehicles.avg_market_operating_cost') }}</p>
-                <p class="text-xl font-bold text-slate-600 dark:text-slate-300">{{ number_format($marketCostPerKm ?? 0.37, 2) }} {{ __('company.sar') }}/km</p>
             </div>
         </div>
         <h3 class="text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">{{ __('vehicles.monthly_mileage') }} {{ __('vehicles.view_all') }}</h3>
@@ -97,9 +93,14 @@
                         <tr class="border-b border-slate-200 dark:border-slate-600/50">
                             <td class="py-2 text-slate-900 dark:text-white">{{ $h->recorded_date?->translatedFormat('Y-m-d') ?? $h->recorded_date }}</td>
                             <td class="py-2">
-                                <span class="px-2 py-0.5 rounded text-xs {{ $h->tracking_type === 'gps' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400' }}">
-                                    {{ $h->tracking_type === 'gps' ? __('tracking.source_device_api') : __('tracking.source_mobile') }}
-                                </span>
+                                @php
+                                    $typeLabels = [
+                                        'gps' => ['label' => __('tracking.source_device_api'), 'class' => 'bg-sky-500/20 text-sky-600 dark:text-sky-400'],
+                                        'fuel_refill' => ['label' => __('vehicles.source_fuel_refill'), 'class' => 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'],
+                                    ];
+                                    $typeConfig = $typeLabels[$h->tracking_type ?? ''] ?? ['label' => __('tracking.source_mobile'), 'class' => 'bg-amber-500/20 text-amber-600 dark:text-amber-400'];
+                                @endphp
+                                <span class="px-2 py-0.5 rounded text-xs {{ $typeConfig['class'] }}">{{ $typeConfig['label'] }}</span>
                             </td>
                             <td class="py-2 text-end text-slate-600 dark:text-slate-300">{{ $h->previous_reading !== null ? number_format($h->previous_reading, 1) : '—' }}</td>
                             <td class="py-2 text-end text-slate-900 dark:text-white font-semibold">{{ number_format($h->current_reading, 1) }}</td>

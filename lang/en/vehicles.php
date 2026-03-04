@@ -191,4 +191,5 @@ return [
     'current_reading' => 'Current Reading',
     'calculated_difference' => 'Difference',
     'no_mileage_history' => 'No mileage history yet.',
+    'source_fuel_refill' => 'Fuel refill',
 ];

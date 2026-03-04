@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Events\VehicleCreated;
 use App\Models\Vehicle;
+use App\Services\VehicleMileageService;
 use App\Models\CompanyBranch;
 use App\Models\MaintenanceRequest;
 use Illuminate\Http\Request;
