@@ -123,4 +123,6 @@ return [
     'unknown_center' => 'Unknown Center',
     'no_maintenance_data' => 'No maintenance data yet',
     'jobs_count' => 'jobs',
+    'fuel' => 'Fuel',
+    'maintenance' => 'Maintenance',
 ];

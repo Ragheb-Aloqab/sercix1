@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Services\ExpiryMonitoringService;
 use App\Services\MarketComparisonService;
 use App\Services\VehicleInspectionService;
+use App\Services\VehicleMileageService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -141,6 +142,13 @@ class DashboardController extends Controller
         // Fuel balance total (from vehicles)
         $fuelBalanceTotal = (float) \App\Models\Vehicle::where('company_id', $company->id)->where('is_active', true)->sum('fuel_balance');
 
+        $mileageService = app(VehicleMileageService::class);
+        $totalAccumulatedMileage = $mileageService->getCompanyAccumulatedMileage($company->id);
+        $totalMonthlyMileage = $mileageService->getCompanyMonthlyMileage($company->id, (int) now()->month, (int) now()->year);
+        $monthlyMileageReport = $mileageService->getCompanyMonthlySummary($company->id, 6);
+        $estimatedMarketCost = $mileageService->getEstimatedMarketCost($totalMonthlyMileage);
+        $marketAverageCostCard = $mileageService->getMarketAverageCostCardData($company->id);
+
         return view('company.dashboard.index', array_merge($data, [
             'marketComparison' => $marketComparison,
             'monthlyChartData' => $monthlyChartData,
@@ -166,6 +174,11 @@ class DashboardController extends Controller
             'inspectionPendingVehicles' => $inspectionPendingVehicles,
             'pendingInvoiceApprovals' => $pendingInvoiceApprovals,
             'pendingInvoiceApprovalsCount' => $pendingInvoiceApprovalsCount,
+            'totalAccumulatedMileage' => $totalAccumulatedMileage,
+            'totalMonthlyMileage' => $totalMonthlyMileage,
+            'monthlyMileageReport' => $monthlyMileageReport,
+            'estimatedMarketCost' => $estimatedMarketCost,
+            'marketAverageCostCard' => $marketAverageCostCard,
         ]));
     }
 }

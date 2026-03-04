@@ -50,4 +50,12 @@ return [
     'market_avg_per_km' => (float) (env('MARKET_AVG_PER_KM', 0.37)),
     'market_fuel_per_km' => (float) (env('MARKET_FUEL_PER_KM', 0.15)),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Maintenance Invoice Upload
+    |--------------------------------------------------------------------------
+    | Max file size in MB for invoice uploads (images: JPG, JPEG, PNG, WEBP; PDF).
+    */
+    'invoice_max_size_mb' => (int) (env('INVOICE_MAX_SIZE_MB', 5)),
+
 ];

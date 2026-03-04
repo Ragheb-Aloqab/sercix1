@@ -34,6 +34,7 @@ class MaintenanceRequest extends Model
         'invoice_approved_at',
         'final_invoice_pdf_path',
         'final_invoice_original_name',
+        'file_type',
         'final_invoice_amount',
         'final_invoice_uploaded_at',
         'completion_date',
@@ -146,5 +147,21 @@ class MaintenanceRequest extends Model
     public function getStatusLabelAttribute(): string
     {
         return MaintenanceRequestStatus::tryFrom($this->status)?->label() ?? $this->status;
+    }
+
+    /** Whether the final invoice file is an image (for display: thumbnail vs PDF icon). */
+    public function isInvoiceImage(): bool
+    {
+        if ($this->file_type) {
+            return $this->file_type === 'image';
+        }
+        $ext = strtolower(pathinfo($this->final_invoice_pdf_path ?? '', PATHINFO_EXTENSION));
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+    }
+
+    /** Whether the final invoice file is a PDF. */
+    public function isInvoicePdf(): bool
+    {
+        return !$this->isInvoiceImage();
     }
 }

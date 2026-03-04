@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Vehicle;
 use App\Models\VehicleMonthlyMileage;
+use App\Models\MobileTrackingTrip;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -39,8 +41,20 @@ class MonthlyMileageSnapshotService
             );
 
             if (!$prevRecord->is_closed) {
-                $prevRecord->end_odometer = $odometer;
-                $prevRecord->total_km = max(0, $odometer - (float) ($prevRecord->start_odometer ?? 0));
+                $vehicle = \App\Models\Vehicle::find($vehicleId);
+                if ($vehicle && $vehicle->usesMobileTracking()) {
+                    $monthStart = $prevMonth->copy()->startOfMonth();
+                    $monthEnd = $prevMonth->copy()->endOfMonth();
+                    $tripSum = (float) MobileTrackingTrip::where('vehicle_id', $vehicleId)
+                        ->whereNotNull('ended_at')
+                        ->whereBetween('ended_at', [$monthStart, $monthEnd])
+                        ->sum('trip_distance_km');
+                    $prevRecord->end_odometer = $odometer;
+                    $prevRecord->total_km = max(0, $tripSum);
+                } else {
+                    $prevRecord->end_odometer = $odometer;
+                    $prevRecord->total_km = max(0, $odometer - (float) ($prevRecord->start_odometer ?? 0));
+                }
                 $prevRecord->is_closed = true;
                 $prevRecord->save();
                 $closed++;
@@ -96,17 +110,27 @@ class MonthlyMileageSnapshotService
                 continue;
             }
 
-            $startOdo = (float) ($record->start_odometer ?? 0);
-
-            // Odometer reset: current < previous
-            if ($startOdo > 0 && $odometer < $startOdo) {
-                $record->odometer_reset_detected = true;
-                $record->start_odometer = $odometer;
+            $vehicle = Vehicle::find($vehicleId);
+            if ($vehicle && $vehicle->usesMobileTracking()) {
+                $monthStart = now()->startOfMonth();
+                $monthEnd = now()->endOfMonth();
+                $tripSum = (float) MobileTrackingTrip::where('vehicle_id', $vehicleId)
+                    ->whereNotNull('ended_at')
+                    ->whereBetween('ended_at', [$monthStart, $monthEnd])
+                    ->sum('trip_distance_km');
                 $record->end_odometer = $odometer;
-                $record->total_km = 0;
+                $record->total_km = max(0, $tripSum);
             } else {
-                $record->end_odometer = $odometer;
-                $record->total_km = $startOdo > 0 ? max(0, $odometer - $startOdo) : 0;
+                $startOdo = (float) ($record->start_odometer ?? 0);
+                if ($startOdo > 0 && $odometer < $startOdo) {
+                    $record->odometer_reset_detected = true;
+                    $record->start_odometer = $odometer;
+                    $record->end_odometer = $odometer;
+                    $record->total_km = 0;
+                } else {
+                    $record->end_odometer = $odometer;
+                    $record->total_km = $startOdo > 0 ? max(0, $odometer - $startOdo) : 0;
+                }
             }
 
             $record->save();
@@ -117,7 +141,7 @@ class MonthlyMileageSnapshotService
     }
 
     /**
-     * Get latest odometer per vehicle (from vehicle_locations, fallback fuel_refills).
+     * Get latest odometer per vehicle (from vehicle_locations, fuel_refills, or mobile_tracking_trips).
      */
     private function getLatestOdometerReadings(?Carbon $before = null): array
     {
@@ -139,12 +163,27 @@ class MonthlyMileageSnapshotService
         }
 
         // Fallback: fuel_refills
-        return DB::table('fuel_refills')
+        $fromFuel = DB::table('fuel_refills')
             ->where('refilled_at', '<=', $before)
             ->whereNotNull('odometer_km')
             ->where('odometer_km', '>', 0)
             ->orderByDesc('refilled_at')
             ->get(['vehicle_id', DB::raw('odometer_km as odometer')])
+            ->unique('vehicle_id')
+            ->pluck('odometer', 'vehicle_id')
+            ->toArray();
+
+        if (!empty($fromFuel)) {
+            return $fromFuel;
+        }
+
+        // Fallback for mobile tracking: latest end_odometer from mobile_tracking_trips
+        return DB::table('mobile_tracking_trips')
+            ->where('ended_at', '<=', $before)
+            ->whereNotNull('end_odometer')
+            ->where('end_odometer', '>', 0)
+            ->orderByDesc('ended_at')
+            ->get(['vehicle_id', DB::raw('end_odometer as odometer')])
             ->unique('vehicle_id')
             ->pluck('odometer', 'vehicle_id')
             ->toArray();

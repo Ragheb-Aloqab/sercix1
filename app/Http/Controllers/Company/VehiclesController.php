@@ -9,6 +9,7 @@ use App\Models\MaintenanceRequest;
 use App\Services\ExpiryMonitoringService;
 use App\Services\VehicleAnalyticsService;
 use App\Services\VehicleInspectionService;
+use App\Services\VehicleMileageService;
 use Illuminate\Http\Request;
 
 class VehiclesController extends Controller
@@ -128,126 +129,140 @@ class VehiclesController extends Controller
     }
 
     /**
-     * GET /company/vehicles/{vehicle}
+     * GET /company/vehicles/{vehicle} — Vehicle Overview (5 navigation cards)
      */
     public function show(Vehicle $vehicle)
     {
         $this->authorize('view', $vehicle);
-
         $company = auth('company')->user();
-        $vehicle->load([
-            'branch:id,name',
-            'orders' => fn ($q) => $q->with(['services'])
-                ->latest(),
-            'fuelRefills' => fn ($q) => $q->latest('refilled_at'),
-        ]);
+        return view('company.vehicles.show', compact('company', 'vehicle'));
+    }
 
-        $orders = $vehicle->orders ?? collect();
-        $totalOrdersAmount = 0;
-        foreach ($orders as $o) {
-            $totalOrdersAmount += (float) ($o->total_amount ?? 0);
-        }
+    /**
+     * GET /company/vehicles/{vehicle}/details — Vehicle metadata
+     */
+    public function details(Vehicle $vehicle)
+    {
+        $this->authorize('view', $vehicle);
+        $company = auth('company')->user();
+        return view('company.vehicles.details', compact('company', 'vehicle'));
+    }
 
-        $fuelRefills = $vehicle->fuelRefills ?? collect();
-        $totalFuelCost = $fuelRefills->sum('cost');
-        $totalFuelLiters = $fuelRefills->sum('liters');
-
-        $statusLabels = [
-            'pending_approval' => __('common.status_pending_approval'),
-            'approved' => __('common.status_approved'),
-            'in_progress' => __('common.status_in_progress'),
-            'pending_confirmation' => __('common.status_pending_confirmation'),
-            'completed' => __('common.status_completed'),
-            'rejected' => __('common.status_rejected'),
-            'cancelled' => __('common.status_cancelled'),
-        ];
-
-        $ordersWithDisplay = $orders->map(function ($order) use ($statusLabels) {
-            $orderTotal = (float) ($order->total_amount ?? 0);
-            $orderStatusClass = match ($order->status ?? '') {
-                'completed' => 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50',
-                'cancelled', 'rejected' => 'bg-red-500/30 text-red-300 border-red-400/50',
-                'pending_approval' => 'bg-amber-500/30 text-amber-300 border-amber-400/50',
-                'approved' => 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50',
-                'pending_confirmation' => 'bg-indigo-500/30 text-indigo-300 border-indigo-400/50',
-                'in_progress' => 'bg-amber-500/30 text-amber-300 border-amber-400/50',
-                default => 'bg-slate-600/30 text-slate-300 border-slate-500/50',
-            };
-            return (object) [
-                'order' => $order,
-                'orderTotal' => $orderTotal,
-                'orderStatusClass' => $orderStatusClass,
-                'statusLabel' => $statusLabels[$order->status ?? ''] ?? $order->status,
-            ];
-        });
-
-        $inspectionService = app(VehicleInspectionService::class);
-        $inspectionStatus = $inspectionService->getVehicleInspectionStatus($vehicle);
-        $vehicleInspections = $vehicle->inspections()->with('photos')->latest('inspection_date')->take(10)->get();
-
-        $analyticsService = app(VehicleAnalyticsService::class);
-        $vehicleAnalytics = $analyticsService->getVehicleAnalytics($vehicle);
-        $chartMonths = (int) request('chart_months', 6);
-        if (!in_array($chartMonths, [1, 3, 6, 12], true)) {
-            $chartMonths = 6;
-        }
-        $costVsMarketChart = $analyticsService->getVehicleCostVsMarketChart($vehicle, $chartMonths);
-        $vehicleMarketComparison = $analyticsService->getVehicleMarketComparison($vehicle);
-
-        // Recent operations: MaintenanceRequest + Order (last 10 combined)
-        $recentMaintenance = MaintenanceRequest::where('vehicle_id', $vehicle->id)
-            ->where(function ($q) {
-                $q->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
-            })
-            ->with('approvedCenter')
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(fn ($r) => (object) [
-                'type' => 'maintenance_request',
-                'id' => $r->id,
-                'status' => $r->status,
-                'cost' => (float) ($r->final_invoice_amount ?? $r->approved_quote_amount ?? 0),
-                'date' => $r->created_at,
-                'center' => $r->approvedCenter?->name,
-            ]);
-
-        $recentOrders = $vehicle->orders()->with('services')->latest()->take(5)->get()->map(function ($o) {
-            $total = (float) ($o->total_amount ?? 0);
-            if ($total <= 0 && $o->services) {
-                $total = $o->services->sum(fn ($s) => (float) ($s->pivot->total_price ?? $s->pivot->qty * $s->pivot->unit_price ?? 0));
+    /**
+     * GET /company/vehicles/{vehicle}/tracking — Tracking data & trip history
+     */
+    public function tracking(Vehicle $vehicle)
+    {
+        $this->authorize('view', $vehicle);
+        $company = auth('company')->user();
+        $mileageService = app(VehicleMileageService::class);
+        $accumulatedMileage = $mileageService->getAccumulatedMileage($vehicle);
+        $currentMonthMileage = $mileageService->getCurrentMonthMileage($vehicle);
+        $trackingOdometer = null;
+        $trackingTrips = collect();
+        if ($vehicle->usesDeviceApiTracking() && $vehicle->imei) {
+            $trackingService = app(\App\Services\VehicleTrackingApiService::class);
+            $result = $trackingService->fetchVehicleLocation($vehicle->company, $vehicle->imei);
+            if ($result['success'] && isset($result['data']['odometer'])) {
+                $trackingOdometer = (float) $result['data']['odometer'];
             }
-            return (object) [
-                'type' => 'order',
-                'id' => $o->id,
-                'status' => $o->status,
-                'cost' => $total,
-                'date' => $o->created_at,
-                'center' => null,
-            ];
-        });
+        } elseif ($vehicle->usesMobileTracking()) {
+            $trackingTrips = $vehicle->mobileTrackingTrips()->whereNotNull('ended_at')->latest('started_at')->take(50)->get();
+        }
+        return view('company.vehicles.tracking', compact('company', 'vehicle', 'accumulatedMileage', 'currentMonthMileage', 'trackingOdometer', 'trackingTrips'));
+    }
 
-        $recentOperations = $recentMaintenance->concat($recentOrders)->sortByDesc('date')->take(8)->values();
+    /**
+     * GET /company/vehicles/{vehicle}/images — Vehicle images archive
+     */
+    public function images(Vehicle $vehicle)
+    {
+        $this->authorize('view', $vehicle);
+        $company = auth('company')->user();
+        $imagesByMonth = [];
+        foreach ($vehicle->inspections()->with('photos')->get() as $insp) {
+            $key = $insp->inspection_date?->format('Y-m') ?? 'unknown';
+            if (!isset($imagesByMonth[$key])) {
+                $imagesByMonth[$key] = [
+                    'label' => $insp->inspection_date?->translatedFormat('F Y') ?? $key,
+                    'photos' => [],
+                    'driver_name' => $insp->driver_name,
+                    'submitted_at' => $insp->submitted_at ?? $insp->created_at,
+                ];
+            }
+            foreach ($insp->photos as $photo) {
+                $imagesByMonth[$key]['photos'][] = [
+                    'photo' => $photo,
+                    'inspection' => $insp,
+                    'has_required' => $insp->hasRequiredPhotos(),
+                ];
+            }
+        }
+        krsort($imagesByMonth);
+        return view('company.vehicles.images', compact('company', 'vehicle', 'imagesByMonth'));
+    }
 
-        return view('company.vehicles.show', compact(
-            'company',
-            'vehicle',
-            'orders',
-            'fuelRefills',
-            'totalOrdersAmount',
-            'totalFuelCost',
-            'totalFuelLiters',
-            'statusLabels',
-            'ordersWithDisplay',
-            'inspectionStatus',
-            'vehicleInspections',
-            'inspectionService',
-            'vehicleAnalytics',
-            'costVsMarketChart',
-            'chartMonths',
-            'vehicleMarketComparison',
-            'recentOperations',
-        ));
+    /**
+     * GET /company/vehicles/{vehicle}/reports — Fuel & maintenance reports
+     */
+    public function reports(Vehicle $vehicle)
+    {
+        $this->authorize('view', $vehicle);
+        $company = auth('company')->user();
+        $reportType = request('report_type', 'all');
+        $reportFrom = request('report_from');
+        $reportTo = request('report_to');
+        $reportTransactions = collect();
+        if (in_array($reportType, ['fuel', 'all'])) {
+            $fuelQ = $vehicle->fuelRefills();
+            if ($reportFrom) $fuelQ->where('refilled_at', '>=', $reportFrom);
+            if ($reportTo) $fuelQ->where('refilled_at', '<=', $reportTo . ' 23:59:59');
+            foreach ($fuelQ->orderBy('refilled_at')->get() as $fr) {
+                $reportTransactions->push((object) [
+                    'date' => $fr->refilled_at,
+                    'type' => 'fuel',
+                    'description' => $fr->liters . ' L',
+                    'cost' => (float) $fr->cost,
+                ]);
+            }
+        }
+        if (in_array($reportType, ['maintenance', 'all'])) {
+            $mrQ = MaintenanceRequest::where('vehicle_id', $vehicle->id)
+                ->where(function ($q) {
+                    $q->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
+                });
+            if ($reportFrom) $mrQ->where('created_at', '>=', $reportFrom);
+            if ($reportTo) $mrQ->where('created_at', '<=', $reportTo . ' 23:59:59');
+            foreach ($mrQ->orderBy('created_at')->get() as $mr) {
+                $reportTransactions->push((object) [
+                    'date' => $mr->created_at,
+                    'type' => 'maintenance',
+                    'description' => 'Request #' . $mr->id,
+                    'cost' => (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0),
+                ]);
+            }
+        }
+        $reportTransactions = $reportTransactions->sortBy('date')->values();
+        $reportFuelTotal = $reportTransactions->where('type', 'fuel')->sum('cost');
+        $reportMaintenanceTotal = $reportTransactions->where('type', 'maintenance')->sum('cost');
+        $reportQs = http_build_query(['type' => $reportType, 'date_from' => $reportFrom, 'date_to' => $reportTo]);
+        return view('company.vehicles.reports', compact('company', 'vehicle', 'reportTransactions', 'reportFuelTotal', 'reportMaintenanceTotal', 'reportQs'));
+    }
+
+    /**
+     * GET /company/vehicles/{vehicle}/mileage — Mileage & market cost
+     */
+    public function mileage(Vehicle $vehicle)
+    {
+        $this->authorize('view', $vehicle);
+        $company = auth('company')->user();
+        $mileageService = app(VehicleMileageService::class);
+        $accumulatedMileage = $mileageService->getAccumulatedMileage($vehicle);
+        $currentMonthMileage = $mileageService->getCurrentMonthMileage($vehicle);
+        $monthlyMileageHistory = $mileageService->getMonthlyHistory($vehicle, 12);
+        $estimatedMarketCost = $mileageService->getEstimatedMarketCost($currentMonthMileage);
+        $marketCostPerKm = (float) config('servx.market_avg_per_km', 0.37);
+        return view('company.vehicles.mileage', compact('company', 'vehicle', 'accumulatedMileage', 'currentMonthMileage', 'monthlyMileageHistory', 'estimatedMarketCost', 'marketCostPerKm'));
     }
 
     /**

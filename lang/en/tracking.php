@@ -52,6 +52,13 @@ return [
     'tracking_permission_denied' => 'Location permission denied.',
     'tracking_error' => 'Location error.',
     'mobile_tracking_hint' => 'Share your location to track this vehicle.',
+    'enter_start_odometer' => 'Enter odometer reading',
+    'start_odometer_hint' => 'Enter the current odometer value (km) before starting the trip.',
+    'enter_end_odometer' => 'Enter odometer reading',
+    'end_odometer_hint' => 'Enter the odometer value (km) after finishing the trip. Trip distance will be calculated automatically.',
+    'enter_end_odometer_prompt' => 'Enter odometer value (km) after finishing the trip:',
+    'odometer_invalid' => 'Please enter a valid odometer value.',
+    'trip_recorded' => 'Trip recorded',
 
     'map_style' => 'Map style',
     'map_style_carto_dark' => 'Carto Dark',

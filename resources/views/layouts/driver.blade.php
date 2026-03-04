@@ -183,7 +183,22 @@
         return watchId;
     }
 
-    function stopTracking(vehicleId) {
+    function stopTracking(vehicleId, skipModal) {
+        if (!skipModal) {
+            var endVal = prompt('{{ __("tracking.enter_end_odometer_prompt") }}', '');
+            if (endVal === null) return;
+            var num = parseFloat(endVal);
+            if (isNaN(num) || num < 0) {
+                alert('{{ __("tracking.odometer_invalid") }}');
+                return;
+            }
+            doStopTrackingFromBar(vehicleId, num);
+        } else {
+            doStopTrackingFromBar(vehicleId, 0);
+        }
+    }
+
+    function doStopTrackingFromBar(vehicleId, endOdometer) {
         var bar = document.getElementById('driver-tracking-bar');
         if (bar) bar.remove();
         if (window.__driverTrackingWatchId) {
@@ -193,6 +208,7 @@
         var form = new FormData();
         form.append('_token', csrf);
         form.append('vehicle_id', vehicleId);
+        form.append('end_odometer', endOdometer);
         fetch(stopUrl, { method: 'POST', body: form, headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
     }
 

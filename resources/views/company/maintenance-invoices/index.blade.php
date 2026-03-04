@@ -10,10 +10,16 @@
 {{-- Summary --}}
 <div class="dash-card dash-card-kpi mb-6">
     <p class="dash-card-title">{{ __('fleet.total_maintenance_cost') }}</p>
-    <p class="dash-card-value">{{ number_format($totalMaintenanceCost ?? 0, 2) }} {{ __('company.sar') }}</p>
+    <p class="dash-card-value">{{ number_format(($totalMaintenanceCost ?? 0) + ($totalCompanyInvoicesCost ?? 0), 2) }} {{ __('company.sar') }}</p>
+    <p class="text-xs text-servx-silver mt-1">{{ __('maintenance.invoice_archive_desc') }}</p>
 </div>
 
+{{-- Company-uploaded invoices section with Upload button & modal (Livewire) --}}
+<livewire:company.maintenance-invoices-section />
+
+{{-- Invoices from maintenance centers --}}
 <div class="dash-card">
+    <h2 class="dash-section-title mb-4">{{ __('maintenance.invoice_archive') }} — {{ __('maintenance.center_name') }}</h2>
     @if($requests->isEmpty())
         <p class="text-servx-silver mb-4">{{ __('maintenance.no_invoices') ?? 'No invoices yet.' }}</p>
     @else
@@ -64,6 +70,7 @@
         <div class="mt-4">{{ $requests->links() }}</div>
     @endif
 </div>
+
 <div class="mt-4">
     <a href="{{ route('company.maintenance-requests.index') }}" class="px-4 py-2 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 font-bold text-servx-silver-light">{{ __('common.back') }}</a>
 </div>

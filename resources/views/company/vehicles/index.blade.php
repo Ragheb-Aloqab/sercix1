@@ -24,9 +24,6 @@
         </form>
 
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('company.fuel-balance') }}" class="px-4 py-3 rounded-2xl border border-amber-500/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition-colors">
-                <i class="fa-solid fa-gas-pump me-2"></i>{{ __('fleet.fuel') }}
-            </a>
             <a href="{{ route('company.vehicles.create') }}"
                 class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors">
                 <i class="fa-solid fa-plus me-2"></i> {{ __('vehicles.add_vehicle') }}

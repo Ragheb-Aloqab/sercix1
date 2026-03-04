@@ -76,23 +76,26 @@ class RfqController extends Controller
     {
         $center = auth('maintenance_center')->user();
 
+        $maxKb = config('servx.invoice_max_size_mb', 5) * 1024;
         $data = $request->validate([
-            'final_invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'final_invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:' . $maxKb],
             'final_invoice_amount' => ['nullable', 'numeric', 'min:0'],
             'completion_date' => ['nullable', 'date'],
         ]);
 
         $file = $request->file('final_invoice');
-        $path = $file->store('maintenance-invoices/' . $maintenanceRequest->id, 'private');
+        $path = $file->store('invoices/' . $maintenanceRequest->company_id . '/' . $maintenanceRequest->id, 'private');
         $originalName = $file->getClientOriginalName();
         $ext = strtolower($file->getClientOriginalExtension() ?: pathinfo($path, PATHINFO_EXTENSION));
+        $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
 
-        if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
             try {
                 $pdfPath = app(\App\Services\MaintenanceInvoicePdfService::class)
                     ->convertImageToPdfAndSave($path, 'private');
                 $path = $pdfPath;
                 $originalName = pathinfo($originalName, PATHINFO_FILENAME) . '.pdf';
+                $fileType = 'pdf';
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Storage::disk('private')->delete($path);
                 report($e);
@@ -102,6 +105,7 @@ class RfqController extends Controller
 
         $data['final_invoice_pdf_path'] = $path;
         $data['final_invoice_original_name'] = $originalName;
+        $data['file_type'] = $fileType;
         $data['final_invoice_amount'] = $data['final_invoice_amount'] ?? null;
         $data['completion_date'] = $data['completion_date'] ?? null;
 

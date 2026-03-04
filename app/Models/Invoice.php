@@ -21,6 +21,8 @@ class Invoice extends Model
         'subtotal',
         'tax',
         'paid_amount',
+        'invoice_file',
+        'file_type',
     ];
 
     protected $appends = ['total', 'remaining'];

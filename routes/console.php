@@ -23,3 +23,6 @@ Schedule::command('inspections:schedule')->dailyAt('06:00');
 // Monthly mileage: snapshot at month start (1st 00:05), update current month daily (01:00)
 Schedule::command('mileage:capture-monthly')->monthlyOn(1, '00:05');
 Schedule::command('mileage:capture-monthly')->dailyAt('01:00');
+
+// Store last odometer value for each vehicle daily (end of day)
+Schedule::command('odometer:store-daily')->dailyAt('23:55');

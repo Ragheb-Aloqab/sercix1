@@ -100,6 +100,16 @@ class Vehicle extends Model
         return $this->hasOne(VehicleInspection::class)->latestOfMany('inspection_date');
     }
 
+    public function mobileTrackingTrips()
+    {
+        return $this->hasMany(MobileTrackingTrip::class)->orderByDesc('started_at');
+    }
+
+    public function vehicleMonthlyMileage()
+    {
+        return $this->hasMany(VehicleMonthlyMileage::class)->orderByDesc('year')->orderByDesc('month');
+    }
+
     /** Display name: name or make+model */
     public function getDisplayNameAttribute(): string
     {

@@ -106,6 +106,10 @@ Route::middleware(['company'])
             ->name('reports.index');
         Route::get('/reports/service', [ServiceReportController::class, 'index'])
             ->name('reports.service');
+        Route::get('/reports/mileage/excel', [\App\Http\Controllers\Company\MileageReportController::class, 'exportExcel'])
+            ->name('reports.mileage.excel');
+        Route::get('/reports/mileage/pdf', [\App\Http\Controllers\Company\MileageReportController::class, 'exportPdf'])
+            ->name('reports.mileage.pdf');
 
         // Insurances (My Insurance)
         Route::get('/insurances', [\App\Http\Controllers\Company\InsurancesController::class, 'index'])
@@ -125,6 +129,27 @@ Route::middleware(['company'])
 
         Route::get('/vehicles/{vehicle}', [VehiclesController::class, 'show'])
             ->name('vehicles.show')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/details', [VehiclesController::class, 'details'])
+            ->name('vehicles.details')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/tracking', [VehiclesController::class, 'tracking'])
+            ->name('vehicles.tracking')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/images', [VehiclesController::class, 'images'])
+            ->name('vehicles.images')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/reports', [VehiclesController::class, 'reports'])
+            ->name('vehicles.reports')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/mileage', [VehiclesController::class, 'mileage'])
+            ->name('vehicles.mileage')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/report/excel', [\App\Http\Controllers\Company\VehicleReportController::class, 'exportExcel'])
+            ->name('vehicles.report.excel')
+            ->whereNumber('vehicle');
+        Route::get('/vehicles/{vehicle}/report/pdf', [\App\Http\Controllers\Company\VehicleReportController::class, 'exportPdf'])
+            ->name('vehicles.report.pdf')
             ->whereNumber('vehicle');
 
         Route::get('/vehicles/{vehicle}/edit', [VehiclesController::class, 'edit'])
@@ -226,12 +251,23 @@ Route::middleware(['company'])
         // Maintenance Invoice Archive (view & download final invoices)
         Route::get('/maintenance-invoices', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'index'])
             ->name('maintenance-invoices.index');
+        Route::post('/maintenance-invoices', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'store'])
+            ->name('maintenance-invoices.store');
         Route::get('/maintenance-invoices/{maintenanceRequest}/view', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'stream'])
             ->name('maintenance-invoices.view')
             ->whereNumber('maintenanceRequest');
         Route::get('/maintenance-invoices/{maintenanceRequest}/download', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'download'])
             ->name('maintenance-invoices.download')
             ->whereNumber('maintenanceRequest');
+        Route::get('/maintenance-invoices/company/{companyMaintenanceInvoice}/view', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'streamCompanyInvoice'])
+            ->name('maintenance-invoices.company.view')
+            ->whereNumber('companyMaintenanceInvoice');
+        Route::get('/maintenance-invoices/company/{companyMaintenanceInvoice}/thumbnail', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'thumbnailCompanyInvoice'])
+            ->name('maintenance-invoices.company.thumbnail')
+            ->whereNumber('companyMaintenanceInvoice');
+        Route::get('/maintenance-invoices/company/{companyMaintenanceInvoice}/download', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'downloadCompanyInvoice'])
+            ->name('maintenance-invoices.company.download')
+            ->whereNumber('companyMaintenanceInvoice');
 
         // Vehicle Inspections
         Route::get('/inspections', [VehicleInspectionController::class, 'index'])

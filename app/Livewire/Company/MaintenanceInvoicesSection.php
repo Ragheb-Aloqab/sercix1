@@ -1,0 +1,121 @@
+<?php
+
+namespace App\Livewire\Company;
+
+use App\Models\CompanyMaintenanceInvoice;
+use App\Models\Vehicle;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
+
+class MaintenanceInvoicesSection extends Component
+{
+    use WithFileUploads;
+
+    public bool $modalOpen = false;
+    public $invoice_file = null;
+    public $vehicle_id = '';
+    public $amount = '';
+    public $description = '';
+
+    protected function rules(): array
+    {
+        $maxMb = config('servx.invoice_max_size_mb', 5);
+        return [
+            'invoice_file' => [
+                'required',
+                'file',
+                'mimes:jpg,jpeg,png,webp,pdf',
+                'max:' . ($maxMb * 1024),
+            ],
+            'vehicle_id' => ['nullable', 'string'],
+            'amount' => ['nullable', 'numeric', 'min:0'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'invoice_file' => __('maintenance.invoice_file_label'),
+        ];
+    }
+
+    protected function messages(): array
+    {
+        $maxMb = config('servx.invoice_max_size_mb', 5);
+        return [
+            'invoice_file.required' => __('maintenance.invoice_validation_type'),
+            'invoice_file.mimes' => __('maintenance.invoice_validation_type'),
+            'invoice_file.max' => __('maintenance.invoice_validation_size', ['max' => $maxMb]),
+        ];
+    }
+
+    public function openModal(): void
+    {
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'description']);
+        $this->resetValidation();
+        $this->modalOpen = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->modalOpen = false;
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'description']);
+        $this->resetValidation();
+    }
+
+    public function saveInvoice(): void
+    {
+        $company = auth('company')->user();
+
+        $this->validate();
+
+        $vehicleId = $this->vehicle_id !== '' && $this->vehicle_id !== null ? (int) $this->vehicle_id : null;
+        if ($vehicleId && !$company->vehicles()->where('id', $vehicleId)->exists()) {
+            $this->addError('vehicle_id', __('validation.exists', ['attribute' => __('driver.vehicle')]));
+            return;
+        }
+
+        $file = $this->invoice_file;
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
+        $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
+        $originalName = $file->getClientOriginalName();
+        $uniqueName = Str::uuid() . '.' . $ext;
+        $path = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
+
+        CompanyMaintenanceInvoice::create([
+            'company_id' => $company->id,
+            'vehicle_id' => $vehicleId,
+            'amount' => $this->amount ? (float) $this->amount : null,
+            'invoice_file' => $path,
+            'file_type' => $fileType,
+            'original_filename' => $originalName,
+            'description' => $this->description ?: null,
+        ]);
+
+        $this->closeModal();
+        $this->dispatch('invoice-uploaded');
+        session()->flash('invoice_success', __('maintenance.invoice_uploaded_success'));
+    }
+
+    public function render()
+    {
+        $company = auth('company')->user();
+        $companyInvoices = CompanyMaintenanceInvoice::where('company_id', $company->id)
+            ->with('vehicle')
+            ->latest()
+            ->get();
+        $vehicles = Vehicle::where('company_id', $company->id)
+            ->where('is_active', true)
+            ->orderBy('plate_number')
+            ->get(['id', 'plate_number', 'make', 'model']);
+        $maxFileMb = config('servx.invoice_max_size_mb', 5);
+
+        return view('livewire.company.maintenance-invoices-section', [
+            'companyInvoices' => $companyInvoices,
+            'vehicles' => $vehicles,
+            'maxFileMb' => $maxFileMb,
+        ]);
+    }
+}

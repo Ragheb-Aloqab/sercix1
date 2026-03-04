@@ -119,6 +119,15 @@ return [
     'invoice_archive_desc' => 'Final invoices from maintenance centers',
     'no_invoices' => 'No invoices yet.',
     'upload_date' => 'Upload Date',
+    'add_invoice' => 'Add Invoice',
+    'upload_maintenance_invoice' => 'Upload Maintenance Invoice',
+    'add_invoice_desc' => 'Upload a maintenance invoice (image or PDF)',
+    'invoice_file_label' => 'Invoice File',
+    'invoice_file_accept' => 'JPG, JPEG, PNG, WEBP or PDF (max :max MB)',
+    'invoice_file_max' => 'File must not exceed :max MB.',
+    'invoice_uploaded_success' => 'Invoice uploaded successfully.',
+    'invoice_validation_type' => 'File must be an image (JPG, JPEG, PNG, WEBP) or PDF.',
+    'invoice_validation_size' => 'File size must not exceed :max MB.',
 
     // Status labels
     'status_new_request' => 'New Request',

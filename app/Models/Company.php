@@ -144,6 +144,11 @@ class Company extends Authenticatable
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function companyMaintenanceInvoices()
+    {
+        return $this->hasMany(CompanyMaintenanceInvoice::class);
+    }
     public function notifications()
     {
         return $this->morphMany(Notification::class, 'notifiable')->latest();

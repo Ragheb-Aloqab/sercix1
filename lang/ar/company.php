@@ -100,11 +100,11 @@ return [
     'alert_exceeds_market' => 'تكاليف الصيانة تتجاوز متوسط السوق بأكثر من 10٪. يُنصح بمراجعة عروض مراكز الخدمة.',
     'alert_saving_market' => 'تكاليف الصيانة أقل من متوسط السوق بأكثر من 10٪. عمل رائع في التحسين!',
     'close' => 'إغلاق',
-    'coming_soon' => 'قريباً',
-    'insurances_coming_soon_desc' => 'إدارة التأمين لأسطولك ستكون متاحة في إصدار لاحق.',
+    'coming_soon' => 'قبل انتهاء بوليصة التأمين،',
+    'insurances_coming_soon_desc' => ' سنعرض لك تلقائيًا أفضل عروض شركات التأمين لتختار الأنسب بكل سهولة.',
 
     // Executive dashboard
-    'total_company_maintenance' => 'إجمالي تكلفة صيانة الشركة',
+    'total_company_maintenance' => 'إجمالي تكلفة  لكل المركبات ',
     'market_average_cost' => 'متوسط تكلفة السوق',
     'difference_saving_over' => 'الفرق (توفير / فوق الميزانية)',
     'total_active_vehicles' => 'إجمالي المركبات النشطة',

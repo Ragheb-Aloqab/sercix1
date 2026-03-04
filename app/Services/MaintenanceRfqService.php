@@ -226,6 +226,7 @@ class MaintenanceRfqService
             $request->update([
                 'final_invoice_pdf_path' => $data['final_invoice_pdf_path'],
                 'final_invoice_original_name' => $data['final_invoice_original_name'] ?? null,
+                'file_type' => $data['file_type'] ?? null,
                 'final_invoice_amount' => $data['final_invoice_amount'] ?? null,
                 'final_invoice_uploaded_at' => now(),
                 'completion_date' => $data['completion_date'] ?? null,

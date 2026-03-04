@@ -365,6 +365,7 @@ class DriverController extends Controller
 
     /**
      * POST /driver/tracking/start — Start tracking session (persists to DB).
+     * For mobile tracking: driver must enter start_odometer before starting.
      */
     public function startTracking(Request $request)
     {
@@ -373,7 +374,10 @@ class DriverController extends Controller
             return response()->json(['error' => 'unauthorized'], 401);
         }
 
-        $data = $request->validate(['vehicle_id' => ['required', 'integer', 'exists:vehicles,id']]);
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'start_odometer' => ['required', 'numeric', 'min:0', 'max:9999999'],
+        ]);
         $phoneVariants = $this->driverPhoneVariants($phone);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
@@ -398,11 +402,22 @@ class DriverController extends Controller
             'tracking_driver_phone' => $phone,
         ]);
 
-        return response()->json(['ok' => true, 'vehicle_id' => $vehicle->id]);
+        // Create mobile tracking trip record for odometer-based mileage
+        $trip = \App\Models\MobileTrackingTrip::create([
+            'vehicle_id' => $vehicle->id,
+            'driver_phone' => $phone,
+            'start_odometer' => (float) $data['start_odometer'],
+            'end_odometer' => (float) $data['start_odometer'],
+            'trip_distance_km' => 0,
+            'started_at' => now(),
+        ]);
+
+        return response()->json(['ok' => true, 'vehicle_id' => $vehicle->id, 'trip_id' => $trip->id]);
     }
 
     /**
      * POST /driver/tracking/stop — Stop tracking session.
+     * For mobile tracking: driver must enter end_odometer. Trip distance = end - start.
      */
     public function stopTracking(Request $request)
     {
@@ -411,7 +426,10 @@ class DriverController extends Controller
             return response()->json(['error' => 'unauthorized'], 401);
         }
 
-        $data = $request->validate(['vehicle_id' => ['required', 'integer', 'exists:vehicles,id']]);
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'end_odometer' => ['required', 'numeric', 'min:0', 'max:9999999'],
+        ]);
         $phoneVariants = $this->driverPhoneVariants($phone);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
@@ -422,11 +440,33 @@ class DriverController extends Controller
             return response()->json(['error' => 'vehicle_not_linked'], 403);
         }
 
+        // Find active trip for this vehicle (most recent unended)
+        $trip = \App\Models\MobileTrackingTrip::where('vehicle_id', $vehicle->id)
+            ->whereNull('ended_at')
+            ->whereIn('driver_phone', $phoneVariants)
+            ->orderByDesc('started_at')
+            ->first();
+
+        if ($trip) {
+            $endOdo = (float) $data['end_odometer'];
+            $startOdo = (float) $trip->start_odometer;
+            $tripDistance = max(0, $endOdo - $startOdo);
+
+            $trip->update([
+                'end_odometer' => $endOdo,
+                'trip_distance_km' => $tripDistance,
+                'ended_at' => now(),
+            ]);
+        }
+
         if ($vehicle->is_tracking_active && in_array($vehicle->tracking_driver_phone, $phoneVariants)) {
             $vehicle->update(['is_tracking_active' => false, 'tracking_driver_phone' => null]);
         }
 
-        return response()->json(['ok' => true]);
+        return response()->json([
+            'ok' => true,
+            'trip_distance_km' => $trip ? (float) $trip->trip_distance_km : 0,
+        ]);
     }
 
     /**

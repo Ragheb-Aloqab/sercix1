@@ -3,28 +3,7 @@
     backdrop-blur shadow-soft lg:shadow-none
     border-e overflow-hidden
     {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-servx-black border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
-    <div class="px-4 py-4 border-b {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-between gap-2">
-        <a href="{{ route('index') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity min-w-0 flex-1">
-            <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="" width="40" height="40" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
-            <div class="min-w-0 sidebar-brand-text transition-opacity duration-300">
-                <p class="font-extrabold leading-5 truncate text-sm {{ in_array($role, ['company', 'maintenance_center']) ? 'text-white' : 'text-slate-900 dark:text-white' }}">
-                    {{ $siteName ?? 'Servx Motors' }}
-                    @if (in_array($role, ['admin', 'super_admin']))
-                        {{ __('dashboard.admin') }}
-                    @elseif($role === 'company')
-                        {{ __('dashboard.company') }}
-                    @elseif($role === 'maintenance_center')
-                        {{ __('maintenance.center') }}
-                    @elseif($role === 'driver')
-                        {{ __('dashboard.driver') }}
-                    @else
-                        {{ __('dashboard.guest') }}
-                    @endif
-                </p>
-                <p class="text-xs {{ in_array($role, ['company', 'maintenance_center']) ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">{{ __('dashboard.dashboard_v1') }}</p>
-            </div>
-        </a>
-
+    <div class="px-4 py-4 border-b {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-end gap-2">
         {{-- Collapse toggle (lg+ only) — dir=ltr keeps chevron direction consistent in RTL --}}
         <button type="button"
             @click="toggleSidebarCollapse()"

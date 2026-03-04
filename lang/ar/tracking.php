@@ -52,6 +52,13 @@ return [
     'tracking_permission_denied' => 'تم رفض إذن الموقع.',
     'tracking_error' => 'خطأ في الموقع.',
     'mobile_tracking_hint' => 'شارك موقعك لتتبع هذه المركبة.',
+    'enter_start_odometer' => 'أدخل قراءة عداد المسافات',
+    'start_odometer_hint' => 'أدخل قيمة عداد المسافات الحالية (كم) قبل بدء الرحلة.',
+    'enter_end_odometer' => 'أدخل قراءة عداد المسافات',
+    'end_odometer_hint' => 'أدخل قيمة عداد المسافات (كم) بعد انتهاء الرحلة. سيتم حساب المسافة تلقائياً.',
+    'enter_end_odometer_prompt' => 'أدخل قيمة عداد المسافات (كم) بعد انتهاء الرحلة:',
+    'odometer_invalid' => 'يرجى إدخال قيمة عداد صالحة.',
+    'trip_recorded' => 'تم تسجيل الرحلة',
 
     'map_style' => 'نمط الخريطة',
     'map_style_carto_dark' => 'كارتو داكن',

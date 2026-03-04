@@ -210,9 +210,14 @@
             </div>
             <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}">
                 <p class="dash-card-title">{{ __('company.market_average_cost') }}</p>
+                @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable']; @endphp
                 <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value">{{ number_format($mcData['market_average'] ?? 0, 0) }} {{ __('company.sar') }}</p>
-                    <span class="dash-trend dash-trend-stable"><i class="fa-solid fa-minus"></i></span>
+                    <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+                    <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}" title="{{ __('vehicles.vs_last_month') }}">
+                        @if(($mac['trend'] ?? 'stable') === 'up')<i class="fa-solid fa-caret-up"></i>
+                        @elseif(($mac['trend'] ?? 'stable') === 'down')<i class="fa-solid fa-caret-down"></i>
+                        @else<i class="fa-solid fa-minus"></i>@endif
+                    </span>
                 </div>
             </div>
             <div class="dash-card dash-card-kpi group" title="{{ __('company.difference_saving_over') }}">

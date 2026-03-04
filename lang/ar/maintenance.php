@@ -119,6 +119,15 @@ return [
     'invoice_archive_desc' => 'الفواتير النهائية من مراكز الصيانة',
     'no_invoices' => 'لا توجد فواتير بعد.',
     'upload_date' => 'تاريخ الرفع',
+    'add_invoice' => 'إضافة فاتورة',
+    'upload_maintenance_invoice' => 'رفع فاتورة صيانة',
+    'add_invoice_desc' => 'رفع فاتورة صيانة (صورة أو PDF)',
+    'invoice_file_label' => 'ملف الفاتورة',
+    'invoice_file_accept' => 'JPG أو JPEG أو PNG أو WEBP أو PDF (الحد الأقصى :max ميجابايت)',
+    'invoice_file_max' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',
+    'invoice_uploaded_success' => 'تم رفع الفاتورة بنجاح.',
+    'invoice_validation_type' => 'يجب أن يكون الملف صورة (JPG, JPEG, PNG, WEBP) أو PDF.',
+    'invoice_validation_size' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',
 
     // Status labels
     'status_new_request' => 'طلب جديد',
