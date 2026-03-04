@@ -4,6 +4,33 @@ Use this checklist before uploading to Hostinger.
 
 ---
 
+## Quick Start: Prepare Locally (Run Before Upload)
+
+Run **one** of these to build assets and optimize:
+
+```bash
+# Option A: Composer script
+composer run deploy
+
+# Option B: Windows
+deploy.bat
+
+# Option C: Linux/Mac
+./deploy.sh
+```
+
+This will:
+1. Install production dependencies (`composer install --no-dev --optimize-autoloader`)
+2. Build frontend assets (`npm run build`)
+3. Remove `public/hot` (if it exists)
+4. Cache config, routes, views
+
+**Then upload** all project files to Hostinger (except `.env` — create it on the server).
+
+> **Note:** `composer run deploy` removes dev dependencies. After uploading, run `composer install` locally to restore them for development.
+
+---
+
 ## ⚠️ FIX: Pages Show Without Styling
 
 If your site loads but has **no CSS/styling**, check these causes:
@@ -39,6 +66,7 @@ If your site loads but has **no CSS/styling**, check these causes:
 ## 1. Environment & Security
 
 - [ ] **Never upload `.env`** – It's in `.gitignore`. Create `.env` on Hostinger manually.
+- [ ] **Do not upload:** `node_modules/`, `.git/`, `public/hot`, `.env`, `*.log`, `storage/logs/*`, `storage/framework/cache/*`, `storage/framework/sessions/*`, `storage/framework/views/*`
 - [ ] **If `.env` was ever committed:** Run `git rm --cached .env` then commit, so secrets are not in repo history. Rotate any exposed keys.
 - [ ] **Production `.env` values:**
   ```
@@ -120,3 +148,12 @@ If using `QUEUE_CONNECTION=database`, run a queue worker. On Hostinger shared ho
 - **Extensions:** Ensure `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo` are enabled
 - **Memory limit:** 256M or higher recommended
 - **Max execution time:** 60+ seconds for long requests
+
+---
+
+## 9. Dark/Light Mode on Production
+
+If dark/light mode works locally but not on Hostinger, see `docs/DARK_MODE_PRODUCTION_TROUBLESHOOTING.md` for:
+- ModSecurity blocking inline scripts
+- View cache serving stale HTML
+- Wrong asset URLs
