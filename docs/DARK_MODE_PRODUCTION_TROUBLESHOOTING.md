@@ -21,16 +21,14 @@ If dark/light mode works locally but **not correctly on Hostinger**, check these
 
 **Cause:** Hostinger or your server may block inline `<script>` (Content Security Policy, ModSecurity).
 
-**Fix:**
+**Fix (already applied):** Theme scripts have been moved to external files:
+- `public/js/theme-init.js` – initial theme (reads from meta tags)
+- `public/js/theme-toggle.js` – toggle button
+- `public/js/theme-livewire.js` – Livewire theme/dir listeners
+
+**Ensure these files are uploaded** to Hostinger in `public/js/`. If the issue persists:
 - Check Hostinger → Security → ModSecurity: temporarily disable to test
-- Or move the theme script to an external file and load it first:
-
-```blade
-{{-- In theme-init.blade.php, replace inline script with: --}}
-<script src="{{ asset('js/theme-init.js') }}" defer></script>
-```
-
-Then create `public/js/theme-init.js` with the script content. External scripts are usually allowed.
+- Verify `https://yourdomain.com/js/theme-init.js` returns the script (not 404)
 
 ---
 

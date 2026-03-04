@@ -45,14 +45,6 @@
             </main>
         </div>
         @livewireScripts
-        <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('ui-theme-changed', ({ theme }) => {
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-                document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
-                try { localStorage.setItem('sercix_theme', theme); } catch (e) {}
-            });
-        });
-        </script>
+        <script src="{{ asset('js/theme-livewire.js') }}"></script>
     </body>
 </html>

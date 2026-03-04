@@ -132,21 +132,8 @@
 
 @livewireScripts
 
-{{-- Theme + Dir listeners --}}
-<script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('ui-theme-changed', ({ theme }) => {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-            document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
-            try { localStorage.setItem('sercix_theme', theme); } catch (e) {}
-        });
-
-        Livewire.on('ui-dir-changed', ({ dir }) => {
-            document.documentElement.setAttribute('dir', dir);
-            document.documentElement.setAttribute('lang', dir === 'rtl' ? 'ar' : 'en');
-        });
-    });
-</script>
+{{-- Theme + Dir listeners (external to avoid ModSecurity block on Hostinger) --}}
+<script src="{{ asset('js/theme-livewire.js') }}"></script>
 
 
 @stack('scripts')

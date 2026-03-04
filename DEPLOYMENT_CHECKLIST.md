@@ -153,7 +153,13 @@ If using `QUEUE_CONNECTION=database`, run a queue worker. On Hostinger shared ho
 
 ## 9. Dark/Light Mode on Production
 
-If dark/light mode works locally but not on Hostinger, see `docs/DARK_MODE_PRODUCTION_TROUBLESHOOTING.md` for:
-- ModSecurity blocking inline scripts
+Theme scripts are in external files (`public/js/theme-init.js`, `theme-toggle.js`, `theme-livewire.js`) to avoid ModSecurity blocking inline scripts on Hostinger.
+
+**Upload `public/js/`** – ensure these files are deployed:
+- `theme-init.js`
+- `theme-toggle.js`
+- `theme-livewire.js`
+
+If dark/light mode still fails, see `docs/DARK_MODE_PRODUCTION_TROUBLESHOOTING.md` for:
 - View cache serving stale HTML
 - Wrong asset URLs
