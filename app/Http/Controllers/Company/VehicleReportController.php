@@ -3,20 +3,28 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateVehicleReportJob;
 use App\Models\Vehicle;
 use App\Exports\VehicleReportExport;
 use App\Services\VehicleReportPdfService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 
 class VehicleReportController extends Controller
 {
     /**
      * Export vehicle report as Excel.
+     * Pass queue=1 to generate in background and receive a notification when ready.
      */
-    public function exportExcel(Request $request, Vehicle $vehicle)
+    public function exportExcel(Request $request, Vehicle $vehicle): Response|RedirectResponse
     {
         $this->authorize('view', $vehicle);
+
+        if ($request->boolean('queue')) {
+            return $this->dispatchVehicleReportJob($request, $vehicle, 'excel');
+        }
 
         $type = $request->string('type', 'all')->toString();
         if (!in_array($type, ['fuel', 'maintenance', 'all'], true)) {
@@ -36,10 +44,15 @@ class VehicleReportController extends Controller
 
     /**
      * Export vehicle report as PDF.
+     * Pass queue=1 to generate in background and receive a notification when ready.
      */
-    public function exportPdf(Request $request, Vehicle $vehicle)
+    public function exportPdf(Request $request, Vehicle $vehicle): Response|RedirectResponse
     {
         $this->authorize('view', $vehicle);
+
+        if ($request->boolean('queue')) {
+            return $this->dispatchVehicleReportJob($request, $vehicle, 'pdf');
+        }
 
         $type = $request->string('type', 'all')->toString();
         if (!in_array($type, ['fuel', 'maintenance', 'all'], true)) {
@@ -57,5 +70,24 @@ class VehicleReportController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    private function dispatchVehicleReportJob(Request $request, Vehicle $vehicle, string $format): RedirectResponse
+    {
+        $type = $request->string('type', 'all')->toString();
+        if (!in_array($type, ['fuel', 'maintenance', 'all'], true)) {
+            $type = 'all';
+        }
+        $dateFrom = $request->string('date_from')->toString() ?: null;
+        $dateTo = $request->string('date_to')->toString() ?: null;
+
+        $company = $vehicle->company;
+        if (!$company) {
+            return back()->with('error', __('messages.error') ?? 'Error');
+        }
+
+        GenerateVehicleReportJob::dispatch($vehicle, $company, $format, $type, $dateFrom, $dateTo);
+
+        return back()->with('success', __('reports.queued_for_generation'));
     }
 }

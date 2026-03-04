@@ -22,6 +22,13 @@ use App\Observers\InvoiceObserver;
 use App\Observers\OrderObserver;
 use App\Observers\VehicleObserver;
 use App\Observers\MaintenanceRequestObserver;
+use App\Events\VehicleCreated;
+use App\Events\PaymentPaid;
+use App\Events\MaintenanceRequestApproved;
+use App\Events\OrderStatusChanged;
+use App\Events\MaintenanceRequestCreated;
+use App\Events\InvoiceCreated;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -53,6 +60,8 @@ class AppServiceProvider extends ServiceProvider
         Vehicle::observe(VehicleObserver::class);
         VehicleLocation::observe(VehicleLocationObserver::class);
         MaintenanceRequest::observe(MaintenanceRequestObserver::class);
+
+        $this->registerDomainEvents();
 
         // Site branding (name + logo) — cached, scoped to views that need it
         // Note: 'index' excluded — IndexController passes fresh data directly
@@ -136,6 +145,29 @@ class AppServiceProvider extends ServiceProvider
                 'driverNotificationCount' => $driverNotificationCount,
             ]);
         });
+    }
+
+    private function registerDomainEvents(): void
+    {
+        Event::listen(VehicleCreated::class, [
+            \App\Listeners\LogVehicleCreated::class,
+        ]);
+        Event::listen(PaymentPaid::class, [
+            \App\Listeners\UpdateInvoiceOnPaymentPaid::class,
+            \App\Listeners\NotifyPaymentPaid::class,
+        ]);
+        Event::listen(MaintenanceRequestApproved::class, [
+            \App\Listeners\NotifyMaintenanceRequestApproved::class,
+        ]);
+        Event::listen(OrderStatusChanged::class, [
+            \App\Listeners\InvalidateCacheOnOrderStatusChanged::class,
+        ]);
+        Event::listen(MaintenanceRequestCreated::class, [
+            \App\Listeners\InvalidateCacheOnMaintenanceRequestCreated::class,
+        ]);
+        Event::listen(InvoiceCreated::class, [
+            \App\Listeners\InvalidateCacheOnInvoiceCreated::class,
+        ]);
     }
 
     private function driverPhoneVariants(?string $phone): array

@@ -13,7 +13,7 @@
             <a href="{{ route('maintenance-center.history.index') }}" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">{{ __('maintenance.history') ?? 'History' }}</a>
             <form method="POST" action="{{ route('maintenance-center.logout') }}">
                 @csrf
-                <button type="submit" class="px-4 py-2 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 font-bold text-servx-silver-light">{{ __('common.logout') }}</button>
+                <button type="submit" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-servx-silver-light transition-colors duration-300">{{ __('common.logout') }}</button>
             </form>
         </div>
     </div>
@@ -21,24 +21,24 @@
     {{-- Summary statistics --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="dash-card bg-sky-500/10 border-sky-500/30">
-            <p class="text-servx-silver text-sm">{{ __('maintenance.total_jobs_completed') ?? 'Jobs Completed' }}</p>
+            <p class="text-slate-600 dark:text-servx-silver text-sm">{{ __('maintenance.total_jobs_completed') ?? 'Jobs Completed' }}</p>
             <p class="text-2xl font-bold text-sky-400">{{ number_format($stats['total_jobs_completed']) }}</p>
         </div>
         <div class="dash-card bg-emerald-500/10 border-emerald-500/30">
-            <p class="text-servx-silver text-sm">{{ __('maintenance.total_revenue') ?? 'Total Revenue' }}</p>
+            <p class="text-slate-600 dark:text-servx-silver text-sm">{{ __('maintenance.total_revenue') ?? 'Total Revenue' }}</p>
             <p class="text-2xl font-bold text-emerald-400">{{ number_format($stats['total_revenue'], 2) }} {{ __('company.sar') ?? 'ر.س' }}</p>
         </div>
         <div class="dash-card bg-amber-500/10 border-amber-500/30">
-            <p class="text-servx-silver text-sm">{{ __('maintenance.pending_approvals') ?? 'Pending Approvals' }}</p>
+            <p class="text-slate-600 dark:text-servx-silver text-sm">{{ __('maintenance.pending_approvals') ?? 'Pending Approvals' }}</p>
             <p class="text-2xl font-bold text-amber-400">{{ number_format($stats['total_pending_approvals']) }}</p>
         </div>
         <div class="dash-card">
-            <p class="text-servx-silver text-sm">{{ __('maintenance.top_companies') ?? 'Top by Company' }}</p>
+            <p class="text-slate-600 dark:text-servx-silver text-sm">{{ __('maintenance.top_companies') ?? 'Top by Company' }}</p>
             <ul class="mt-2 space-y-1 text-sm">
                 @forelse($stats['services_per_company'] as $row)
-                    <li class="flex justify-between"><span class="text-servx-silver-light truncate max-w-[120px]" title="{{ $row->name }}">{{ $row->name }}</span><span class="font-bold text-sky-400">{{ $row->count }}</span></li>
+                    <li class="flex justify-between"><span class="text-slate-700 dark:text-servx-silver-light truncate max-w-[120px]" title="{{ $row->name }}">{{ $row->name }}</span><span class="font-bold text-sky-400">{{ $row->count }}</span></li>
                 @empty
-                    <li class="text-servx-silver">-</li>
+                    <li class="text-slate-600 dark:text-servx-silver">-</li>
                 @endforelse
             </ul>
         </div>
@@ -46,12 +46,12 @@
 
     <div class="dash-card">
         @if($rfqs->isEmpty())
-            <p class="text-servx-silver">{{ __('maintenance.no_rfqs') ?? 'لا توجد طلبات عروض معينة' }}</p>
+            <p class="text-slate-600 dark:text-servx-silver">{{ __('maintenance.no_rfqs') ?? 'لا توجد طلبات عروض معينة' }}</p>
         @else
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="text-start text-servx-silver text-sm border-b border-slate-600/50">
+                        <tr class="text-start text-slate-600 dark:text-servx-silver text-sm border-b border-slate-200 dark:border-slate-600/50">
                             <th class="pb-3 pe-4">#</th>
                             <th class="pb-3 pe-4">{{ __('driver.vehicle') }}</th>
                             <th class="pb-3 pe-4">{{ __('driver.maintenance_type') }}</th>
@@ -61,7 +61,7 @@
                     </thead>
                     <tbody>
                         @foreach($rfqs as $r)
-                            <tr class="border-b border-slate-600/30 hover:bg-slate-800/30">
+                            <tr class="border-b border-slate-200 dark:border-slate-600/30 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-300">
                                 <td class="py-4 pe-4 font-bold">{{ $r->id }}</td>
                                 <td class="py-4 pe-4">{{ $r->vehicle?->plate_number ?? '-' }}</td>
                                 <td class="py-4 pe-4">{{ \App\Enums\MaintenanceType::tryFrom($r->maintenance_type)?->label() ?? $r->maintenance_type }}</td>
@@ -72,7 +72,7 @@
                                     @elseif($r->status === 'waiting_for_invoice_approval') bg-amber-500/20 text-amber-400
                                     @elseif($r->status === 'closed') bg-emerald-500/20 text-emerald-400
                                     @elseif($r->status === 'rejected') bg-rose-500/20 text-rose-400
-                                    @else bg-slate-600/50 text-slate-300 @endif">{{ $r->status_label }}</span></td>
+                                    @else bg-slate-200 dark:bg-slate-600/50 text-slate-600 dark:text-slate-300 @endif">{{ $r->status_label }}</span></td>
                                 <td class="py-4 pe-4">
                                     <a href="{{ route('maintenance-center.rfq.show', $r) }}" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">{{ __('common.view') }}</a>
                                 </td>

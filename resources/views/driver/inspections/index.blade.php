@@ -6,7 +6,7 @@
 <div class="max-w-4xl mx-auto w-full">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="dash-page-title">{{ __('inspections.upload_photos') }}</h1>
-        <a href="{{ route('driver.dashboard') }}" class="px-4 py-3 rounded-2xl border border-slate-600/50 text-servx-silver-light font-bold hover:bg-slate-700/50">
+        <a href="{{ route('driver.dashboard') }}" class="px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-600/50 text-slate-700 dark:text-servx-silver-light font-bold hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-300">
             <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} me-2"></i>{{ __('common.back') }}
         </a>
     </div>
@@ -20,22 +20,22 @@
 
     @if ($pendingInspections->isEmpty())
         <div class="dash-card p-8 text-center mb-6">
-            <i class="fa-solid fa-circle-check text-5xl text-emerald-500 mb-4"></i>
-            <p class="font-bold text-servx-silver-light">{{ __('inspections.no_pending') }}</p>
-            <p class="text-servx-silver mt-2">{{ __('inspections.compliant') }}</p>
+            <i class="fa-solid fa-circle-check text-5xl text-emerald-600 dark:text-emerald-500 mb-4"></i>
+            <p class="font-bold text-slate-900 dark:text-servx-silver-light">{{ __('inspections.no_pending') }}</p>
+            <p class="text-slate-600 dark:text-servx-silver mt-2">{{ __('inspections.compliant') }}</p>
         </div>
 
         @if ($vehicles->isNotEmpty())
             <div class="dash-card p-6">
                 <h2 class="dash-section-title mb-4">{{ __('inspections.upload_photos') }}</h2>
-                <p class="text-servx-silver text-sm mb-4">{{ __('inspections.upload_when_compliant') }}</p>
+                <p class="text-slate-600 dark:text-servx-silver text-sm mb-4">{{ __('inspections.upload_when_compliant') }}</p>
                 <ul class="space-y-3">
                     @foreach ($vehicles as $v)
-                        <li class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-slate-600/40 bg-slate-800/40">
+                        <li class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-600/40 bg-slate-50 dark:bg-slate-800/40 transition-colors duration-300">
                             <div>
-                                <span class="font-bold text-servx-silver-light">{{ $v->plate_number ?? $v->display_name }}</span>
+                                <span class="font-bold text-slate-900 dark:text-servx-silver-light">{{ $v->plate_number ?? $v->display_name }}</span>
                                 @if ($v->make || $v->model)
-                                    <p class="text-sm text-servx-silver mt-1">{{ $v->make }} {{ $v->model }}</p>
+                                    <p class="text-sm text-slate-600 dark:text-servx-silver mt-1">{{ $v->make }} {{ $v->model }}</p>
                                 @endif
                             </div>
                             <form method="POST" action="{{ route('driver.inspections.request', $v) }}" class="inline">
@@ -56,8 +56,8 @@
                 @foreach ($pendingInspections as $insp)
                     <li class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border {{ $insp->isOverdue() ? 'border-red-500/40 bg-red-500/10' : 'border-amber-500/40 bg-amber-500/10' }}">
                         <div>
-                            <span class="font-bold text-servx-silver-light">{{ $insp->vehicle->plate_number ?? $insp->vehicle->display_name }}</span>
-                            <p class="text-sm text-servx-silver mt-1">{{ __('inspections.due_date') }}: {{ $insp->due_date->translatedFormat('d M Y') }}</p>
+                            <span class="font-bold text-slate-900 dark:text-servx-silver-light">{{ $insp->vehicle->plate_number ?? $insp->vehicle->display_name }}</span>
+                            <p class="text-sm text-slate-600 dark:text-servx-silver mt-1">{{ __('inspections.due_date') }}: {{ $insp->due_date->translatedFormat('d M Y') }}</p>
                             @if ($insp->isOverdue())
                                 <span class="inline-block mt-2 px-2 py-1 rounded-xl text-xs font-bold bg-red-500/20 text-red-400">{{ __('inspections.overdue') }}</span>
                             @endif

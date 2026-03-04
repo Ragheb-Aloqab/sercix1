@@ -35,6 +35,7 @@ class InvoiceObserver
      */
     public function created(Invoice $invoice): void
     {
+        event(new \App\Events\InvoiceCreated($invoice));
         if ($invoice->company_id ?? null) {
             Cache::forget("company_dashboard_{$invoice->company_id}");
         }

@@ -41,6 +41,7 @@ return [
     // Status
     'active' => 'نشط',
     'inactive' => 'غير نشط',
+    'all_statuses' => 'كل الحالات',
 
     // Summary
     'orders_count' => 'عدد الطلبات',
@@ -162,4 +163,30 @@ return [
     'accumulated_monthly_market' => 'المتراكم والشهري والتكلفة السوقية',
     'never_reset' => 'لا يتم إعادة التعيين أبداً، مخزن تاريخياً',
     'back_to_overview' => 'رجوع للنظرة العامة',
+
+    'vehicle_mileage_reports' => 'تقارير مسافات المركبات',
+    'vehicle_mileage_reports_desc' => 'تقرير مسافات كامل لجميع المركبات',
+    'current_mileage' => 'المسافة الحالية',
+    'previous_mileage' => 'المسافة السابقة',
+    'total_distance' => 'إجمالي المسافة',
+    'total_vehicles' => 'إجمالي المركبات',
+    'total_mileage_this_period' => 'إجمالي المسافة (الفترة)',
+    'avg_mileage_per_vehicle' => 'المتوسط لكل مركبة',
+    'status' => 'الحالة',
+    'status_normal' => 'طبيعي',
+    'status_high_usage' => 'استخدام عالٍ',
+    'status_no_update' => 'بدون تحديث',
+    'no_mileage_data' => 'لا توجد بيانات مسافة للفترة المحددة.',
+    'view_all' => 'عرض الكل',
+
+    // Mileage history
+    'current_previous_total' => 'الحالي / السابق / إجمالي المسافة',
+    'mileage_history' => 'سجل المسافات',
+    'mileage_history_hint' => 'كل حساب مسافة مخزن مع نوع التتبع والقراءات السابقة والحالية.',
+    'recorded_date' => 'التاريخ',
+    'tracking_type' => 'نوع التتبع',
+    'previous_reading' => 'القراءة السابقة',
+    'current_reading' => 'القراءة الحالية',
+    'calculated_difference' => 'الفرق',
+    'no_mileage_history' => 'لا يوجد سجل مسافات بعد.',
 ];

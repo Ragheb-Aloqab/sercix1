@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PaymentPaid;
 use App\Models\Payment;
 use App\Models\Order;
-use App\Models\User;
-use App\Notifications\PaymentPaidNotification;
 use App\Services\TapService;
 use App\Support\OrderStatus;
 use Illuminate\Http\Request;
@@ -78,10 +77,7 @@ class TapWebhookController extends Controller
                 ]);
             }
 
-            $admin = User::where('role', 'admin')->first();
-            if ($admin) {
-                $admin->notify(new PaymentPaidNotification($payment));
-            }
+            event(new PaymentPaid($payment));
 
             Log::info('Tap webhook: payment marked paid', ['payment_id' => $payment->id, 'charge_id' => $chargeId]);
         } else {

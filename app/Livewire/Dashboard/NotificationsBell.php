@@ -3,11 +3,21 @@
 namespace App\Livewire\Dashboard;
 
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class NotificationsBell extends Component
 {
     public bool $open = false;
+
+    #[On('notification-received')]
+    public function onNotificationReceived(): void
+    {
+        $this->refreshUnread();
+        if ($this->open) {
+            $this->loadNotifications();
+        }
+    }
     public int $unreadCount = 0;
     /** @var array<int, array{id:string,data:array,read_at:?string,created_at:?string,created_human:?string}> */
     public array $notifications = [];

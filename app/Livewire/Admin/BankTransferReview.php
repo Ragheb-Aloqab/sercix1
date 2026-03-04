@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Events\PaymentPaid;
 use App\Models\Payment;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -23,6 +24,8 @@ class BankTransferReview extends Component
             'reviewed_at' => now(),
             'reviewed_by' => auth()->id(),
         ]);
+
+        event(new PaymentPaid($payment));
 
         $this->dispatch('notify', type: 'success', message: 'تم تأكيد التحويل بنجاح.');
     }

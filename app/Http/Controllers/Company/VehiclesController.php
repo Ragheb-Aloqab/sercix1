@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Events\VehicleCreated;
 use App\Models\Vehicle;
 use App\Models\CompanyBranch;
 use App\Models\MaintenanceRequest;
-use App\Services\ExpiryMonitoringService;
-use App\Services\VehicleAnalyticsService;
-use App\Services\VehicleInspectionService;
-use App\Services\VehicleMileageService;
 use Illuminate\Http\Request;
 
 class VehiclesController extends Controller
@@ -20,32 +17,7 @@ class VehiclesController extends Controller
      */
     public function index(Request $request)
     {
-        $company = auth('company')->user();
-        $q = $request->string('q')->toString();
-        $quotaUsage = $company->getQuotaUsage();
-
-        $vehicles = Vehicle::query()
-            ->where('company_id', $company->id)
-            ->with(['branch:id,name']) // إذا عندك علاقة branch()
-            ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($qq) use ($q) {
-                    $qq->where('plate_number', 'like', "%{$q}%")
-                        ->orWhere('name', 'like', "%{$q}%")
-                        ->orWhere('make', 'like', "%{$q}%")
-                        ->orWhere('model', 'like', "%{$q}%")
-                        ->orWhere('imei', 'like', "%{$q}%");
-                });
-            })
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
-
-        $expiryService = app(ExpiryMonitoringService::class);
-        $inspectionService = app(VehicleInspectionService::class);
-        $vehicles->each(function ($v) use ($inspectionService) {
-            $v->inspection_status = $inspectionService->getVehicleInspectionStatus($v);
-        });
-        return view('company.vehicles.index', compact('company', 'vehicles', 'q', 'quotaUsage', 'expiryService'));
+        return view('company.vehicles.index');
     }
 
     /**
@@ -121,11 +93,12 @@ class VehiclesController extends Controller
             $data['driver_phone'] = $this->normalizePhone($data['driver_phone']);
         }
 
-        Vehicle::create($data);
+        $vehicle = Vehicle::create($data);
+        event(new VehicleCreated($vehicle));
 
         return redirect()
             ->route('company.vehicles.index')
-            ->with('success', __('messages.vehicle_added'));
+            ->withFlash('success', __('messages.vehicle_added'));
     }
 
     /**
@@ -262,7 +235,9 @@ class VehiclesController extends Controller
         $monthlyMileageHistory = $mileageService->getMonthlyHistory($vehicle, 12);
         $estimatedMarketCost = $mileageService->getEstimatedMarketCost($currentMonthMileage);
         $marketCostPerKm = (float) config('servx.market_avg_per_km', 0.37);
-        return view('company.vehicles.mileage', compact('company', 'vehicle', 'accumulatedMileage', 'currentMonthMileage', 'monthlyMileageHistory', 'estimatedMarketCost', 'marketCostPerKm'));
+        $mileageSummary = $mileageService->getVehicleMileageSummary($vehicle);
+        $mileageHistory = $mileageService->getMileageHistory($vehicle, 100);
+        return view('company.vehicles.mileage', compact('company', 'vehicle', 'accumulatedMileage', 'currentMonthMileage', 'monthlyMileageHistory', 'estimatedMarketCost', 'marketCostPerKm', 'mileageSummary', 'mileageHistory'));
     }
 
     /**
@@ -332,7 +307,7 @@ class VehiclesController extends Controller
 
         return redirect()
             ->route('company.vehicles.index')
-            ->with('success', __('messages.vehicle_updated'));
+            ->withFlash('success', __('messages.vehicle_updated'));
     }
 
     private function normalizePhone(string $phone): string

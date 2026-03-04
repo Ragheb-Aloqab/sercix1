@@ -22,28 +22,28 @@
             ];
         @endphp
         @foreach ($mobileGridItems as $item)
-            <a href="{{ $item['href'] }}" wire:navigate class="company-mobile-grid-card flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-sky-500/30 active:scale-[0.98] transition-all duration-200 min-h-[100px] sm:min-h-[120px]">
-                <span class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-sky-500/20 text-sky-400">
+            <a href="{{ $item['href'] }}" wire:navigate class="company-mobile-grid-card flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-2xl bg-slate-100 dark:bg-white/5 backdrop-blur-sm border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:border-sky-400 dark:hover:border-sky-500/30 active:scale-[0.98] transition-all duration-200 min-h-[100px] sm:min-h-[120px]">
+                <span class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center bg-sky-500/20 text-sky-600 dark:text-sky-400">
                     <i class="fa-solid {{ $item['icon'] }} text-xl sm:text-2xl"></i>
                 </span>
-                <span class="text-xs sm:text-sm font-semibold text-white text-center leading-tight">{{ $item['label'] }}</span>
+                <span class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white text-center leading-tight">{{ $item['label'] }}</span>
             </a>
         @endforeach
     </div>
     @if(($expiringDocumentsCount ?? 0) > 0 || ($inspectionPendingCount ?? 0) > 0 || ($pendingInvoiceApprovalsCount ?? 0) > 0)
         <div class="mt-4 space-y-3">
             @if(($expiringDocumentsCount ?? 0) > 0)
-                <a href="{{ route('company.vehicles.index') }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
+                <a href="{{ route('company.vehicles.index') }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm font-semibold">
                     <i class="fa-solid fa-file-circle-exclamation me-2"></i>{{ __('vehicles.expiring_documents') }} ({{ $expiringDocumentsCount }})
                 </a>
             @endif
             @if(($inspectionPendingCount ?? 0) > 0)
-                <a href="{{ route('company.inspections.index') }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
+                <a href="{{ route('company.inspections.index') }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm font-semibold">
                     <i class="fa-solid fa-camera me-2"></i>{{ __('inspections.vehicles_pending') }} ({{ $inspectionPendingCount }})
                 </a>
             @endif
             @if(($pendingInvoiceApprovalsCount ?? 0) > 0)
-                <a href="{{ route('company.maintenance-requests.index', ['status' => 'waiting_for_invoice_approval']) }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
+                <a href="{{ route('company.maintenance-requests.index', ['status' => 'waiting_for_invoice_approval']) }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm font-semibold">
                     <i class="fa-solid fa-file-invoice me-2"></i>{{ __('maintenance.invoice_approval') ?? 'Invoices Pending Approval' }} ({{ $pendingInvoiceApprovalsCount }})
                 </a>
             @endif
@@ -88,14 +88,14 @@
         @if($mc && $percentDiff > 10)
             <div class="dash-card border-red-500/40 bg-red-500/5">
                 <p class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400"></i>
                     {{ __('company.alert_exceeds_market') }}
                 </p>
             </div>
         @elseif($mc && $percentDiff < -10)
             <div class="dash-card border-emerald-500/40 bg-emerald-500/5">
                 <p class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400"></i>
                     {{ __('company.alert_saving_market') }}
                 </p>
             </div>
@@ -105,13 +105,13 @@
         @if(($expiringDocumentsCount ?? 0) > 0)
             <div class="dash-card border-amber-500/40 bg-amber-500/5">
                 <h2 class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-file-circle-exclamation text-amber-400"></i>
+                    <i class="fa-solid fa-file-circle-exclamation text-amber-600 dark:text-amber-400"></i>
                     {{ __('vehicles.expiring_documents') }} ({{ $expiringDocumentsCount }})
                 </h2>
                 <div class="space-y-2 max-h-40 overflow-y-auto">
                     @foreach($expiringDocuments ?? [] as $item)
                         <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-servx-inner hover:bg-servx-inner-hover border border-servx-border transition-colors">
-                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'expired' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'expired' ? 'bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400' }}">
                                 <i class="fa-solid fa-car text-xs"></i>
                             </span>
                             <div class="min-w-0 flex-1">
@@ -119,25 +119,25 @@
                                 <p class="text-xs text-servx-silver">{{ $item->date?->translatedFormat('d M Y') }} · {{ $item->days_remaining !== null ? ($item->days_remaining < 0 ? abs($item->days_remaining) . ' ' . __('vehicles.days_ago') : $item->days_remaining . ' ' . __('vehicles.days_remaining')) : '-' }}</p>
                             </div>
                             <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $expiryService->getStatusBadgeClass($item->status) }}">{{ __('vehicles.' . $item->status) }}</span>
-                            <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
+                            <i class="fa-solid fa-arrow-left text-sky-600 dark:text-sky-400 shrink-0 rtl:rotate-180"></i>
                         </a>
                     @endforeach
                 </div>
-                <a href="{{ route('company.vehicles.index') }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('common.view_all') }}</a>
+                <a href="{{ route('company.vehicles.index') }}" class="inline-block mt-3 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 font-bold">{{ __('common.view_all') }}</a>
             </div>
         @endif
 
         @if(($pendingInvoiceApprovalsCount ?? 0) > 0)
             <div class="dash-card border-amber-500/40 bg-amber-500/5">
                 <h2 class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice text-amber-400"></i>
+                    <i class="fa-solid fa-file-invoice text-amber-600 dark:text-amber-400"></i>
                     {{ __('maintenance.invoice_approval') ?? 'Invoices Pending Approval' }} ({{ $pendingInvoiceApprovalsCount }})
                 </h2>
                 <p class="text-sm text-servx-silver mb-3">{{ __('maintenance.invoice_approval_desc') ?? 'Maintenance invoices uploaded by centers — approve or reject' }}</p>
                 <div class="space-y-2 max-h-40 overflow-y-auto">
                     @foreach($pendingInvoiceApprovals ?? [] as $req)
                         <a href="{{ route('company.maintenance-requests.show', $req) }}" class="flex items-center gap-3 p-3 rounded-xl bg-servx-inner hover:bg-servx-inner-hover border border-servx-border transition-colors">
-                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-500/20 text-amber-400">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-500/20 text-amber-600 dark:text-amber-400">
                                 <i class="fa-solid fa-file-invoice text-xs"></i>
                             </span>
                             <div class="min-w-0 flex-1">
@@ -145,18 +145,18 @@
                                 <p class="text-xs text-servx-silver">{{ $req->vehicle?->plate_number ?? '-' }} · {{ $req->final_invoice_amount ? number_format($req->final_invoice_amount, 2) . ' ' . __('company.sar') : '-' }}</p>
                             </div>
                             <span class="px-2 py-1 rounded-full text-xs font-bold border border-amber-400/50 text-amber-300 bg-amber-500/20">{{ __('maintenance.status_waiting_for_invoice_approval') ?? 'Pending' }}</span>
-                            <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
+                            <i class="fa-solid fa-arrow-left text-sky-600 dark:text-sky-400 shrink-0 rtl:rotate-180"></i>
                         </a>
                     @endforeach
                 </div>
-                <a href="{{ route('company.maintenance-requests.index', ['status' => 'waiting_for_invoice_approval']) }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('common.view_all') }}</a>
+                <a href="{{ route('company.maintenance-requests.index', ['status' => 'waiting_for_invoice_approval']) }}" class="inline-block mt-3 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 font-bold">{{ __('common.view_all') }}</a>
             </div>
         @endif
 
         @if(($inspectionPendingCount ?? 0) > 0)
             <div class="dash-card {{ ($inspectionOverdueCount ?? 0) > 0 ? 'border-red-500/40 bg-red-500/5' : 'border-amber-500/40 bg-amber-500/5' }}">
                 <h2 class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-amber-400"></i>
+                    <i class="fa-solid fa-camera text-amber-600 dark:text-amber-400"></i>
                     {{ __('inspections.vehicles_pending') }}
                     @if(($inspectionOverdueCount ?? 0) > 0)
                         <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-500/30 text-red-300 border border-red-400/50">{{ $inspectionOverdueCount }} {{ __('inspections.overdue') }}</span>
@@ -165,7 +165,7 @@
                 <div class="space-y-2 max-h-40 overflow-y-auto">
                     @foreach($inspectionPendingVehicles ?? [] as $item)
                         <a href="{{ route('company.vehicles.show', $item->vehicle) }}" class="flex items-center gap-3 p-3 rounded-xl bg-servx-inner hover:bg-servx-inner-hover border border-servx-border transition-colors">
-                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'overdue' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' }}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $item->status === 'overdue' ? 'bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400' }}">
                                 <i class="fa-solid fa-car text-xs"></i>
                             </span>
                             <div class="min-w-0 flex-1">
@@ -173,18 +173,18 @@
                                 <p class="text-xs text-servx-silver">{{ __('inspections.due_date') }}: {{ $item->due_date?->translatedFormat('d M Y') ?? '—' }}</p>
                             </div>
                             <span class="px-2 py-1 rounded-full text-xs font-bold border {{ $item->status === 'overdue' ? 'border-red-400/50 text-red-300 bg-red-500/20' : 'border-amber-400/50 text-amber-300 bg-amber-500/20' }}">{{ __('inspections.' . $item->status) }}</span>
-                            <i class="fa-solid fa-arrow-left text-sky-400 shrink-0 rtl:rotate-180"></i>
+                            <i class="fa-solid fa-arrow-left text-sky-600 dark:text-sky-400 shrink-0 rtl:rotate-180"></i>
                         </a>
                     @endforeach
                 </div>
-                <a href="{{ route('company.inspections.index') }}" class="inline-block mt-3 text-sm text-sky-400 hover:text-sky-300 font-bold">{{ __('inspections.view_all') }}</a>
+                <a href="{{ route('company.inspections.index') }}" class="inline-block mt-3 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 font-bold">{{ __('inspections.view_all') }}</a>
             </div>
         @endif
 
         @if(count($announcements ?? []) > 0)
             <div class="dash-card border-sky-500/40">
                 <h2 class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-sky-400"></i>
+                    <i class="fa-solid fa-bullhorn text-sky-600 dark:text-sky-400"></i>
                     {{ __('admin_dashboard.announcements') }}
                 </h2>
                 <div class="space-y-3 max-h-32 overflow-y-auto">
@@ -445,7 +445,7 @@
             {{-- Fuel Summary --}}
             <a href="{{ route('company.fuel-balance') }}" class="dash-card dash-card-interactive block">
                 <h2 class="dash-section-title flex items-center gap-2">
-                    <i class="fa-solid fa-gas-pump text-sky-400"></i>
+                    <i class="fa-solid fa-gas-pump text-sky-600 dark:text-sky-400"></i>
                     {{ __('fleet.fuel') }}
                 </h2>
                 <p class="dash-card-value dash-card-value-lg">{{ number_format($fuelBalanceTotal ?? 0, 0) }} {{ __('company.sar') }}</p>
@@ -490,7 +490,7 @@
                                 <p class="font-semibold text-white truncate">{{ __('dashboard.order') }} #{{ $o->id }} — {{ $o->status }}</p>
                                 <p class="text-xs text-servx-silver truncate">{{ $o->city ?? '-' }} · {{ \Illuminate\Support\Str::limit($o->address ?? '', 35) }}</p>
                             </div>
-                            <span class="text-sky-400 text-sm shrink-0"><i class="fa-solid fa-arrow-left ms-1"></i></span>
+                            <span class="text-sky-600 dark:text-sky-400 text-sm shrink-0"><i class="fa-solid fa-arrow-left ms-1"></i></span>
                         </a>
                     @empty
                         <p class="text-servx-silver text-sm py-6 text-center">{{ __('common.no_orders') }}</p>

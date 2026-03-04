@@ -41,6 +41,7 @@ return [
     // Status
     'active' => 'Active',
     'inactive' => 'Inactive',
+    'all_statuses' => 'All statuses',
 
     // Summary
     'orders_count' => 'Orders count',
@@ -143,7 +144,7 @@ return [
     'model' => 'Model',
     'company' => 'Company',
     'created_date' => 'Created date',
-    'last_update_date' => 'Last update',
+    'last_update_date' => 'Last Update',
     'assigned_driver' => 'Assigned driver',
     'live_tracking_status' => 'Live tracking status',
     'trip_history' => 'Trip history',
@@ -163,4 +164,31 @@ return [
     'accumulated_monthly_market' => 'Accumulated, monthly & market cost',
     'never_reset' => 'Never reset, stored historically',
     'back_to_overview' => 'Back to overview',
+
+    // Vehicle Mileage Reports
+    'vehicle_mileage_reports' => 'Vehicle Mileage Reports',
+    'vehicle_mileage_reports_desc' => 'Complete mileage report for all vehicles',
+    'current_mileage' => 'Current Mileage',
+    'previous_mileage' => 'Previous Mileage',
+    'total_distance' => 'Total Distance',
+    'total_vehicles' => 'Total Vehicles',
+    'total_mileage_this_period' => 'Total Mileage (Period)',
+    'avg_mileage_per_vehicle' => 'Avg per Vehicle',
+    'status' => 'Status',
+    'status_normal' => 'Normal',
+    'status_high_usage' => 'High Usage',
+    'status_no_update' => 'No Update',
+    'no_mileage_data' => 'No mileage data for the selected period.',
+    'view_all' => 'View all',
+
+    // Mileage history
+    'current_previous_total' => 'Current / Previous / Total Distance',
+    'mileage_history' => 'Mileage History',
+    'mileage_history_hint' => 'Every mileage calculation stored with tracking type, previous and current readings.',
+    'recorded_date' => 'Date',
+    'tracking_type' => 'Tracking Type',
+    'previous_reading' => 'Previous Reading',
+    'current_reading' => 'Current Reading',
+    'calculated_difference' => 'Difference',
+    'no_mileage_history' => 'No mileage history yet.',
 ];

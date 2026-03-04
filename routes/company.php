@@ -68,6 +68,17 @@ Route::middleware(['company'])
             ->name('invoices.maintenance-pdf')
             ->whereNumber('invoice');
 
+        // Company-uploaded fuel invoices (view, download, thumbnail)
+        Route::get('/fuel-invoices/{companyFuelInvoice}/view', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'view'])
+            ->name('fuel-invoices.view')
+            ->whereNumber('companyFuelInvoice');
+        Route::get('/fuel-invoices/{companyFuelInvoice}/thumbnail', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'thumbnail'])
+            ->name('fuel-invoices.thumbnail')
+            ->whereNumber('companyFuelInvoice');
+        Route::get('/fuel-invoices/{companyFuelInvoice}/download', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'download'])
+            ->name('fuel-invoices.download')
+            ->whereNumber('companyFuelInvoice');
+
         // Payments (only when config servx.payments_enabled = true)
         Route::middleware('payments')->group(function () {
             Route::get('/payments', [PaymentsController::class, 'index'])->name('payments.index');
@@ -106,10 +117,15 @@ Route::middleware(['company'])
             ->name('reports.index');
         Route::get('/reports/service', [ServiceReportController::class, 'index'])
             ->name('reports.service');
+        Route::get('/reports/mileage', [ReportsController::class, 'mileage'])
+            ->name('reports.mileage');
         Route::get('/reports/mileage/excel', [\App\Http\Controllers\Company\MileageReportController::class, 'exportExcel'])
             ->name('reports.mileage.excel');
         Route::get('/reports/mileage/pdf', [\App\Http\Controllers\Company\MileageReportController::class, 'exportPdf'])
             ->name('reports.mileage.pdf');
+        Route::get('/reports/download/{export}', [\App\Http\Controllers\Company\ReportsController::class, 'downloadExport'])
+            ->name('reports.download')
+            ->whereUuid('export');
 
         // Insurances (My Insurance)
         Route::get('/insurances', [\App\Http\Controllers\Company\InsurancesController::class, 'index'])
@@ -296,8 +312,7 @@ Route::middleware(['company'])
             ->name('notifications.index');
 
         Route::patch('/notifications/{notification}/read', [NotificationsController::class, 'markRead'])
-            ->name('notifications.read')
-            ->whereNumber('notification');
+            ->name('notifications.read');
 
         // Settings (Livewire)
         Route::get('/settings', Settings::class)->name('settings');

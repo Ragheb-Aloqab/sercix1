@@ -74,16 +74,57 @@
         </div>
     </div>
 
-    {{-- 4. Fuel --}}
-    <a href="{{ route('company.fuel-balance') }}"
-       class="sidebar-nav-item {{ request()->routeIs('company.fuel-balance') ? 'sidebar-nav-item--active' : '' }}"
-       title="{{ __('fleet.fuel') }}">
-        <span class="sidebar-nav-icon"><i class="fa-solid fa-gas-pump"></i></span>
-        <div class="sidebar-nav-text">
-            <p class="sidebar-nav-label">{{ __('fleet.fuel') }}</p>
-            <p class="sidebar-nav-sublabel">{{ __('fleet.fuel_desc') }}</p>
+    {{-- 4. Fuel (collapsible section) --}}
+    @php
+        $fuelActive = request()->routeIs('company.fuel.index') || request()->routeIs('company.fuel-balance') || (request()->routeIs('company.invoices.index') && request()->get('invoice_type') === 'fuel');
+    @endphp
+    <div x-data="{ fuelOpen: {{ $fuelActive ? 'true' : 'false' }} }" class="sidebar-nav-group">
+        <button type="button" @click="fuelOpen = !fuelOpen"
+                class="sidebar-nav-item w-full text-start {{ $fuelActive ? 'sidebar-nav-item--active' : '' }}"
+                title="{{ __('fleet.fuel') }}">
+            <span class="sidebar-nav-icon"><i class="fa-solid fa-gas-pump"></i></span>
+            <div class="sidebar-nav-text flex-1">
+                <p class="sidebar-nav-label">{{ __('fleet.fuel') }}</p>
+                <p class="sidebar-nav-sublabel">{{ __('fleet.fuel_desc') }}</p>
+            </div>
+            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="fuelOpen ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="fuelOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="overflow-hidden">
+            <div class="ps-4 ms-9 border-s border-slate-600/50 space-y-0.5 py-1">
+                <a href="{{ route('company.fuel-balance') }}"
+                   class="sidebar-nav-item sidebar-nav-item--sub {{ request()->routeIs('company.fuel-balance') ? 'sidebar-nav-item--active' : '' }}"
+                   title="{{ __('fleet.fuel_balance') }}">
+                    <span class="sidebar-nav-icon"><i class="fa-solid fa-wallet"></i></span>
+                    <div class="sidebar-nav-text">
+                        <p class="sidebar-nav-label">{{ __('fleet.fuel_balance') }}</p>
+                    </div>
+                </a>
+                <a href="{{ route('company.fuel.index') }}"
+                   class="sidebar-nav-item sidebar-nav-item--sub {{ request()->routeIs('company.fuel.index') ? 'sidebar-nav-item--active' : '' }}"
+                   title="{{ __('fleet.fuel_refills') }}">
+                    <span class="sidebar-nav-icon"><i class="fa-solid fa-gas-pump"></i></span>
+                    <div class="sidebar-nav-text">
+                        <p class="sidebar-nav-label">{{ __('fleet.fuel_refills') }}</p>
+                    </div>
+                </a>
+                <a href="{{ route('company.invoices.index', ['invoice_type' => 'fuel']) }}"
+                   class="sidebar-nav-item sidebar-nav-item--sub {{ (request()->routeIs('company.invoices.index') && request()->get('invoice_type') === 'fuel') ? 'sidebar-nav-item--active' : '' }}"
+                   title="{{ __('fleet.fuel_invoices') }}">
+                    <span class="sidebar-nav-icon"><i class="fa-solid fa-file-invoice"></i></span>
+                    <div class="sidebar-nav-text">
+                        <p class="sidebar-nav-label">{{ __('fleet.fuel_invoices') }}</p>
+                    </div>
+                </a>
+            </div>
         </div>
-    </a>
+    </div>
 
     {{-- 5. Tracking --}}
     <a href="{{ route('company.tracking.index') }}"
@@ -107,7 +148,21 @@
         </div>
     </a>
 
-    {{-- 7. My Insurance --}}
+    {{-- 7. Notifications --}}
+    <a href="{{ route('company.notifications.index') }}"
+       class="sidebar-nav-item {{ $this->isActive('company.notifications.*') ? 'sidebar-nav-item--active' : '' }}"
+       title="{{ __('common.notifications') }}">
+        <span class="sidebar-nav-icon"><i class="fa-solid fa-bell"></i></span>
+        <div class="sidebar-nav-text">
+            <p class="sidebar-nav-label">{{ __('common.notifications') }}</p>
+            <p class="sidebar-nav-sublabel">{{ __('fleet.notifications_desc') }}</p>
+        </div>
+        @if($unreadNotifications > 0)
+            <span class="sidebar-nav-badge sidebar-nav-badge--info">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
+        @endif
+    </a>
+
+    {{-- 8. My Insurance --}}
     <a href="{{ route('company.insurances.index') }}"
        class="sidebar-nav-item {{ $this->isActive('company.insurances.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.my_insurance') }}">
@@ -118,7 +173,7 @@
         </div>
     </a>
 
-    {{-- 8. Settings --}}
+    {{-- 9. Settings --}}
     <a href="{{ route('company.settings') }}"
        class="sidebar-nav-item {{ $this->isActive('company.settings') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.settings') }}">

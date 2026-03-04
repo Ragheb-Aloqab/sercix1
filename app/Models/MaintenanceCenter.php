@@ -20,6 +20,7 @@ class MaintenanceCenter extends Model implements AuthenticatableContract
         'city',
         'is_active',
         'status',
+        'theme_preference',
         'service_categories',
         'total_earnings',
         'paid_amount',

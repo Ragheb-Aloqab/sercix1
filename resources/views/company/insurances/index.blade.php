@@ -10,12 +10,10 @@
 <div class="flex flex-col items-center justify-center min-h-[50vh] py-12 sm:py-16">
     <div class="dash-card max-w-md w-full mx-4 text-center">
         <div class="w-20 h-20 rounded-2xl bg-sky-500/20 flex items-center justify-center mx-auto mb-6">
-            <i class="fa-solid fa-shield-halved text-4xl text-sky-400"></i>
+            <i class="fa-solid fa-shield-halved text-4xl text-sky-600 dark:text-sky-400"></i>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">{{ __('company.coming_soon') }}</h2>
-        <p class="text-servx-silver">{{ __('company.insurances_coming_soon_desc') }}</p>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-2">{{ __('company.coming_soon') }}</h2>
+        <p class="text-slate-600 dark:text-servx-silver">{{ __('company.insurances_coming_soon_desc') }}</p>
     </div>
 </div>
 @endsection
-قبل انتهاء بوليصة التأمين،
- سنعرض لك تلقائيًا أفضل عروض شركات التأمين لتختار الأنسب بكل سهولة.

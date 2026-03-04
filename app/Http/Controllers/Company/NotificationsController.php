@@ -3,36 +3,37 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class NotificationsController extends Controller
 {
+    public function __construct(
+        private readonly NotificationService $notificationService
+    ) {}
+
     public function index(Request $request)
-{
-    $company = auth('company')->user();
+    {
+        $company = auth('company')->user();
 
-    $filter = $request->string('filter')->toString() ?: 'all'; // all | unread
+        $filter = $request->string('filter')->toString() ?: 'all';
 
-    $query = $company->notifications()->latest();
+        $notifications = $this->notificationService->getNotifications($company, $filter, 15);
 
-    if ($filter === 'unread') {
-        $query->whereNull('read_at');
+        return view('company.notifications.index', compact(
+            'company',
+            'notifications',
+            'filter'
+        ));
     }
-
-    $notifications = $query->paginate(15)->withQueryString();
-    return view('company.notifications.index', compact(
-        'company',
-        'notifications',
-        'filter'
-    ));
-}
 
     public function markRead(string $id)
     {
         $company = auth('company')->user();
 
-        $notification = $company->notifications()->where('id', $id)->firstOrFail();
-        $notification->markAsRead();
+        if (!$this->notificationService->markAsRead($company, $id)) {
+            abort(404);
+        }
 
         return back();
     }

@@ -36,18 +36,11 @@ class MarketComparisonService
         $fuelTotal = $this->getCompanyFuelTotal($company->id, $since);
         $totalExpenses = round($maintenanceTotal + $fuelTotal, self::INTERNAL_PRECISION);
 
-        // Step 3: Market Average = quotation-based maintenance + fuel benchmark
-        $marketData = $this->getMarketAverageBySegment($since);
-        $marketMaintenanceTotal = $this->getMarketTotalForCompanyJobs($company->id, $since, $marketData);
-        $marketFuelPerKm = (float) config('servx.market_fuel_per_km', 0.15);
-        $marketFuelTotal = round($totalKilometers * $marketFuelPerKm, self::INTERNAL_PRECISION);
-        $marketAverageTotalCost = round($marketMaintenanceTotal + $marketFuelTotal, self::INTERNAL_PRECISION);
-
-        // Fallback: when no quotation data or zero market maintenance, use full km-based benchmark
+        // Market Average = Total Fleet Mileage × 0.37 SAR (unified formula)
         $marketRatePerKm = (float) config('servx.market_avg_per_km', 0.37);
-        if ($marketAverageTotalCost <= 0 && $totalKilometers > 0) {
-            $marketAverageTotalCost = round($totalKilometers * $marketRatePerKm, self::INTERNAL_PRECISION);
-        }
+        $marketAverageTotalCost = round($totalKilometers * $marketRatePerKm, self::INTERNAL_PRECISION);
+
+        $marketData = $this->getMarketAverageBySegment($since);
 
         // Step 4: Actual Cost Per KM (weighted fleet average)
         $actualCostPerKm = $totalKilometers > 0
@@ -101,13 +94,18 @@ class MarketComparisonService
     }
 
     /**
-     * Total Kilometers = Sum of vehicle mileage in date range.
-     * Primary: fuel_refills (MAX - MIN odometer per vehicle) - same source as fuel cost, ensures consistency.
-     * Fallback: vehicle_monthly_mileage (when no fuel odometer data), then vehicle_locations.
+     * Total Kilometers = Sum of vehicle mileage in date range (unified mileage system).
+     * Primary: vehicle_monthly_mileage (SUM of daily differences from vehicle_mileage_history).
+     * Fallback: fuel_refills, then vehicle_locations.
      */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
-        // Primary: fuel_refills (MAX - MIN odometer per vehicle) - accurate when fuel data exists
+        $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
+        $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
+        if ($totalKm > 0) {
+            return round($totalKm, self::INTERNAL_PRECISION);
+        }
+
         $fuelRanges = DB::table('fuel_refills')
             ->where('company_id', $companyId)
             ->where('refilled_at', '>=', $since)
@@ -116,21 +114,11 @@ class MarketComparisonService
             ->selectRaw('vehicle_id, MAX(odometer_km) - MIN(odometer_km) as km_driven')
             ->groupBy('vehicle_id')
             ->get();
-
         $totalKm = max(0, (float) $fuelRanges->sum('km_driven'));
-
         if ($totalKm > 0) {
             return round($totalKm, self::INTERNAL_PRECISION);
         }
 
-        // Fallback: vehicle_monthly_mileage (when no fuel odometer data)
-        $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
-        $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
-        if ($totalKm > 0) {
-            return round($totalKm, self::INTERNAL_PRECISION);
-        }
-
-        // Fallback: vehicle_locations
         $locationRanges = DB::table('vehicle_locations')
             ->join('vehicles', 'vehicles.id', '=', 'vehicle_locations.vehicle_id')
             ->where('vehicles.company_id', $companyId)

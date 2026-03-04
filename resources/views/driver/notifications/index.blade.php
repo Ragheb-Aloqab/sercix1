@@ -9,7 +9,7 @@
     <div class="dash-card">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
             <form method="GET" action="{{ route('driver.notifications.index') }}" class="flex items-center gap-2">
-                <select name="filter" class="px-4 py-2 rounded-xl border border-slate-600/50 bg-slate-800/60 text-servx-silver-light text-sm font-semibold">
+                <select name="filter" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 text-slate-900 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
                     <option value="all" @selected($filter !== 'unread')>{{ __('common.all') }}</option>
                     <option value="unread" @selected($filter === 'unread')>{{ __('common.unread') }}</option>
                 </select>
@@ -19,7 +19,7 @@
             </form>
         </div>
 
-        <div class="divide-y divide-slate-600/40">
+        <div class="divide-y divide-slate-200 dark:divide-slate-600/40">
             @forelse($notifications as $n)
                 @php
                     $data = $n->data ?? [];
@@ -30,16 +30,16 @@
                     }
                 @endphp
 
-                <div class="py-4 flex items-start justify-between gap-4 hover:bg-slate-700/30 rounded-xl transition-colors {{ $isUnread ? 'bg-emerald-500/10' : '' }}">
+                <div class="py-4 flex items-start justify-between gap-4 hover:bg-slate-100 dark:hover:bg-slate-700/30 rounded-xl transition-colors duration-300 {{ $isUnread ? 'bg-emerald-500/10' : '' }}">
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
-                            <p class="font-bold text-servx-silver-light">{{ $data['title'] ?? __('common.notification') }}</p>
+                            <p class="font-bold text-slate-900 dark:text-servx-silver-light">{{ $data['title'] ?? __('common.notification') }}</p>
                             @if ($isUnread)
                                 <span class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">{{ __('common.unread') }}</span>
                             @endif
                         </div>
-                        <p class="text-sm text-servx-silver mt-1">{{ $data['message'] ?? '' }}</p>
-                        <p class="text-xs text-servx-silver mt-2">{{ $n->created_at?->format('Y-m-d H:i') }}</p>
+                        <p class="text-sm text-slate-600 dark:text-servx-silver mt-1">{{ $data['message'] ?? '' }}</p>
+                        <p class="text-xs text-slate-500 dark:text-servx-silver mt-2">{{ $n->created_at?->format('Y-m-d H:i') }}</p>
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
@@ -60,14 +60,14 @@
                     </div>
                 </div>
             @empty
-                <div class="py-12 text-center text-servx-silver">
+                <div class="py-12 text-center text-slate-600 dark:text-servx-silver">
                     {{ __('dashboard.no_notifications') ?? 'No notifications yet.' }}
                 </div>
             @endforelse
         </div>
 
         @if ($notifications->hasPages())
-            <div class="mt-6 pt-4 border-t border-slate-600/40">
+            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600/40">
                 {{ $notifications->links() }}
             </div>
         @endif

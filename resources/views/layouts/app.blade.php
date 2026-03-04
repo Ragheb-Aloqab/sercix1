@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="transition-colors duration-300">
     <head>
+        <x-theme-init />
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -23,14 +24,15 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/css/style.css', 'resources/js/app.js'])
         <x-vite-cdn-fallback />
+        @livewireStyles
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body class="font-sans antialiased transition-colors duration-300 bg-gray-100 dark:bg-slate-900 text-gray-900 dark:text-slate-100">
+        <div class="min-h-screen">
             <livewire:layout.navigation />
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white shadow">
+                <header class="bg-white dark:bg-slate-800 shadow dark:shadow-slate-900/50 transition-colors duration-300">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -42,5 +44,15 @@
                 {{ $slot }}
             </main>
         </div>
+        @livewireScripts
+        <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('ui-theme-changed', ({ theme }) => {
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+                document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+                try { localStorage.setItem('sercix_theme', theme); } catch (e) {}
+            });
+        });
+        </script>
     </body>
 </html>

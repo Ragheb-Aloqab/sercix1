@@ -259,11 +259,7 @@ class MaintenanceRfqService
             ]);
             $this->transitionStatus($request, MaintenanceRequestStatus::CLOSED->value, [], 'company', $company->id);
 
-            $center = $request->approvedCenter;
-            if ($center) {
-                $center->notify(new \App\Notifications\MaintenanceInvoiceApprovedNotification($request));
-            }
-            app(\App\Services\DriverNotificationService::class)->notifyMaintenanceRequestClosed($request);
+            event(new \App\Events\MaintenanceRequestApproved($request));
         });
     }
 

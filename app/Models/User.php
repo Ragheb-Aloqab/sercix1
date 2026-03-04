@@ -23,6 +23,7 @@ class User extends Authenticatable
         'phone',
         'role',
         'status',
+        'theme_preference',
         'password',
         'otp_code',
         'otp_expires_at',

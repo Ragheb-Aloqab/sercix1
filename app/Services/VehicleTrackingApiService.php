@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Vehicle;
 use App\Models\VehicleLocation;
+use App\Services\DailyOdometerSnapshotService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -300,6 +301,13 @@ class VehicleTrackingApiService
             'tracker_timestamp' => $trackerTs,
         ]);
 
+        // When GPS sends engine/ignition OFF, store the last odometer value for mileage history
+        $machineStatus = $data['machine_status'] ?? null;
+        $odometerVal = $data['odometer'] ?? null;
+        if ($odometerVal !== null && $odometerVal > 0 && $this->isEngineOff($machineStatus)) {
+            app(DailyOdometerSnapshotService::class)->storeOdometerOnGpsEngineOff($vehicle->id, (float) $odometerVal);
+        }
+
         return [
             'success' => true,
             'data' => array_merge($data, [
@@ -351,6 +359,15 @@ class VehicleTrackingApiService
             return ($io1 === '1' || $io1 === 'true') ? 'ON' : 'OFF';
         }
         return null;
+    }
+
+    private function isEngineOff(?string $machineStatus): bool
+    {
+        if ($machineStatus === null || $machineStatus === '') {
+            return false;
+        }
+        $s = strtoupper(trim((string) $machineStatus));
+        return in_array($s, ['OFF', '0', 'FALSE', 'إيقاف'], true);
     }
 
     private function inferStatusFromSpeed(?float $speed): string

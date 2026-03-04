@@ -59,6 +59,11 @@ return [
     'enter_end_odometer_prompt' => 'Enter odometer value (km) after finishing the trip:',
     'odometer_invalid' => 'Please enter a valid odometer value.',
     'trip_recorded' => 'Trip recorded',
+    'end_odometer_less_than_start' => 'End odometer cannot be less than start odometer.',
+    'end_odometer_less_than_previous' => 'Odometer reading cannot be less than the previous recorded value.',
+    'daily_odometer_saved' => 'Daily odometer saved successfully.',
+    'enter_daily_odometer' => 'Enter end of day odometer',
+    'daily_odometer_hint' => 'Enter the odometer reading at end of your shift. Daily mileage will be calculated from the previous reading.',
 
     'map_style' => 'Map style',
     'map_style_carto_dark' => 'Carto Dark',

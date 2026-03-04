@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\WebhookUrl;
 use Illuminate\Support\Facades\Cache;
 use App\Events\OrderCreated;
+use App\Events\OrderStatusChanged;
+use App\Events\InvoiceCreated;
 use App\Notifications\DriverServiceRequestNotification;
 use App\Services\InvoicePdfService;
 
@@ -54,13 +56,14 @@ class OrderObserver
             Cache::forget("market_comparison_{$order->company_id}_12");
         }
         $this->invalidateAdminStats();
-        // Admin notifications removed - only Company ↔ Driver notifications
 
-        // Auto-create invoice when order is completed
+        if ($order->wasChanged('status')) {
+            event(new OrderStatusChanged($order, (string) $order->getOriginal('status'), $order->status));
+        }
+
         if ($order->wasChanged('status') && $order->status === 'completed') {
             $this->createInvoiceForOrder($order);
         }
-
     }
     /**
      * Handle the Order "deleted" event.
@@ -103,6 +106,8 @@ class OrderObserver
             'tax' => $tax,
             'paid_amount' => 0,
         ]);
+
+        event(new InvoiceCreated($invoice));
 
         try {
             app(InvoicePdfService::class)->generate($invoice);

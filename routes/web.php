@@ -26,6 +26,14 @@ Route::get('/sitemap.xml', \App\Http\Controllers\SitemapController::class)->name
 
 Route::get('/set-locale', \App\Http\Controllers\LocaleController::class)->name('set-locale');
 
+Route::post('/theme-preference', function (Request $request) {
+    $theme = in_array($request->input('theme'), ['light', 'dark'], true)
+        ? $request->input('theme')
+        : 'light';
+    app(\App\Services\ThemeService::class)->setPreference($theme);
+    return response()->json(['theme' => $theme]);
+})->middleware('web')->name('theme-preference');
+
 /*
 |--------------------------------------------------------------------------
 | Tap Payment (webhook + redirect - public, no auth)
@@ -95,6 +103,7 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::post('/tracking/stop', [\App\Http\Controllers\DriverController::class, 'stopTracking'])->name('tracking.stop');
         Route::get('/tracking/status', [\App\Http\Controllers\DriverController::class, 'trackingStatus'])->name('tracking.status');
         Route::post('/tracking/report', [\App\Http\Controllers\DriverController::class, 'reportTracking'])->name('tracking.report')->middleware('throttle:60,1');
+        Route::post('/odometer/daily', [\App\Http\Controllers\DriverController::class, 'storeDailyOdometer'])->name('odometer.daily');
         Route::get('/inspections', [\App\Http\Controllers\DriverInspectionController::class, 'index'])->name('inspections.index');
         Route::post('/inspections/request/{vehicle}', [\App\Http\Controllers\DriverInspectionController::class, 'requestInspection'])->name('inspections.request')->whereNumber('vehicle');
         Route::get('/inspections/{inspection}/upload', [\App\Http\Controllers\DriverInspectionController::class, 'showUploadForm'])->name('inspections.upload')->whereNumber('inspection');

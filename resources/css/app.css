@@ -4,11 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dashboard/Company glass: Servx Motors watermark + dark overlay */
+/* Dashboard/Company glass: light default, dark overlay in dark mode */
 @layer components {
     .company-glass,
     .dashboard-glass {
         position: relative;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+        transition: background 300ms ease;
+    }
+    .dark .company-glass,
+    .dark .dashboard-glass {
         background: linear-gradient(135deg, #1A1A1A 0%, #1E1E1E 50%, #1A1A1A 100%);
     }
     .company-glass::before,
@@ -16,9 +21,13 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.92) 50%, rgba(26, 26, 26, 0.95) 100%);
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.92) 50%, rgba(248, 250, 252, 0.95) 100%);
         pointer-events: none;
         z-index: 1;
+    }
+    .dark .company-glass::before,
+    .dark .dashboard-glass::before {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.92) 50%, rgba(26, 26, 26, 0.95) 100%);
     }
     /* Watermark: Servx logo, 4% opacity, centered, ~60% of container, above overlay */
     .company-glass::after,

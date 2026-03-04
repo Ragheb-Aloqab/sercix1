@@ -63,4 +63,13 @@ return [
     'invoice_details' => 'تفاصيل الفاتورة',
     'overview' => 'نظرة عامة',
     'created_at' => 'تاريخ الانشاء',
+
+    // Add invoice buttons
+    'add_fuel_invoice' => 'إضافة فاتورة وقود',
+    'add_maintenance_invoice' => 'إضافة فاتورة صيانة',
+    'upload_fuel_invoice' => 'رفع فاتورة وقود',
+    'upload_maintenance_invoice' => 'رفع فاتورة صيانة',
+    'upload_file_label' => 'ملف الفاتورة',
+    'fuel_invoice_uploaded_success' => 'تم رفع فاتورة الوقود بنجاح.',
+    'select_vehicle' => 'اختر المركبة',
 ];

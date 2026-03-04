@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Vehicle;
 use App\Models\VehicleMonthlyMileage;
-use App\Models\MobileTrackingTrip;
+use App\Models\VehicleMileageHistory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,20 +41,13 @@ class MonthlyMileageSnapshotService
             );
 
             if (!$prevRecord->is_closed) {
-                $vehicle = \App\Models\Vehicle::find($vehicleId);
-                if ($vehicle && $vehicle->usesMobileTracking()) {
-                    $monthStart = $prevMonth->copy()->startOfMonth();
-                    $monthEnd = $prevMonth->copy()->endOfMonth();
-                    $tripSum = (float) MobileTrackingTrip::where('vehicle_id', $vehicleId)
-                        ->whereNotNull('ended_at')
-                        ->whereBetween('ended_at', [$monthStart, $monthEnd])
-                        ->sum('trip_distance_km');
-                    $prevRecord->end_odometer = $odometer;
-                    $prevRecord->total_km = max(0, $tripSum);
-                } else {
-                    $prevRecord->end_odometer = $odometer;
-                    $prevRecord->total_km = max(0, $odometer - (float) ($prevRecord->start_odometer ?? 0));
-                }
+                $monthStart = $prevMonth->copy()->startOfMonth()->toDateString();
+                $monthEnd = $prevMonth->copy()->endOfMonth()->toDateString();
+                $totalKm = (float) VehicleMileageHistory::where('vehicle_id', $vehicleId)
+                    ->whereBetween('recorded_date', [$monthStart, $monthEnd])
+                    ->sum('calculated_difference');
+                $prevRecord->end_odometer = $odometer;
+                $prevRecord->total_km = max(0, $totalKm);
                 $prevRecord->is_closed = true;
                 $prevRecord->save();
                 $closed++;
@@ -110,29 +103,19 @@ class MonthlyMileageSnapshotService
                 continue;
             }
 
-            $vehicle = Vehicle::find($vehicleId);
-            if ($vehicle && $vehicle->usesMobileTracking()) {
-                $monthStart = now()->startOfMonth();
-                $monthEnd = now()->endOfMonth();
-                $tripSum = (float) MobileTrackingTrip::where('vehicle_id', $vehicleId)
-                    ->whereNotNull('ended_at')
-                    ->whereBetween('ended_at', [$monthStart, $monthEnd])
-                    ->sum('trip_distance_km');
-                $record->end_odometer = $odometer;
-                $record->total_km = max(0, $tripSum);
-            } else {
-                $startOdo = (float) ($record->start_odometer ?? 0);
-                if ($startOdo > 0 && $odometer < $startOdo) {
-                    $record->odometer_reset_detected = true;
-                    $record->start_odometer = $odometer;
-                    $record->end_odometer = $odometer;
-                    $record->total_km = 0;
-                } else {
-                    $record->end_odometer = $odometer;
-                    $record->total_km = $startOdo > 0 ? max(0, $odometer - $startOdo) : 0;
-                }
-            }
+            $monthStart = now()->startOfMonth()->toDateString();
+            $monthEnd = now()->endOfMonth()->toDateString();
+            $totalKm = (float) VehicleMileageHistory::where('vehicle_id', $vehicleId)
+                ->whereBetween('recorded_date', [$monthStart, $monthEnd])
+                ->sum('calculated_difference');
 
+            $startOdo = (float) ($record->start_odometer ?? 0);
+            if ($startOdo > 0 && $odometer < $startOdo) {
+                $record->odometer_reset_detected = true;
+                $record->start_odometer = $odometer;
+            }
+            $record->end_odometer = $odometer;
+            $record->total_km = max(0, $totalKm);
             $record->save();
             $updated++;
         }

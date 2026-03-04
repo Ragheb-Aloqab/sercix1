@@ -3,10 +3,16 @@
 namespace App\Observers;
 
 use App\Models\MaintenanceRequest;
+use App\Events\MaintenanceRequestCreated;
 use Illuminate\Support\Facades\Cache;
 
 class MaintenanceRequestObserver
 {
+    public function created(MaintenanceRequest $maintenanceRequest): void
+    {
+        event(new MaintenanceRequestCreated($maintenanceRequest));
+    }
+
     /**
      * Invalidate market comparison cache when expense-related fields change.
      */

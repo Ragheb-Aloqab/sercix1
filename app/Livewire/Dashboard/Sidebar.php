@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard;
 use App\Models\Company;
 use App\Models\VehicleQuotaRequest;
 use App\Services\ExpiryMonitoringService;
+use App\Services\NotificationService;
 use App\Services\VehicleInspectionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -41,6 +42,7 @@ class Sidebar extends Component
             if ($company) {
                 $this->expiringDocumentsCount = app(ExpiryMonitoringService::class)->countExpiringForCompany($company->id);
                 $this->inspectionPendingCount = app(VehicleInspectionService::class)->getPendingCount($company);
+                $this->unreadNotifications = app(NotificationService::class)->getUnreadCount($company);
             }
         }
     }

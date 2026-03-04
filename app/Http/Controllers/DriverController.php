@@ -10,9 +10,12 @@ use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
+use App\Models\VehicleDailyOdometer;
 use App\Models\VehicleLocation;
+use App\Models\VehicleMileageHistory;
 use App\Support\OrderStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -376,7 +379,7 @@ class DriverController extends Controller
 
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
-            'start_odometer' => ['required', 'numeric', 'min:0', 'max:9999999'],
+            'start_odometer' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
         ]);
         $phoneVariants = $this->driverPhoneVariants($phone);
 
@@ -402,12 +405,17 @@ class DriverController extends Controller
             'tracking_driver_phone' => $phone,
         ]);
 
-        // Create mobile tracking trip record for odometer-based mileage
+        // Use provided start_odometer or last recorded value (odometer entered at end of previous trip)
+        $startOdo = isset($data['start_odometer']) && $data['start_odometer'] !== ''
+            ? (float) $data['start_odometer']
+            : ($this->getLastOdometerForVehicle($vehicle->id) ?? 0);
+
+        // Create mobile tracking trip record; end_odometer will be set when driver stops
         $trip = \App\Models\MobileTrackingTrip::create([
             'vehicle_id' => $vehicle->id,
             'driver_phone' => $phone,
-            'start_odometer' => (float) $data['start_odometer'],
-            'end_odometer' => (float) $data['start_odometer'],
+            'start_odometer' => $startOdo,
+            'end_odometer' => $startOdo,
             'trip_distance_km' => 0,
             'started_at' => now(),
         ]);
@@ -450,6 +458,23 @@ class DriverController extends Controller
         if ($trip) {
             $endOdo = (float) $data['end_odometer'];
             $startOdo = (float) $trip->start_odometer;
+
+            // Validate: new reading cannot be less than previous
+            if ($endOdo < $startOdo) {
+                return response()->json([
+                    'error' => 'invalid_odometer',
+                    'message' => __('tracking.end_odometer_less_than_start'),
+                ], 422);
+            }
+
+            $lastRecorded = $this->getLastOdometerForVehicle($vehicle->id);
+            if ($lastRecorded !== null && $endOdo < $lastRecorded) {
+                return response()->json([
+                    'error' => 'invalid_odometer',
+                    'message' => __('tracking.end_odometer_less_than_previous'),
+                ], 422);
+            }
+
             $tripDistance = max(0, $endOdo - $startOdo);
 
             $trip->update([
@@ -457,6 +482,10 @@ class DriverController extends Controller
                 'trip_distance_km' => $tripDistance,
                 'ended_at' => now(),
             ]);
+
+            // Store in vehicle_daily_odometer and vehicle_mileage_history
+            $this->storeManualMileageEntry($vehicle->id, $startOdo, $endOdo, 'mobile_tracking_trips');
+            $this->clearMileageRelatedCache($vehicle->company_id);
         }
 
         if ($vehicle->is_tracking_active && in_array($vehicle->tracking_driver_phone, $phoneVariants)) {
@@ -542,6 +571,97 @@ class DriverController extends Controller
         ]);
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * POST /driver/odometer/daily — Manual daily odometer entry (end of shift).
+     * For vehicles with tracking_source=mobile. Validates new >= previous.
+     */
+    public function storeDailyOdometer(Request $request)
+    {
+        $phone = Session::get('driver_phone');
+        if (!$phone) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'odometer_km' => ['required', 'numeric', 'min:0', 'max:9999999'],
+        ]);
+        $phoneVariants = $this->driverPhoneVariants($phone);
+
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])
+            ->whereIn('driver_phone', $phoneVariants)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'vehicle_not_linked'], 403);
+        }
+        if (!$vehicle->usesMobileTracking()) {
+            return response()->json(['error' => 'tracking_source_not_mobile'], 403);
+        }
+
+        $currentOdo = (float) $data['odometer_km'];
+        $lastRecorded = $this->getLastOdometerForVehicle($vehicle->id);
+        if ($lastRecorded !== null && $currentOdo < $lastRecorded) {
+            return response()->json([
+                'error' => 'invalid_odometer',
+                'message' => __('tracking.end_odometer_less_than_previous'),
+            ], 422);
+        }
+
+        $this->storeManualMileageEntry($vehicle->id, $lastRecorded, $currentOdo, VehicleMileageHistory::SOURCE_MANUAL_DAILY);
+        $this->clearMileageRelatedCache($vehicle->company_id);
+
+        return response()->json(['ok' => true, 'message' => __('tracking.daily_odometer_saved')]);
+    }
+
+    private function getLastOdometerForVehicle(int $vehicleId): ?float
+    {
+        $fromDaily = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->orderByDesc('date')
+            ->value('odometer_km');
+        if ($fromDaily !== null) {
+            return (float) $fromDaily;
+        }
+        $fromTrip = \App\Models\MobileTrackingTrip::where('vehicle_id', $vehicleId)
+            ->whereNotNull('end_odometer')
+            ->orderByDesc('ended_at')
+            ->value('end_odometer');
+        return $fromTrip !== null ? (float) $fromTrip : null;
+    }
+
+    private function storeManualMileageEntry(int $vehicleId, ?float $previousReading, float $currentReading, string $source): void
+    {
+        $today = now()->toDateString();
+        $calculatedDiff = $previousReading !== null ? max(0, $currentReading - $previousReading) : 0;
+
+        VehicleDailyOdometer::updateOrCreate(
+            ['vehicle_id' => $vehicleId, 'date' => $today],
+            ['odometer_km' => $currentReading, 'source' => $source]
+        );
+
+        // manual_daily: one entry per day; mobile_tracking_trips: each trip = one entry
+        $isDaily = $source === VehicleMileageHistory::SOURCE_MANUAL_DAILY;
+        if ($isDaily && VehicleMileageHistory::where('vehicle_id', $vehicleId)->where('recorded_date', $today)->exists()) {
+            return;
+        }
+
+        VehicleMileageHistory::create([
+            'vehicle_id' => $vehicleId,
+            'tracking_type' => VehicleMileageHistory::TRACKING_MANUAL,
+            'previous_reading' => $previousReading,
+            'current_reading' => $currentReading,
+            'calculated_difference' => $calculatedDiff,
+            'recorded_date' => $today,
+            'source' => $source,
+        ]);
+    }
+
+    private function clearMileageRelatedCache(int $companyId): void
+    {
+        Cache::forget('market_avg_cost_card_' . $companyId . '_' . now()->format('Y-m'));
     }
 
     /** Match DB whether company saved +966... or 05... */

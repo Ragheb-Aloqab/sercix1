@@ -59,6 +59,11 @@ return [
     'enter_end_odometer_prompt' => 'أدخل قيمة عداد المسافات (كم) بعد انتهاء الرحلة:',
     'odometer_invalid' => 'يرجى إدخال قيمة عداد صالحة.',
     'trip_recorded' => 'تم تسجيل الرحلة',
+    'end_odometer_less_than_start' => 'لا يمكن أن تكون قراءة نهاية العداد أقل من قراءة البداية.',
+    'end_odometer_less_than_previous' => 'لا يمكن أن تكون قراءة العداد أقل من آخر قيمة مسجلة.',
+    'daily_odometer_saved' => 'تم حفظ قراءة العداد اليومية بنجاح.',
+    'enter_daily_odometer' => 'أدخل قراءة نهاية اليوم',
+    'daily_odometer_hint' => 'أدخل قراءة عداد المسافات في نهاية نوبتك. سيتم حساب المسافة اليومية من القراءة السابقة.',
 
     'map_style' => 'نمط الخريطة',
     'map_style_carto_dark' => 'كارتو داكن',

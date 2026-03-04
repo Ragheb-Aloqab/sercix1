@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Vehicle;
+use App\Models\VehicleDailyOdometer;
 use App\Models\VehicleMonthlyMileage;
+use App\Models\VehicleMileageHistory;
 use App\Models\MobileTrackingTrip;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -36,6 +38,8 @@ class VehicleMileageService
 
     /**
      * Get monthly mileage for a vehicle (specific month/year).
+     * Unified: SUM of daily differences from vehicle_mileage_history.
+     * Falls back to vehicle_monthly_mileage, then mobile_tracking_trips for backward compatibility.
      */
     public function getMonthlyMileage(Vehicle $vehicle, int $month, int $year): float
     {
@@ -44,21 +48,67 @@ class VehicleMileageService
             ->where('year', $year)
             ->value('total_km');
 
-        if ($fromSnapshot !== null) {
+        if ($fromSnapshot !== null && (float) $fromSnapshot > 0) {
             return round((float) $fromSnapshot, 2);
         }
 
+        $start = Carbon::createFromDate($year, $month, 1)->startOfDay()->toDateString();
+        $end = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
+        $fromHistory = (float) VehicleMileageHistory::where('vehicle_id', $vehicle->id)
+            ->whereBetween('recorded_date', [$start, $end])
+            ->sum('calculated_difference');
+
+        if ($fromHistory > 0) {
+            return round($fromHistory, 2);
+        }
+
         if ($vehicle->usesMobileTracking()) {
-            $start = Carbon::createFromDate($year, $month, 1)->startOfDay();
-            $end = $start->copy()->endOfMonth();
+            $startDt = Carbon::createFromDate($year, $month, 1)->startOfDay();
+            $endDt = $startDt->copy()->endOfMonth();
             $tripSum = (float) MobileTrackingTrip::where('vehicle_id', $vehicle->id)
                 ->whereNotNull('ended_at')
-                ->whereBetween('ended_at', [$start, $end])
+                ->whereBetween('ended_at', [$startDt, $endDt])
                 ->sum('trip_distance_km');
-            return round($tripSum, 2);
+            if ($tripSum > 0) {
+                return round($tripSum, 2);
+            }
+        }
+
+        // Fallback: compute from vehicle_daily_odometer (daily stored odometer for all cars)
+        $fromDaily = $this->getMonthlyMileageFromDailyOdometer($vehicle->id, $month, $year);
+        if ($fromDaily > 0) {
+            return round($fromDaily, 2);
         }
 
         return 0.0;
+    }
+
+    /**
+     * Compute monthly mileage from vehicle_daily_odometer: SUM of (current - previous) per day.
+     * Uses the odometer values stored every day for all cars.
+     */
+    private function getMonthlyMileageFromDailyOdometer(int $vehicleId, int $month, int $year): float
+    {
+        $start = Carbon::createFromDate($year, $month, 1)->startOfDay()->toDateString();
+        $end = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
+
+        $records = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->whereBetween('date', [$start, $end])
+            ->orderBy('date')
+            ->get(['date', 'odometer_km']);
+
+        if ($records->count() < 2) {
+            return 0.0;
+        }
+
+        $total = 0.0;
+        $prev = (float) $records->first()->odometer_km;
+        foreach ($records->skip(1) as $r) {
+            $curr = (float) $r->odometer_km;
+            $total += max(0, $curr - $prev);
+            $prev = $curr;
+        }
+        return $total;
     }
 
     /**
@@ -161,6 +211,101 @@ class VehicleMileageService
                 'trend' => $trend,
             ];
         });
+    }
+
+    /**
+     * Get mileage history for a vehicle (structured history table).
+     * Returns records with: vehicle_id, tracking_type, previous_reading, current_reading, calculated_difference, timestamp.
+     */
+    public function getMileageHistory(Vehicle $vehicle, int $limit = 50): \Illuminate\Database\Eloquent\Collection
+    {
+        return VehicleMileageHistory::where('vehicle_id', $vehicle->id)
+            ->orderByDesc('recorded_date')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get mileage summaries for multiple vehicles (batch, optimized for fleet table).
+     */
+    public function getVehicleMileageSummariesForVehicles(iterable $vehicles): array
+    {
+        $ids = collect($vehicles)->pluck('id')->filter()->unique()->values()->all();
+        if (empty($ids)) {
+            return [];
+        }
+
+        $latestByVehicle = VehicleMileageHistory::whereIn('vehicle_id', $ids)
+            ->orderByDesc('recorded_date')
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('vehicle_id')
+            ->keyBy('vehicle_id');
+
+        $result = [];
+        foreach ($ids as $vid) {
+            $latest = $latestByVehicle->get($vid);
+            if ($latest) {
+                $result[$vid] = [
+                    'current_mileage' => (float) $latest->current_reading,
+                    'previous_mileage' => $latest->previous_reading !== null ? (float) $latest->previous_reading : null,
+                    'total_distance' => (float) $latest->calculated_difference,
+                ];
+            } else {
+                $lastDaily = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vid)->orderByDesc('date')->first();
+                if (!$lastDaily) {
+                    $result[$vid] = ['current_mileage' => 0, 'previous_mileage' => null, 'total_distance' => 0];
+                } else {
+                    $current = (float) $lastDaily->odometer_km;
+                    $prev = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vid)->where('date', '<', $lastDaily->date)->orderByDesc('date')->value('odometer_km');
+                    $prev = $prev !== null ? (float) $prev : null;
+                    $result[$vid] = [
+                        'current_mileage' => $current,
+                        'previous_mileage' => $prev,
+                        'total_distance' => $prev !== null ? max(0, $current - $prev) : 0,
+                    ];
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Get current/previous/total for vehicle (unified for both GPS and manual).
+     */
+    public function getVehicleMileageSummary(Vehicle $vehicle): array
+    {
+        $latest = VehicleMileageHistory::where('vehicle_id', $vehicle->id)
+            ->orderByDesc('recorded_date')
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (!$latest) {
+            $lastDaily = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vehicle->id)
+                ->orderByDesc('date')
+                ->first();
+            if (!$lastDaily) {
+                return ['current_mileage' => 0, 'previous_mileage' => null, 'total_distance' => 0];
+            }
+            $current = (float) $lastDaily->odometer_km;
+            $prev = \App\Models\VehicleDailyOdometer::where('vehicle_id', $vehicle->id)
+                ->where('date', '<', $lastDaily->date)
+                ->orderByDesc('date')
+                ->value('odometer_km');
+            $prev = $prev !== null ? (float) $prev : null;
+            return [
+                'current_mileage' => $current,
+                'previous_mileage' => $prev,
+                'total_distance' => $prev !== null ? max(0, $current - $prev) : 0,
+            ];
+        }
+
+        return [
+            'current_mileage' => (float) $latest->current_reading,
+            'previous_mileage' => $latest->previous_reading !== null ? (float) $latest->previous_reading : null,
+            'total_distance' => (float) $latest->calculated_difference,
+        ];
     }
 
     /**

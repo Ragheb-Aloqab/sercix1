@@ -1,23 +1,23 @@
 <aside id="sidebar"
     class="flex flex-col w-full h-full min-h-dvh
     backdrop-blur shadow-soft lg:shadow-none
-    border-e overflow-hidden
-    {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-servx-black border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
-    <div class="px-4 py-4 border-b {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-end gap-2">
+    border-e overflow-hidden transition-colors duration-300
+    {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-white/95 dark:bg-servx-black border-slate-200/70 dark:border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
+    <div class="px-4 py-4 border-b transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-200/70 dark:border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-end gap-2">
         {{-- Collapse toggle (lg+ only) — dir=ltr keeps chevron direction consistent in RTL --}}
         <button type="button"
             @click="toggleSidebarCollapse()"
-            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'hover:bg-slate-700/50 text-slate-400' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400' }}"
+            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-400' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400' }}"
             :title="sidebarCollapsed ? '{{ __('admin_dashboard.sidebar_expand_tooltip') }}' : '{{ __('admin_dashboard.sidebar_toggle_tooltip') }}'"
             aria-label="{{ __('admin_dashboard.sidebar_toggle_tooltip') }}"
             dir="ltr">
-            <i class="fa-solid fa-chevrons-left text-base transition-transform duration-300 {{ $role === 'company' ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400' }}" :class="sidebarCollapsed ? 'fa-chevrons-right' : 'fa-chevrons-left'"></i>
+            <i class="fa-solid fa-chevrons-left text-base transition-transform duration-300 text-slate-500 dark:text-slate-400" :class="sidebarCollapsed ? 'fa-chevrons-right' : 'fa-chevrons-left'"></i>
         </button>
 
         <button type="button" id="closeSidebar"
             @click="$dispatch('close-sidebar')"
-            class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0
-            {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-600/50 hover:bg-slate-700/50 text-slate-300' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
+            class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 transition-colors duration-300
+            {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
             aria-label="{{ __('dashboard.menu') }}">
             <i class="fa-solid fa-xmark"></i>
         </button>
@@ -66,7 +66,7 @@
     </div>
 
     {{-- Footer (Fixed Bottom) — logout / user info --}}
-    <div class="p-4 border-t {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }}">
+    <div class="p-4 border-t transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-200/70 dark:border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }}">
         <div class="flex items-center gap-3 sidebar-footer-inner">
             <div
                 class="w-10 h-10 rounded-2xl flex items-center justify-center font-black {{ $role === 'company' ? 'bg-[#3B82F6] text-white' : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' }}">
@@ -74,9 +74,9 @@
             </div>
 
             <div class="flex-1 min-w-0 sidebar-footer-text">
-                <p class="font-bold leading-5 truncate text-sm {{ in_array($role, ['company', 'maintenance_center']) ? 'text-servx-silver-light' : '' }}">{{ $displayName }}</p>
+                <p class="font-bold leading-5 truncate text-sm text-slate-900 dark:text-servx-silver-light">{{ $displayName }}</p>
                 @if ($displayEmail)
-                    <p class="text-xs truncate {{ in_array($role, ['company', 'maintenance_center']) ? 'text-servx-silver' : 'text-slate-500 dark:text-slate-400' }}">{{ $displayEmail }}</p>
+                    <p class="text-xs truncate text-slate-500 dark:text-servx-silver">{{ $displayEmail }}</p>
                 @endif
             </div>
 
@@ -85,7 +85,7 @@
                 <form method="POST" action="{{ route('maintenance-center.logout') }}" class="inline">
                     @csrf
                     <button type="submit"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 text-servx-silver text-sm font-semibold transition-colors sidebar-logout-btn"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver text-sm font-semibold transition-colors duration-300 sidebar-logout-btn"
                         title="{{ __('dashboard.logout') }}">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span class="sidebar-logout-text">{{ __('dashboard.logout') }}</span>
@@ -95,7 +95,7 @@
                 <form method="POST" action="{{ route('company.logout') }}" class="inline">
                     @csrf
                     <button type="submit"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 text-servx-silver text-sm font-semibold transition-colors sidebar-logout-btn"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver text-sm font-semibold transition-colors duration-300 sidebar-logout-btn"
                         title="{{ __('dashboard.logout') }}">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span class="sidebar-logout-text">{{ __('dashboard.logout') }}</span>

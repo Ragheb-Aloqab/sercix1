@@ -2,24 +2,24 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Services\ThemeService;
 use Illuminate\Support\Facades\App;
 use Livewire\Component;
 
 class UiPreferences extends Component
 {
-    public string $theme = 'light'; // light | dark
+    public string $theme = 'light'; // light | dark (effective)
     public string $dir   = 'rtl';   // rtl | ltr
 
-    public function mount()
+    public function mount(ThemeService $themeService)
     {
-        $this->theme = session('ui.theme', 'light');
-        $this->dir   = session('ui.dir', 'rtl');
+        $this->theme = $themeService->getEffectiveTheme();
+        $this->dir   = session('ui.dir', app()->getLocale() === 'ar' ? 'rtl' : 'ltr');
     }
 
-    public function toggleTheme()
+    public function toggleTheme(ThemeService $themeService)
     {
-        $this->theme = $this->theme === 'dark' ? 'light' : 'dark';
-        session(['ui.theme' => $this->theme]);
+        $this->theme = $themeService->toggle();
 
         $this->dispatch('ui-theme-changed', theme: $this->theme);
     }

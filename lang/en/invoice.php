@@ -63,4 +63,13 @@ return [
     'invoice_details' => 'Invoice details',
     'overview' => 'Overview',
     'created_at' => 'Created at',
+
+    // Add invoice buttons
+    'add_fuel_invoice' => 'Add Fuel Invoice',
+    'add_maintenance_invoice' => 'Add Maintenance Invoice',
+    'upload_fuel_invoice' => 'Upload Fuel Invoice',
+    'upload_maintenance_invoice' => 'Upload Maintenance Invoice',
+    'upload_file_label' => 'Invoice File',
+    'fuel_invoice_uploaded_success' => 'Fuel invoice uploaded successfully.',
+    'select_vehicle' => 'Select vehicle',
 ];

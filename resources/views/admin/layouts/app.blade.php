@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
-      class="{{ auth('company')->check() || auth('maintenance_center')->check() || session('ui.theme') === 'dark' || request()->routeIs('admin.*') ? 'dark' : '' }} h-full scroll-smooth">
+      class="h-full scroll-smooth transition-colors duration-300">
 
 <head>
+    <x-theme-init />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -36,10 +37,11 @@
     {{-- Font Awesome --}}
 
     @livewireStyles
+    <x-echo-setup />
     @stack('styles')
 </head>
 
-<body class="admin-layout h-full overflow-x-hidden {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard bg-servx-black text-servx-silver-light font-servx' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
+<body class="admin-layout h-full overflow-x-hidden transition-colors duration-300 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard font-servx bg-slate-50 text-slate-900 dark:bg-servx-black dark:text-servx-silver-light' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
 
 <div x-data="{
         sidebarOpen: false,
@@ -54,7 +56,7 @@
     }"
      @keydown.escape.window="sidebarOpen = false"
      @close-sidebar.window="sidebarOpen = false"
-     class="min-h-screen flex w-full min-w-0 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard-layout' : '' }}"
+     class="min-h-screen flex w-full min-w-0 transition-colors duration-300 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard-layout' : '' }}"
      :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     {{-- Mobile backdrop --}}
     <div x-show="sidebarOpen"
@@ -130,11 +132,13 @@
 
 @livewireScripts
 
-{{-- Modal --}}
+{{-- Theme + Dir listeners --}}
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('ui-theme-changed', ({ theme }) => {
             document.documentElement.classList.toggle('dark', theme === 'dark');
+            document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+            try { localStorage.setItem('sercix_theme', theme); } catch (e) {}
         });
 
         Livewire.on('ui-dir-changed', ({ dir }) => {
