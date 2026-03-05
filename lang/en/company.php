@@ -96,6 +96,8 @@ return [
     'top3_saving_services' => 'Top 3 Most Saving Service Types',
     'company_total' => 'Company Total',
     'market_average' => 'Market Average',
+    'total_mileage_period' => 'Total Mileage (sum of all vehicles)',
+    'market_avg_formula' => 'Market Average = Total Mileage × 0.37',
     'difference' => 'Difference',
     'alert_exceeds_market' => 'Your maintenance costs exceed market average by more than 10%. Consider reviewing service center offers.',
     'alert_saving_market' => 'Your maintenance costs are below market average by more than 10%. Great job optimizing!',

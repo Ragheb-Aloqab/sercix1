@@ -94,6 +94,8 @@ return [
     'percentage_difference' => 'نسبة الفرق',
     'top3_expensive_services' => 'أعلى 3 أنواع خدمات تكلفة',
     'top3_saving_services' => 'أعلى 3 أنواع خدمات توفير',
+    'total_mileage_period' => 'إجمالي المسافة (مجموع كل المركبات)',
+    'market_avg_formula' => 'المتوسط السوقي = إجمالي المسافة × 0.37',
     'company_total' => 'إجمالي الشركة',
     'market_average' => 'متوسط السوق',
     'difference' => 'الفرق',

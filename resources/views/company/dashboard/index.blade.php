@@ -274,7 +274,12 @@
                     </div>
                 </div>
                 <div class="space-y-2 text-sm border-t border-slate-600/50 pt-4">
-                    <div class="flex justify-between">
+                    @php $totalKm = $mcData['total_kilometers'] ?? 0; $rate = config('servx.market_avg_per_km', 0.37); @endphp
+                    <div class="flex justify-between" title="{{ __('company.market_avg_formula') }} = {{ number_format($mcData['market_average'] ?? 0, 0) }} {{ __('company.sar') }}">
+                        <span class="text-servx-silver">{{ __('company.total_mileage_period') }} ({{ $chartMonths ?? 6 }}m)</span>
+                        <span class="font-bold text-white">{{ number_format($totalKm, 1) }} {{ __('common.km') }}</span>
+                    </div>
+                    <div class="flex justify-between pt-1 border-t border-slate-600/30">
                         <span class="text-servx-silver">{{ __('company.company_total') }}</span>
                         <span class="font-bold text-white">{{ number_format($mcData['company_total'] ?? 0, 0) }} {{ __('company.sar') }}</span>
                     </div>
