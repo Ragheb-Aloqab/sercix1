@@ -208,8 +208,8 @@
                     </span>
                 </div>
             </div>
-            @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable', 'total_mileage_km' => 0]; @endphp
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}. {{ __('vehicles.total_mileage') }}: {{ number_format($mac['total_mileage_km'] ?? 0, 1) }} km × 0.37 ({{ $chartMonths ?? 6 }} {{ __('common.months') }})">
+            @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable', 'total_mileage_km' => 0]; $marketRate = $mcData['market_rate_per_km'] ?? config('servx.market_avg_per_km', 0.37); @endphp
+            <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}. {{ __('vehicles.total_mileage') }}: {{ number_format($mac['total_mileage_km'] ?? 0, 1) }} km × {{ $marketRate }} ({{ $chartMonths ?? 6 }} {{ __('common.months') }})">
                 <p class="dash-card-title">{{ __('company.market_average_cost') }} <span class="text-xs font-normal opacity-75">({{ $chartMonths ?? 6 }}m)</span></p>
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 0) }} {{ __('company.sar') }}</p>
@@ -274,7 +274,7 @@
                     </div>
                 </div>
                 <div class="space-y-2 text-sm border-t border-slate-600/50 pt-4">
-                    @php $totalKm = $mcData['total_kilometers'] ?? 0; $rate = config('servx.market_avg_per_km', 0.37); @endphp
+                    @php $totalKm = $mcData['total_kilometers'] ?? 0; $rate = $mcData['market_rate_per_km'] ?? config('servx.market_avg_per_km', 0.37); @endphp
                     <div class="flex justify-between" title="{{ __('company.market_avg_formula') }} = {{ number_format($mcData['market_average'] ?? 0, 0) }} {{ __('company.sar') }}">
                         <span class="text-servx-silver">{{ __('company.total_mileage_period') }} ({{ $chartMonths ?? 6 }}m)</span>
                         <span class="font-bold text-white">{{ number_format($totalKm, 1) }} {{ __('common.km') }}</span>

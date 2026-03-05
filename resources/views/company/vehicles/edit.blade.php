@@ -133,7 +133,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 pt-4">
+            <div class="flex flex-wrap items-center gap-2 pt-4">
                 <button type="submit" class="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black transition-colors">
                     حفظ التعديل
                 </button>
@@ -141,6 +141,15 @@
                     class="px-5 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-black hover:border-slate-400/50 transition-colors">
                     إلغاء
                 </a>
+                <form method="POST" action="{{ route('company.vehicles.destroy', $vehicle) }}" class="inline ms-auto"
+                    onsubmit="return confirm('{{ __('common.confirm_delete') }}');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="px-5 py-3 rounded-2xl border border-red-500/50 text-red-400 font-black hover:bg-red-500/20 transition-colors">
+                        <i class="fa-solid fa-trash me-1"></i> {{ __('common.delete') }}
+                    </button>
+                </form>
             </div>
         </form>
 

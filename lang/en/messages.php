@@ -23,6 +23,7 @@ return [
     // Vehicles (Company)
     'vehicle_added' => 'Vehicle added successfully.',
     'vehicle_updated' => 'Vehicle updated successfully.',
+    'vehicle_deleted' => 'Vehicle deleted successfully.',
 
     // Orders (Company)
     'order_created' => 'Order created successfully.',

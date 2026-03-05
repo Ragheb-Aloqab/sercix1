@@ -149,25 +149,13 @@ class AppServiceProvider extends ServiceProvider
 
     private function registerDomainEvents(): void
     {
-        Event::listen(VehicleCreated::class, [
-            \App\Listeners\LogVehicleCreated::class,
-        ]);
-        Event::listen(PaymentPaid::class, [
-            \App\Listeners\UpdateInvoiceOnPaymentPaid::class,
-            \App\Listeners\NotifyPaymentPaid::class,
-        ]);
-        Event::listen(MaintenanceRequestApproved::class, [
-            \App\Listeners\NotifyMaintenanceRequestApproved::class,
-        ]);
-        Event::listen(OrderStatusChanged::class, [
-            \App\Listeners\InvalidateCacheOnOrderStatusChanged::class,
-        ]);
-        Event::listen(MaintenanceRequestCreated::class, [
-            \App\Listeners\InvalidateCacheOnMaintenanceRequestCreated::class,
-        ]);
-        Event::listen(InvoiceCreated::class, [
-            \App\Listeners\InvalidateCacheOnInvoiceCreated::class,
-        ]);
+        Event::listen(VehicleCreated::class, \App\Listeners\LogVehicleCreated::class);
+        Event::listen(PaymentPaid::class, \App\Listeners\UpdateInvoiceOnPaymentPaid::class);
+        Event::listen(PaymentPaid::class, \App\Listeners\NotifyPaymentPaid::class);
+        Event::listen(MaintenanceRequestApproved::class, \App\Listeners\NotifyMaintenanceRequestApproved::class);
+        Event::listen(OrderStatusChanged::class, \App\Listeners\InvalidateCacheOnOrderStatusChanged::class);
+        Event::listen(MaintenanceRequestCreated::class, \App\Listeners\InvalidateCacheOnMaintenanceRequestCreated::class);
+        Event::listen(InvoiceCreated::class, \App\Listeners\InvalidateCacheOnInvoiceCreated::class);
     }
 
     private function driverPhoneVariants(?string $phone): array

@@ -126,6 +126,15 @@
                                             class="px-3 py-2 rounded-2xl border border-slate-300 dark:border-slate-500/50 text-slate-700 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-slate-700/50 inline-flex items-center gap-2 transition-colors duration-300">
                                             <i class="fa-solid fa-pen shrink-0"></i> {{ __('fleet.edit') }}
                                         </a>
+                                        <form method="POST" action="{{ route('company.vehicles.destroy', $v) }}" class="inline"
+                                            onsubmit="return confirm('{{ __('common.confirm_delete') }}');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="px-3 py-2 rounded-2xl border border-red-500/50 text-red-600 dark:text-red-400 font-bold hover:bg-red-500/20 dark:hover:bg-red-500/10 inline-flex items-center gap-2 transition-colors duration-300">
+                                                <i class="fa-solid fa-trash shrink-0"></i> {{ __('common.delete') }}
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

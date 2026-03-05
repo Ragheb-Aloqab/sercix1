@@ -311,6 +311,19 @@ class VehiclesController extends Controller
             ->withFlash('success', __('messages.vehicle_updated'));
     }
 
+    /**
+     * DELETE /company/vehicles/{vehicle}
+     * company.vehicles.destroy
+     */
+    public function destroy(Vehicle $vehicle)
+    {
+        $this->authorize('delete', $vehicle);
+        $vehicle->delete();
+        return redirect()
+            ->route('company.vehicles.index')
+            ->withFlash('success', __('messages.vehicle_deleted'));
+    }
+
     private function normalizePhone(string $phone): string
     {
         $phone = trim($phone);

@@ -23,6 +23,7 @@ return [
     // Vehicles (Company)
     'vehicle_added' => 'تم إضافة المركبة بنجاح',
     'vehicle_updated' => 'تم تحديث المركبة بنجاح',
+    'vehicle_deleted' => 'تم حذف المركبة بنجاح',
 
     // Orders (Company)
     'order_created' => 'تم إنشاء الطلب بنجاح.',

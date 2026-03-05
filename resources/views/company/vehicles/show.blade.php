@@ -17,6 +17,15 @@
             class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors">
             <i class="fa-solid fa-pen"></i> {{ __('vehicles.edit_vehicle') }}
         </a>
+        <form method="POST" action="{{ route('company.vehicles.destroy', $vehicle) }}" class="inline"
+            onsubmit="return confirm('{{ __('common.confirm_delete') }}');">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-red-500/50 text-red-400 font-bold hover:bg-red-500/20 transition-colors">
+                <i class="fa-solid fa-trash"></i> {{ __('common.delete') }}
+            </button>
+        </form>
         @if ($vehicle->imei || $vehicle->usesMobileTracking())
             <a href="{{ route('company.vehicles.track', $vehicle) }}"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors">

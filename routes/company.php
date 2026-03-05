@@ -176,6 +176,10 @@ Route::middleware(['company'])
             ->name('vehicles.update')
             ->whereNumber('vehicle');
 
+        Route::delete('/vehicles/{vehicle}', [VehiclesController::class, 'destroy'])
+            ->name('vehicles.destroy')
+            ->whereNumber('vehicle');
+
         Route::post('/vehicles/{vehicle}/documents/registration', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'uploadRegistration'])
             ->name('vehicles.documents.registration')
             ->whereNumber('vehicle');

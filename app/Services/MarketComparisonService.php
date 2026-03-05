@@ -13,6 +13,31 @@ class MarketComparisonService
     private const CACHE_TTL = 300; // 5 minutes for real-time recalculation
     private const MONTHS_BACK = 6;
     private const INTERNAL_PRECISION = 4;
+    private const MARKET_RATE_PER_KM = 0.37;
+
+    /**
+     * Get total mileage (sum of all company vehicles' kilometers) for the given period.
+     * Single source of truth for fleet mileage used in market comparison.
+     */
+    public function getTotalMileageForPeriod(Company $company, int $months = 6): float
+    {
+        $months = in_array($months, [6, 12], true) ? $months : self::MONTHS_BACK;
+        $since = now()->subMonths($months)->startOfDay();
+        return round($this->getCompanyTotalKilometers($company->id, $since), 2);
+    }
+
+    /**
+     * Calculate Market Average Cost = Total Mileage × 0.37 (SAR).
+     * Centralized formula used consistently across dashboard.
+     *
+     * @param  float|null  $totalMileage  Pre-computed total (avoids duplicate calculation when called from getComparisonData)
+     */
+    public function calculateMarketAverageCost(Company $company, int $months = 6, ?float $totalMileage = null): float
+    {
+        $totalMileage = $totalMileage ?? $this->getTotalMileageForPeriod($company, $months);
+        $rate = (float) config('servx.market_avg_per_km', self::MARKET_RATE_PER_KM);
+        return round($totalMileage * $rate, 2);
+    }
 
     /**
      * Get market comparison data for company dashboard.
@@ -30,15 +55,15 @@ class MarketComparisonService
     {
         $since = now()->subMonths($months)->startOfDay();
 
-        // Step 1 & 2: Total Kilometers + Total Expenses (aggregated queries)
+        // Total mileage = sum of all company vehicles' kilometers (single source of truth)
         $totalKilometers = $this->getCompanyTotalKilometers($company->id, $since);
         $maintenanceTotal = $this->getCompanyMaintenanceTotal($company->id, $since);
         $fuelTotal = $this->getCompanyFuelTotal($company->id, $since);
         $totalExpenses = round($maintenanceTotal + $fuelTotal, self::INTERNAL_PRECISION);
 
-        // Market Average = Total Fleet Mileage × 0.37 SAR (unified formula)
-        $marketRatePerKm = (float) config('servx.market_avg_per_km', 0.37);
-        $marketAverageTotalCost = round($totalKilometers * $marketRatePerKm, self::INTERNAL_PRECISION);
+        // Market Average Cost = Total Mileage × 0.37 (centralized formula)
+        $marketAverageTotalCost = $this->calculateMarketAverageCost($company, $months, $totalKilometers);
+        $marketRatePerKm = (float) config('servx.market_avg_per_km', self::MARKET_RATE_PER_KM);
 
         $marketData = $this->getMarketAverageBySegment($since);
 
@@ -71,6 +96,7 @@ class MarketComparisonService
         return [
             'company_total' => round($totalExpenses, 2),
             'market_average' => round($marketAverageTotalCost, 2),
+            'market_rate_per_km' => $marketRatePerKm,
             'market_avg_per_km' => round($totalKilometers > 0 ? ($marketAverageTotalCost / $totalKilometers) : $marketRatePerKm, 2),
             'actual_cost_per_km' => round($actualCostPerKm, 2),
             'difference_per_km' => round($differencePerKm, 2),
@@ -94,30 +120,35 @@ class MarketComparisonService
     }
 
     /**
-     * Total Kilometers = Sum of vehicle mileage in date range (unified mileage system).
-     * Primary: vehicle_monthly_mileage (snapshots).
-     * Fallback 1: VehicleMileageService (vehicle_mileage_history, vehicle_daily_odometer, etc.).
-     * Fallback 2: fuel_refills, then vehicle_locations.
+     * Total Kilometers = SUM of latest calculated_difference per vehicle (vehicle_mileage_history).
+     * For each car, takes only the last (most recent) record in the period.
+     * Single source of truth for Market Average Cost: Total Mileage × 0.37
      */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
+        $sinceDate = $since->copy()->startOfDay()->toDateString();
+
+        $totalKm = (float) DB::table('vehicle_mileage_history as v1')
+            ->join('vehicles', 'vehicles.id', '=', 'v1.vehicle_id')
+            ->where('vehicles.company_id', $companyId)
+            ->where('v1.recorded_date', '>=', $sinceDate)
+            ->whereRaw('v1.id = (
+                SELECT v2.id FROM vehicle_mileage_history v2
+                WHERE v2.vehicle_id = v1.vehicle_id
+                AND v2.recorded_date >= ?
+                ORDER BY v2.recorded_date DESC, v2.id DESC
+                LIMIT 1
+            )', [$sinceDate])
+            ->sum('v1.calculated_difference');
+
+        if ($totalKm > 0) {
+            return round(max(0, $totalKm), self::INTERNAL_PRECISION);
+        }
+
         $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
         $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
         if ($totalKm > 0) {
             return round($totalKm, self::INTERNAL_PRECISION);
-        }
-
-        // Fallback: sum getCompanyMonthlyMileage for each month (uses vehicle_mileage_history, vehicle_daily_odometer, vehicle_locations, fuel_refills)
-        $mileageService = app(\App\Services\VehicleMileageService::class);
-        $sumFromMonthly = 0.0;
-        $cursor = now()->copy()->startOfMonth();
-        $sinceStart = $since->copy()->startOfMonth();
-        while ($cursor->gte($sinceStart)) {
-            $sumFromMonthly += $mileageService->getCompanyMonthlyMileage($companyId, (int) $cursor->month, (int) $cursor->year);
-            $cursor->subMonth();
-        }
-        if ($sumFromMonthly > 0) {
-            return round($sumFromMonthly, self::INTERNAL_PRECISION);
         }
 
         $fuelRanges = DB::table('fuel_refills')
