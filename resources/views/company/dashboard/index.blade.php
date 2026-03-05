@@ -84,7 +84,7 @@
             $percentDiff = $mc['percent_difference'] ?? 0;
         @endphp
 
-        {{-- Smart Alert Banner --}}
+        {{-- Smart Alert Banner
         @if($mc && $percentDiff > 10)
             <div class="dash-card border-red-500/40 bg-red-500/5">
                 <p class="dash-section-title flex items-center gap-2">
@@ -99,7 +99,7 @@
                     {{ __('company.alert_saving_market') }}
                 </p>
             </div>
-        @endif
+        @endif --}}
 
         {{-- Document expiry, inspection, invoice alerts (only when data exists) --}}
         @if(($expiringDocumentsCount ?? 0) > 0)
@@ -208,11 +208,11 @@
                     </span>
                 </div>
             </div>
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}">
-                <p class="dash-card-title">{{ __('company.market_average_cost') }}</p>
-                @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable']; @endphp
+            @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable', 'total_mileage_km' => 0]; @endphp
+            <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}. {{ __('vehicles.total_mileage') }}: {{ number_format($mac['total_mileage_km'] ?? 0, 1) }} km × 0.37 ({{ $chartMonths ?? 6 }} {{ __('common.months') }})">
+                <p class="dash-card-title">{{ __('company.market_average_cost') }} <span class="text-xs font-normal opacity-75">({{ $chartMonths ?? 6 }}m)</span></p>
                 <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+                    <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 0) }} {{ __('company.sar') }}</p>
                     <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}" title="{{ __('vehicles.vs_last_month') }}">
                         @if(($mac['trend'] ?? 'stable') === 'up')<i class="fa-solid fa-caret-up"></i>
                         @elseif(($mac['trend'] ?? 'stable') === 'down')<i class="fa-solid fa-caret-down"></i>

@@ -128,7 +128,13 @@
                             <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ $row['branch_name'] }}</td>
                             <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ number_format($row['current_mileage'], 1) }}</td>
                             <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ number_format($row['previous_mileage'], 1) }}</td>
-                            <td class="py-4 pe-4 font-bold text-sky-600 dark:text-sky-400">{{ number_format($row['total_distance'], 1) }} {{ __('common.km') ?? 'km' }}</td>
+                            <td class="py-4 pe-4 font-bold {{ ($row['has_anomaly'] ?? false) ? 'text-amber-500 dark:text-amber-400' : 'text-sky-600 dark:text-sky-400' }}" title="{{ ($row['has_anomaly'] ?? false) ? __('vehicles.mileage_anomaly_tooltip') : '' }}">
+                                @if($row['has_anomaly'] ?? false)
+                                    — <i class="fa-solid fa-triangle-exclamation text-xs ms-0.5"></i>
+                                @else
+                                    {{ number_format($row['total_distance'], 1) }} {{ __('common.km') ?? 'km' }}
+                                @endif
+                            </td>
                             <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ $row['last_update_date'] }}</td>
                             <td class="py-4 pe-4">
                                 @php
@@ -136,6 +142,7 @@
                                         'normal' => 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-400/50',
                                         'high_usage' => 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-400/50',
                                         'no_update' => 'bg-red-500/20 text-red-700 dark:text-red-300 border-red-400/50',
+                                        'data_anomaly' => 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-400/50',
                                         default => 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-400/50',
                                     };
                                 @endphp

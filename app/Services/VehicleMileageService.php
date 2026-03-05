@@ -292,17 +292,25 @@ class VehicleMileageService
 
     /**
      * Get company total monthly mileage (all vehicles, for a given month).
+     *
+     * Sums odometer distance traveled by all company vehicles in the given month.
+     * Uses vehicle_monthly_mileage when available, with fallbacks to vehicle_mileage_history,
+     * vehicle_daily_odometer, vehicle_locations, fuel_refills per vehicle.
+     *
+     * @return float Total kilometers (0 if no vehicles)
      */
     public function getCompanyMonthlyMileage(int $companyId, int $month, int $year): float
     {
-        $vehicleIds = Vehicle::where('company_id', $companyId)->pluck('id');
-        $total = 0.0;
-        foreach ($vehicleIds as $vid) {
-            $v = Vehicle::find($vid);
-            if ($v) {
-                $total += $this->getMonthlyMileage($v, $month, $year);
-            }
+        $vehicles = Vehicle::where('company_id', $companyId)->get();
+        if ($vehicles->isEmpty()) {
+            return 0.0;
         }
+
+        $total = 0.0;
+        foreach ($vehicles as $vehicle) {
+            $total += $this->getMonthlyMileage($vehicle, $month, $year);
+        }
+
         return round($total, 2);
     }
 
@@ -318,15 +326,16 @@ class VehicleMileageService
     /**
      * Get market average cost card data for dashboard.
      *
-     * Formula: Market Average Cost = SUM(odometer distance for all cars in the month) × 0.37
+     * Formula: Market Average Cost = Total Vehicle Mileage × 0.37 (SAR/km)
      *
-     * Sums the odometer distance (from vehicle_mileage_history, vehicle_daily_odometer,
-     * vehicle_locations, fuel_refills, etc.) for all company vehicles in the selected month,
-     * then multiplies by 0.37 SAR per km to estimate the average market cost.
+     * - Total Vehicle Mileage = SUM(odometer distance for all company vehicles in the month)
+     * - Rate 0.37 is configurable via config('servx.market_avg_per_km')
+     * - Returns 0 when company has no vehicles
      *
      * @param  int  $companyId  Company ID
      * @param  int|null  $month  Selected month (1-12). Default: current month
      * @param  int|null  $year  Selected year. Default: current year
+     * @return array{value: float, trend: string, total_mileage_km: float}
      */
     public function getMarketAverageCostCardData(int $companyId, ?int $month = null, ?int $year = null): array
     {
@@ -337,16 +346,16 @@ class VehicleMileageService
         return Cache::remember($cacheKey, self::MARKET_AVG_CARD_CACHE_TTL, function () use ($companyId, $month, $year) {
             $rate = (float) config('servx.market_avg_per_km', self::MARKET_COST_PER_KM);
 
-            // SUM(odometer distance for all cars in the month)
-            $totalOdometerDistance = $this->getCompanyMonthlyMileage($companyId, $month, $year);
+            // Total Vehicle Mileage = SUM(odometer distance for all cars in the month)
+            $totalMileageKm = $this->getCompanyMonthlyMileage($companyId, $month, $year);
 
-            // Market Average Cost = total distance × 0.37
-            $marketAverageCost = round($totalOdometerDistance * $rate, 2);
+            // Market Average Cost = Total Vehicle Mileage × 0.37 (edge case: no vehicles => 0)
+            $marketAverageCost = round($totalMileageKm * $rate, 2);
 
             // Trend: compare with previous month
             $lastMonth = Carbon::createFromDate($year, $month, 1)->subMonth();
-            $lastMonthDistance = $this->getCompanyMonthlyMileage($companyId, (int) $lastMonth->month, (int) $lastMonth->year);
-            $lastMonthCost = round($lastMonthDistance * $rate, 2);
+            $lastMonthMileage = $this->getCompanyMonthlyMileage($companyId, (int) $lastMonth->month, (int) $lastMonth->year);
+            $lastMonthCost = round($lastMonthMileage * $rate, 2);
 
             $trend = 'stable';
             if ($marketAverageCost > $lastMonthCost) {
@@ -358,6 +367,7 @@ class VehicleMileageService
             return [
                 'value' => $marketAverageCost,
                 'trend' => $trend,
+                'total_mileage_km' => $totalMileageKm,
             ];
         });
     }

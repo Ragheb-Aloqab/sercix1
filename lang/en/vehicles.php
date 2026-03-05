@@ -178,6 +178,8 @@ return [
     'status_normal' => 'Normal',
     'status_high_usage' => 'High Usage',
     'status_no_update' => 'No Update',
+    'status_data_anomaly' => 'Data Anomaly',
+    'mileage_anomaly_tooltip' => 'Current mileage is less than previous — possible odometer reset or data error',
     'no_mileage_data' => 'No mileage data for the selected period.',
     'view_all' => 'View all',
 

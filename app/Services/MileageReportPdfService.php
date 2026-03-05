@@ -20,12 +20,15 @@ class MileageReportPdfService
         $tableRows = '';
         foreach ($rows as $r) {
             $statusLabel = __("vehicles.status_{$r['status']}");
+            $distanceCell = ($r['has_anomaly'] ?? false)
+                ? '—'
+                : number_format($r['total_distance'] ?? 0, 1);
             $tableRows .= '<tr>';
             $tableRows .= '<td>' . e($r['plate_number'] ?? '-') . '</td>';
             $tableRows .= '<td>' . e($r['vehicle_name'] ?? '-') . '</td>';
             $tableRows .= '<td style="text-align:right">' . number_format($r['current_mileage'] ?? 0, 1) . '</td>';
             $tableRows .= '<td style="text-align:right">' . number_format($r['previous_mileage'] ?? 0, 1) . '</td>';
-            $tableRows .= '<td style="text-align:right">' . number_format($r['total_distance'] ?? 0, 1) . '</td>';
+            $tableRows .= '<td style="text-align:right">' . $distanceCell . '</td>';
             $tableRows .= '<td>' . e($r['last_update_date'] ?? '-') . '</td>';
             $tableRows .= '<td>' . e($statusLabel) . '</td>';
             $tableRows .= '</tr>';

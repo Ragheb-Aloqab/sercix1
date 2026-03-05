@@ -33,14 +33,18 @@ class VehicleMileageReportExport implements FromCollection, WithHeadings, WithMa
 
     public function map($row): array
     {
+        $distance = ($row['has_anomaly'] ?? false)
+            ? '—'
+            : number_format($row['total_distance'] ?? 0, 1);
+
         return [
             $row['plate_number'] ?? '-',
             $row['vehicle_name'] ?? '-',
             number_format($row['current_mileage'] ?? 0, 1),
             number_format($row['previous_mileage'] ?? 0, 1),
-            number_format($row['total_distance'] ?? 0, 1),
+            $distance,
             $row['last_update_date'] ?? '-',
-            $row['status_label'] ?? $row['status'] ?? '-',
+            $row['status_label'] ?? __("vehicles.status_{$row['status']}"),
         ];
     }
 }

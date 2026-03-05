@@ -147,7 +147,13 @@ class DashboardController extends Controller
         $totalMonthlyMileage = $mileageService->getCompanyMonthlyMileage($company->id, (int) now()->month, (int) now()->year);
         $monthlyMileageReport = $mileageService->getCompanyMonthlySummary($company->id, 6);
         $estimatedMarketCost = $mileageService->getEstimatedMarketCost($totalMonthlyMileage);
-        $marketAverageCostCard = $mileageService->getMarketAverageCostCardData($company->id);
+
+        // Market Average Cost card uses same source as comparison: marketComparison (single source of truth)
+        $marketAverageCostCard = [
+            'value' => $marketComparison['market_average'] ?? 0,
+            'trend' => 'stable',
+            'total_mileage_km' => $marketComparison['total_kilometers'] ?? 0,
+        ];
 
         return view('company.dashboard.index', array_merge($data, [
             'marketComparison' => $marketComparison,

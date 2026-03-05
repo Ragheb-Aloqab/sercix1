@@ -176,6 +176,8 @@ return [
     'status_normal' => 'طبيعي',
     'status_high_usage' => 'استخدام عالٍ',
     'status_no_update' => 'بدون تحديث',
+    'status_data_anomaly' => 'شذوذ في البيانات',
+    'mileage_anomaly_tooltip' => 'المسافة الحالية أقل من السابقة — احتمال إعادة ضبط عداد المسافات أو خطأ في البيانات',
     'no_mileage_data' => 'لا توجد بيانات مسافة للفترة المحددة.',
     'view_all' => 'عرض الكل',
 

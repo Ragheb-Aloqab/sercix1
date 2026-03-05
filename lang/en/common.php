@@ -92,6 +92,7 @@ return [
     'status_assigned_to_technician' => 'Assigned to technician',
     'status_pending' => 'Pending',
     'km' => 'km',
+    'months' => 'months',
     'days' => 'days',
     'selected' => 'selected',
     'unread' => 'Unread',

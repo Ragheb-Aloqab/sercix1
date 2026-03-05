@@ -92,6 +92,7 @@ return [
     'status_assigned_to_technician' => 'معيّن لفني',
     'status_pending' => 'بانتظار',
     'km' => 'كم',
+    'months' => 'أشهر',
     'days' => 'أيام',
     'selected' => 'محدد',
     'unread' => 'غير مقروء',

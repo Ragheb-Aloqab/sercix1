@@ -13,6 +13,7 @@ class VehicleMileageReportService
     public const STATUS_NORMAL = 'normal';
     public const STATUS_HIGH_USAGE = 'high_usage';
     public const STATUS_NO_UPDATE = 'no_update';
+    public const STATUS_DATA_ANOMALY = 'data_anomaly';
 
     /** High usage threshold: km per month (configurable) */
     protected int $highUsageThresholdKm = 2000;
@@ -83,10 +84,20 @@ class VehicleMileageReportService
         $lastUpdate = $this->getLastOdometerDate($vehicle->id);
 
         $currentMileage = (float) ($currentOdo ?? 0);
-        $previousMileage = (float) ($previousOdo ?? 0);
-        $totalDistance = max(0, $currentMileage - $previousMileage);
+        $previousMileage = $previousOdo !== null ? (float) $previousOdo : null;
 
-        $status = $this->determineStatus($lastUpdate, $totalDistance, $from, $to);
+        // Raw difference: Current - Previous (can be negative when odometer reset or data error)
+        $rawDifference = $previousMileage !== null
+            ? $currentMileage - $previousMileage
+            : 0.0;
+
+        $hasAnomaly = $previousMileage !== null && $previousMileage > 0 && $rawDifference < 0;
+
+        // For status and summary: use 0 when anomaly (negative distance is invalid for usage metrics)
+        $totalDistanceForMetrics = $hasAnomaly ? 0.0 : max(0, $rawDifference);
+        $status = $hasAnomaly
+            ? self::STATUS_DATA_ANOMALY
+            : $this->determineStatus($lastUpdate, $totalDistanceForMetrics, $from, $to);
 
         return [
             'vehicle_id' => $vehicle->id,
@@ -94,8 +105,9 @@ class VehicleMileageReportService
             'vehicle_name' => $vehicle->display_name,
             'branch_name' => $vehicle->branch?->name ?? '-',
             'current_mileage' => $currentMileage,
-            'previous_mileage' => $previousMileage,
-            'total_distance' => $totalDistance,
+            'previous_mileage' => $previousMileage ?? 0,
+            'total_distance' => $rawDifference,
+            'has_anomaly' => $hasAnomaly,
             'last_update_date' => $lastUpdate?->format('Y-m-d H:i') ?? '-',
             'status' => $status,
         ];
@@ -213,7 +225,8 @@ class VehicleMileageReportService
     protected function computeSummary(array $rows, Carbon $from, Carbon $to): array
     {
         $totalVehicles = count($rows);
-        $totalMileage = array_sum(array_column($rows, 'total_distance'));
+        // Exclude negative distances (anomalies) from total mileage
+        $totalMileage = array_sum(array_map(fn ($r) => max(0, $r['total_distance'] ?? 0), $rows));
         $avgMileage = $totalVehicles > 0 ? round($totalMileage / $totalVehicles, 2) : 0;
 
         return [
