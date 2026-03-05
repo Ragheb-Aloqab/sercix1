@@ -7,6 +7,7 @@ use App\Models\MaintenanceRequest;
 use App\Models\Quotation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class MarketComparisonService
 {
@@ -126,21 +127,34 @@ class MarketComparisonService
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
         $sinceDate = $since->copy()->startOfDay()->toDateString();
+        $totalKm = 0.0;
 
-        $totalKm = (float) DB::table('vehicle_mileage_history')
-            ->join('vehicles', 'vehicles.id', '=', 'vehicle_mileage_history.vehicle_id')
-            ->where('vehicles.company_id', $companyId)
-            ->where('vehicle_mileage_history.recorded_date', '>=', $sinceDate)
-            ->sum('vehicle_mileage_history.calculated_difference');
+        if (Schema::hasTable('vehicle_mileage_history')) {
+            try {
+                $totalKm = (float) DB::table('vehicle_mileage_history')
+                    ->join('vehicles', 'vehicles.id', '=', 'vehicle_mileage_history.vehicle_id')
+                    ->where('vehicles.company_id', $companyId)
+                    ->where('vehicle_mileage_history.recorded_date', '>=', $sinceDate)
+                    ->sum('vehicle_mileage_history.calculated_difference');
+            } catch (\Throwable $e) {
+                // Table exists but query failed (e.g. missing column) — fall through to other sources
+            }
+        }
 
         if ($totalKm > 0) {
             return round(max(0, $totalKm), self::INTERNAL_PRECISION);
         }
 
-        $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
-        $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
-        if ($totalKm > 0) {
-            return round($totalKm, self::INTERNAL_PRECISION);
+        if (Schema::hasTable('vehicle_monthly_mileage')) {
+            try {
+                $snapshotService = app(\App\Services\MonthlyMileageSnapshotService::class);
+                $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
+                if ($totalKm > 0) {
+                    return round($totalKm, self::INTERNAL_PRECISION);
+                }
+            } catch (\Throwable $e) {
+                // Table missing or query failed — fall through to fuel_refills
+            }
         }
 
         $fuelRanges = DB::table('fuel_refills')

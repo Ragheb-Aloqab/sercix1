@@ -149,7 +149,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function registerDomainEvents(): void
     {
-        Event::listen(VehicleCreated::class, \App\Listeners\LogVehicleCreated::class);
+        Event::listen(VehicleCreated::class, [\App\Listeners\LogVehicleCreated::class, 'handle']);
         Event::listen(PaymentPaid::class, \App\Listeners\UpdateInvoiceOnPaymentPaid::class);
         Event::listen(PaymentPaid::class, \App\Listeners\NotifyPaymentPaid::class);
         Event::listen(MaintenanceRequestApproved::class, \App\Listeners\NotifyMaintenanceRequestApproved::class);
