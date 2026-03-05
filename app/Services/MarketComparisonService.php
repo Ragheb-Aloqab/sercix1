@@ -120,26 +120,18 @@ class MarketComparisonService
     }
 
     /**
-     * Total Kilometers = SUM of latest calculated_difference per vehicle (vehicle_mileage_history).
-     * For each car, takes only the last (most recent) record in the period.
-     * Single source of truth for Market Average Cost: Total Mileage × 0.37
+     * Total Kilometers = SUM(vehicle_mileage_history.calculated_difference) for all company vehicles in period.
+     * Sums all records (total km driven). Market Average Cost = Total × 0.37
      */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
         $sinceDate = $since->copy()->startOfDay()->toDateString();
 
-        $totalKm = (float) DB::table('vehicle_mileage_history as v1')
-            ->join('vehicles', 'vehicles.id', '=', 'v1.vehicle_id')
+        $totalKm = (float) DB::table('vehicle_mileage_history')
+            ->join('vehicles', 'vehicles.id', '=', 'vehicle_mileage_history.vehicle_id')
             ->where('vehicles.company_id', $companyId)
-            ->where('v1.recorded_date', '>=', $sinceDate)
-            ->whereRaw('v1.id = (
-                SELECT v2.id FROM vehicle_mileage_history v2
-                WHERE v2.vehicle_id = v1.vehicle_id
-                AND v2.recorded_date >= ?
-                ORDER BY v2.recorded_date DESC, v2.id DESC
-                LIMIT 1
-            )', [$sinceDate])
-            ->sum('v1.calculated_difference');
+            ->where('vehicle_mileage_history.recorded_date', '>=', $sinceDate)
+            ->sum('vehicle_mileage_history.calculated_difference');
 
         if ($totalKm > 0) {
             return round(max(0, $totalKm), self::INTERNAL_PRECISION);
