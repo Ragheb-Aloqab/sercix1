@@ -317,34 +317,46 @@ class VehicleMileageService
 
     /**
      * Get market average cost card data for dashboard.
-     * Value = Total Monthly Mileage (current month, all vehicles) * 0.37 SAR.
-     * Trend = up if higher than last month, down if lower, stable if equal.
-     * Sources: GPS (vehicle_locations), mobile trips (end_odometer - start_odometer).
+     *
+     * Formula: Market Average Cost = SUM(odometer distance for all cars in the month) × 0.37
+     *
+     * Sums the odometer distance (from vehicle_mileage_history, vehicle_daily_odometer,
+     * vehicle_locations, fuel_refills, etc.) for all company vehicles in the selected month,
+     * then multiplies by 0.37 SAR per km to estimate the average market cost.
+     *
+     * @param  int  $companyId  Company ID
+     * @param  int|null  $month  Selected month (1-12). Default: current month
+     * @param  int|null  $year  Selected year. Default: current year
      */
-    public function getMarketAverageCostCardData(int $companyId): array
+    public function getMarketAverageCostCardData(int $companyId, ?int $month = null, ?int $year = null): array
     {
-        $cacheKey = "market_avg_cost_card_{$companyId}_" . now()->format('Y-m');
-        return Cache::remember($cacheKey, self::MARKET_AVG_CARD_CACHE_TTL, function () use ($companyId) {
+        $month = $month ?? (int) now()->month;
+        $year = $year ?? (int) now()->year;
+        $cacheKey = "market_avg_cost_card_{$companyId}_{$year}-{$month}";
+
+        return Cache::remember($cacheKey, self::MARKET_AVG_CARD_CACHE_TTL, function () use ($companyId, $month, $year) {
             $rate = (float) config('servx.market_avg_per_km', self::MARKET_COST_PER_KM);
-            $currentMonth = (int) now()->month;
-            $currentYear = (int) now()->year;
-            $lastMonth = now()->subMonth();
 
-            $currentMileage = $this->getCompanyMonthlyMileage($companyId, $currentMonth, $currentYear);
-            $lastMileage = $this->getCompanyMonthlyMileage($companyId, (int) $lastMonth->month, (int) $lastMonth->year);
+            // SUM(odometer distance for all cars in the month)
+            $totalOdometerDistance = $this->getCompanyMonthlyMileage($companyId, $month, $year);
 
-            $currentCost = round($currentMileage * $rate, 2);
-            $lastCost = round($lastMileage * $rate, 2);
+            // Market Average Cost = total distance × 0.37
+            $marketAverageCost = round($totalOdometerDistance * $rate, 2);
+
+            // Trend: compare with previous month
+            $lastMonth = Carbon::createFromDate($year, $month, 1)->subMonth();
+            $lastMonthDistance = $this->getCompanyMonthlyMileage($companyId, (int) $lastMonth->month, (int) $lastMonth->year);
+            $lastMonthCost = round($lastMonthDistance * $rate, 2);
 
             $trend = 'stable';
-            if ($currentCost > $lastCost) {
+            if ($marketAverageCost > $lastMonthCost) {
                 $trend = 'up';
-            } elseif ($currentCost < $lastCost) {
+            } elseif ($marketAverageCost < $lastMonthCost) {
                 $trend = 'down';
             }
 
             return [
-                'value' => $currentCost,
+                'value' => $marketAverageCost,
                 'trend' => $trend,
             ];
         });
@@ -486,7 +498,6 @@ class VehicleMileageService
                 ->orderByDesc('date')
                 ->first();
             if (!$lastDaily) {
-                // Fallback: latest odometer from vehicle_locations or fuel_refills
                 $fromRaw = $this->getLatestOdometerFromRawSources($vehicle->id);
                 if ($fromRaw) {
                     return [

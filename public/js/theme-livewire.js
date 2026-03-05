@@ -4,8 +4,10 @@
 document.addEventListener('livewire:init', function() {
     Livewire.on('ui-theme-changed', function(event) {
         var theme = event.theme;
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-        document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+        var isDark = theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        document.body?.classList.toggle('dark', isDark);
+        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
         try { localStorage.setItem('sercix_theme', theme); } catch (e) {}
     });
     Livewire.on('ui-dir-changed', function(event) {

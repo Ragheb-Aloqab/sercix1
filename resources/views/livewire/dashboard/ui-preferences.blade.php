@@ -4,9 +4,9 @@
     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
         <button type="button"
             @click="open = ! open"
-            class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 {{ auth('company')->check() ? 'border border-slate-500/50 hover:bg-slate-700/50 text-slate-200' : 'border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
+            class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 {{ auth('company')->check() ? 'border border-slate-500/50 hover:bg-slate-700/50 text-slate-200' : 'border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100' }}"
             title="{{ __('index.language') ?? 'Language' }}">
-            <i class="fa-solid fa-globe"></i>
+            <i class="fa-solid fa-globe {{ auth('company')->check() ? 'text-cyan-400' : 'text-cyan-500 dark:text-cyan-400' }}"></i>
             <span class="hidden sm:inline">{{ app()->getLocale() === 'ar' ? __('dashboard.lang_ar') : __('dashboard.lang_en') }}</span>
             <i class="fa-solid fa-chevron-down text-xs opacity-70"></i>
         </button>

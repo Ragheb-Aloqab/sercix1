@@ -17,7 +17,7 @@ return [
 
     'default_title' => env('SEO_DEFAULT_TITLE', 'Servx Motors — Corporate Fleet Maintenance Solutions'),
 
-    'default_description' => env('SEO_DEFAULT_DESCRIPTION', 'Servx Motors is an integrated platform for fleet management. Oil & filter services, maintenance tracking, and consolidated invoicing for corporate fleets.'),
+    'default_description' => env('SEO_DEFAULT_DESCRIPTION', 'Servx Motors is an integrated platform for vehicle management. Oil & filter services, maintenance tracking, and consolidated invoicing for corporate platforms.'),
 
     'default_image' => env('SEO_DEFAULT_IMAGE', null),
 

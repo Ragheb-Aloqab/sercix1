@@ -7,19 +7,19 @@
         {{-- Collapse toggle (lg+ only) — dir=ltr keeps chevron direction consistent in RTL --}}
         <button type="button"
             @click="toggleSidebarCollapse()"
-            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-400' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400' }}"
+            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 dark:hover:bg-sky-800/50 text-sky-700 dark:text-sky-300' : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300' }}"
             :title="sidebarCollapsed ? '{{ __('admin_dashboard.sidebar_expand_tooltip') }}' : '{{ __('admin_dashboard.sidebar_toggle_tooltip') }}'"
             aria-label="{{ __('admin_dashboard.sidebar_toggle_tooltip') }}"
             dir="ltr">
-            <i class="fa-solid fa-chevrons-left text-base transition-transform duration-300 text-slate-500 dark:text-slate-400" :class="sidebarCollapsed ? 'fa-chevrons-right' : 'fa-chevrons-left'"></i>
+            <i class="fa-solid fa-chevrons-left text-base transition-transform duration-300" :class="sidebarCollapsed ? 'fa-chevrons-right' : 'fa-chevrons-left'"></i>
         </button>
 
         <button type="button" id="closeSidebar"
             @click="$dispatch('close-sidebar')"
             class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 transition-colors duration-300
-            {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
+            {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
             aria-label="{{ __('dashboard.menu') }}">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fa-solid fa-xmark {{ in_array($role, ['company', 'maintenance_center']) ? 'text-slate-700 dark:text-slate-300' : 'text-slate-600 dark:text-slate-400' }}"></i>
         </button>
     </div>
 
@@ -65,8 +65,9 @@
         </nav>
     </div>
 
-    {{-- Footer (Fixed Bottom) — logout / user info --}}
-    <div class="p-4 border-t transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-200/70 dark:border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }}">
+    {{-- Footer (Fixed Bottom) — logout / user info — hidden for company/maintenance (moved to topbar) --}}
+    @if (!in_array($role, ['company', 'maintenance_center']))
+    <div class="p-4 border-t transition-colors duration-300 border-slate-200/70 dark:border-slate-800">
         <div class="flex items-center gap-3 sidebar-footer-inner">
             <div
                 class="w-10 h-10 rounded-2xl flex items-center justify-center font-black {{ $role === 'company' ? 'bg-[#3B82F6] text-white' : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' }}">
@@ -131,4 +132,5 @@
             @endif
         </div>
     </div>
+    @endif
 </aside>

@@ -26,13 +26,13 @@
         <x-vite-cdn-fallback />
         @livewireStyles
     </head>
-    <body class="font-sans antialiased transition-colors duration-300 bg-gray-100 dark:bg-slate-900 text-gray-900 dark:text-slate-100">
+    <body class="font-sans antialiased transition-colors duration-300 bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
         <div class="min-h-screen">
             <livewire:layout.navigation />
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white dark:bg-slate-800 shadow dark:shadow-slate-900/50 transition-colors duration-300">
+                <header class="bg-white dark:bg-slate-800 shadow dark:shadow-slate-900/50 border-b border-slate-200 dark:border-slate-700 transition-colors duration-300">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

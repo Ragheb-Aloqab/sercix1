@@ -1,0 +1,41 @@
+# Servx Motors - robots.txt
+# https://www.robotstxt.org/robotstxt.html
+# Note: Update Sitemap and Host URLs if your domain differs from APP_URL in .env
+
+User-agent: *
+Allow: /
+Allow: /set-locale
+Disallow: /admin/
+Disallow: /company/
+Disallow: /tech/
+Disallow: /driver/
+Disallow: /maintenance-center/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /sign-in/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /confirm-password
+Disallow: /profile
+Disallow: /payments/tap/webhook
+Disallow: /payments/tap/redirect
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /company/
+Disallow: /tech/
+Disallow: /driver/
+Disallow: /maintenance-center/
+Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+
+User-agent: Googlebot-Image
+Allow: /
+
+Sitemap: https://servxmotors.com/sitemap.xml

@@ -200,14 +200,15 @@ class ExpiryMonitoringService
 
     /**
      * Get CSS class for status badge.
+     * Uses dark: variant for dark mode; light mode gets darker text for contrast.
      */
     public function getStatusBadgeClass(string $status): string
     {
         return match ($status) {
-            self::STATUS_VALID => 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50',
-            self::STATUS_EXPIRING_SOON => 'bg-amber-500/30 text-amber-300 border-amber-400/50',
-            self::STATUS_EXPIRED => 'bg-red-500/30 text-red-300 border-red-400/50',
-            default => 'bg-slate-600/30 text-slate-400 border-slate-500/50',
+            self::STATUS_VALID => 'bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 border-emerald-400/50',
+            self::STATUS_EXPIRING_SOON => 'bg-amber-500/30 text-amber-800 dark:text-amber-300 border-amber-400/50',
+            self::STATUS_EXPIRED => 'bg-red-500/30 text-red-800 dark:text-red-300 border-red-400/50',
+            default => 'bg-slate-600/30 text-slate-700 dark:text-slate-400 border-slate-500/50',
         };
     }
 }

@@ -263,23 +263,23 @@ body.page-figtree {
 }
 .dark .sidebar-nav-item:hover,
 .admin-layout.dark .sidebar-nav-item:hover {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.14) 0%, rgba(185, 28, 28, 0.1) 100%);
-    border-inline-end-color: rgba(220, 38, 38, 0.5);
-    box-shadow: 0 0 8px rgba(220, 38, 38, 0.12);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.06) 100%);
+    border-inline-end-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.08);
 }
 .sidebar-nav-item.sidebar-nav-item--active {
-    background: rgba(15, 23, 42, 0.1);
-    border-inline-end-color: rgb(15, 23, 42);
-    box-shadow: inset 0 0 16px rgba(15, 23, 42, 0.04);
+    background: rgba(59, 130, 246, 0.08);
+    border-inline-end-color: rgb(59, 130, 246);
+    box-shadow: inset 0 0 16px rgba(59, 130, 246, 0.03);
 }
 .dark .sidebar-nav-item.sidebar-nav-item--active,
 .admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.18) 0%, rgba(185, 28, 28, 0.12) 100%);
-    border-inline-end-color: var(--servx-red);
-    box-shadow: inset 0 0 16px rgba(220, 38, 38, 0.06);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border-inline-end-color: rgb(59, 130, 246);
+    box-shadow: inset 0 0 16px rgba(59, 130, 246, 0.05);
 }
 [dir="rtl"] .sidebar-nav-item.sidebar-nav-item--active {
-    background: linear-gradient(225deg, rgba(220, 38, 38, 0.18) 0%, rgba(185, 28, 28, 0.12) 100%);
+    background: linear-gradient(225deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
 }
 .sidebar-nav-item .sidebar-nav-icon {
     width: 2.25rem;
@@ -297,13 +297,13 @@ body.page-figtree {
     transform: scale(1.02);
 }
 .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon {
-    background: rgba(15, 23, 42, 0.2);
-    color: rgb(15, 23, 42);
+    background: rgba(59, 130, 246, 0.15);
+    color: rgb(37, 99, 235);
 }
 .dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon,
 .admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon {
-    background: rgba(220, 38, 38, 0.25);
-    color: rgb(248, 113, 113);
+    background: rgba(59, 130, 246, 0.2);
+    color: rgb(96, 165, 250);
 }
 .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon {
     background: rgba(148, 163, 184, 0.15);
@@ -314,6 +314,62 @@ body.page-figtree {
     background: rgba(148, 163, 184, 0.1);
     color: rgb(148, 163, 184);
 }
+/* Colored sidebar icons (company/maintenance) */
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--sky { color: #0ea5e9; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--blue { color: #3b82f6; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--amber { color: #f59e0b; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--orange { color: #f97316; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--emerald { color: #10b981; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--violet { color: #8b5cf6; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--rose { color: #f43f5e; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--cyan { color: #06b6d4; }
+.sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--slate { color: #64748b; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--sky,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--sky { color: #38bdf8; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--blue,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--blue { color: #60a5fa; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--amber,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--amber { color: #fbbf24; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--orange,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--orange { color: #fb923c; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--emerald,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--emerald { color: #34d399; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--violet,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--violet { color: #a78bfa; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--rose,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--rose { color: #fb7185; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--cyan,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--cyan { color: #22d3ee; }
+.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--slate,
+.admin-layout.dark .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--slate { color: #94a3b8; }
+/* Active item: keep icon color for visual consistency */
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--sky { color: #0ea5e9 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--blue { color: #3b82f6 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--amber { color: #f59e0b !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--orange { color: #f97316 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--emerald { color: #10b981 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--violet { color: #8b5cf6 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--rose { color: #f43f5e !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--cyan { color: #06b6d4 !important; }
+.sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--slate { color: #64748b !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--sky,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--sky { color: #38bdf8 !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--blue,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--blue { color: #60a5fa !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--amber,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--amber { color: #fbbf24 !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--orange,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--orange { color: #fb923c !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--emerald,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--emerald { color: #34d399 !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--violet,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--violet { color: #a78bfa !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--rose,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--rose { color: #fb7185 !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--cyan,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--cyan { color: #22d3ee !important; }
+.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--slate,
+.admin-layout.dark .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--slate { color: #94a3b8 !important; }
 .sidebar-nav-item .sidebar-nav-text {
     flex: 1;
     min-width: 0;
@@ -440,6 +496,10 @@ body.page-figtree {
 .sidebar-collapsed .sidebar-lang-switcher {
     display: none;
 }
+/* Collapsed: center the header buttons so collapse toggle is visible */
+.sidebar-collapsed #sidebar > div:first-child {
+    justify-content: center;
+}
 
 /* Company dashboard: main content fills space */
 .company-dashboard-layout {
@@ -477,6 +537,10 @@ body.page-figtree {
     font-weight: 700;
     color: var(--servx-white);
     margin-block-end: 0;
+}
+html:not(.dark) .dashboard-glass .dash-page-title,
+html:not(.dark) .company-glass .dash-page-title {
+    color: rgb(15, 23, 42);
 }
 @media (min-width: 640px) {
     .dash-page-title {
@@ -691,6 +755,31 @@ body.page-figtree {
 }
 .dash-chart-bar-empty {
     background: rgba(255, 255, 255, 0.1);
+}
+/* Chart bar entrance animation */
+@keyframes dashBarGrow {
+    from { transform: scaleY(0); transform-origin: bottom; }
+    to { transform: scaleY(1); transform-origin: bottom; }
+}
+.dash-chart-bar-group:hover .dash-chart-bar {
+    transform: scaleY(1.05);
+    transform-origin: bottom;
+}
+.dash-chart-bar-group:hover .dash-chart-bar--company {
+    box-shadow: 0 -2px 8px rgba(59, 130, 246, 0.4);
+}
+.dash-chart-bar-group:hover .dash-chart-bar--market {
+    box-shadow: 0 -2px 8px rgba(100, 116, 139, 0.4);
+}
+/* Gauge interactive hover */
+.dash-card-interactive:hover .dash-gauge-fill {
+    filter: brightness(1.1);
+}
+.dash-gauge-wrap {
+    transition: transform 0.2s ease;
+}
+.dash-card-interactive:hover .dash-gauge-wrap {
+    transform: scale(1.02);
 }
 .dash-chart-trend {
     display: flex;
@@ -928,6 +1017,43 @@ html:not(.dark) .company-glass .text-servx-silver {
 html:not(.dark) .dashboard-glass .text-servx-silver-light,
 html:not(.dark) .company-glass .text-servx-silver-light {
     color: rgb(71, 85, 105);
+}
+/* Light mode: dash-section-title - ensure dark text on light background */
+html:not(.dark) .dashboard-glass .dash-section-title,
+html:not(.dark) .company-glass .dash-section-title {
+    color: rgb(15, 23, 42);
+}
+/* Light mode: dash-card-value - ensure dark text on light cards */
+html:not(.dark) .dashboard-glass .dash-card-value,
+html:not(.dark) .company-glass .dash-card-value {
+    color: rgb(15, 23, 42);
+}
+/* Light mode: dash-stat-mini - light bg for readability */
+html:not(.dark) .dashboard-glass .dash-stat-mini,
+html:not(.dark) .company-glass .dash-stat-mini {
+    background: rgba(241, 245, 249, 0.9);
+    border-color: rgba(15, 23, 42, 0.12);
+}
+html:not(.dark) .dashboard-glass .dash-stat-mini-label,
+html:not(.dark) .company-glass .dash-stat-mini-label {
+    color: rgb(100, 116, 139);
+}
+html:not(.dark) .dashboard-glass .dash-stat-mini-value,
+html:not(.dark) .company-glass .dash-stat-mini-value {
+    color: rgb(15, 23, 42);
+}
+/* Light mode: gauge and footer text */
+html:not(.dark) .dashboard-glass .dash-gauge-value,
+html:not(.dark) .company-glass .dash-gauge-value {
+    color: rgb(15, 23, 42);
+}
+html:not(.dark) .dashboard-glass .dash-gauge-bg,
+html:not(.dark) .company-glass .dash-gauge-bg {
+    stroke: rgba(15, 23, 42, 0.15);
+}
+html:not(.dark) .dashboard-glass .dash-footer,
+html:not(.dark) .company-glass .dash-footer {
+    color: rgb(100, 116, 139);
 }
 /* ========== Print ========== */
 @media print {

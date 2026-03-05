@@ -73,7 +73,7 @@
                 <p class="font-bold">{{ __('orders.quotation_invoice') }}</p>
                 @if ($isQuotationImage)
                     <a href="{{ asset('storage/' . $quotationInvoice->file_path) }}" target="_blank" class="block mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs">
-                        <img src="{{ asset('storage/' . $quotationInvoice->file_path) }}" alt="{{ $quotationInvoice->original_name ?? 'Quotation' }}" class="w-full h-40 object-contain bg-white">
+                        <img src="{{ asset('storage/' . $quotationInvoice->file_path) }}" alt="{{ $quotationInvoice->original_name ?? 'Quotation' }}" class="w-full h-40 object-contain bg-white dark:bg-slate-800">
                     </a>
                 @else
                     <div class="mt-2 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 inline-flex items-center gap-2">
@@ -115,7 +115,7 @@
                     <p class="font-bold">{{ __('orders.driver_invoice') }}</p>
                     @if ($isDriverInvoiceImage)
                         <a href="{{ asset('storage/' . $driverInvoice->file_path) }}" target="_blank" class="block mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs">
-                            <img src="{{ asset('storage/' . $driverInvoice->file_path) }}" alt="{{ $driverInvoice->original_name ?? 'Invoice' }}" class="w-full h-40 object-contain bg-white">
+                            <img src="{{ asset('storage/' . $driverInvoice->file_path) }}" alt="{{ $driverInvoice->original_name ?? 'Invoice' }}" class="w-full h-40 object-contain bg-white dark:bg-slate-800">
                         </a>
                     @endif
                     <a href="{{ asset('storage/' . $driverInvoice->file_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sky-600 hover:underline mt-2">

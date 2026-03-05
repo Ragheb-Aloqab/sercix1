@@ -323,14 +323,14 @@
                             $maxVal = max($maxVal, $cm['company_total'] ?? 0, $cm['market_total'] ?? 0);
                         }
                     @endphp
-                    <div class="dash-chart-bars flex-1" style="display: grid; grid-template-columns: repeat({{ count($chartData) ?: 6 }}, 1fr); gap: 4px; min-height: 120px; align-items: flex-end;">
+                    <div class="dash-chart-bars flex-1 dash-chart-bars--interactive" style="display: grid; grid-template-columns: repeat({{ count($chartData) ?: 6 }}, 1fr); gap: 4px; min-height: 120px; align-items: flex-end;">
                         @foreach($chartData as $m)
-                            <div class="flex flex-col gap-1 items-center" title="{{ $m['month_label'] }} {{ $m['year'] }}: {{ __('company.company_total') }} {{ number_format($m['company_total'], 0) }} {{ __('company.sar') }}, {{ __('company.market_average') }} {{ number_format($m['market_total'], 0) }} {{ __('company.sar') }}">
+                            <div class="dash-chart-bar-group flex flex-col gap-1 items-center group" title="{{ $m['month_label'] }} {{ $m['year'] }}: {{ __('company.company_total') }} {{ number_format($m['company_total'], 0) }} {{ __('company.sar') }}, {{ __('company.market_average') }} {{ number_format($m['market_total'], 0) }} {{ __('company.sar') }}">
                                 <div class="w-full flex gap-0.5 items-end" style="height: 80px;">
-                                    <div class="flex-1 bg-sky-500 rounded-t" style="height: {{ max(4, ($m['company_total'] / $maxVal) * 100) }}%; min-height: 4px;"></div>
-                                    <div class="flex-1 bg-slate-500/70 rounded-t" style="height: {{ max(4, ($m['market_total'] / $maxVal) * 100) }}%; min-height: 4px;"></div>
+                                    <div class="dash-chart-bar dash-chart-bar--company flex-1 bg-sky-500 rounded-t transition-all duration-300 ease-out hover:bg-sky-400" style="height: {{ max(4, ($m['company_total'] / $maxVal) * 100) }}%; min-height: 4px; animation: dashBarGrow 0.6s ease-out {{ $loop->index * 0.05 }}s both;"></div>
+                                    <div class="dash-chart-bar dash-chart-bar--market flex-1 bg-slate-500/70 rounded-t transition-all duration-300 ease-out hover:bg-slate-500" style="height: {{ max(4, ($m['market_total'] / $maxVal) * 100) }}%; min-height: 4px; animation: dashBarGrow 0.6s ease-out {{ $loop->index * 0.05 + 0.03 }}s both;"></div>
                                 </div>
-                                <span class="text-xs text-servx-silver">{{ $m['month_label'] }}</span>
+                                <span class="text-xs text-servx-silver group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ $m['month_label'] }}</span>
                             </div>
                         @endforeach
                         @if(empty($chartData))

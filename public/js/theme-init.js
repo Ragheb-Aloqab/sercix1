@@ -26,5 +26,7 @@
     var isDark = theme === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    if (document.body) document.body.classList.toggle('dark', isDark);
+    else document.addEventListener('DOMContentLoaded', function() { document.body.classList.toggle('dark', isDark); });
     window.__sercix_theme = { effective: theme, preference: preference };
 })();
