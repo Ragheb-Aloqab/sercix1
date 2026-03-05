@@ -95,8 +95,9 @@ class MarketComparisonService
 
     /**
      * Total Kilometers = Sum of vehicle mileage in date range (unified mileage system).
-     * Primary: vehicle_monthly_mileage (SUM of daily differences from vehicle_mileage_history).
-     * Fallback: fuel_refills, then vehicle_locations.
+     * Primary: vehicle_monthly_mileage (snapshots).
+     * Fallback 1: VehicleMileageService (vehicle_mileage_history, vehicle_daily_odometer, etc.).
+     * Fallback 2: fuel_refills, then vehicle_locations.
      */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {
@@ -104,6 +105,19 @@ class MarketComparisonService
         $totalKm = $snapshotService->getCompanyTotalKilometersFromSnapshots($companyId, $since);
         if ($totalKm > 0) {
             return round($totalKm, self::INTERNAL_PRECISION);
+        }
+
+        // Fallback: sum getCompanyMonthlyMileage for each month (uses vehicle_mileage_history, vehicle_daily_odometer, vehicle_locations, fuel_refills)
+        $mileageService = app(\App\Services\VehicleMileageService::class);
+        $sumFromMonthly = 0.0;
+        $cursor = now()->copy()->startOfMonth();
+        $sinceStart = $since->copy()->startOfMonth();
+        while ($cursor->gte($sinceStart)) {
+            $sumFromMonthly += $mileageService->getCompanyMonthlyMileage($companyId, (int) $cursor->month, (int) $cursor->year);
+            $cursor->subMonth();
+        }
+        if ($sumFromMonthly > 0) {
+            return round($sumFromMonthly, self::INTERNAL_PRECISION);
         }
 
         $fuelRanges = DB::table('fuel_refills')
