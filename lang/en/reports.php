@@ -58,4 +58,16 @@ return [
     'period' => 'Period',
     'metric' => 'Metric',
     'value' => 'Value',
+
+    // Tax Reports
+    'tax_reports' => 'Tax Reports',
+    'tax_reports_desc' => 'VAT and invoice totals for maintenance invoices',
+    'total_invoices' => 'Total Invoices',
+    'total_vat_amount' => 'Total VAT Amount',
+    'total_including_vat' => 'Total Including VAT',
+    'date_from' => 'From',
+    'date_to' => 'To',
+    'invoice_details' => 'Invoice Details',
+    'date' => 'Date',
+    'no_invoices_in_period' => 'No invoices in the selected period.',
 ];

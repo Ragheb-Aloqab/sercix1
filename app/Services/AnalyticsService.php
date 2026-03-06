@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Vehicle;
@@ -85,8 +86,16 @@ class AnalyticsService
             ->value('total') ?? 0);
         $mrCount = (int) ($mrBaseQ()->count());
 
-        $totalCost = round($orderCost + $mrCost, 2);
-        $totalCount = $orderCount + $mrCount;
+        $invoiceQ = CompanyMaintenanceInvoice::query()
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', $dateFrom->copy()->startOfDay()))
+            ->when($dateTo, fn ($q) => $q->where('created_at', '<=', $dateTo->copy()->endOfDay()))
+            ->when($vehicleId, fn ($q) => $q->where('vehicle_id', $vehicleId));
+        $invoiceCost = (float) (clone $invoiceQ)->sum('amount');
+        $invoiceCount = (int) (clone $invoiceQ)->count();
+
+        $totalCost = round($orderCost + $mrCost + $invoiceCost, 2);
+        $totalCount = $orderCount + $mrCount + $invoiceCount;
 
         $vehicleCount = $vehicleId ? 1 : ($companyId
             ? Vehicle::where('company_id', $companyId)->count()

@@ -63,7 +63,7 @@
                                 </td>
                                 <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver">{{ $inv->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
                                 <td class="py-4 pe-4">
-                                    <div class="flex gap-2">
+                                    <div class="flex flex-wrap gap-2">
                                         @if($inv->isImage())
                                             <button type="button" @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $inv) }}' })"
                                                 class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
@@ -75,6 +75,10 @@
                                                 <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
                                             </a>
                                         @endif
+                                        <button type="button" wire:click="openEditModal({{ $inv->id }})"
+                                            class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
+                                            <i class="fa-solid fa-pen me-1"></i> {{ __('common.edit') }}
+                                        </button>
                                         <a href="{{ route('company.maintenance-invoices.company.download', $inv) }}"
                                             class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
                                             <i class="fa-solid fa-download me-1"></i> {{ __('fleet.download_pdf') }}
@@ -103,10 +107,11 @@
 
                 {{-- Modal --}}
                 <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600/50 shadow-2xl p-6 transition-colors duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">{{ __('maintenance.upload_maintenance_invoice') }}</h3>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">{{ $editingInvoiceId ? __('maintenance.edit_invoice') : __('maintenance.upload_maintenance_invoice') }}</h3>
 
                     <form wire:submit="saveInvoice" class="space-y-4">
-                        {{-- Drag & Drop --}}
+                        {{-- Drag & Drop (hidden when editing) --}}
+                        @if(!$editingInvoiceId)
                         <div x-data="{ dragging: false }"
                              @dragover.prevent="dragging = true"
                              @dragleave.prevent="dragging = false"
@@ -136,6 +141,7 @@
                         @error('invoice_file')
                             <p class="text-sm text-red-400">{{ $message }}</p>
                         @enderror
+                        @endif
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -193,7 +199,11 @@
                         <div class="flex gap-3 pt-2">
                             <button type="submit" wire:loading.attr="disabled"
                                 class="flex-1 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors">
-                                <span wire:loading.remove wire:target="saveInvoice">{{ __('maintenance.add_invoice') }}</span>
+                                @if($editingInvoiceId)
+                                    <span wire:loading.remove wire:target="saveInvoice">{{ __('common.update') }}</span>
+                                @else
+                                    <span wire:loading.remove wire:target="saveInvoice">{{ __('maintenance.add_invoice') }}</span>
+                                @endif
                                 <span wire:loading wire:target="saveInvoice">{{ __('common.saving') ?: 'Saving...' }}</span>
                             </button>
                             <button type="button" wire:click="closeModal"

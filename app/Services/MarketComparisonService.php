@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Quotation;
 use Illuminate\Support\Facades\Cache;
@@ -210,7 +211,12 @@ class MarketComparisonService
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0;
 
-        return $mrTotal + $orderTotal;
+        // From CompanyMaintenanceInvoice (company-uploaded invoices)
+        $invoiceTotal = (float) CompanyMaintenanceInvoice::where('company_id', $companyId)
+            ->where('created_at', '>=', $since)
+            ->sum('amount');
+
+        return $mrTotal + $orderTotal + $invoiceTotal;
     }
 
     private function getCompanyMaintenanceJobs(int $companyId, $since): int
@@ -427,7 +433,11 @@ class MarketComparisonService
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0;
 
-        return $mrTotal + $orderTotal;
+        $invoiceTotal = (float) CompanyMaintenanceInvoice::where('company_id', $companyId)
+            ->whereBetween('created_at', [$from, $to])
+            ->sum('amount');
+
+        return $mrTotal + $orderTotal + $invoiceTotal;
     }
 
     private function getMarketTotalForCompanyJobsInPeriod(int $companyId, $from, $to, array $marketData, float $globalAvg): float

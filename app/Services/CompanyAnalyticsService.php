@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\FuelRefill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -18,11 +19,16 @@ class CompanyAnalyticsService
 
     public function maintenanceCost(): float
     {
-        return (float) DB::table('order_services')
+        $orderTotal = (float) DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
             ->where('orders.company_id', $this->company->id)
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?: 0;
+
+        $companyInvoiceTotal = (float) CompanyMaintenanceInvoice::where('company_id', $this->company->id)
+            ->sum('amount');
+
+        return $orderTotal + $companyInvoiceTotal;
     }
 
     public function fuelsCost(): float
@@ -79,13 +85,23 @@ class CompanyAnalyticsService
             ->when($dateTo, fn ($q) => $q->where('orders.created_at', '<=', $dateTo->copy()->endOfDay()))
             ->when($vehicleId, fn ($q) => $q->where('orders.vehicle_id', $vehicleId));
 
-        $total = (float) (clone $baseQuery())
+        $orderTotal = (float) (clone $baseQuery())
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0;
 
-        $count = (int) (clone $baseQuery())
+        $orderCount = (int) (clone $baseQuery())
             ->selectRaw('COUNT(DISTINCT orders.id) as cnt')
             ->value('cnt') ?? 0;
+
+        $invoiceQ = CompanyMaintenanceInvoice::where('company_id', $this->company->id)
+            ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', $dateFrom->copy()->startOfDay()))
+            ->when($dateTo, fn ($q) => $q->where('created_at', '<=', $dateTo->copy()->endOfDay()))
+            ->when($vehicleId, fn ($q) => $q->where('vehicle_id', $vehicleId));
+        $invoiceTotal = (float) (clone $invoiceQ)->sum('amount');
+        $invoiceCount = (int) (clone $invoiceQ)->count();
+
+        $total = $orderTotal + $invoiceTotal;
+        $count = $orderCount + $invoiceCount;
 
         return [
             'total' => round($total, 2),
@@ -144,15 +160,24 @@ class CompanyAnalyticsService
             ->get()
             ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
 
+        $invoiceRows = CompanyMaintenanceInvoice::where('company_id', $this->company->id)
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total_cost')
+            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+            ->get()
+            ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
+
         $out = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $key = "{$date->year}-{$date->month}";
-            $row = $rows[$key] ?? null;
+            $orderCost = (float) (($rows[$key] ?? null)?->total_cost ?? 0);
+            $invoiceCost = (float) (($invoiceRows[$key] ?? null)?->total_cost ?? 0);
             $out[] = [
                 'month' => $date->month,
                 'year' => $date->year,
-                'total_cost' => round((float) ($row->total_cost ?? 0), 2),
+                'total_cost' => round($orderCost + $invoiceCost, 2),
             ];
         }
         return $out;
@@ -234,6 +259,13 @@ class CompanyAnalyticsService
             ->get()
             ->keyBy('vehicle_id');
 
+        $invoiceRows = CompanyMaintenanceInvoice::where('company_id', $this->company->id)
+            ->whereNotNull('vehicle_id')
+            ->selectRaw('vehicle_id, COALESCE(SUM(amount), 0) as total, COUNT(*) as invoice_count')
+            ->groupBy('vehicle_id')
+            ->get()
+            ->keyBy('vehicle_id');
+
         $fuelRows = FuelRefill::where('company_id', $this->company->id)
             ->selectRaw('vehicle_id, COALESCE(SUM(cost), 0) as total')
             ->groupBy('vehicle_id')
@@ -241,13 +273,14 @@ class CompanyAnalyticsService
             ->keyBy('vehicle_id');
 
         $vehicles = $this->company->vehicles()->get(['id', 'make', 'model', 'plate_number']);
-        $list = $vehicles->map(function ($v) use ($serviceRows, $fuelRows, $totalCompany) {
+        $list = $vehicles->map(function ($v) use ($serviceRows, $invoiceRows, $fuelRows, $totalCompany) {
             $sRow = $serviceRows[$v->id] ?? null;
+            $iRow = $invoiceRows[$v->id] ?? null;
             $fRow = $fuelRows[$v->id] ?? null;
-            $serviceCost = $sRow ? (float) $sRow->total : 0;
+            $serviceCost = ($sRow ? (float) $sRow->total : 0) + ($iRow ? (float) $iRow->total : 0);
             $fuelCost = $fRow ? (float) $fRow->total : 0;
             $total = $serviceCost + $fuelCost;
-            $servicesCount = $sRow ? (int) $sRow->services_count : 0;
+            $servicesCount = ($sRow ? (int) $sRow->services_count : 0) + ($iRow ? (int) $iRow->invoice_count : 0);
             $percentage = $totalCompany > 0 ? ($total / $totalCompany) * 100 : 0;
             return (object) [
                 'id' => $v->id,

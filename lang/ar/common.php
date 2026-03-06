@@ -30,6 +30,7 @@ return [
     'delete' => 'حذف',
     'edit' => 'تعديل',
     'save' => 'حفظ',
+    'update' => 'تحديث',
     'saving' => 'جاري الحفظ...',
     'cancel' => 'إلغاء',
     'search' => 'بحث',

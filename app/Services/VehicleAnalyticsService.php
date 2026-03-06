@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\Cache;
@@ -90,7 +91,9 @@ class VehicleAnalyticsService
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0;
 
-        return $mrTotal + $orderTotal;
+        $invoiceTotal = (float) CompanyMaintenanceInvoice::where('vehicle_id', $vehicleId)->sum('amount');
+
+        return $mrTotal + $orderTotal + $invoiceTotal;
     }
 
     private function getVehicleCostForPeriod(int $vehicleId, $from, $to): float
@@ -111,12 +114,16 @@ class VehicleAnalyticsService
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total')
             ->value('total') ?? 0;
 
+        $invoiceTotal = (float) CompanyMaintenanceInvoice::where('vehicle_id', $vehicleId)
+            ->whereBetween('created_at', [$from, $to])
+            ->sum('amount');
+
         $fuelTotal = (float) DB::table('fuel_refills')
             ->where('vehicle_id', $vehicleId)
             ->whereBetween('refilled_at', [$from, $to])
             ->sum('cost');
 
-        return $mrTotal + $orderTotal + $fuelTotal;
+        return $mrTotal + $orderTotal + $invoiceTotal + $fuelTotal;
     }
 
     private function computeHealthScore(Vehicle $vehicle): int

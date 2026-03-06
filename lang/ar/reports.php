@@ -58,4 +58,16 @@ return [
     'period' => 'الفترة',
     'metric' => 'المقياس',
     'value' => 'القيمة',
+
+    // Tax Reports
+    'tax_reports' => 'تقارير الضرائب',
+    'tax_reports_desc' => 'ضريبة القيمة المضافة وإجمالي فواتير الصيانة',
+    'total_invoices' => 'إجمالي الفواتير',
+    'total_vat_amount' => 'إجمالي ضريبة القيمة المضافة',
+    'total_including_vat' => 'الإجمالي مع الضريبة',
+    'date_from' => 'من',
+    'date_to' => 'إلى',
+    'invoice_details' => 'تفاصيل الفواتير',
+    'date' => 'التاريخ',
+    'no_invoices_in_period' => 'لا توجد فواتير في الفترة المحددة.',
 ];

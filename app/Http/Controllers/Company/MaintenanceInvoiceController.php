@@ -125,6 +125,8 @@ class MaintenanceInvoiceController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
+        \App\Listeners\InvalidateCompanyAnalyticsCache::forCompany($company->id);
+
         return redirect()
             ->route('company.maintenance-invoices.index')
             ->with('success', __('maintenance.invoice_uploaded_success'));

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\Vehicle;
 use App\Models\FuelRefill;
 use App\Models\MaintenanceRequest;
@@ -53,6 +54,24 @@ class VehicleReportPdfService
                     'date' => $mr->created_at?->format('Y-m-d H:i'),
                     'type' => __('company.maintenance'),
                     'desc' => 'Request #' . $mr->id,
+                    'cost' => $cost,
+                ];
+            }
+
+            $invQ = CompanyMaintenanceInvoice::where('vehicle_id', $vehicle->id);
+            if ($dateFrom) {
+                $invQ->where('created_at', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $invQ->where('created_at', '<=', $dateTo . ' 23:59:59');
+            }
+            foreach ($invQ->orderBy('created_at')->get() as $inv) {
+                $cost = (float) $inv->amount;
+                $maintenanceTotal += $cost;
+                $rows[] = [
+                    'date' => $inv->created_at?->format('Y-m-d H:i'),
+                    'type' => __('company.maintenance'),
+                    'desc' => __('maintenance.invoice') . ' #' . $inv->id,
                     'cost' => $cost,
                 ];
             }

@@ -30,6 +30,7 @@ return [
     'delete' => 'Delete',
     'edit' => 'Edit',
     'save' => 'Save',
+    'update' => 'Update',
     'saving' => 'Saving...',
     'cancel' => 'Cancel',
     'search' => 'Search',
