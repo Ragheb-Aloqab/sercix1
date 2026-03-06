@@ -16,6 +16,7 @@ class MaintenanceInvoicesSection extends Component
     public $invoice_file = null;
     public $vehicle_id = '';
     public $amount = '';
+    public string $tax_type = 'without_tax';
     public $description = '';
 
     protected function rules(): array
@@ -30,6 +31,7 @@ class MaintenanceInvoicesSection extends Component
             ],
             'vehicle_id' => ['nullable', 'string'],
             'amount' => ['nullable', 'numeric', 'min:0'],
+            'tax_type' => ['required', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -53,7 +55,8 @@ class MaintenanceInvoicesSection extends Component
 
     public function openModal(): void
     {
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'description']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description']);
+        $this->tax_type = 'without_tax';
         $this->resetValidation();
         $this->modalOpen = true;
     }
@@ -61,7 +64,7 @@ class MaintenanceInvoicesSection extends Component
     public function closeModal(): void
     {
         $this->modalOpen = false;
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'description']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description']);
         $this->resetValidation();
     }
 
@@ -84,10 +87,22 @@ class MaintenanceInvoicesSection extends Component
         $uniqueName = Str::uuid() . '.' . $ext;
         $path = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
 
+        $originalAmount = $this->amount ? (float) $this->amount : null;
+        $vatAmount = null;
+        $totalAmount = $originalAmount;
+
+        if ($originalAmount !== null && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
+            $vatAmount = round($originalAmount * CompanyMaintenanceInvoice::VAT_RATE, 2);
+            $totalAmount = round($originalAmount + $vatAmount, 2);
+        }
+
         CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
-            'amount' => $this->amount ? (float) $this->amount : null,
+            'amount' => $totalAmount,
+            'original_amount' => $originalAmount,
+            'vat_amount' => $vatAmount,
+            'tax_type' => $this->tax_type,
             'invoice_file' => $path,
             'file_type' => $fileType,
             'original_filename' => $originalName,

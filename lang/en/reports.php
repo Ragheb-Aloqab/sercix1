@@ -43,4 +43,19 @@ return [
     'generate_excel_in_background' => 'Generate Excel in background',
     'export_expired' => 'This report has expired and is no longer available.',
     'export_not_found' => 'Report file not found.',
+
+    // Comprehensive Report
+    'comprehensive_report' => 'Comprehensive Report',
+    'comprehensive_report_desc' => 'Maintenance, fuel, and mileage summary for the selected period',
+    'total_maintenance_cost' => 'Total Maintenance Cost',
+    'total_fuel_cost' => 'Total Fuel Cost',
+    'monthly_mileage' => 'Monthly Mileage',
+    'total_accumulated_mileage' => 'Total Accumulated Actual Mileage',
+    'export_pdf' => 'Export to PDF',
+    'export_excel' => 'Export to Excel',
+    'month' => 'Month',
+    'year' => 'Year',
+    'period' => 'Period',
+    'metric' => 'Metric',
+    'value' => 'Value',
 ];

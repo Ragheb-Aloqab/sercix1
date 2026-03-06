@@ -119,6 +119,12 @@ Route::middleware(['company'])
             ->name('reports.service');
         Route::get('/reports/mileage', [ReportsController::class, 'mileage'])
             ->name('reports.mileage');
+        Route::get('/reports/comprehensive', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'index'])
+            ->name('reports.comprehensive');
+        Route::get('/reports/comprehensive/pdf', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'exportPdf'])
+            ->name('reports.comprehensive.pdf');
+        Route::get('/reports/comprehensive/excel', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'exportExcel'])
+            ->name('reports.comprehensive.excel');
         Route::get('/reports/mileage/excel', [\App\Http\Controllers\Company\MileageReportController::class, 'exportExcel'])
             ->name('reports.mileage.excel');
         Route::get('/reports/mileage/pdf', [\App\Http\Controllers\Company\MileageReportController::class, 'exportPdf'])

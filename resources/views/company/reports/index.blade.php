@@ -51,6 +51,16 @@
         <p class="text-sm text-slate-600 dark:text-slate-500">{{ __('vehicles.vehicle_mileage_reports_desc') }}</p>
         <p class="text-xs text-slate-500 dark:text-servx-silver mt-2">{{ __('fleet.export_pdf') }} · {{ __('fleet.export_excel') }}</p>
     </a>
+
+    <a href="{{ route('company.reports.comprehensive') }}"
+        class="group block rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-6 backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-400/50 hover:scale-[1.02] transition-all duration-300 shadow-sm dark:shadow-none">
+        <div class="w-14 h-14 rounded-2xl bg-violet-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-chart-line text-2xl text-violet-600 dark:text-violet-400"></i>
+        </div>
+        <h3 class="font-black text-lg mb-1 text-slate-900 dark:text-white">{{ __('reports.comprehensive_report') }}</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-500">{{ __('reports.comprehensive_report_desc') }}</p>
+        <p class="text-xs text-slate-500 dark:text-servx-silver mt-2">{{ __('fleet.export_pdf') }} · {{ __('fleet.export_excel') }}</p>
+    </a>
 </div>
 </x-company.glass>
 @endsection

@@ -12,10 +12,17 @@ class CompanyMaintenanceInvoice extends Model
     public const FILE_TYPE_IMAGE = 'image';
     public const FILE_TYPE_PDF = 'pdf';
 
+    public const TAX_WITHOUT = 'without_tax';
+    public const TAX_WITH = 'with_tax';
+    public const VAT_RATE = 0.15;
+
     protected $fillable = [
         'company_id',
         'vehicle_id',
         'amount',
+        'original_amount',
+        'vat_amount',
+        'tax_type',
         'invoice_file',
         'file_type',
         'original_filename',
@@ -24,7 +31,14 @@ class CompanyMaintenanceInvoice extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'original_amount' => 'decimal:2',
+        'vat_amount' => 'decimal:2',
     ];
+
+    public function hasTax(): bool
+    {
+        return $this->tax_type === self::TAX_WITH;
+    }
 
     public function company()
     {
