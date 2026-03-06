@@ -27,15 +27,6 @@
         </div>
     </div>
 
-    {{-- Daily odometer entry (end of shift) for manual tracking --}}
-    <div class="dash-card mt-6">
-        <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('tracking.enter_daily_odometer') }}</h3>
-        <p class="text-sm text-slate-600 dark:text-servx-silver mb-4">{{ __('tracking.daily_odometer_hint') }}</p>
-        <button type="button" id="btn-daily-odometer"
-            class="px-4 py-2 rounded-xl bg-sky-600 dark:bg-slate-600 hover:bg-sky-500 dark:hover:bg-slate-500 text-white font-semibold text-sm transition-colors duration-300">
-            <i class="fa-solid fa-gauge-high me-2"></i>{{ __('tracking.enter_daily_odometer') }}
-        </button>
-    </div>
 
     {{-- Modal: Daily odometer entry --}}
     <div id="modal-daily-odometer" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
