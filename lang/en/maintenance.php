@@ -131,6 +131,12 @@ return [
     'edit_invoice' => 'Edit Invoice',
     'invoice_validation_type' => 'File must be an image (JPG, JPEG, PNG, WEBP) or PDF.',
     'invoice_validation_size' => 'File size must not exceed :max MB.',
+    'invoice_file_optional' => 'Optional — upload image or PDF',
+    'service_name' => 'Service Name',
+    'add_service' => 'Add Service',
+    'service_already_exists' => 'This service already exists.',
+    'services' => 'Services',
+    'select_services' => 'Select services',
 
     // Tax options for maintenance invoices
     'invoice_amount' => 'Invoice Amount',

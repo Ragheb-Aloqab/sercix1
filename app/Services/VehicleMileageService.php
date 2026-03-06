@@ -20,20 +20,29 @@ class VehicleMileageService
     /**
      * Get total accumulated mileage for a vehicle (never reset, historical sum).
      * Source: vehicle_monthly_mileage.total_km (closed months) + current month from trips/snapshots.
-     * For mobile: also sum mobile_tracking_trips for months not yet in vehicle_monthly_mileage.
+     * For mobile: sum mobile_tracking_trips when vehicle_monthly_mileage is empty.
+     * For GPS: sum vehicle_mileage_history.calculated_difference when vehicle_monthly_mileage is empty.
+     * Both tracking types produce the same total distance for reports and dashboard.
      */
     public function getAccumulatedMileage(Vehicle $vehicle): float
     {
         $fromMonthly = (float) VehicleMonthlyMileage::where('vehicle_id', $vehicle->id)
             ->sum('total_km');
 
-        if ($vehicle->usesMobileTracking() && $fromMonthly <= 0) {
-            $fromMonthly = (float) MobileTrackingTrip::where('vehicle_id', $vehicle->id)
-                ->whereNotNull('ended_at')
-                ->sum('trip_distance_km');
+        if ($fromMonthly <= 0) {
+            if ($vehicle->usesMobileTracking()) {
+                $fromMonthly = (float) MobileTrackingTrip::where('vehicle_id', $vehicle->id)
+                    ->whereNotNull('ended_at')
+                    ->sum('trip_distance_km');
+            } elseif ($vehicle->usesDeviceApiTracking()) {
+                // GPS device: sum trip distances from vehicle_mileage_history (each engine OFF = trip end)
+                $fromMonthly = (float) VehicleMileageHistory::where('vehicle_id', $vehicle->id)
+                    ->where('source', VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS)
+                    ->sum('calculated_difference');
+            }
         }
 
-        // Fallback: sum monthly mileage from all sources (vehicle_locations, fuel_refills, etc.)
+        // Fallback: sum from raw sources (vehicle_locations, fuel_refills) when no structured data
         if ($fromMonthly <= 0) {
             $fromMonthly = $this->getAccumulatedMileageFromRawSources($vehicle->id);
         }

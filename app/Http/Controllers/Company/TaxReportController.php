@@ -116,7 +116,7 @@ class TaxReportController extends Controller
         $filename = 'tax-report-' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
-            new TaxReportExport($result['data']),
+            new TaxReportExport($result['data'], app()->getLocale()),
             $filename,
             \Maatwebsite\Excel\Excel::XLSX
         );

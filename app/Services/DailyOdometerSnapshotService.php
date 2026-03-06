@@ -170,7 +170,9 @@ class DailyOdometerSnapshotService
     /**
      * Store odometer when GPS sends engine/ignition OFF status.
      * For vehicles with IMEI (GPS device): captures the last odometer value at end of trip.
+     * Each engine OFF = end of trip. Distance = current odometer - previous (last engine OFF or baseline).
      * Uses OdometerTrackingService for first-entry baseline logic.
+     * Prevents duplicate entries when same odometer is received multiple times.
      */
     public function storeOdometerOnGpsEngineOff(int $vehicleId, float $odometer): void
     {
@@ -183,11 +185,22 @@ class DailyOdometerSnapshotService
             return;
         }
 
+        // Duplicate prevention: skip if last GPS entry has same odometer (avoid redundant 0-distance entries)
+        $lastGpsEntry = VehicleMileageHistory::where('vehicle_id', $vehicleId)
+            ->where('source', VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS)
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($lastGpsEntry && (float) $lastGpsEntry->current_reading === (float) $odometer) {
+            return;
+        }
+
         $odometerService = app(OdometerTrackingService::class);
 
-        // For multiple GPS updates same day: use last today's current as previous
+        // For multiple engine OFF events same day: use last today's current as previous (trip start)
         $lastToday = VehicleMileageHistory::where('vehicle_id', $vehicleId)
             ->where('recorded_date', now()->toDateString())
+            ->where('source', VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS)
             ->orderByDesc('created_at')
             ->first();
 

@@ -177,6 +177,23 @@ class MarketComparisonService
             return round($totalKm, self::INTERNAL_PRECISION);
         }
 
+        // Fallback: mobile_tracking_trips (driver tracking) - same formula as GPS: Distance × 0.37
+        if (Schema::hasTable('mobile_tracking_trips')) {
+            try {
+                $tripKm = (float) DB::table('mobile_tracking_trips')
+                    ->join('vehicles', 'vehicles.id', '=', 'mobile_tracking_trips.vehicle_id')
+                    ->where('vehicles.company_id', $companyId)
+                    ->whereNotNull('mobile_tracking_trips.ended_at')
+                    ->where('mobile_tracking_trips.ended_at', '>=', $since)
+                    ->sum('mobile_tracking_trips.trip_distance_km');
+                if ($tripKm > 0) {
+                    return round($tripKm, self::INTERNAL_PRECISION);
+                }
+            } catch (\Throwable $e) {
+                // Fall through to vehicle_locations
+            }
+        }
+
         $locationRanges = DB::table('vehicle_locations')
             ->join('vehicles', 'vehicles.id', '=', 'vehicle_locations.vehicle_id')
             ->where('vehicles.company_id', $companyId)

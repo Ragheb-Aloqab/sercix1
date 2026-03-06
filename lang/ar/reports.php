@@ -70,4 +70,5 @@ return [
     'invoice_details' => 'تفاصيل الفواتير',
     'date' => 'التاريخ',
     'no_invoices_in_period' => 'لا توجد فواتير في الفترة المحددة.',
+    'generated_on' => 'تم الإنشاء في :date',
 ];

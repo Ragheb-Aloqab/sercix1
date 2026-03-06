@@ -4,6 +4,7 @@ namespace App\Livewire\Company;
 
 use App\Listeners\InvalidateCompanyAnalyticsCache;
 use App\Models\CompanyMaintenanceInvoice;
+use App\Models\Service;
 use App\Models\Vehicle;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -14,28 +15,38 @@ class MaintenanceInvoicesSection extends Component
     use WithFileUploads;
 
     public bool $modalOpen = false;
+    public bool $addServiceModalOpen = false;
     public ?int $editingInvoiceId = null;
     public $invoice_file = null;
     public $vehicle_id = '';
     public $amount = '';
     public string $tax_type = 'without_tax';
     public $description = '';
+    public array $service_ids = [];
+    public string $newServiceName = '';
 
     protected function rules(): array
     {
         $maxMb = config('servx.invoice_max_size_mb', 5);
-        return [
-            'invoice_file' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png,webp,pdf',
-                'max:' . ($maxMb * 1024),
-            ],
+        $rules = [
             'vehicle_id' => ['nullable', 'string'],
             'amount' => ['nullable', 'numeric', 'min:0'],
             'tax_type' => ['required', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
+            'service_ids' => ['nullable', 'array'],
+            'service_ids.*' => ['integer', 'exists:services,id'],
         ];
+
+        if (!$this->editingInvoiceId) {
+            $rules['invoice_file'] = [
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,webp,pdf',
+                'max:' . ($maxMb * 1024),
+            ];
+        }
+
+        return $rules;
     }
 
     protected function validationAttributes(): array
@@ -49,7 +60,6 @@ class MaintenanceInvoicesSection extends Component
     {
         $maxMb = config('servx.invoice_max_size_mb', 5);
         return [
-            'invoice_file.required' => __('maintenance.invoice_validation_type'),
             'invoice_file.mimes' => __('maintenance.invoice_validation_type'),
             'invoice_file.max' => __('maintenance.invoice_validation_size', ['max' => $maxMb]),
         ];
@@ -58,7 +68,8 @@ class MaintenanceInvoicesSection extends Component
     public function openModal(): void
     {
         $this->editingInvoiceId = null;
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description', 'service_ids', 'newServiceName']);
+        $this->service_ids = [];
         $this->tax_type = 'without_tax';
         $this->resetValidation();
         $this->modalOpen = true;
@@ -67,21 +78,57 @@ class MaintenanceInvoicesSection extends Component
     public function closeModal(): void
     {
         $this->modalOpen = false;
+        $this->addServiceModalOpen = false;
         $this->editingInvoiceId = null;
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description', 'service_ids', 'newServiceName']);
         $this->resetValidation();
+    }
+
+    public function openAddServiceModal(): void
+    {
+        $this->newServiceName = '';
+        $this->addServiceModalOpen = true;
+    }
+
+    public function closeAddServiceModal(): void
+    {
+        $this->addServiceModalOpen = false;
+        $this->newServiceName = '';
+        $this->resetValidation('newServiceName');
+    }
+
+    public function addNewService(): void
+    {
+        $this->validate([
+            'newServiceName' => ['required', 'string', 'max:255', 'unique:services,name'],
+        ], [
+            'newServiceName.required' => __('validation.required', ['attribute' => __('maintenance.service_name')]),
+            'newServiceName.unique' => __('maintenance.service_already_exists'),
+        ]);
+
+        $service = Service::create([
+            'name' => trim($this->newServiceName),
+            'is_active' => true,
+        ]);
+
+        $this->service_ids[] = $service->id;
+        $this->closeAddServiceModal();
+        $this->dispatch('service-added', serviceId: $service->id, serviceName: $service->name);
     }
 
     public function openEditModal(int $invoiceId): void
     {
         $company = auth('company')->user();
-        $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)->findOrFail($invoiceId);
+        $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)
+            ->with('services')
+            ->findOrFail($invoiceId);
 
         $this->editingInvoiceId = $inv->id;
         $this->vehicle_id = $inv->vehicle_id ? (string) $inv->vehicle_id : '';
         $this->amount = $inv->original_amount !== null ? (string) $inv->original_amount : '';
         $this->tax_type = $inv->tax_type ?? CompanyMaintenanceInvoice::TAX_WITHOUT;
         $this->description = $inv->description ?? '';
+        $this->service_ids = $inv->services->pluck('id')->map(fn ($id) => (int) $id)->all();
         $this->invoice_file = null;
         $this->resetValidation();
         $this->modalOpen = true;
@@ -91,11 +138,14 @@ class MaintenanceInvoicesSection extends Component
     {
         $company = auth('company')->user();
 
+        $this->service_ids = is_array($this->service_ids) ? $this->service_ids : [];
         $this->validate([
             'vehicle_id' => ['nullable', 'string'],
             'amount' => ['nullable', 'numeric', 'min:0'],
             'tax_type' => ['required', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
+            'service_ids' => ['nullable', 'array'],
+            'service_ids.*' => ['integer', 'exists:services,id'],
         ]);
 
         $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)->findOrFail($this->editingInvoiceId);
@@ -124,6 +174,8 @@ class MaintenanceInvoicesSection extends Component
             'description' => $this->description ?: null,
         ]);
 
+        $inv->services()->sync($this->service_ids);
+
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
 
         $this->closeModal();
@@ -140,6 +192,7 @@ class MaintenanceInvoicesSection extends Component
 
         $company = auth('company')->user();
 
+        $this->service_ids = is_array($this->service_ids) ? $this->service_ids : [];
         $this->validate();
 
         $vehicleId = $this->vehicle_id !== '' && $this->vehicle_id !== null ? (int) $this->vehicle_id : null;
@@ -148,12 +201,18 @@ class MaintenanceInvoicesSection extends Component
             return;
         }
 
-        $file = $this->invoice_file;
-        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
-        $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
-        $originalName = $file->getClientOriginalName();
-        $uniqueName = Str::uuid() . '.' . $ext;
-        $path = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
+        $path = null;
+        $fileType = null;
+        $originalName = null;
+
+        if ($this->invoice_file) {
+            $file = $this->invoice_file;
+            $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
+            $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
+            $originalName = $file->getClientOriginalName();
+            $uniqueName = Str::uuid() . '.' . $ext;
+            $path = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
+        }
 
         $originalAmount = $this->amount ? (float) $this->amount : null;
         $vatAmount = null;
@@ -164,7 +223,7 @@ class MaintenanceInvoicesSection extends Component
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
 
-        CompanyMaintenanceInvoice::create([
+        $inv = CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
             'amount' => $totalAmount,
@@ -177,6 +236,8 @@ class MaintenanceInvoicesSection extends Component
             'description' => $this->description ?: null,
         ]);
 
+        $inv->services()->sync($this->service_ids);
+
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
 
         $this->closeModal();
@@ -188,18 +249,22 @@ class MaintenanceInvoicesSection extends Component
     {
         $company = auth('company')->user();
         $companyInvoices = CompanyMaintenanceInvoice::where('company_id', $company->id)
-            ->with('vehicle')
+            ->with(['vehicle', 'services'])
             ->latest()
             ->get();
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
             ->orderBy('plate_number')
-            ->get(['id', 'plate_number', 'make', 'model']);
+            ->get(['id', 'plate_number', 'make', 'model', 'name']);
+        $services = Service::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
         $maxFileMb = config('servx.invoice_max_size_mb', 5);
 
         return view('livewire.company.maintenance-invoices-section', [
             'companyInvoices' => $companyInvoices,
             'vehicles' => $vehicles,
+            'services' => $services,
             'maxFileMb' => $maxFileMb,
         ]);
     }

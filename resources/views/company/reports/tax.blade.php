@@ -97,6 +97,7 @@
                 <tr class="border-b border-slate-200 dark:border-slate-600/50 text-slate-600 dark:text-slate-400">
                     <th class="text-start py-3 px-2 font-bold">{{ __('reports.date') ?? 'Date' }}</th>
                     <th class="text-start py-3 px-2 font-bold">{{ __('company.vehicle') }}</th>
+                    <th class="text-start py-3 px-2 font-bold">{{ __('maintenance.services') }}</th>
                     <th class="text-end py-3 px-2 font-bold">{{ __('maintenance.invoice_amount') }}</th>
                     <th class="text-end py-3 px-2 font-bold">{{ __('maintenance.vat_amount') }}</th>
                     <th class="text-end py-3 px-2 font-bold">{{ __('maintenance.total_with_tax') }}</th>
@@ -106,14 +107,15 @@
                 @forelse($data['invoices'] ?? [] as $inv)
                     <tr class="border-b border-slate-200 dark:border-slate-600/50">
                         <td class="py-3 px-2 text-slate-900 dark:text-white">{{ $inv->created_at?->translatedFormat('Y-m-d H:i') }}</td>
-                        <td class="py-3 px-2 text-slate-600 dark:text-servx-silver">{{ $inv->vehicle ? ($inv->vehicle->plate_number . ' — ' . trim(($inv->vehicle->make ?? '') . ' ' . ($inv->vehicle->model ?? ''))) : '—' }}</td>
+                        <td class="py-3 px-2 text-slate-600 dark:text-servx-silver">{{ $inv->vehicle ? ($inv->vehicle->display_name ?? ($inv->vehicle->plate_number . ' — ' . trim(($inv->vehicle->make ?? '') . ' ' . ($inv->vehicle->model ?? '')))) : '—' }}</td>
+                        <td class="py-3 px-2 text-slate-600 dark:text-servx-silver text-sm">{{ $inv->services->isNotEmpty() ? $inv->services->pluck('name')->join(', ') : '—' }}</td>
                         <td class="py-3 px-2 text-end text-slate-900 dark:text-white">{{ number_format($inv->original_amount ?? $inv->amount ?? 0, 2) }} {{ __('company.sar') }}</td>
                         <td class="py-3 px-2 text-end text-amber-600 dark:text-amber-400">{{ number_format($inv->vat_amount ?? 0, 2) }} {{ __('company.sar') }}</td>
                         <td class="py-3 px-2 text-end font-bold text-emerald-600 dark:text-emerald-400">{{ number_format($inv->amount ?? 0, 2) }} {{ __('company.sar') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-slate-500 dark:text-servx-silver">{{ __('reports.no_invoices_in_period') }}</td>
+                        <td colspan="6" class="py-8 text-center text-slate-500 dark:text-servx-silver">{{ __('reports.no_invoices_in_period') }}</td>
                     </tr>
                 @endforelse
             </tbody>

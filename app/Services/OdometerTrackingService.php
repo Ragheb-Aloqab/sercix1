@@ -166,6 +166,11 @@ class OdometerTrackingService
      * Clear mileage-related cache for a company (call after recording odometer).
      * Ensures Market Average Cost and Total Distance stay in sync when driver adds odometer.
      */
+    /**
+     * Clear mileage-related cache for a company (call after recording odometer).
+     * Ensures Market Average Cost, Total Distance, and dashboard stay in sync
+     * for both GPS device tracking and mobile/driver tracking.
+     */
     public function clearMileageCache(?int $companyId): void
     {
         if ($companyId === null) {
@@ -174,6 +179,8 @@ class OdometerTrackingService
         Cache::forget('market_avg_cost_card_' . $companyId . '_' . now()->format('Y-m'));
         Cache::forget("market_comparison_{$companyId}_6");
         Cache::forget("market_comparison_{$companyId}_12");
+        Cache::forget("market_monthly_{$companyId}_6");
+        Cache::forget("market_monthly_{$companyId}_12");
         Cache::forget("company_dashboard_{$companyId}");
     }
 }

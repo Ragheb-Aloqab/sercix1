@@ -33,4 +33,10 @@ class Service extends Model
             ->withPivot(['base_price', 'estimated_minutes', 'is_enabled'])
             ->withTimestamps();
     }
+
+    public function companyMaintenanceInvoices()
+    {
+        return $this->belongsToMany(CompanyMaintenanceInvoice::class, 'company_maintenance_invoice_service')
+            ->withTimestamps();
+    }
 }

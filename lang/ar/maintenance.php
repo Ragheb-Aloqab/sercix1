@@ -131,6 +131,12 @@ return [
     'edit_invoice' => 'تعديل الفاتورة',
     'invoice_validation_type' => 'يجب أن يكون الملف صورة (JPG, JPEG, PNG, WEBP) أو PDF.',
     'invoice_validation_size' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',
+    'invoice_file_optional' => 'اختياري — رفع صورة أو PDF',
+    'service_name' => 'اسم الخدمة',
+    'add_service' => 'إضافة خدمة',
+    'service_already_exists' => 'هذه الخدمة موجودة مسبقاً.',
+    'services' => 'الخدمات',
+    'select_services' => 'اختر الخدمات',
 
     // Tax options for maintenance invoices
     'invoice_amount' => 'مبلغ الفاتورة',

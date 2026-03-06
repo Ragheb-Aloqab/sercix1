@@ -41,7 +41,7 @@ class TaxReportService
         ')->first();
 
         $invoices = (clone $query)
-            ->with('vehicle:id,plate_number,make,model')
+            ->with(['vehicle:id,plate_number,make,model,name', 'services:id,name'])
             ->orderByDesc('created_at')
             ->get();
 

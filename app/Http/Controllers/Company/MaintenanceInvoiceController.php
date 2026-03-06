@@ -227,7 +227,7 @@ class MaintenanceInvoiceController extends Controller
         }
 
         $path = $companyMaintenanceInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 
@@ -267,7 +267,7 @@ class MaintenanceInvoiceController extends Controller
         }
 
         $path = $companyMaintenanceInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 
@@ -297,12 +297,12 @@ class MaintenanceInvoiceController extends Controller
             abort(403);
         }
 
-        if (!$companyMaintenanceInvoice->isImage()) {
+        if (!$companyMaintenanceInvoice->hasInvoiceFile() || !$companyMaintenanceInvoice->isImage()) {
             abort(404);
         }
 
         $path = $companyMaintenanceInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 

@@ -70,4 +70,5 @@ return [
     'invoice_details' => 'Invoice Details',
     'date' => 'Date',
     'no_invoices_in_period' => 'No invoices in the selected period.',
+    'generated_on' => 'Generated on :date',
 ];

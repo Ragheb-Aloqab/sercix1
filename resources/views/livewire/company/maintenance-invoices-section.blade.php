@@ -26,6 +26,7 @@
                         <tr class="text-start text-slate-600 dark:text-servx-silver text-sm border-b border-slate-200 dark:border-slate-600/50">
                             <th class="pb-3 pe-4">{{ __('common.preview') }}</th>
                             <th class="pb-3 pe-4">{{ __('driver.vehicle') }}</th>
+                            <th class="pb-3 pe-4">{{ __('maintenance.services') }}</th>
                             <th class="pb-3 pe-4">{{ __('maintenance.final_invoice_amount') }}</th>
                             <th class="pb-3 pe-4">{{ __('maintenance.upload_date') }}</th>
                             <th class="pb-3 pe-4"></th>
@@ -35,22 +36,33 @@
                         @foreach($companyInvoices as $inv)
                             <tr class="border-b border-slate-200 dark:border-slate-600/30 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors duration-300">
                                 <td class="py-4 pe-4">
-                                    @if($inv->isImage())
-                                        <button type="button"
-                                            @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $inv) }}' })"
-                                            class="block w-16 h-16 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600/50 hover:border-sky-500/50 transition-colors cursor-pointer"
-                                            title="{{ __('common.view') }}">
-                                            <img src="{{ route('company.maintenance-invoices.company.thumbnail', $inv) }}" alt="" class="w-full h-full object-cover" loading="lazy">
-                                        </button>
+                                    @if($inv->hasInvoiceFile())
+                                        @if($inv->isImage())
+                                            <button type="button"
+                                                @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $inv) }}' })"
+                                                class="block w-16 h-16 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600/50 hover:border-sky-500/50 transition-colors cursor-pointer"
+                                                title="{{ __('common.view') }}">
+                                                <img src="{{ route('company.maintenance-invoices.company.thumbnail', $inv) }}" alt="" class="w-full h-full object-cover" loading="lazy">
+                                            </button>
+                                        @else
+                                            <a href="{{ route('company.maintenance-invoices.company.view', $inv) }}" target="_blank"
+                                                class="inline-flex w-16 h-16 rounded-lg bg-red-500/20 border border-red-400/50 items-center justify-center hover:bg-red-500/30 dark:hover:bg-red-500/40 transition-colors duration-300"
+                                                title="{{ __('common.view') }}">
+                                                <i class="fa-solid fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
+                                            </a>
+                                        @endif
                                     @else
-                                        <a href="{{ route('company.maintenance-invoices.company.view', $inv) }}" target="_blank"
-                                            class="inline-flex w-16 h-16 rounded-lg bg-red-500/20 border border-red-400/50 items-center justify-center hover:bg-red-500/30 dark:hover:bg-red-500/40 transition-colors duration-300"
-                                            title="{{ __('common.view') }}">
-                                            <i class="fa-solid fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
-                                        </a>
+                                        <span class="inline-flex w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 items-center justify-center text-slate-400 dark:text-slate-500 text-xs" title="{{ __('maintenance.invoice_file_optional') }}">—</span>
                                     @endif
                                 </td>
-                                <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ $inv->vehicle?->plate_number ?? '-' }}</td>
+                                <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ $inv->vehicle?->display_name ?? $inv->vehicle?->plate_number ?? '-' }}</td>
+                                <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver text-sm">
+                                    @if($inv->services->isNotEmpty())
+                                        {{ $inv->services->pluck('name')->join(', ') }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver-light">
                                     @if($inv->amount)
                                         {{ number_format($inv->amount, 2) }} {{ __('company.sar') }}
@@ -64,25 +76,27 @@
                                 <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver">{{ $inv->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
                                 <td class="py-4 pe-4">
                                     <div class="flex flex-wrap gap-2">
-                                        @if($inv->isImage())
-                                            <button type="button" @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $inv) }}' })"
-                                                class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
-                                                <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
-                                            </button>
-                                        @else
-                                            <a href="{{ route('company.maintenance-invoices.company.view', $inv) }}" target="_blank"
-                                                class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
-                                                <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
+                                        @if($inv->hasInvoiceFile())
+                                            @if($inv->isImage())
+                                                <button type="button" @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $inv) }}' })"
+                                                    class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
+                                                    <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
+                                                </button>
+                                            @else
+                                                <a href="{{ route('company.maintenance-invoices.company.view', $inv) }}" target="_blank"
+                                                    class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
+                                                    <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('company.maintenance-invoices.company.download', $inv) }}"
+                                                class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
+                                                <i class="fa-solid fa-download me-1"></i> {{ __('fleet.download_pdf') }}
                                             </a>
                                         @endif
                                         <button type="button" wire:click="openEditModal({{ $inv->id }})"
                                             class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
                                             <i class="fa-solid fa-pen me-1"></i> {{ __('common.edit') }}
                                         </button>
-                                        <a href="{{ route('company.maintenance-invoices.company.download', $inv) }}"
-                                            class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
-                                            <i class="fa-solid fa-download me-1"></i> {{ __('fleet.download_pdf') }}
-                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -109,7 +123,7 @@
                 <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600/50 shadow-2xl p-6 transition-colors duration-300">
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">{{ $editingInvoiceId ? __('maintenance.edit_invoice') : __('maintenance.upload_maintenance_invoice') }}</h3>
 
-                    <form wire:submit="saveInvoice" class="space-y-4">
+                    <form wire:submit.prevent="saveInvoice" @submit.prevent class="space-y-4">
                         {{-- Drag & Drop (hidden when editing) --}}
                         @if(!$editingInvoiceId)
                         <div x-data="{ dragging: false }"
@@ -125,7 +139,8 @@
                             <p class="text-slate-600 dark:text-servx-silver-light mb-2">
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-sky-600 dark:text-sky-400"></i>
                             </p>
-                            <p class="text-slate-600 dark:text-servx-silver-light text-sm mb-1">{{ __('maintenance.invoice_file_accept', ['max' => $maxFileMb]) }}</p>
+                            <p class="text-slate-600 dark:text-servx-silver-light text-sm mb-1">{{ __('maintenance.invoice_file_optional') }}</p>
+                            <p class="text-slate-500 text-xs mb-1">{{ __('maintenance.invoice_file_accept', ['max' => $maxFileMb]) }}</p>
                             <p class="text-slate-500 text-xs mb-3">
                                 @if($invoice_file)
                                     <span class="text-sky-400">{{ $invoice_file->getClientOriginalName() }}</span>
@@ -143,19 +158,44 @@
                         @enderror
                         @endif
 
+                        {{-- Vehicle select (wire:model ensures it saves on submit) --}}
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('driver.vehicle') }}</label>
+                            <select wire:model="vehicle_id" name="vehicle_id"
+                                class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
+                                <option value="">{{ __('fuel.all_vehicles') }}</option>
+                                @foreach($vehicles as $v)
+                                    <option value="{{ $v->id }}">{{ $v->display_name }} ({{ $v->plate_number ?? '-' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('driver.vehicle') }}</label>
-                                <select wire:model="vehicle_id" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
-                                    <option value="">{{ __('fuel.all_vehicles') }}</option>
-                                    @foreach($vehicles as $v)
-                                        <option value="{{ $v->id }}">{{ $v->plate_number }} — {{ trim(($v->make ?? '') . ' ' . ($v->model ?? '')) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.invoice_amount') }} ({{ __('company.sar') }})</label>
                                 <input type="number" wire:model.live="amount" step="0.01" min="0" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        {{-- Services multi-select with Add Service --}}
+                        <div x-data="{ servicesOpen: false }" class="relative">
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.services') }}</label>
+                            <div class="flex gap-2">
+                                <div class="flex-1 relative">
+                                    <select wire:model="service_ids" multiple
+                                        class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300 min-h-[42px]"
+                                        size="3">
+                                        @foreach($services as $s)
+                                            <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-xs text-slate-500 mt-1">{{ __('maintenance.select_services') }}</p>
+                                </div>
+                                <button type="button" wire:click="openAddServiceModal"
+                                    class="shrink-0 self-start px-3 py-2 rounded-xl border border-dashed border-sky-500/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 transition-colors"
+                                    title="{{ __('maintenance.add_service') }}">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -196,6 +236,15 @@
                             <input type="text" wire:model="description" maxlength="500" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="{{ __('common.optional') }}">
                         </div>
 
+                        {{-- Validation errors summary --}}
+                        @if($errors->any())
+                            <div class="p-3 rounded-xl bg-red-500/10 border border-red-400/30 text-red-600 dark:text-red-400 text-sm">
+                                @foreach($errors->all() as $err)
+                                    <p>{{ $err }}</p>
+                                @endforeach
+                            </div>
+                        @endif
+
                         <div class="flex gap-3 pt-2">
                             <button type="submit" wire:loading.attr="disabled"
                                 class="flex-1 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors">
@@ -208,6 +257,39 @@
                             </button>
                             <button type="button" wire:click="closeModal"
                                 class="px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-servx-silver-light font-bold transition-colors duration-300">
+                                {{ __('common.cancel') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Add Service Modal --}}
+    @if($addServiceModalOpen)
+        <div class="fixed inset-0 z-[55] overflow-y-auto" aria-modal="true" role="dialog">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeAddServiceModal"></div>
+                <div class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600/50 shadow-2xl p-6">
+                    <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-4">{{ __('maintenance.add_service') }}</h4>
+                    <form wire:submit.prevent="addNewService" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.service_name') }}</label>
+                            <input type="text" wire:model="newServiceName" maxlength="255"
+                                class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light"
+                                placeholder="{{ __('maintenance.service_name') }}">
+                            @error('newServiceName')
+                                <p class="text-sm text-red-400 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="submit" wire:loading.attr="disabled"
+                                class="flex-1 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">
+                                {{ __('maintenance.add') }}
+                            </button>
+                            <button type="button" wire:click="closeAddServiceModal"
+                                class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 font-bold">
                                 {{ __('common.cancel') }}
                             </button>
                         </div>

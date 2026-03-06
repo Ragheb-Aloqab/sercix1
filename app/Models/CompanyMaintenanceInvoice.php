@@ -50,13 +50,24 @@ class CompanyMaintenanceInvoice extends Model
         return $this->belongsTo(Vehicle::class);
     }
 
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'company_maintenance_invoice_service')
+            ->withTimestamps();
+    }
+
     public function isImage(): bool
     {
-        return $this->file_type === self::FILE_TYPE_IMAGE;
+        return $this->invoice_file && $this->file_type === self::FILE_TYPE_IMAGE;
     }
 
     public function isPdf(): bool
     {
-        return $this->file_type === self::FILE_TYPE_PDF;
+        return $this->invoice_file && $this->file_type === self::FILE_TYPE_PDF;
+    }
+
+    public function hasInvoiceFile(): bool
+    {
+        return !empty($this->invoice_file);
     }
 }
