@@ -10,12 +10,11 @@ use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
-use App\Models\VehicleDailyOdometer;
 use App\Models\VehicleLocation;
 use App\Models\VehicleMileageHistory;
+use App\Services\OdometerTrackingService;
 use App\Support\OrderStatus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -406,9 +405,10 @@ class DriverController extends Controller
         ]);
 
         // Use provided start_odometer or last recorded value (odometer entered at end of previous trip)
+        $odometerService = app(OdometerTrackingService::class);
         $startOdo = isset($data['start_odometer']) && $data['start_odometer'] !== ''
             ? (float) $data['start_odometer']
-            : ($this->getLastOdometerForVehicle($vehicle->id) ?? 0);
+            : ($odometerService->getLastOdometerForVehicle($vehicle->id) ?? 0);
 
         // Create mobile tracking trip record; end_odometer will be set when driver stops
         $trip = \App\Models\MobileTrackingTrip::create([
@@ -467,11 +467,12 @@ class DriverController extends Controller
                 ], 422);
             }
 
-            $lastRecorded = $this->getLastOdometerForVehicle($vehicle->id);
-            if ($lastRecorded !== null && $endOdo < $lastRecorded) {
+            try {
+                app(OdometerTrackingService::class)->validateOdometerReading($vehicle->id, $endOdo);
+            } catch (\InvalidArgumentException $e) {
                 return response()->json([
                     'error' => 'invalid_odometer',
-                    'message' => __('tracking.end_odometer_less_than_previous'),
+                    'message' => $e->getMessage(),
                 ], 422);
             }
 
@@ -483,9 +484,16 @@ class DriverController extends Controller
                 'ended_at' => now(),
             ]);
 
-            // Store in vehicle_daily_odometer and vehicle_mileage_history
-            $this->storeManualMileageEntry($vehicle->id, $startOdo, $endOdo, 'mobile_tracking_trips');
-            $this->clearMileageRelatedCache($vehicle->company_id);
+            // Store in vehicle_daily_odometer and vehicle_mileage_history (override previous for trip start)
+            app(OdometerTrackingService::class)->recordOdometerEntry(
+                $vehicle->id,
+                $endOdo,
+                'mobile_tracking_trips',
+                null,
+                VehicleMileageHistory::TRACKING_MANUAL,
+                $startOdo
+            );
+            app(OdometerTrackingService::class)->clearMileageCache($vehicle->company_id);
         }
 
         if ($vehicle->is_tracking_active && in_array($vehicle->tracking_driver_phone, $phoneVariants)) {
@@ -603,65 +611,25 @@ class DriverController extends Controller
         }
 
         $currentOdo = (float) $data['odometer_km'];
-        $lastRecorded = $this->getLastOdometerForVehicle($vehicle->id);
-        if ($lastRecorded !== null && $currentOdo < $lastRecorded) {
+        $odometerService = app(OdometerTrackingService::class);
+
+        try {
+            $odometerService->validateOdometerReading($vehicle->id, $currentOdo);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'error' => 'invalid_odometer',
-                'message' => __('tracking.end_odometer_less_than_previous'),
+                'message' => $e->getMessage(),
             ], 422);
         }
 
-        $this->storeManualMileageEntry($vehicle->id, $lastRecorded, $currentOdo, VehicleMileageHistory::SOURCE_MANUAL_DAILY);
-        $this->clearMileageRelatedCache($vehicle->company_id);
+        $odometerService->recordOdometerEntry(
+            $vehicle->id,
+            $currentOdo,
+            VehicleMileageHistory::SOURCE_MANUAL_DAILY
+        );
+        $odometerService->clearMileageCache($vehicle->company_id);
 
         return response()->json(['ok' => true, 'message' => __('tracking.daily_odometer_saved')]);
-    }
-
-    private function getLastOdometerForVehicle(int $vehicleId): ?float
-    {
-        $fromDaily = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
-            ->orderByDesc('date')
-            ->value('odometer_km');
-        if ($fromDaily !== null) {
-            return (float) $fromDaily;
-        }
-        $fromTrip = \App\Models\MobileTrackingTrip::where('vehicle_id', $vehicleId)
-            ->whereNotNull('end_odometer')
-            ->orderByDesc('ended_at')
-            ->value('end_odometer');
-        return $fromTrip !== null ? (float) $fromTrip : null;
-    }
-
-    private function storeManualMileageEntry(int $vehicleId, ?float $previousReading, float $currentReading, string $source): void
-    {
-        $today = now()->toDateString();
-        $calculatedDiff = $previousReading !== null ? max(0, $currentReading - $previousReading) : 0;
-
-        VehicleDailyOdometer::updateOrCreate(
-            ['vehicle_id' => $vehicleId, 'date' => $today],
-            ['odometer_km' => $currentReading, 'source' => $source]
-        );
-
-        // manual_daily: one entry per day; mobile_tracking_trips: each trip = one entry
-        $isDaily = $source === VehicleMileageHistory::SOURCE_MANUAL_DAILY;
-        if ($isDaily && VehicleMileageHistory::where('vehicle_id', $vehicleId)->where('recorded_date', $today)->exists()) {
-            return;
-        }
-
-        VehicleMileageHistory::create([
-            'vehicle_id' => $vehicleId,
-            'tracking_type' => VehicleMileageHistory::TRACKING_MANUAL,
-            'previous_reading' => $previousReading,
-            'current_reading' => $currentReading,
-            'calculated_difference' => $calculatedDiff,
-            'recorded_date' => $today,
-            'source' => $source,
-        ]);
-    }
-
-    private function clearMileageRelatedCache(int $companyId): void
-    {
-        Cache::forget('market_avg_cost_card_' . $companyId . '_' . now()->format('Y-m'));
     }
 
     /** Match DB whether company saved +966... or 05... */

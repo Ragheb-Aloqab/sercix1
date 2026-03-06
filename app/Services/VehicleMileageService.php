@@ -315,7 +315,8 @@ class VehicleMileageService
     }
 
     /**
-     * Calculate estimated market cost: total_monthly_mileage * 0.37 SAR.
+     * Calculate estimated market cost: actual_distance × 0.37 SAR.
+     * Uses mileage from vehicle_mileage_history.calculated_difference (baseline = 0).
      */
     public function getEstimatedMarketCost(float $totalMonthlyMileageKm): float
     {

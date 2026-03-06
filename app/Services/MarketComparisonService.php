@@ -28,10 +28,12 @@ class MarketComparisonService
     }
 
     /**
-     * Calculate Market Average Cost = Total Mileage × 0.37 (SAR).
-     * Centralized formula used consistently across dashboard.
+     * Calculate Market Average Cost = Actual Distance × 0.37 (SAR).
      *
-     * @param  float|null  $totalMileage  Pre-computed total (avoids duplicate calculation when called from getComparisonData)
+     * Uses total mileage from vehicle_mileage_history.calculated_difference (excludes baseline).
+     * First odometer entry contributes 0; only subsequent distance is used.
+     *
+     * @param  float|null  $totalMileage  Pre-computed total distance (avoids duplicate calculation)
      */
     public function calculateMarketAverageCost(Company $company, int $months = 6, ?float $totalMileage = null): float
     {
@@ -122,7 +124,11 @@ class MarketComparisonService
 
     /**
      * Total Kilometers = SUM(vehicle_mileage_history.calculated_difference) for all company vehicles in period.
-     * Sums all records (total km driven). Market Average Cost = Total × 0.37
+     *
+     * First odometer entry (baseline) has calculated_difference = 0 — excluded from total.
+     * Subsequent entries: Distance = Current - Previous, so only actual distance is counted.
+     *
+     * Market Average Cost = Total Distance × 0.37 (config: servx.market_avg_per_km)
      */
     private function getCompanyTotalKilometers(int $companyId, $since): float
     {

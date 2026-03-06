@@ -6,7 +6,6 @@ use App\Models\Vehicle;
 use App\Models\VehicleDailyOdometer;
 use App\Models\VehicleMileageHistory;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DailyOdometerSnapshotService
@@ -44,7 +43,7 @@ class DailyOdometerSnapshotService
 
             $record->wasRecentlyCreated ? $stored++ : $updated++;
 
-            // Store mileage history: previous reading, current reading, calculated difference
+            // Store mileage history via OdometerTrackingService (first-entry baseline logic)
             $this->storeMileageHistoryEntry($vehicleId, $odo, $data['source'], $forDate);
         }
 
@@ -52,27 +51,37 @@ class DailyOdometerSnapshotService
     }
 
     /**
-     * Store a mileage history entry when we have previous and current readings.
-     * Actual Mileage = Current - Previous.
+     * Store a mileage history entry.
+     * First entry (no previous): value saved as baseline only, no distance calculated.
+     * Second entry and after: Distance = Current - Previous.
      */
     private function storeMileageHistoryEntry(int $vehicleId, float $currentOdometer, string $source, Carbon $forDate): void
     {
-        $trackingType = $this->sourceToTrackingType($source);
-        $prevRecord = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
-            ->where('date', '<', $forDate->toDateString())
-            ->orderByDesc('date')
-            ->first();
-
-        $previousReading = $prevRecord ? (float) $prevRecord->odometer_km : null;
-        $calculatedDiff = $previousReading !== null ? max(0, $currentOdometer - $previousReading) : 0;
-
-        // Avoid duplicate history for same vehicle+date
         $exists = VehicleMileageHistory::where('vehicle_id', $vehicleId)
             ->where('recorded_date', $forDate->toDateString())
             ->exists();
 
         if ($exists) {
             return;
+        }
+
+        $trackingType = $this->sourceToTrackingType($source);
+
+        // For batch processing we need to get previous from records before this date
+        // (OdometerTrackingService uses VehicleDailyOdometer which we just updated)
+        $prevRecord = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->where('date', '<', $forDate->toDateString())
+            ->orderByDesc('date')
+            ->first();
+
+        $previousReading = $prevRecord ? (float) $prevRecord->odometer_km : null;
+        $isFirstEntry = $previousReading === null;
+
+        if ($isFirstEntry) {
+            $previousReading = $currentOdometer;
+            $calculatedDiff = 0.0;
+        } else {
+            $calculatedDiff = max(0.0, $currentOdometer - $previousReading);
         }
 
         VehicleMileageHistory::create([
@@ -161,6 +170,7 @@ class DailyOdometerSnapshotService
     /**
      * Store odometer when GPS sends engine/ignition OFF status.
      * For vehicles with IMEI (GPS device): captures the last odometer value at end of trip.
+     * Uses OdometerTrackingService for first-entry baseline logic.
      */
     public function storeOdometerOnGpsEngineOff(int $vehicleId, float $odometer): void
     {
@@ -173,39 +183,25 @@ class DailyOdometerSnapshotService
             return;
         }
 
-        $today = now()->toDateString();
-        $source = VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS;
+        $odometerService = app(OdometerTrackingService::class);
 
-        VehicleDailyOdometer::updateOrCreate(
-            ['vehicle_id' => $vehicleId, 'date' => $today],
-            ['odometer_km' => $odometer, 'source' => $source]
-        );
-
-        $prevRecord = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
-            ->where('date', '<', $today)
-            ->orderByDesc('date')
-            ->first();
-        $previousReading = $prevRecord ? (float) $prevRecord->odometer_km : null;
-
+        // For multiple GPS updates same day: use last today's current as previous
         $lastToday = VehicleMileageHistory::where('vehicle_id', $vehicleId)
-            ->where('recorded_date', $today)
+            ->where('recorded_date', now()->toDateString())
             ->orderByDesc('created_at')
             ->first();
-        if ($lastToday) {
-            $previousReading = (float) $lastToday->current_reading;
-        }
-        $calculatedDiff = $previousReading !== null ? max(0, $odometer - $previousReading) : 0;
 
-        VehicleMileageHistory::create([
-            'vehicle_id' => $vehicleId,
-            'tracking_type' => VehicleMileageHistory::TRACKING_GPS,
-            'previous_reading' => $previousReading,
-            'current_reading' => $odometer,
-            'calculated_difference' => $calculatedDiff,
-            'recorded_date' => $today,
-            'source' => $source,
-        ]);
+        $overridePrevious = $lastToday ? (float) $lastToday->current_reading : null;
 
-        Cache::forget('market_avg_cost_card_' . $vehicle->company_id . '_' . now()->format('Y-m'));
+        $odometerService->recordOdometerEntry(
+            $vehicleId,
+            $odometer,
+            VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS,
+            now(),
+            VehicleMileageHistory::TRACKING_GPS,
+            $overridePrevious
+        );
+
+        $odometerService->clearMileageCache($vehicle->company_id);
     }
 }
