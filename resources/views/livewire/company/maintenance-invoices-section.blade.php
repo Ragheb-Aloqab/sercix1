@@ -138,41 +138,33 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div x-data="{
-                                get invoiceAmount() { return parseFloat($wire.amount) || 0; },
-                                get vatAmount() { return (this.invoiceAmount * 0.15).toFixed(2); },
-                                get totalWithTax() { return (this.invoiceAmount * 1.15).toFixed(2); }
-                            }">
+                            <div>
                                 <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.invoice_amount') }} ({{ __('company.sar') }})</label>
                                 <input type="number" wire:model.live="amount" step="0.01" min="0" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="0.00">
                             </div>
                         </div>
 
                         {{-- Tax option (appears after amount) --}}
-                        <div x-data="{ taxType: @entangle('tax_type') }" x-effect="taxType = $wire.tax_type">
+                        <div>
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
                             <div class="flex flex-wrap gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" wire:model="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                    <input type="radio" wire:model.live="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
                                     <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.without_tax') }}</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" wire:model="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                    <input type="radio" wire:model.live="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
                                     <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
                                 </label>
                             </div>
-                            <div x-data="{
-                                get amount() { return parseFloat($wire.amount) || 0; },
-                                get vat() { return (this.amount * 0.15).toFixed(2); },
-                                get total() { return (this.amount * 1.15).toFixed(2); }
-                            }" x-show="$wire.tax_type === 'with_tax' && amount > 0" x-cloak x-transition class="mt-3 p-3 rounded-xl bg-sky-500/10 border border-sky-400/30">
+                            <div x-data="taxCalculator()" x-init="init()" x-show="showVatSummary" x-cloak x-transition class="mt-3 p-3 rounded-xl bg-sky-500/10 border border-sky-400/30">
                                 <p class="text-sm text-slate-700 dark:text-servx-silver-light">
                                     <span class="font-semibold">{{ __('maintenance.vat_amount') }} (15%):</span>
-                                    <span class="font-bold text-sky-600 dark:text-sky-400" x-text="vat + ' {{ __('company.sar') }}'"></span>
+                                    <span class="font-bold text-sky-600 dark:text-sky-400" x-text="vatFormatted"></span>
                                 </p>
                                 <p class="text-sm text-slate-700 dark:text-servx-silver-light mt-1">
                                     <span class="font-semibold">{{ __('maintenance.total_with_tax') }}:</span>
-                                    <span class="font-bold text-emerald-600 dark:text-emerald-400" x-text="total + ' {{ __('company.sar') }}'"></span>
+                                    <span class="font-bold text-emerald-600 dark:text-emerald-400" x-text="totalFormatted"></span>
                                 </p>
                             </div>
                         </div>
