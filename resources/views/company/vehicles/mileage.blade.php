@@ -18,7 +18,7 @@
     {{-- Current / Previous / Total Distance (unified for GPS and Manual) --}}
     <div class="rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-6 backdrop-blur-sm shadow-sm dark:shadow-none transition-colors duration-300">
         <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-4">{{ __('vehicles.current_previous_total') }}</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
                 <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('vehicles.current_mileage') }}</p>
                 <p class="text-xl font-bold text-slate-900 dark:text-white">{{ number_format($mileageSummary['current_mileage'] ?? 0, 1) }} {{ __('common.km') }}</p>
@@ -30,6 +30,12 @@
             <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
                 <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('vehicles.total_distance') }}</p>
                 <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">{{ number_format($mileageSummary['total_distance'] ?? 0, 1) }} {{ __('common.km') }}</p>
+            </div>
+            @php $totalDist = (float) ($mileageSummary['total_distance'] ?? 0); $marketAvgCost = round($totalDist * ($marketCostPerKm ?? 0.37), 2); @endphp
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 p-4">
+                <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">{{ __('company.market_average_cost') }}</p>
+                <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ number_format($marketAvgCost, 2) }} {{ __('company.sar') }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ __('company.market_avg_formula') ?? 'Distance × 0.37' }}</p>
             </div>
         </div>
     </div>

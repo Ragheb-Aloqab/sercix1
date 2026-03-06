@@ -108,9 +108,18 @@ class OdometerTrackingService
             ]
         );
 
-        // manual_daily: one entry per day; skip if already exists
+        // manual_daily: one entry per day; update existing record if driver re-enters on same day
         $isDaily = $source === VehicleMileageHistory::SOURCE_MANUAL_DAILY;
-        if ($isDaily && VehicleMileageHistory::where('vehicle_id', $vehicleId)->where('recorded_date', $dateString)->exists()) {
+        $existing = $isDaily
+            ? VehicleMileageHistory::where('vehicle_id', $vehicleId)->where('recorded_date', $dateString)->first()
+            : null;
+
+        if ($existing) {
+            $existing->update([
+                'previous_reading' => $previousReading,
+                'current_reading' => $currentReading,
+                'calculated_difference' => $calculatedDifference,
+            ]);
             return [
                 'is_first_entry' => $isFirstEntry,
                 'previous_reading' => $previousReading,
