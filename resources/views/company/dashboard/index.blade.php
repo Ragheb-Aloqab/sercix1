@@ -199,46 +199,46 @@
         @endif
         @php $mcData = $mc ?? []; @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.total_company_maintenance') }} — {{ __('company.market_comparison_tooltip') }}">
+            <div class="dash-card dash-card-kpi group">
                 <p class="dash-card-title">{{ __('company.total_company_maintenance') }}</p>
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value">{{ number_format($mcData['company_total'] ?? 0, 0) }} {{ __('company.sar') }}</p>
-                    <span class="dash-trend dash-trend-stable" title="{{ __('company.performance_ratio') }}">
+                    <span class="dash-trend dash-trend-stable">
                         <i class="fa-solid fa-minus"></i>
                     </span>
                 </div>
             </div>
             @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable', 'total_mileage_km' => 0]; $marketRate = $mcData['market_rate_per_km'] ?? config('servx.market_avg_per_km', 0.37); @endphp
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.market_average_cost') }} — {{ __('company.market_comparison_tooltip') }}. {{ __('vehicles.total_mileage') }}: {{ number_format($mac['total_mileage_km'] ?? 0, 1) }} km × {{ $marketRate }} ({{ $chartMonths ?? 6 }} {{ __('common.months') }})">
+            <div class="dash-card dash-card-kpi group">
                 <p class="dash-card-title">{{ __('company.market_average_cost') }} <span class="text-xs font-normal opacity-75">({{ $chartMonths ?? 6 }}m)</span></p>
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 0) }} {{ __('company.sar') }}</p>
-                    <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}" title="{{ __('vehicles.vs_last_month') }}">
+                    <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}">
                         @if(($mac['trend'] ?? 'stable') === 'up')<i class="fa-solid fa-caret-up"></i>
                         @elseif(($mac['trend'] ?? 'stable') === 'down')<i class="fa-solid fa-caret-down"></i>
                         @else<i class="fa-solid fa-minus"></i>@endif
                     </span>
                 </div>
             </div>
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.difference_saving_over') }}">
+            <div class="dash-card dash-card-kpi group">
                 <p class="dash-card-title">{{ __('company.difference_saving_over') }}</p>
                 @php $diff = $mcData['total_difference'] ?? (($mcData['company_total'] ?? 0) - ($mcData['market_average'] ?? 0)); @endphp
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value {{ $diff > 0 ? 'text-red-400' : ($diff < 0 ? 'text-emerald-400' : '') }}">
                         {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0) }} {{ __('company.sar') }}
                     </p>
-                    <span class="dash-trend dash-trend-{{ $diff > 0 ? 'down' : ($diff < 0 ? 'up' : 'stable') }}" title="{{ $percentDiff }}% {{ __('company.percentage_difference') }}">
+                    <span class="dash-trend dash-trend-{{ $diff > 0 ? 'down' : ($diff < 0 ? 'up' : 'stable') }}">
                         @if($diff > 0)<i class="fa-solid fa-caret-up"></i>
                         @elseif($diff < 0)<i class="fa-solid fa-caret-down"></i>
                         @else<i class="fa-solid fa-minus"></i>@endif
                     </span>
                 </div>
             </div>
-            <div class="dash-card dash-card-kpi group" title="{{ __('company.total_active_vehicles') }}">
+            <div class="dash-card dash-card-kpi group">
                 <p class="dash-card-title">{{ __('company.total_active_vehicles') }}</p>
                 <div class="flex items-center justify-between gap-2">
                     <p class="dash-card-value">{{ $vehiclesCount ?? 0 }}</p>
-                    <span class="dash-trend dash-trend-up" title="{{ __('company.above_normal') }}">
+                    <span class="dash-trend dash-trend-up">
                         <i class="fa-solid fa-caret-up"></i>
                     </span>
                 </div>
@@ -248,12 +248,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {{-- Left: Performance Gauge --}}
             <div class="dash-card dash-card-interactive">
-                <h2 class="dash-section-title flex items-center gap-1">
-                    {{ __('company.market_comparison') }}
-                    <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-600/50 text-slate-400 text-xs cursor-help" title="{{ __('company.performance_gauge_tooltip') }}">
-                        <i class="fa-solid fa-info"></i>
-                    </span>
-                </h2>
+                <h2 class="dash-section-title">{{ __('company.market_comparison') }}</h2>
                 <div class="dash-gauge-wrap">
                     @php
                         $ratio = $mcData['cost_ratio'] ?? 0;
@@ -275,7 +270,7 @@
                 </div>
                 <div class="space-y-2 text-sm border-t border-slate-600/50 pt-4">
                     @php $totalKm = $mcData['total_kilometers'] ?? 0; $rate = $mcData['market_rate_per_km'] ?? config('servx.market_avg_per_km', 0.37); @endphp
-                    <div class="flex justify-between" title="{{ __('company.market_avg_formula') }} = {{ number_format($mcData['market_average'] ?? 0, 0) }} {{ __('company.sar') }}">
+                    <div class="flex justify-between">
                         <span class="text-servx-silver">{{ __('company.total_mileage_period') }} ({{ $chartMonths ?? 6 }}m)</span>
                         <span class="font-bold text-white">{{ number_format($totalKm, 1) }} {{ __('common.km') }}</span>
                     </div>
@@ -302,12 +297,7 @@
             {{-- Right: Monthly Comparison Chart --}}
             <div class="dash-card dash-card-interactive">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <h2 class="dash-section-title flex items-center gap-1">
-                        {{ __('company.monthly_comparison') }}
-                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-600/50 text-slate-400 text-xs cursor-help" title="{{ __('company.market_comparison_tooltip') }}">
-                            <i class="fa-solid fa-info"></i>
-                        </span>
-                    </h2>
+                    <h2 class="dash-section-title">{{ __('company.monthly_comparison') }}</h2>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ request()->fullUrlWithQuery(['chart_months' => 6]) }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 6 ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50' : 'bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30' }}">
                             {{ __('company.last_6_months') }}
@@ -315,7 +305,7 @@
                         <a href="{{ request()->fullUrlWithQuery(['chart_months' => 12]) }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 12 ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50' : 'bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30' }}">
                             {{ __('company.last_12_months') }}
                         </a>
-                        <a href="{{ route('company.reports.index') }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30" title="{{ __('company.custom_range') }}">
+                        <a href="{{ route('company.reports.index') }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30">
                             {{ __('company.custom_range') }}
                         </a>
                     </div>
@@ -330,7 +320,7 @@
                     @endphp
                     <div class="dash-chart-bars flex-1 dash-chart-bars--interactive" style="display: grid; grid-template-columns: repeat({{ count($chartData) ?: 6 }}, 1fr); gap: 4px; min-height: 120px; align-items: flex-end;">
                         @foreach($chartData as $m)
-                            <div class="dash-chart-bar-group flex flex-col gap-1 items-center group" title="{{ $m['month_label'] }} {{ $m['year'] }}: {{ __('company.company_total') }} {{ number_format($m['company_total'], 0) }} {{ __('company.sar') }}, {{ __('company.market_average') }} {{ number_format($m['market_total'], 0) }} {{ __('company.sar') }}">
+                            <div class="dash-chart-bar-group flex flex-col gap-1 items-center group">
                                 <div class="w-full flex gap-0.5 items-end" style="height: 80px;">
                                     <div class="dash-chart-bar dash-chart-bar--company flex-1 bg-sky-500 rounded-t transition-all duration-300 ease-out hover:bg-sky-400" style="height: {{ max(4, ($m['company_total'] / $maxVal) * 100) }}%; min-height: 4px; animation: dashBarGrow 0.6s ease-out {{ $loop->index * 0.05 }}s both;"></div>
                                     <div class="dash-chart-bar dash-chart-bar--market flex-1 bg-slate-500/70 rounded-t transition-all duration-300 ease-out hover:bg-slate-500" style="height: {{ max(4, ($m['market_total'] / $maxVal) * 100) }}%; min-height: 4px; animation: dashBarGrow 0.6s ease-out {{ $loop->index * 0.05 + 0.03 }}s both;"></div>
@@ -358,7 +348,7 @@
                 @php $top3 = ($topVehicles ?? collect())->take(3); @endphp
                 <div class="space-y-2">
                     @forelse($top3 as $v)
-                        <a href="{{ route('company.vehicles.show', $v->id) }}" class="flex items-center justify-between p-2 rounded-lg bg-servx-inner border border-servx-border hover:border-sky-500/30 transition-colors" title="{{ $v->plate_number ?? '' }} {{ $v->make }} {{ $v->model }}">
+                        <a href="{{ route('company.vehicles.show', $v->id) }}" class="flex items-center justify-between p-2 rounded-lg bg-servx-inner border border-servx-border hover:border-sky-500/30 transition-colors">
                             <span class="text-sm text-white truncate">{{ $v->plate_number ?? ($v->make . ' ' . $v->model) }}</span>
                             <span class="text-sm font-bold text-sky-400 shrink-0">{{ number_format($v->total_cost ?? 0, 0) }} {{ __('company.sar') }}</span>
                         </a>
@@ -381,13 +371,13 @@
                 @endif
             </div>
             {{-- Average Cost Per Vehicle --}}
-            <div class="dash-card dash-card-interactive" title="{{ __('company.avg_cost_per_vehicle_label') }} = {{ __('company.company_total') }} ÷ {{ __('company.total_active_vehicles') }}">
+            <div class="dash-card dash-card-interactive">
                 <h2 class="dash-section-title">{{ __('company.avg_cost_per_vehicle_label') }}</h2>
                 <p class="dash-card-value dash-card-value-lg">{{ number_format($avgCostPerVehicle ?? 0, 0) }} {{ __('company.sar') }}</p>
                 <p class="text-xs text-servx-silver">{{ __('company.company_total') }} ÷ {{ __('company.vehicles') }}</p>
             </div>
             {{-- Total Yearly Savings --}}
-            <div class="dash-card dash-card-interactive" title="{{ __('company.total_yearly_savings') }} — {{ __('company.market_average') }} − {{ __('company.company_total') }} when positive">
+            <div class="dash-card dash-card-interactive">
                 <h2 class="dash-section-title">{{ __('company.total_yearly_savings') }}</h2>
                 <p class="dash-card-value dash-card-value-lg text-emerald-400">{{ number_format($totalYearlySavings ?? 0, 0) }} {{ __('company.sar') }}</p>
                 <p class="text-xs text-servx-silver">{{ __('company.market_average') }} − {{ __('company.company_total') }}</p>
