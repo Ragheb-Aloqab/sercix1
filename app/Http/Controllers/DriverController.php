@@ -50,7 +50,9 @@ class DriverController extends Controller
             ? route('driver.tracking', ['vehicle' => $firstTrackableVehicle->id])
             : route('driver.dashboard');
 
-        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount', 'trackingUrl'));
+        $firstOdometerVehicle = $vehicles->first(fn ($v) => $v->usesMobileTracking());
+
+        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount', 'trackingUrl', 'firstOdometerVehicle'));
     }
 
     public function history()

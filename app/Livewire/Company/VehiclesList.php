@@ -65,7 +65,7 @@ class VehiclesList extends Component
             $v->inspection_status = $inspectionService->getVehicleInspectionStatus($v);
         });
 
-        $mileageSummaries = $mileageService->getVehicleMileageSummariesForVehicles($vehicles);
+        $mileageSummaries = $mileageService->getVehicleMileageSummariesForVehicles($vehicles->getCollection());
 
         $branches = $company->branches()
             ->where('is_active', true)

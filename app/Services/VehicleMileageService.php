@@ -451,7 +451,10 @@ class VehicleMileageService
      */
     public function getVehicleMileageSummariesForVehicles(iterable $vehicles): array
     {
-        $ids = collect($vehicles)->pluck('id')->filter()->unique()->values()->all();
+        $items = $vehicles instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator
+            ? $vehicles->getCollection()
+            : collect($vehicles);
+        $ids = $items->pluck('id')->filter()->unique()->values()->all();
         if (empty($ids)) {
             return [];
         }
