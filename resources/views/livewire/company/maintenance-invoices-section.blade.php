@@ -51,7 +51,16 @@
                                     @endif
                                 </td>
                                 <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ $inv->vehicle?->plate_number ?? '-' }}</td>
-                                <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver-light">{{ $inv->amount ? number_format($inv->amount, 2) . ' ' . __('company.sar') : '-' }}</td>
+                                <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver-light">
+                                    @if($inv->amount)
+                                        {{ number_format($inv->amount, 2) }} {{ __('company.sar') }}
+                                        @if($inv->hasTax())
+                                            <span class="ms-1 px-1.5 py-0.5 rounded text-xs bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-400/30" title="{{ __('maintenance.with_tax_vat') }}">VAT</span>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver">{{ $inv->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
                                 <td class="py-4 pe-4">
                                     <div class="flex gap-2">
@@ -145,7 +154,13 @@
                         </div>
 
                         {{-- Tax option (appears after amount) --}}
-                        <div>
+                        <div x-data="{
+                            get amount() { return parseFloat($wire.amount) || 0; },
+                            get taxType() { return $wire.tax_type || 'without_tax'; },
+                            get vat() { return (this.amount * 0.15).toFixed(2); },
+                            get total() { return (this.amount * 1.15).toFixed(2); },
+                            get showVatSummary() { return this.taxType === 'with_tax' && this.amount > 0; }
+                        }">
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
                             <div class="flex flex-wrap gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
@@ -157,16 +172,18 @@
                                     <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
                                 </label>
                             </div>
-                            <div x-data="taxCalculator()" x-init="init()" x-show="showVatSummary" x-cloak x-transition class="mt-3 p-3 rounded-xl bg-sky-500/10 border border-sky-400/30">
-                                <p class="text-sm text-slate-700 dark:text-servx-silver-light">
-                                    <span class="font-semibold">{{ __('maintenance.vat_amount') }} (15%):</span>
-                                    <span class="font-bold text-sky-600 dark:text-sky-400" x-text="vatFormatted"></span>
-                                </p>
-                                <p class="text-sm text-slate-700 dark:text-servx-silver-light mt-1">
-                                    <span class="font-semibold">{{ __('maintenance.total_with_tax') }}:</span>
-                                    <span class="font-bold text-emerald-600 dark:text-emerald-400" x-text="totalFormatted"></span>
-                                </p>
-                            </div>
+                            <template x-if="showVatSummary">
+                                <div class="mt-3 p-3 rounded-xl bg-sky-500/10 border border-sky-400/30" x-transition x-cloak>
+                                    <p class="text-sm text-slate-700 dark:text-servx-silver-light">
+                                        <span class="font-semibold">{{ __('maintenance.vat_amount') }} (15%):</span>
+                                        <span class="font-bold text-sky-600 dark:text-sky-400" x-text="vat + ' {{ __('company.sar') }}'"></span>
+                                    </p>
+                                    <p class="text-sm text-slate-700 dark:text-servx-silver-light mt-1">
+                                        <span class="font-semibold">{{ __('maintenance.total_with_tax') }}:</span>
+                                        <span class="font-bold text-emerald-600 dark:text-emerald-400" x-text="total + ' {{ __('company.sar') }}'"></span>
+                                    </p>
+                                </div>
+                            </template>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('common.description') }}</label>

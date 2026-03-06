@@ -129,6 +129,14 @@ return [
     'invoice_validation_type' => 'File must be an image (JPG, JPEG, PNG, WEBP) or PDF.',
     'invoice_validation_size' => 'File size must not exceed :max MB.',
 
+    // Tax options for maintenance invoices
+    'invoice_amount' => 'Invoice Amount',
+    'tax_option' => 'Tax Option',
+    'without_tax' => 'Without Tax',
+    'with_tax_vat' => 'With Tax (15% VAT)',
+    'vat_amount' => 'VAT Amount',
+    'total_with_tax' => 'Total with Tax',
+
     // Status labels
     'status_new_request' => 'New Request',
     'status_rejected' => 'Rejected',

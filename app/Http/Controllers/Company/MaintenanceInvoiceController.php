@@ -26,6 +26,7 @@ class MaintenanceInvoiceController extends Controller
             ],
             'vehicle_id' => ['nullable', 'exists:vehicles,id'],
             'amount' => ['nullable', 'numeric', 'min:0'],
+            'tax_type' => ['nullable', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -101,10 +102,23 @@ class MaintenanceInvoiceController extends Controller
         $uniqueName = Str::uuid() . '.' . $ext;
         $path = $file->storeAs('invoices/' . $company->id, $uniqueName, 'private');
 
+        $originalAmount = isset($validated['amount']) ? (float) $validated['amount'] : null;
+        $taxType = $validated['tax_type'] ?? CompanyMaintenanceInvoice::TAX_WITHOUT;
+        $vatAmount = null;
+        $totalAmount = $originalAmount;
+
+        if ($originalAmount !== null && $taxType === CompanyMaintenanceInvoice::TAX_WITH) {
+            $vatAmount = round($originalAmount * CompanyMaintenanceInvoice::VAT_RATE, 2);
+            $totalAmount = round($originalAmount + $vatAmount, 2);
+        }
+
         CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $validated['vehicle_id'] ?? null,
-            'amount' => $validated['amount'] ?? null,
+            'amount' => $totalAmount,
+            'original_amount' => $originalAmount,
+            'vat_amount' => $vatAmount,
+            'tax_type' => $taxType,
             'invoice_file' => $path,
             'file_type' => $fileType,
             'original_filename' => $originalName,

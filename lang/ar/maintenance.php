@@ -129,6 +129,14 @@ return [
     'invoice_validation_type' => 'يجب أن يكون الملف صورة (JPG, JPEG, PNG, WEBP) أو PDF.',
     'invoice_validation_size' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',
 
+    // Tax options for maintenance invoices
+    'invoice_amount' => 'مبلغ الفاتورة',
+    'tax_option' => 'خيار الضريبة',
+    'without_tax' => 'بدون ضريبة',
+    'with_tax_vat' => 'مع ضريبة (15% ضريبة القيمة المضافة)',
+    'vat_amount' => 'مبلغ الضريبة',
+    'total_with_tax' => 'الإجمالي مع الضريبة',
+
     // Status labels
     'status_new_request' => 'طلب جديد',
     'status_rejected' => 'مرفوض',
