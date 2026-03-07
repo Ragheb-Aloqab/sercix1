@@ -6,6 +6,8 @@ use App\Listeners\InvalidateCompanyAnalyticsCache;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\Service;
 use App\Models\Vehicle;
+use App\Rules\PreventDuplicateMaintenanceInvoice;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
@@ -97,6 +99,14 @@ class MaintenanceInvoicesSection extends Component
         $this->resetValidation('newServiceName');
     }
 
+    public function removeService(int $serviceId): void
+    {
+        $this->service_ids = array_values(array_filter(
+            $this->service_ids,
+            fn ($id) => (int) $id !== $serviceId
+        ));
+    }
+
     public function addNewService(): void
     {
         $this->validate([
@@ -149,6 +159,7 @@ class MaintenanceInvoicesSection extends Component
         ]);
 
         $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)->findOrFail($this->editingInvoiceId);
+        $oldVehicleId = $inv->vehicle_id ? (int) $inv->vehicle_id : null;
 
         $vehicleId = $this->vehicle_id !== '' && $this->vehicle_id !== null ? (int) $this->vehicle_id : null;
         if ($vehicleId && !$company->vehicles()->where('id', $vehicleId)->exists()) {
@@ -177,6 +188,12 @@ class MaintenanceInvoicesSection extends Component
         $inv->services()->sync($this->service_ids);
 
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
+        if ($vehicleId) {
+            InvalidateCompanyAnalyticsCache::forVehicle($vehicleId);
+        }
+        if ($oldVehicleId && $oldVehicleId !== $vehicleId) {
+            InvalidateCompanyAnalyticsCache::forVehicle($oldVehicleId);
+        }
 
         $this->closeModal();
         $this->dispatch('invoice-uploaded');
@@ -223,6 +240,13 @@ class MaintenanceInvoicesSection extends Component
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
 
+        if ($totalAmount !== null) {
+            Validator::make(
+                ['amount' => $totalAmount],
+                ['amount' => [new PreventDuplicateMaintenanceInvoice($company->id, $vehicleId, $totalAmount)]]
+            )->validate();
+        }
+
         $inv = CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
@@ -239,6 +263,9 @@ class MaintenanceInvoicesSection extends Component
         $inv->services()->sync($this->service_ids);
 
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
+        if ($vehicleId) {
+            InvalidateCompanyAnalyticsCache::forVehicle($vehicleId);
+        }
 
         $this->closeModal();
         $this->dispatch('invoice-uploaded');

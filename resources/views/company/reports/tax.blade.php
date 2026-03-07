@@ -57,35 +57,24 @@
 
 {{-- Summary cards --}}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
-    <div class="rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm transition-colors duration-300">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="w-10 h-10 rounded-xl flex items-center justify-center bg-sky-500/30">
-                <i class="fa-solid fa-file-invoice text-sky-600 dark:text-sky-400"></i>
-            </span>
-            <p class="text-slate-600 dark:text-slate-400 text-sm font-bold">{{ __('reports.total_invoices') }}</p>
-        </div>
-        <p class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{{ number_format($data['total_invoices'] ?? 0, 0) }}</p>
-    </div>
-
-    <div class="rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm transition-colors duration-300">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/30">
-                <i class="fa-solid fa-percent text-amber-600 dark:text-amber-400"></i>
-            </span>
-            <p class="text-slate-600 dark:text-slate-400 text-sm font-bold">{{ __('reports.total_vat_amount') }}</p>
-        </div>
-        <p class="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">{{ number_format($data['total_vat_amount'] ?? 0, 2) }} {{ __('company.sar') }}</p>
-    </div>
-
-    <div class="rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm transition-colors duration-300">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/30">
-                <i class="fa-solid fa-coins text-emerald-600 dark:text-emerald-400"></i>
-            </span>
-            <p class="text-slate-600 dark:text-slate-400 text-sm font-bold">{{ __('reports.total_including_vat') }}</p>
-        </div>
-        <p class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">{{ number_format($data['total_including_vat'] ?? 0, 2) }} {{ __('company.sar') }}</p>
-    </div>
+    <x-report-stat-card
+        :label="__('reports.total_invoices')"
+        :value="number_format($data['total_invoices'] ?? 0, 0)"
+        icon="fa-file-invoice"
+        icon-color="sky"
+    />
+    <x-report-stat-card
+        :label="__('reports.total_vat_amount')"
+        :value="number_format($data['total_vat_amount'] ?? 0, 2) . ' ' . __('company.sar')"
+        icon="fa-percent"
+        icon-color="amber"
+    />
+    <x-report-stat-card
+        :label="__('reports.total_including_vat')"
+        :value="number_format($data['total_including_vat'] ?? 0, 2) . ' ' . __('company.sar')"
+        icon="fa-coins"
+        icon-color="emerald"
+    />
 </div>
 
 {{-- Invoices table --}}

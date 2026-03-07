@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\CompanyFuelInvoice;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Quotation;
@@ -117,10 +118,16 @@ class MarketComparisonService
 
     private function getCompanyFuelTotal(int $companyId, $since): float
     {
-        return (float) DB::table('fuel_refills')
+        $refillTotal = (float) DB::table('fuel_refills')
             ->where('company_id', $companyId)
             ->where('refilled_at', '>=', $since)
             ->sum('cost');
+
+        $invoiceTotal = (float) CompanyFuelInvoice::where('company_id', $companyId)
+            ->where('created_at', '>=', $since)
+            ->sum('amount');
+
+        return $refillTotal + $invoiceTotal;
     }
 
     /**

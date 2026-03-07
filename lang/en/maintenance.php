@@ -127,6 +127,7 @@ return [
     'invoice_file_accept' => 'JPG, JPEG, PNG, WEBP or PDF (max :max MB)',
     'invoice_file_max' => 'File must not exceed :max MB.',
     'invoice_uploaded_success' => 'Invoice uploaded successfully.',
+    'duplicate_invoice_warning' => 'A similar invoice (same vehicle and amount) was added recently. Please confirm this is not a duplicate.',
     'invoice_updated_success' => 'Invoice updated successfully.',
     'edit_invoice' => 'Edit Invoice',
     'invoice_validation_type' => 'File must be an image (JPG, JPEG, PNG, WEBP) or PDF.',
@@ -136,7 +137,9 @@ return [
     'add_service' => 'Add Service',
     'service_already_exists' => 'This service already exists.',
     'services' => 'Services',
-    'select_services' => 'Select services',
+    'select_services' => 'Select one or more services',
+    'search_services' => 'Search services...',
+    'no_services_match' => 'No services match your search',
 
     // Tax options for maintenance invoices
     'invoice_amount' => 'Invoice Amount',

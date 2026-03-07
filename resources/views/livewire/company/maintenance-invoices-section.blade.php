@@ -177,26 +177,71 @@
                             </div>
                         </div>
 
-                        {{-- Services multi-select with Add Service --}}
-                        <div x-data="{ servicesOpen: false }" class="relative">
+                        {{-- Services: searchable multi-select with Add Service --}}
+                        <div x-data="{
+                            open: false,
+                            search: '',
+                            services: {{ Js::from($services->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()) }},
+                            get filtered() { const q = this.search.toLowerCase().trim(); return this.services.filter(s => !q || s.name.toLowerCase().includes(q)); },
+                            get noMatch() { return this.open && this.search && this.filtered.length === 0; }
+                        }" x-on:click.outside="open = false" class="relative">
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.services') }}</label>
-                            <div class="flex gap-2">
-                                <div class="flex-1 relative">
-                                    <select wire:model="service_ids" multiple
-                                        class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300 min-h-[42px]"
-                                        size="3">
-                                        @foreach($services as $s)
-                                            <option value="{{ $s->id }}">{{ $s->name }}</option>
-                                        @endforeach
-                                    </select>
+                            <div class="flex gap-2 flex-wrap">
+                                <div class="flex-1 min-w-0">
+                                    <div class="rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 overflow-hidden">
+                                        {{-- Selected chips --}}
+                                        @if(count($service_ids) > 0)
+                                            <div class="flex flex-wrap gap-1.5 p-2 border-b border-slate-200 dark:border-slate-600/50">
+                                                @foreach($services->whereIn('id', $service_ids) as $s)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/20 text-sky-700 dark:text-sky-300 text-sm">
+                                                        {{ $s->name }}
+                                                        <button type="button" wire:click="removeService({{ $s->id }})"
+                                                            class="hover:text-red-500 transition-colors" title="{{ __('common.remove') }}">
+                                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                                        </button>
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        {{-- Dropdown trigger + search --}}
+                                        <div class="relative">
+                                            <input type="text" x-model="search" @focus="open = true"
+                                                placeholder="{{ __('maintenance.search_services') }}"
+                                                class="w-full px-4 py-2.5 pr-10 bg-transparent text-slate-900 dark:text-servx-silver-light border-0 focus:ring-0 focus:outline-none placeholder-slate-400">
+                                            <button type="button" @click="open = !open"
+                                                class="absolute end-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-servx-silver">
+                                                <i class="fa-solid fa-chevron-down text-sm transition-transform" :class="{ 'rotate-180': open }"></i>
+                                            </button>
+                                        </div>
+                                        {{-- Options list --}}
+                                        <div x-show="open" x-transition
+                                            class="max-h-48 overflow-y-auto border-t border-slate-200 dark:border-slate-600/50">
+                                            <template x-for="s in filtered" :key="s.id">
+                                                <label class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                                    <input type="checkbox" :value="s.id"
+                                                        class="w-4 h-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
+                                                        :checked="($wire.service_ids || []).includes(s.id) || ($wire.service_ids || []).includes(String(s.id))"
+                                                        @change="const ids = $wire.service_ids || []; const next = $el.checked ? [...ids, s.id] : ids.filter(id => id != s.id && id != s.id.toString()); $wire.set('service_ids', next)">
+                                                    <span class="text-slate-700 dark:text-servx-silver-light" x-text="s.name"></span>
+                                                </label>
+                                            </template>
+                                            <p x-show="noMatch" class="px-4 py-3 text-slate-500 text-sm">
+                                                {{ __('maintenance.no_services_match') }}
+                                            </p>
+                                        </div>
+                                    </div>
                                     <p class="text-xs text-slate-500 mt-1">{{ __('maintenance.select_services') }}</p>
                                 </div>
                                 <button type="button" wire:click="openAddServiceModal"
-                                    class="shrink-0 self-start px-3 py-2 rounded-xl border border-dashed border-sky-500/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 transition-colors"
+                                    class="shrink-0 self-start px-3 py-2.5 rounded-xl border border-dashed border-sky-500/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 transition-colors inline-flex items-center gap-1.5"
                                     title="{{ __('maintenance.add_service') }}">
                                     <i class="fa-solid fa-plus"></i>
+                                    <span class="text-sm font-semibold">{{ __('maintenance.add_service') }}</span>
                                 </button>
                             </div>
+                            @error('service_ids')
+                                <p class="text-sm text-red-400 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Tax option (appears after amount) --}}

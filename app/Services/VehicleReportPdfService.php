@@ -2,124 +2,102 @@
 
 namespace App\Services;
 
-use App\Models\CompanyMaintenanceInvoice;
+use App\Services\Report\VehicleReportDataProvider;
 use App\Models\Vehicle;
-use App\Models\FuelRefill;
-use App\Models\MaintenanceRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as Mpdf;
 
 class VehicleReportPdfService
 {
-    public function generate(Vehicle $vehicle, string $type, ?string $dateFrom, ?string $dateTo): string
+    public function __construct(
+        private readonly VehicleReportDataProvider $dataProvider
+    ) {}
+
+    /**
+     * Generate PDF from pre-fetched data (used by ReportExportService).
+     *
+     * @param  array{rows: array, fuel_total: float, maintenance_total: float, combined_total: float, vehicle: Vehicle, type: string, date_from?: string|null, date_to?: string|null}  $data
+     */
+    public function generateFromData(array $data): string
     {
-        $fuelTotal = 0.0;
-        $maintenanceTotal = 0.0;
-        $rows = [];
-
-        if (in_array($type, ['fuel', 'all'])) {
-            $q = FuelRefill::where('vehicle_id', $vehicle->id);
-            if ($dateFrom) {
-                $q->where('refilled_at', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $q->where('refilled_at', '<=', $dateTo . ' 23:59:59');
-            }
-            foreach ($q->orderBy('refilled_at')->get() as $fr) {
-                $cost = (float) $fr->cost;
-                $fuelTotal += $cost;
-                $rows[] = [
-                    'date' => $fr->refilled_at?->format('Y-m-d H:i'),
-                    'type' => __('company.fuel'),
-                    'desc' => $fr->liters . ' L',
-                    'cost' => $cost,
-                ];
-            }
+        $vehicle = $data['vehicle'] ?? null;
+        if (!$vehicle instanceof Vehicle) {
+            throw new \InvalidArgumentException('Vehicle is required.');
         }
 
-        if (in_array($type, ['maintenance', 'all'])) {
-            $q = MaintenanceRequest::where('vehicle_id', $vehicle->id)
-                ->where(function ($mq) {
-                    $mq->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
-                });
-            if ($dateFrom) {
-                $q->where('created_at', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $q->where('created_at', '<=', $dateTo . ' 23:59:59');
-            }
-            foreach ($q->orderBy('created_at')->get() as $mr) {
-                $cost = (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0);
-                $maintenanceTotal += $cost;
-                $rows[] = [
-                    'date' => $mr->created_at?->format('Y-m-d H:i'),
-                    'type' => __('company.maintenance'),
-                    'desc' => 'Request #' . $mr->id,
-                    'cost' => $cost,
-                ];
-            }
-
-            $invQ = CompanyMaintenanceInvoice::where('vehicle_id', $vehicle->id);
-            if ($dateFrom) {
-                $invQ->where('created_at', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $invQ->where('created_at', '<=', $dateTo . ' 23:59:59');
-            }
-            foreach ($invQ->orderBy('created_at')->get() as $inv) {
-                $cost = (float) $inv->amount;
-                $maintenanceTotal += $cost;
-                $rows[] = [
-                    'date' => $inv->created_at?->format('Y-m-d H:i'),
-                    'type' => __('company.maintenance'),
-                    'desc' => __('maintenance.invoice') . ' #' . $inv->id,
-                    'cost' => $cost,
-                ];
-            }
-        }
-
-        usort($rows, fn ($a, $b) => strcmp($a['date'] ?? '', $b['date'] ?? ''));
-        $combinedTotal = $fuelTotal + $maintenanceTotal;
+        $rows = $data['rows'] ?? [];
+        $fuelTotal = (float) ($data['fuel_total'] ?? 0);
+        $maintenanceTotal = (float) ($data['maintenance_total'] ?? 0);
+        $combinedTotal = (float) ($data['combined_total'] ?? 0);
+        $type = $data['type'] ?? 'all';
+        $dateFrom = $data['date_from'] ?? null;
+        $dateTo = $data['date_to'] ?? null;
 
         $html = $this->buildHtml($vehicle, $rows, $fuelTotal, $maintenanceTotal, $combinedTotal, $type, $dateFrom, $dateTo);
 
-        return Pdf::loadHTML($html)
-            ->setPaper('a4', 'portrait')
-            ->setOption('isHtml5ParserEnabled', true)
-            ->setOption('defaultFont', 'DejaVu Sans')
-            ->output();
+        return $this->renderPdf($html);
+    }
+
+    /**
+     * Generate PDF (legacy method - delegates to data provider).
+     */
+    public function generate(Vehicle $vehicle, string $type, ?string $dateFrom, ?string $dateTo): string
+    {
+        $data = $this->dataProvider->getData([
+            'vehicle' => $vehicle,
+            'type' => $type,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+        ]);
+
+        return $this->generateFromData($data);
     }
 
     private function buildHtml(Vehicle $vehicle, array $rows, float $fuelTotal, float $maintenanceTotal, float $combinedTotal, string $type, ?string $dateFrom, ?string $dateTo): string
     {
+        $locale = app()->getLocale();
+        $isRtl = $locale === 'ar';
+        $dir = $isRtl ? 'rtl' : 'ltr';
+        $lang = $isRtl ? 'ar' : 'en';
+        $textAlign = $isRtl ? 'right' : 'left';
+
         $title = __('vehicles.vehicle_report') . ' - ' . ($vehicle->plate_number ?? $vehicle->display_name);
         $dateRange = ($dateFrom && $dateTo) ? $dateFrom . ' — ' . $dateTo : __('vehicles.all_dates');
 
         $tableRows = '';
         foreach ($rows as $r) {
-            $tableRows .= '<tr><td>' . ($r['date'] ?? '') . '</td><td>' . ($r['type'] ?? '') . '</td><td>' . ($r['desc'] ?? '') . '</td><td style="text-align:right">' . number_format($r['cost'], 2) . '</td></tr>';
+            $desc = $r['description'] ?? $r['desc'] ?? '';
+            $typeLabel = ($r['type'] ?? '') === 'fuel' ? __('company.fuel') : __('company.maintenance');
+            $tableRows .= '<tr><td>' . e($r['date'] ?? '') . '</td><td>' . e($typeLabel) . '</td><td>' . e($desc) . '</td><td style="text-align:right">' . number_format((float) ($r['cost'] ?? 0), 2) . '</td></tr>';
         }
 
         $summary = '';
         if (in_array($type, ['fuel', 'all'])) {
-            $summary .= '<p><strong>' . __('company.total_fuel_cost') . ':</strong> ' . number_format($fuelTotal, 2) . ' SAR</p>';
+            $summary .= '<p><strong>' . __('company.total_fuel_cost') . ':</strong> ' . number_format($fuelTotal, 2) . ' ' . __('company.sar') . '</p>';
         }
         if (in_array($type, ['maintenance', 'all'])) {
-            $summary .= '<p><strong>' . __('company.total_maintenance_cost') . ':</strong> ' . number_format($maintenanceTotal, 2) . ' SAR</p>';
+            $summary .= '<p><strong>' . __('company.total_maintenance_cost') . ':</strong> ' . number_format($maintenanceTotal, 2) . ' ' . __('company.sar') . '</p>';
         }
-        $summary .= '<p><strong>' . __('vehicles.combined_total') . ':</strong> ' . number_format($combinedTotal, 2) . ' SAR</p>';
+        $summary .= '<p><strong>' . __('vehicles.combined_total') . ':</strong> ' . number_format($combinedTotal, 2) . ' ' . __('company.sar') . '</p>';
 
-        return <<<HTML
+        $dateLabel = __('fuel.date');
+        $typeLabel = __('vehicles.report_type');
+        $descLabel = __('vehicles.description');
+        $costLabel = __('company.cost') . ' (SAR)';
+
+        $html = <<<HTML
 <!DOCTYPE html>
-<html>
+<html dir="{$dir}" lang="{$lang}">
 <head>
     <meta charset="utf-8">
     <title>{$title}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; padding: 20px; }
-        h1 { font-size: 16px; margin-bottom: 8px; }
+        body { font-size: 11px; padding: 24px; margin: 0; }
+        h1 { font-size: 18px; margin-bottom: 8px; }
         table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
-        th { background: #eee; }
+        th, td { border: 1px solid #333; padding: 8px 10px; text-align: {$textAlign}; }
+        th { background: #1E3A5F; color: #fff; font-weight: bold; }
+        td:last-child { text-align: right; }
         .summary { margin-top: 16px; }
     </style>
 </head>
@@ -127,12 +105,37 @@ class VehicleReportPdfService
     <h1>{$title}</h1>
     <p>{$dateRange}</p>
     <table>
-        <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Cost (SAR)</th></tr></thead>
+        <thead><tr><th>{$dateLabel}</th><th>{$typeLabel}</th><th>{$descLabel}</th><th style="text-align:right">{$costLabel}</th></tr></thead>
         <tbody>{$tableRows}</tbody>
     </table>
     <div class="summary">{$summary}</div>
 </body>
 </html>
 HTML;
+
+        return $html;
+    }
+
+    private function renderPdf(string $html): string
+    {
+        $locale = app()->getLocale();
+        $isRtl = $locale === 'ar';
+
+        if ($isRtl) {
+            $config = [
+                'format' => 'A4',
+                'default_font_size' => 11,
+                'default_font' => 'xbriyaz',
+            ];
+            $pdf = Mpdf::loadHTML($html, $config);
+            $pdf->getMpdf()->SetDirectionality('rtl');
+            return $pdf->output();
+        }
+
+        return Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('defaultFont', 'DejaVu Sans')
+            ->output();
     }
 }

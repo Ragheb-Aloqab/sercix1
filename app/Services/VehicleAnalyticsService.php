@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CompanyFuelInvoice;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Vehicle;
@@ -24,7 +25,9 @@ class VehicleAnalyticsService
     private function computeVehicleAnalytics(Vehicle $vehicle): array
     {
         $maintenanceCost = $this->getVehicleMaintenanceCost($vehicle->id);
-        $fuelCost = (float) $vehicle->fuelRefills()->sum('cost');
+        $fuelRefillCost = (float) $vehicle->fuelRefills()->sum('cost');
+        $fuelInvoiceCost = (float) CompanyFuelInvoice::where('vehicle_id', $vehicle->id)->sum('amount');
+        $fuelCost = $fuelRefillCost + $fuelInvoiceCost;
         $totalCost = $maintenanceCost + $fuelCost;
 
         // Cost breakdown: Maintenance, Fuel, Parts, Other (parts/other = 0 when not separately tracked)
@@ -60,6 +63,9 @@ class VehicleAnalyticsService
         $yearlyCost = $this->getVehicleCostForPeriod($vehicle->id, $yearStart, $now);
         $avgMonthlyCost = 12 > 0 ? round($yearlyCost / 12, 0) : 0;
 
+        // Cost per kilometer (useful fleet efficiency metric)
+        $costPerKm = $totalMileage > 0 ? round($totalCost / $totalMileage, 2) : 0.0;
+
         return [
             'current_month_cost' => round($currentMonthCost, 2),
             'last_month_cost' => round($lastMonthCost, 2),
@@ -72,18 +78,19 @@ class VehicleAnalyticsService
             'health_score' => $healthScore,
             'yearly_cost' => round($yearlyCost, 2),
             'avg_monthly_cost' => $avgMonthlyCost,
+            'cost_per_km' => $costPerKm,
         ];
     }
 
     private function getVehicleMaintenanceCost(int $vehicleId): float
     {
-        $mrTotal = MaintenanceRequest::query()
+        $mrTotal = (float) MaintenanceRequest::query()
             ->where('vehicle_id', $vehicleId)
             ->where(function ($q) {
                 $q->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
             })
-            ->get()
-            ->sum(fn ($r) => (float) ($r->final_invoice_amount ?? $r->approved_quote_amount ?? 0));
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount)), 0) as total')
+            ->value('total');
 
         $orderTotal = (float) DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
@@ -98,14 +105,14 @@ class VehicleAnalyticsService
 
     private function getVehicleCostForPeriod(int $vehicleId, $from, $to): float
     {
-        $mrTotal = MaintenanceRequest::query()
+        $mrTotal = (float) MaintenanceRequest::query()
             ->where('vehicle_id', $vehicleId)
             ->whereBetween('created_at', [$from, $to])
             ->where(function ($q) {
                 $q->whereNotNull('approved_quote_amount')->orWhereNotNull('final_invoice_amount');
             })
-            ->get()
-            ->sum(fn ($r) => (float) ($r->final_invoice_amount ?? $r->approved_quote_amount ?? 0));
+            ->selectRaw('COALESCE(SUM(COALESCE(final_invoice_amount, approved_quote_amount)), 0) as total')
+            ->value('total');
 
         $orderTotal = (float) DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
@@ -118,12 +125,16 @@ class VehicleAnalyticsService
             ->whereBetween('created_at', [$from, $to])
             ->sum('amount');
 
-        $fuelTotal = (float) DB::table('fuel_refills')
+        $fuelRefillTotal = (float) DB::table('fuel_refills')
             ->where('vehicle_id', $vehicleId)
             ->whereBetween('refilled_at', [$from, $to])
             ->sum('cost');
 
-        return $mrTotal + $orderTotal + $invoiceTotal + $fuelTotal;
+        $fuelInvoiceTotal = (float) CompanyFuelInvoice::where('vehicle_id', $vehicleId)
+            ->whereBetween('created_at', [$from, $to])
+            ->sum('amount');
+
+        return $mrTotal + $orderTotal + $invoiceTotal + $fuelRefillTotal + $fuelInvoiceTotal;
     }
 
     private function computeHealthScore(Vehicle $vehicle): int

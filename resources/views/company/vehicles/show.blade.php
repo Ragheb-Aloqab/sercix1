@@ -35,6 +35,28 @@
     </div>
 </div>
 
+{{-- Cost summary (includes maintenance invoices) --}}
+@if(isset($analytics))
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm">
+        <p class="text-sm text-slate-500 mb-1">{{ __('company.total_maintenance_cost') }}</p>
+        <p class="text-xl font-bold text-white">{{ number_format($analytics['maintenance_cost'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+    </div>
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm">
+        <p class="text-sm text-slate-500 mb-1">{{ __('company.total_fuel_cost') }}</p>
+        <p class="text-xl font-bold text-white">{{ number_format($analytics['fuel_cost'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+    </div>
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm">
+        <p class="text-sm text-slate-500 mb-1">{{ __('company.total_cost') }}</p>
+        <p class="text-xl font-bold text-amber-400">{{ number_format($analytics['total_cost'] ?? 0, 2) }} {{ __('company.sar') }}</p>
+    </div>
+    <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm">
+        <p class="text-sm text-slate-500 mb-1">{{ __('reports.cost_per_km') }}</p>
+        <p class="text-xl font-bold text-emerald-400">{{ number_format($analytics['cost_per_km'] ?? 0, 2) }} {{ __('company.sar') }}/km</p>
+    </div>
+</div>
+@endif
+
 {{-- 5 Clickable Navigation Cards --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
     <a href="{{ route('company.vehicles.details', $vehicle) }}"

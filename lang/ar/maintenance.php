@@ -127,6 +127,7 @@ return [
     'invoice_file_accept' => 'JPG أو JPEG أو PNG أو WEBP أو PDF (الحد الأقصى :max ميجابايت)',
     'invoice_file_max' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',
     'invoice_uploaded_success' => 'تم رفع الفاتورة بنجاح.',
+    'duplicate_invoice_warning' => 'تم إضافة فاتورة مشابهة (نفس المركبة والمبلغ) مؤخراً. يرجى التأكد من أنها ليست مكررة.',
     'invoice_updated_success' => 'تم تحديث الفاتورة بنجاح.',
     'edit_invoice' => 'تعديل الفاتورة',
     'invoice_validation_type' => 'يجب أن يكون الملف صورة (JPG, JPEG, PNG, WEBP) أو PDF.',
@@ -136,7 +137,9 @@ return [
     'add_service' => 'إضافة خدمة',
     'service_already_exists' => 'هذه الخدمة موجودة مسبقاً.',
     'services' => 'الخدمات',
-    'select_services' => 'اختر الخدمات',
+    'select_services' => 'اختر خدمة أو أكثر',
+    'search_services' => 'البحث في الخدمات...',
+    'no_services_match' => 'لا توجد خدمات تطابق البحث',
 
     // Tax options for maintenance invoices
     'invoice_amount' => 'مبلغ الفاتورة',
