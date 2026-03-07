@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Company;
 
+use App\Listeners\InvalidateCompanyAnalyticsCache;
 use App\Models\CompanyFuelInvoice;
 use App\Models\Vehicle;
 use Livewire\Component;
@@ -95,6 +96,9 @@ class FuelInvoiceUploadSection extends Component
             'original_filename' => $originalName,
             'description' => $this->description ?: null,
         ]);
+
+        InvalidateCompanyAnalyticsCache::forVehicle($vehicleId);
+        InvalidateCompanyAnalyticsCache::forCompany($company->id);
 
         $this->closeModal();
         session()->flash('fuel_invoice_success', __('invoice.fuel_invoice_uploaded_success'));

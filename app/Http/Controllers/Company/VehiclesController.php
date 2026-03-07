@@ -7,6 +7,8 @@ use App\Events\VehicleCreated;
 use App\Models\Vehicle;
 use App\Services\VehicleMileageService;
 use App\Models\CompanyBranch;
+use App\Models\CompanyFuelInvoice;
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use Illuminate\Http\Request;
 
@@ -109,7 +111,8 @@ class VehiclesController extends Controller
     {
         $this->authorize('view', $vehicle);
         $company = auth('company')->user();
-        return view('company.vehicles.show', compact('company', 'vehicle'));
+        $analytics = app(\App\Services\VehicleAnalyticsService::class)->getVehicleAnalytics($vehicle);
+        return view('company.vehicles.show', compact('company', 'vehicle', 'analytics'));
     }
 
     /**
@@ -199,6 +202,18 @@ class VehiclesController extends Controller
                     'cost' => (float) $fr->cost,
                 ]);
             }
+            // Company-uploaded fuel invoices (linked to this vehicle)
+            $fuelInvQ = CompanyFuelInvoice::where('vehicle_id', $vehicle->id);
+            if ($reportFrom) $fuelInvQ->where('created_at', '>=', $reportFrom);
+            if ($reportTo) $fuelInvQ->where('created_at', '<=', $reportTo . ' 23:59:59');
+            foreach ($fuelInvQ->orderBy('created_at')->get() as $inv) {
+                $reportTransactions->push((object) [
+                    'date' => $inv->created_at,
+                    'type' => 'fuel',
+                    'description' => __('maintenance.invoice') . ' #' . $inv->id,
+                    'cost' => (float) ($inv->amount ?? 0),
+                ]);
+            }
         }
         if (in_array($reportType, ['maintenance', 'all'])) {
             $mrQ = MaintenanceRequest::where('vehicle_id', $vehicle->id)
@@ -213,6 +228,18 @@ class VehiclesController extends Controller
                     'type' => 'maintenance',
                     'description' => 'Request #' . $mr->id,
                     'cost' => (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0),
+                ]);
+            }
+            // Company-uploaded maintenance invoices (linked to this vehicle)
+            $invQ = CompanyMaintenanceInvoice::where('vehicle_id', $vehicle->id);
+            if ($reportFrom) $invQ->where('created_at', '>=', $reportFrom);
+            if ($reportTo) $invQ->where('created_at', '<=', $reportTo . ' 23:59:59');
+            foreach ($invQ->orderBy('created_at')->get() as $inv) {
+                $reportTransactions->push((object) [
+                    'date' => $inv->created_at,
+                    'type' => 'maintenance',
+                    'description' => __('maintenance.invoice') . ' #' . $inv->id,
+                    'cost' => (float) ($inv->amount ?? 0),
                 ]);
             }
         }

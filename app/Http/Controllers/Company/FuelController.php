@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyFuelInvoice;
 use App\Models\FuelRefill;
 use App\Models\Invoice;
 use App\Models\Vehicle;
@@ -18,6 +19,7 @@ class FuelController extends Controller
 
     /**
      * Company-wide fuel expenses report.
+     * Includes: FuelRefill (driver-logged) + CompanyFuelInvoice (company-uploaded).
      */
     public function index(Request $request)
     {
@@ -31,30 +33,86 @@ class FuelController extends Controller
             : now()->endOfDay();
         $vehicleId = $request->integer('vehicle_id', 0);
 
-        $query = FuelRefill::query()
+        $vehicleFilter = $vehicleId > 0 && Vehicle::where('company_id', $company->id)->where('id', $vehicleId)->exists();
+
+        // Fuel refills (driver-logged)
+        $fuelQuery = FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
             ->with(['vehicle:id,plate_number,make,model', 'invoice']);
-
-        if ($vehicleId > 0) {
-            $vehicle = Vehicle::where('company_id', $company->id)->find($vehicleId);
-            if ($vehicle) {
-                $query->where('vehicle_id', $vehicleId);
-            }
+        if ($vehicleFilter) {
+            $fuelQuery->where('vehicle_id', $vehicleId);
         }
+        $fuelRefills = $fuelQuery->orderBy('refilled_at')->get();
 
-        $refills = $query->latest('refilled_at')->paginate(25)->withQueryString();
+        // Company-uploaded fuel invoices
+        $invQuery = CompanyFuelInvoice::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->with(['vehicle:id,plate_number,make,model']);
+        if ($vehicleFilter) {
+            $invQuery->where('vehicle_id', $vehicleId);
+        }
+        $companyInvoices = $invQuery->orderBy('created_at')->get();
 
-        $totals = FuelRefill::query()
+        // Build unified rows (refill or company invoice)
+        $rows = collect();
+        foreach ($fuelRefills as $fr) {
+            $rows->push((object) [
+                'date' => $fr->refilled_at,
+                'type' => 'refill',
+                'refill' => $fr,
+                'invoice' => null,
+            ]);
+        }
+        foreach ($companyInvoices as $inv) {
+            $rows->push((object) [
+                'date' => $inv->created_at,
+                'type' => 'company_invoice',
+                'refill' => null,
+                'invoice' => $inv,
+            ]);
+        }
+        $rows = $rows->sortByDesc('date')->values();
+
+        $refills = new \Illuminate\Pagination\LengthAwarePaginator(
+            $rows->forPage(request('page', 1), 25),
+            $rows->count(),
+            25,
+            request('page', 1),
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        // Totals: include both fuel refills and company invoices
+        $fuelTotalCost = (float) FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
-            ->when($vehicleId > 0, fn ($q) => $q->where('vehicle_id', $vehicleId))
-            ->selectRaw('SUM(cost) as total_cost, SUM(liters) as total_liters, COUNT(*) as refill_count')
-            ->first();
+            ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->sum('cost');
+        $fuelTotalLiters = (float) FuelRefill::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('refilled_at', [$from, $to])
+            ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->sum('liters');
+        $fuelRefillCount = (int) FuelRefill::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('refilled_at', [$from, $to])
+            ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->count();
+        $companyInvoiceTotal = (float) CompanyFuelInvoice::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->sum('amount');
+        $companyInvoiceCount = (int) CompanyFuelInvoice::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
+            ->count();
 
-        $totalCost = (float) ($totals->total_cost ?? 0);
-        $totalLiters = (float) ($totals->total_liters ?? 0);
-        $refillCount = (int) ($totals->refill_count ?? 0);
+        $totalCost = $fuelTotalCost + $companyInvoiceTotal;
+        $totalLiters = $fuelTotalLiters;
+        $refillCount = $fuelRefillCount + $companyInvoiceCount;
 
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
@@ -62,11 +120,12 @@ class FuelController extends Controller
             ->get(['id', 'plate_number', 'make', 'model']);
 
         $analytics = $this->analytics->getFuelAnalytics($from, $to, $company->id, $vehicleId ?: null);
+        $analytics['avg_per_vehicle'] = $analytics['avg_per_vehicle'] ?? 0;
+        $analytics['avg_per_transaction'] = $refillCount > 0 ? round($totalCost / $refillCount, 2) : 0;
 
         return view('company.fuel.index', compact(
             'company',
             'refills',
-            'totals',
             'totalCost',
             'totalLiters',
             'refillCount',

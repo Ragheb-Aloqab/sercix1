@@ -126,6 +126,9 @@ class MaintenanceInvoiceController extends Controller
         ]);
 
         \App\Listeners\InvalidateCompanyAnalyticsCache::forCompany($company->id);
+        if (!empty($validated['vehicle_id'])) {
+            \App\Listeners\InvalidateCompanyAnalyticsCache::forVehicle((int) $validated['vehicle_id']);
+        }
 
         return redirect()
             ->route('company.maintenance-invoices.index')

@@ -100,53 +100,84 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-600/50">
-                                @foreach ($refills as $fr)
-                                    <tr class="hover:bg-slate-700/30 transition-colors">
-                                        <td class="py-3 px-2 text-white text-end">{{ $fr->refilled_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
-                                        <td class="py-3 px-2 text-end">
-                                            @if ($fr->vehicle)
-                                                <a href="{{ route('company.vehicles.show', $fr->vehicle) }}" class="text-sky-400 hover:text-sky-300">
-                                                    {{ $fr->vehicle->plate_number }} — {{ trim(($fr->vehicle->make ?? '') . ' ' . ($fr->vehicle->model ?? '')) }}
-                                                </a>
-                                            @else
-                                                <span class="text-slate-500">—</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3 px-2 text-white text-end">{{ number_format($fr->liters, 1) }}</td>
-                                        <td class="py-3 px-2 font-bold text-white text-end">{{ number_format($fr->cost, 2) }} {{ __('company.sar') }}</td>
-                                        <td class="py-3 px-2 text-white text-end">{{ $fr->odometer_km ? number_format($fr->odometer_km) . ' ' . __('common.km') : '—' }}</td>
-                                        <td class="py-3 px-2 text-end">
-                                            @if ($fr->isFromExternalProvider())
-                                                <span class="text-xs px-2 py-1 rounded-full bg-sky-500/30 text-sky-300 border border-sky-400/50">{{ $fr->provider }}</span>
-                                            @else
-                                                <span class="text-xs text-slate-500">{{ __('fuel.manual') }}</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3 px-2 min-w-[140px] text-end">
-                                            @if ($fr->invoice)
-                                                <div class="flex flex-wrap gap-2 justify-end">
-                                                    <a href="{{ route('company.invoices.show', $fr->invoice) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold">
-                                                        <i class="fa-solid fa-eye"></i> {{ __('invoice.view_details') }}
+                                @foreach ($refills as $row)
+                                    @if ($row->type === 'refill')
+                                        @php $fr = $row->refill; @endphp
+                                        <tr class="hover:bg-slate-700/30 transition-colors">
+                                            <td class="py-3 px-2 text-white text-end">{{ $fr->refilled_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                            <td class="py-3 px-2 text-end">
+                                                @if ($fr->vehicle)
+                                                    <a href="{{ route('company.vehicles.show', $fr->vehicle) }}" class="text-sky-400 hover:text-sky-300">
+                                                        {{ $fr->vehicle->plate_number }} — {{ trim(($fr->vehicle->make ?? '') . ' ' . ($fr->vehicle->model ?? '')) }}
                                                     </a>
-                                                    <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
-                                                        <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_invoice') }}
+                                                @else
+                                                    <span class="text-slate-500">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-2 text-white text-end">{{ number_format($fr->liters ?? 0, 1) }}</td>
+                                            <td class="py-3 px-2 font-bold text-white text-end">{{ number_format($fr->cost ?? 0, 2) }} {{ __('company.sar') }}</td>
+                                            <td class="py-3 px-2 text-white text-end">{{ $fr->odometer_km ? number_format($fr->odometer_km) . ' ' . __('common.km') : '—' }}</td>
+                                            <td class="py-3 px-2 text-end">
+                                                @if ($fr->isFromExternalProvider())
+                                                    <span class="text-xs px-2 py-1 rounded-full bg-sky-500/30 text-sky-300 border border-sky-400/50">{{ $fr->provider }}</span>
+                                                @else
+                                                    <span class="text-xs text-slate-500">{{ __('fuel.manual') }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-2 min-w-[140px] text-end">
+                                                @if ($fr->invoice)
+                                                    <div class="flex flex-wrap gap-2 justify-end">
+                                                        <a href="{{ route('company.invoices.show', $fr->invoice) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold">
+                                                            <i class="fa-solid fa-eye"></i> {{ __('invoice.view_details') }}
+                                                        </a>
+                                                        <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
+                                                            <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_invoice') }}
+                                                        </a>
+                                                    </div>
+                                                @elseif ($fr->receipt_path)
+                                                    <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
+                                                        <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
                                                     </a>
-                                                </div>
-                                            @elseif ($fr->receipt_path)
-                                                <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
+                                                    <form method="POST" action="{{ route('company.fuel.generate-invoice', $fr) }}" class="inline mt-1">
+                                                        @csrf
+                                                        <button type="submit" class="text-amber-400 hover:text-amber-300 text-xs font-bold">
+                                                            {{ __('invoice.create_invoice') }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <span class="text-xs text-slate-400">—</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @else
+                                        @php $inv = $row->invoice; @endphp
+                                        <tr class="hover:bg-slate-700/30 transition-colors">
+                                            <td class="py-3 px-2 text-white text-end">{{ $inv->created_at?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
+                                            <td class="py-3 px-2 text-end">
+                                                @if ($inv->vehicle)
+                                                    <a href="{{ route('company.vehicles.show', $inv->vehicle) }}" class="text-sky-400 hover:text-sky-300">
+                                                        {{ $inv->vehicle->plate_number }} — {{ trim(($inv->vehicle->make ?? '') . ' ' . ($inv->vehicle->model ?? '')) }}
+                                                    </a>
+                                                @else
+                                                    <span class="text-slate-500">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-2 text-slate-500 text-end">—</td>
+                                            <td class="py-3 px-2 font-bold text-white text-end">{{ number_format($inv->amount ?? 0, 2) }} {{ __('company.sar') }}</td>
+                                            <td class="py-3 px-2 text-slate-500 text-end">—</td>
+                                            <td class="py-3 px-2 text-end">
+                                                <span class="text-xs px-2 py-1 rounded-full bg-amber-500/30 text-amber-300 border border-amber-400/50">{{ __('fuel.company_upload') }}</span>
+                                            </td>
+                                            <td class="py-3 px-2 min-w-[140px] text-end">
+                                                <a href="{{ route('company.fuel-invoices.view', $inv) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
                                                     <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
                                                 </a>
-                                                <form method="POST" action="{{ route('company.fuel.generate-invoice', $fr) }}" class="inline mt-1">
-                                                    @csrf
-                                                    <button type="submit" class="text-amber-400 hover:text-amber-300 text-xs font-bold">
-                                                        {{ __('invoice.create_invoice') }}
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <span class="text-xs text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                                <a href="{{ route('company.fuel-invoices.download', $inv) }}" download class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold ms-2">
+                                                    <i class="fa-solid fa-download"></i> {{ __('common.download') }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -154,6 +185,7 @@
                     <div class="mt-4">{{ $refills->links() }}</div>
                 @else
                     <p class="text-slate-500 py-4 text-end">{{ __('fuel.no_refills') }}</p>
+                    <p class="text-slate-500 text-sm text-end">{{ __('fuel.no_refills_hint') }}</p>
                 @endif
             </div>
         </div>

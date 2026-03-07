@@ -36,6 +36,8 @@ return [
     'invoice' => 'Invoice',
     'view' => 'View',
     'no_refills' => 'No refill records in the selected period. Drivers log refills from their dashboard.',
+    'no_refills_hint' => 'Add fuel invoices from Invoices → Fuel invoice, or have drivers log refills from their dashboard.',
+    'company_upload' => 'Company upload',
     'fuel_refills_log' => 'Fuel refills log',
     'fuel_refills_desc' => 'Fuel costs and vehicle consumption — logged by driver at each refill',
     'no_refills_vehicle' => 'No fuel refill records for this vehicle. Driver can log refills from their dashboard.',
