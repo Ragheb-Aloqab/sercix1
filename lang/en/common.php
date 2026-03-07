@@ -110,4 +110,6 @@ return [
     'reset' => 'Reset',
     'reject' => 'Reject',
     'confirm_reject' => 'Confirm reject?',
+    'yes' => 'Yes',
+    'no' => 'No',
 ];
