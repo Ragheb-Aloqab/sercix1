@@ -117,6 +117,10 @@ Route::middleware(['company'])
             ->name('reports.index');
         Route::get('/reports/service', [ServiceReportController::class, 'index'])
             ->name('reports.service');
+        Route::get('/reports/service/excel', [ServiceReportController::class, 'exportExcel'])
+            ->name('reports.service.excel');
+        Route::get('/reports/service/pdf', [ServiceReportController::class, 'exportPdf'])
+            ->name('reports.service.pdf');
         Route::get('/reports/mileage', [ReportsController::class, 'mileage'])
             ->name('reports.mileage');
         Route::get('/reports/tax', [\App\Http\Controllers\Company\TaxReportController::class, 'index'])
