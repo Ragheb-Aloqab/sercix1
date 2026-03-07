@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Vehicle;
 use App\Models\VehicleLocation;
 use App\Services\ActivityLogger;
+use App\Services\CompanyAnalyticsService;
 use Illuminate\Support\Facades\Cache;
 
 class VehicleObserver
@@ -28,6 +29,7 @@ class VehicleObserver
     {
         if ($vehicle->company_id) {
             Cache::forget("company_dashboard_{$vehicle->company_id}");
+            CompanyAnalyticsService::invalidateDashboardCache($vehicle->company_id);
         }
         $this->invalidateAdminStats();
         $desc = ($vehicle->plate_number ?? $vehicle->make . ' ' . $vehicle->model) . ' (Company #' . $vehicle->company_id . ')';
@@ -38,6 +40,7 @@ class VehicleObserver
     {
         if ($vehicle->company_id) {
             Cache::forget("company_dashboard_{$vehicle->company_id}");
+            CompanyAnalyticsService::invalidateDashboardCache($vehicle->company_id);
         }
         $this->invalidateAdminStats();
         if ($vehicle->wasChanged()) {

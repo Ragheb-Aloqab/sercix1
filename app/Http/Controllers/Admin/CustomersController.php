@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Customers\StoreCustomerRequest;
 use App\Http\Requests\Admin\Customers\UpdateCustomerRequest;
 use App\Models\Company;
-use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class CustomersController extends Controller
@@ -37,11 +36,16 @@ class CustomersController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         $data = $request->validated();
-        unset($data['password'], $data['password_confirmation']);
+        unset($data['password'], $data['password_confirmation'], $data['logo']);
         $data['password'] = \Illuminate\Support\Facades\Hash::make($request->input('password') ?: \Illuminate\Support\Str::random(12));
         $data['vehicle_quota'] = $data['vehicle_quota'] ?? config('servx.default_vehicle_quota');
 
-        Company::create($data);
+        $company = Company::create($data);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store("companies/{$company->id}/logos", 'public');
+            $company->update(['logo' => $path]);
+        }
 
         return redirect()
             ->route('admin.customers.index')
@@ -55,9 +59,21 @@ class CustomersController extends Controller
 
     public function update(UpdateCustomerRequest $request, Company $customer)
     {
-        
-        $customer->update($request->validated());
-        
+        $data = $request->validated();
+        unset($data['logo'], $data['remove_logo']);
+
+        if ($request->boolean('remove_logo') && $customer->logo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($customer->logo);
+            $data['logo'] = null;
+        } elseif ($request->hasFile('logo')) {
+            if ($customer->logo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($customer->logo);
+            }
+            $data['logo'] = $request->file('logo')->store("companies/{$customer->id}/logos", 'public');
+        }
+
+        $customer->update($data);
+
         return redirect()
             ->route('admin.customers.index')
             ->with('success', __('messages.customer_updated'));

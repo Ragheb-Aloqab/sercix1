@@ -18,7 +18,7 @@ class VehicleQueryService
 
     public function __construct(
         private readonly int $companyId,
-        private readonly int $perPage = 12
+        private readonly int $perPage = 25
     ) {}
 
     public function paginate(

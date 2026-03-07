@@ -23,6 +23,9 @@ class MaintenanceInvoicesSection extends Component
     public $vehicle_id = '';
     public $amount = '';
     public string $tax_type = 'without_tax';
+    public string $service_type = '';
+    /** @var array<int, array{service_id: string|int, price: string}> */
+    public array $lineItems = [];
     public $description = '';
     public array $service_ids = [];
     public string $newServiceName = '';
@@ -67,14 +70,36 @@ class MaintenanceInvoicesSection extends Component
         ];
     }
 
+    public function mount(): void
+    {
+        if (request()->query('open') === 'add') {
+            $this->openModal();
+        }
+    }
+
     public function openModal(): void
     {
         $this->editingInvoiceId = null;
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description', 'service_ids', 'newServiceName']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'service_type', 'description', 'service_ids', 'newServiceName']);
         $this->service_ids = [];
         $this->tax_type = 'without_tax';
+        $this->service_type = '';
+        $this->lineItems = [['service_id' => '', 'price' => '']];
         $this->resetValidation();
         $this->modalOpen = true;
+    }
+
+    public function addLineItem(): void
+    {
+        $this->lineItems[] = ['service_id' => '', 'price' => ''];
+    }
+
+    public function removeLineItem(int $index): void
+    {
+        if (count($this->lineItems) <= 1) {
+            return;
+        }
+        array_splice($this->lineItems, $index, 1);
     }
 
     public function closeModal(): void
@@ -82,7 +107,8 @@ class MaintenanceInvoicesSection extends Component
         $this->modalOpen = false;
         $this->addServiceModalOpen = false;
         $this->editingInvoiceId = null;
-        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'description', 'service_ids', 'newServiceName']);
+        $this->reset(['invoice_file', 'vehicle_id', 'amount', 'tax_type', 'service_type', 'description', 'service_ids', 'newServiceName', 'lineItems']);
+        $this->lineItems = [];
         $this->resetValidation();
     }
 
@@ -137,9 +163,11 @@ class MaintenanceInvoicesSection extends Component
         $this->vehicle_id = $inv->vehicle_id ? (string) $inv->vehicle_id : '';
         $this->amount = $inv->original_amount !== null ? (string) $inv->original_amount : '';
         $this->tax_type = $inv->tax_type ?? CompanyMaintenanceInvoice::TAX_WITHOUT;
+        $this->service_type = $inv->service_type ?? '';
         $this->description = $inv->description ?? '';
         $this->service_ids = $inv->services->pluck('id')->map(fn ($id) => (int) $id)->all();
         $this->invoice_file = null;
+        $this->lineItems = [['service_id' => '', 'price' => '']];
         $this->resetValidation();
         $this->modalOpen = true;
     }
@@ -178,6 +206,7 @@ class MaintenanceInvoicesSection extends Component
 
         $inv->update([
             'vehicle_id' => $vehicleId,
+            'service_type' => $this->service_type ?: null,
             'amount' => $totalAmount,
             'original_amount' => $originalAmount,
             'vat_amount' => $vatAmount,
@@ -209,8 +238,31 @@ class MaintenanceInvoicesSection extends Component
 
         $company = auth('company')->user();
 
-        $this->service_ids = is_array($this->service_ids) ? $this->service_ids : [];
-        $this->validate();
+        // When creating: compute amount from line items
+        $serviceIdsFromLines = [];
+        $subtotal = 0.0;
+        foreach ($this->lineItems as $row) {
+            $sid = $row['service_id'] ?? '';
+            $price = isset($row['price']) ? (float) str_replace(',', '.', (string) $row['price']) : 0;
+            if ($sid !== '' && $sid !== null && $price > 0) {
+                $serviceIdsFromLines[] = (int) $sid;
+                $subtotal += $price;
+            }
+        }
+        $this->service_ids = array_values(array_unique($serviceIdsFromLines));
+
+        // Allow single amount override if no line items (e.g. manual entry)
+        if ($subtotal <= 0 && $this->amount !== '' && $this->amount !== null) {
+            $subtotal = (float) $this->amount;
+        }
+
+        $this->amount = (string) $subtotal;
+
+        $rules = $this->rules();
+        if ($subtotal <= 0) {
+            $rules['amount'] = ['required', 'numeric', 'min:0.01'];
+        }
+        $this->validate($rules);
 
         $vehicleId = $this->vehicle_id !== '' && $this->vehicle_id !== null ? (int) $this->vehicle_id : null;
         if ($vehicleId && !$company->vehicles()->where('id', $vehicleId)->exists()) {
@@ -231,16 +283,16 @@ class MaintenanceInvoicesSection extends Component
             $path = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
         }
 
-        $originalAmount = $this->amount ? (float) $this->amount : null;
+        $originalAmount = $subtotal > 0 ? $subtotal : (float) $this->amount;
         $vatAmount = null;
         $totalAmount = $originalAmount;
 
-        if ($originalAmount !== null && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
+        if ($originalAmount > 0 && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
             $vatAmount = round($originalAmount * CompanyMaintenanceInvoice::VAT_RATE, 2);
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
 
-        if ($totalAmount !== null) {
+        if ($totalAmount !== null && $totalAmount > 0) {
             Validator::make(
                 ['amount' => $totalAmount],
                 ['amount' => [new PreventDuplicateMaintenanceInvoice($company->id, $vehicleId, $totalAmount)]]
@@ -250,6 +302,7 @@ class MaintenanceInvoicesSection extends Component
         $inv = CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
+            'service_type' => $this->service_type ?: null,
             'amount' => $totalAmount,
             'original_amount' => $originalAmount,
             'vat_amount' => $vatAmount,
@@ -270,6 +323,33 @@ class MaintenanceInvoicesSection extends Component
         $this->closeModal();
         $this->dispatch('invoice-uploaded');
         session()->flash('invoice_success', __('maintenance.invoice_uploaded_success'));
+    }
+
+    public function getSubtotal(): float
+    {
+        if ($this->editingInvoiceId) {
+            return (float) ($this->amount ?: 0);
+        }
+        $s = 0.0;
+        foreach ($this->lineItems as $row) {
+            $price = isset($row['price']) ? (float) str_replace(',', '.', (string) ($row['price'] ?? '')) : 0;
+            if ($price > 0) {
+                $s += $price;
+            }
+        }
+        return round($s, 2);
+    }
+
+    public function getVatAmount(): float
+    {
+        return $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH
+            ? round($this->getSubtotal() * CompanyMaintenanceInvoice::VAT_RATE, 2)
+            : 0.0;
+    }
+
+    public function getTotal(): float
+    {
+        return round($this->getSubtotal() + $this->getVatAmount(), 2);
     }
 
     public function render()

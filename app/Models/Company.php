@@ -23,6 +23,11 @@ class Company extends Authenticatable
         'address',
         'tracking_api_key',
         'tracking_base_url',
+        'subdomain',
+        'primary_color',
+        'secondary_color',
+        'logo',
+        'white_label_enabled',
     ];
 
     protected $hidden = [
@@ -33,7 +38,35 @@ class Company extends Authenticatable
 
     protected $casts = [
         'tracking_api_key' => 'encrypted',
+        'white_label_enabled' => 'boolean',
     ];
+
+    /**
+     * Get primary color with fallback (for branding).
+     */
+    public function getResolvedPrimaryColor(): string
+    {
+        return $this->attributes['primary_color'] ?? '#2563eb';
+    }
+
+    /**
+     * Get secondary color with fallback (for branding).
+     */
+    public function getResolvedSecondaryColor(): string
+    {
+        return $this->attributes['secondary_color'] ?? '#16a34a';
+    }
+
+    /**
+     * Get logo URL (storage path or null if none).
+     */
+    public function getLogoUrl(): ?string
+    {
+        if ($this->logo) {
+            return \Illuminate\Support\Facades\Storage::url($this->logo);
+        }
+        return null;
+    }
 
     /*
     |--------------------------------------------------------------------------

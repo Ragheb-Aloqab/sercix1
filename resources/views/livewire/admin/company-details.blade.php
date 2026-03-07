@@ -22,6 +22,34 @@
             </div>
         </div>
 
+        {{-- White-Label Branding Card --}}
+        @if($company->white_label_enabled || $company->subdomain)
+        <div class="dash-card">
+            <h2 class="dash-section-title">{{ __('admin_dashboard.white_label_branding') ?? 'White-Label Branding' }}</h2>
+            <div class="flex flex-wrap items-center gap-4">
+                @if($company->subdomain)
+                    <div>
+                        <p class="text-xs text-slate-400">{{ __('admin_dashboard.subdomain') ?? 'Subdomain' }}</p>
+                        <p class="font-semibold text-white">{{ $company->subdomain }}.{{ config('servx.white_label_domain', 'servx.sa') }}</p>
+                    </div>
+                @endif
+                @if($company->logo)
+                    <div>
+                        <p class="text-xs text-slate-400 mb-1">{{ __('admin_dashboard.company_logo') ?? 'Logo' }}</p>
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($company->logo) }}" alt="Logo" class="w-16 h-16 object-contain rounded-lg bg-white/10">
+                    </div>
+                @endif
+                <div class="flex gap-2 items-center">
+                    <div title="Primary" class="w-8 h-8 rounded-lg border border-slate-600" style="background: {{ $company->getResolvedPrimaryColor() }}"></div>
+                    <div title="Secondary" class="w-8 h-8 rounded-lg border border-slate-600" style="background: {{ $company->getResolvedSecondaryColor() }}"></div>
+                </div>
+                <a href="{{ route('admin.customers.edit', $company) }}" class="dash-btn dash-btn-secondary !py-2 !px-3 text-sm">
+                    <i class="fa-solid fa-pen"></i>{{ __('common.edit') }}
+                </a>
+            </div>
+        </div>
+        @endif
+
         {{-- Company Info Card --}}
         <div class="dash-card">
             <h2 class="dash-section-title">{{ __('admin_dashboard.company_details') }}</h2>

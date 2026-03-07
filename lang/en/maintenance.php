@@ -141,6 +141,21 @@ return [
     'search_services' => 'Search services...',
     'no_services_match' => 'No services match your search',
 
+    'choose_vehicle' => 'Choose Vehicle',
+    'select_vehicle' => 'Select Vehicle',
+    'service_type' => 'Service Type',
+    'service_type_maintenance' => 'Maintenance',
+    'service_type_oil_change' => 'Oil Change',
+    'service_type_painting' => 'Painting',
+    'service_type_tires' => 'Tires',
+    'service_type_other' => 'Other',
+    'service_amount' => 'Service Amount',
+    'service' => 'Service',
+    'select_service' => 'Select service',
+    'total_before_tax' => 'Total before tax',
+    'tax_15' => 'Tax (15%)',
+    'total' => 'Total',
+
     // Predefined maintenance service names (for translation; key = slug of English name)
     'predefined_services' => [
         'oil_change' => 'Oil Change',

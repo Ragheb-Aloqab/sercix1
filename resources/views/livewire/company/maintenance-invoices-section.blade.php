@@ -6,14 +6,14 @@
         </div>
     @endif
 
-    {{-- Invoices section header with Upload button (top right) --}}
+    {{-- Invoices section header with Upload button (opens modal) --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 class="dash-section-title mb-0">{{ __('maintenance.add_invoice') }} — {{ __('common.uploaded') }}</h2>
-        <a href="{{ route('company.maintenance-invoices.create') }}"
+        <button type="button" wire:click="openModal"
             class="shrink-0 px-5 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors inline-flex items-center gap-2">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             {{ __('maintenance.upload_maintenance_invoice') }}
-        </a>
+        </button>
     </div>
 
     {{-- Company-uploaded invoices list --}}
@@ -119,11 +119,150 @@
                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeModal"></div>
 
                 {{-- Modal --}}
-                <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600/50 shadow-2xl p-6 transition-colors duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">{{ $editingInvoiceId ? __('maintenance.edit_invoice') : __('maintenance.upload_maintenance_invoice') }}</h3>
+                <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600/50 shadow-2xl p-6 transition-colors duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $editingInvoiceId ? __('maintenance.edit_invoice') : __('maintenance.add_invoice') }}</h3>
+                        <button type="button" wire:click="closeModal" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-500 dark:text-servx-silver transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
 
-                    <form wire:submit.prevent="saveInvoice" @submit.prevent class="space-y-4">
-                        {{-- Drag & Drop (hidden when editing) --}}
+                    <form wire:submit.prevent="saveInvoice" @submit.prevent class="space-y-6">
+                        {{-- 1. Choose Vehicle --}}
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.choose_vehicle') }}</label>
+                            <select wire:model="vehicle_id" name="vehicle_id"
+                                class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2.5 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
+                                <option value="">{{ __('maintenance.select_vehicle') }}</option>
+                                @foreach($vehicles as $v)
+                                    <option value="{{ $v->id }}">{{ $v->display_name }} ({{ $v->plate_number ?? '-' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- 2. Service Type (create only) --}}
+                        @if(!$editingInvoiceId)
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.service_type') }}</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(\App\Models\CompanyMaintenanceInvoice::serviceTypes() as $type)
+                                    <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-colors
+                                        {{ $service_type === $type ? 'bg-sky-500/20 border-sky-500/50 text-sky-700 dark:text-sky-300' : 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-servx-silver-light' }}">
+                                        <input type="radio" wire:model.live="service_type" value="{{ $type }}" class="sr-only">
+                                        <span class="font-semibold text-sm">{{ __('maintenance.service_type_' . $type) }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- 3. Service Amount: line items (create) or single amount (edit) --}}
+                        @if(!$editingInvoiceId)
+                            {{-- Line items table --}}
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.service_amount') }}</label>
+                                <div class="rounded-xl border border-slate-300 dark:border-slate-600/50 overflow-hidden">
+                                    <table class="w-full text-start">
+                                        <thead>
+                                            <tr class="text-slate-600 dark:text-servx-silver text-sm border-b border-slate-200 dark:border-slate-600/50 bg-slate-50 dark:bg-slate-800/50">
+                                                <th class="px-4 py-3 font-semibold">{{ __('maintenance.service') }}</th>
+                                                <th class="px-4 py-3 font-semibold w-28">{{ __('maintenance.price') }} ({{ __('company.sar') }})</th>
+                                                <th class="w-10"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($lineItems as $index => $line)
+                                                <tr class="border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                                    <td class="px-4 py-2">
+                                                        <select wire:model.live="lineItems.{{ $index }}.service_id"
+                                                            class="w-full rounded-lg border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-3 py-2 text-sm text-slate-900 dark:text-servx-silver-light">
+                                                            <option value="">{{ __('maintenance.select_service') }}</option>
+                                                            @foreach($services as $s)
+                                                                <option value="{{ $s->id }}">{{ $s->getTranslatedName() }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td class="px-4 py-2">
+                                                        <input type="number" wire:model.live="lineItems.{{ $index }}.price" step="0.01" min="0"
+                                                            class="w-full rounded-lg border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-3 py-2 text-sm text-slate-900 dark:text-servx-silver-light" placeholder="0">
+                                                    </td>
+                                                    <td class="px-2 py-2">
+                                                        <button type="button" wire:click="removeLineItem({{ $index }})" wire:disabled="{{ count($lineItems) <= 1 }}"
+                                                            class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 disabled:opacity-40 disabled:pointer-events-none transition-colors" title="{{ __('common.remove') }}">
+                                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <div class="px-4 py-2 border-t border-slate-200 dark:border-slate-600/50 bg-slate-50/50 dark:bg-slate-800/30">
+                                        <button type="button" wire:click="addLineItem"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-sky-500/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 text-sm font-semibold transition-colors">
+                                            <i class="fa-solid fa-plus"></i> {{ __('maintenance.add_service') }} +
+                                        </button>
+                                    </div>
+                                </div>
+                                {{-- Invoice details (subtotal, tax, total) --}}
+                                <div class="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-600/50 space-y-2">
+                                    <p class="text-sm font-semibold text-slate-700 dark:text-servx-silver-light flex justify-between">
+                                        <span>{{ __('maintenance.total_before_tax') }}</span>
+                                        <span>{{ number_format($this->getSubtotal(), 2) }} {{ __('company.sar') }}</span>
+                                    </p>
+                                    <p class="text-sm font-semibold text-slate-700 dark:text-servx-silver-light flex justify-between">
+                                        <span>{{ __('maintenance.tax_15') }}</span>
+                                        <span>{{ number_format($this->getVatAmount(), 2) }} {{ __('company.sar') }}</span>
+                                    </p>
+                                    <p class="text-base font-bold text-emerald-600 dark:text-emerald-400 flex justify-between pt-2 border-t border-slate-200 dark:border-slate-600/50">
+                                        <span>{{ __('maintenance.total') }}</span>
+                                        <span>{{ number_format($this->getTotal(), 2) }} {{ __('company.sar') }}</span>
+                                    </p>
+                                </div>
+                                {{-- Tax option --}}
+                                <div class="mt-3">
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" wire:model.live="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                            <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.without_tax') }}</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" wire:model.live="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                            <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Edit: single amount + tax --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.invoice_amount') }} ({{ __('company.sar') }})</label>
+                                    <input type="number" wire:model.live="amount" step="0.01" min="0" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
+                                <div class="flex flex-wrap gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model.live="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                        <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.without_tax') }}</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model.live="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
+                                        <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Description (optional) --}}
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('common.description') }}</label>
+                            <input type="text" wire:model="description" maxlength="500" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="{{ __('common.optional') }}">
+                        </div>
+
+                        {{-- 4. Upload Invoice --}}
                         @if(!$editingInvoiceId)
                         <div x-data="{ dragging: false }"
                              @dragover.prevent="dragging = true"
@@ -156,129 +295,6 @@
                             <p class="text-sm text-red-400">{{ $message }}</p>
                         @enderror
                         @endif
-
-                        {{-- Vehicle select (wire:model ensures it saves on submit) --}}
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('driver.vehicle') }}</label>
-                            <select wire:model="vehicle_id" name="vehicle_id"
-                                class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
-                                <option value="">{{ __('fuel.all_vehicles') }}</option>
-                                @foreach($vehicles as $v)
-                                    <option value="{{ $v->id }}">{{ $v->display_name }} ({{ $v->plate_number ?? '-' }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.invoice_amount') }} ({{ __('company.sar') }})</label>
-                                <input type="number" wire:model.live="amount" step="0.01" min="0" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="0.00">
-                            </div>
-                        </div>
-
-                        {{-- Services: searchable multi-select with Add Service (translated) --}}
-                        <div x-data="{
-                            open: false,
-                            search: '',
-                            services: {{ Js::from($services->map(fn($s) => ['id' => $s->id, 'name' => $s->getTranslatedName(), 'nameOriginal' => $s->name])->values()) }},
-                            get filtered() { const q = this.search.toLowerCase().trim(); return this.services.filter(s => !q || s.name.toLowerCase().includes(q) || (s.nameOriginal && s.nameOriginal.toLowerCase().includes(q))); },
-                            get noMatch() { return this.open && this.search && this.filtered.length === 0; }
-                        }" x-on:click.outside="open = false" class="relative">
-                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.services') }}</label>
-                            <div class="flex gap-2 flex-wrap">
-                                <div class="flex-1 min-w-0">
-                                    <div class="rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 overflow-hidden">
-                                        {{-- Selected chips --}}
-                                        @if(count($service_ids) > 0)
-                                            <div class="flex flex-wrap gap-1.5 p-2 border-b border-slate-200 dark:border-slate-600/50">
-                                                @foreach($services->whereIn('id', $service_ids) as $s)
-                                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/20 text-sky-700 dark:text-sky-300 text-sm">
-                                                        {{ $s->getTranslatedName() }}
-                                                        <button type="button" wire:click="removeService({{ $s->id }})"
-                                                            class="hover:text-red-500 transition-colors" title="{{ __('common.remove') }}">
-                                                            <i class="fa-solid fa-xmark text-xs"></i>
-                                                        </button>
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                        {{-- Dropdown trigger + search --}}
-                                        <div class="relative">
-                                            <input type="text" x-model="search" @focus="open = true"
-                                                placeholder="{{ __('maintenance.search_services') }}"
-                                                class="w-full px-4 py-2.5 pr-10 bg-transparent text-slate-900 dark:text-servx-silver-light border-0 focus:ring-0 focus:outline-none placeholder-slate-400">
-                                            <button type="button" @click="open = !open"
-                                                class="absolute end-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-servx-silver">
-                                                <i class="fa-solid fa-chevron-down text-sm transition-transform" :class="{ 'rotate-180': open }"></i>
-                                            </button>
-                                        </div>
-                                        {{-- Options list --}}
-                                        <div x-show="open" x-transition
-                                            class="max-h-48 overflow-y-auto border-t border-slate-200 dark:border-slate-600/50">
-                                            <template x-for="s in filtered" :key="s.id">
-                                                <label class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer border-b border-slate-100 dark:border-slate-700/50 last:border-0">
-                                                    <input type="checkbox" :value="s.id"
-                                                        class="w-4 h-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
-                                                        :checked="($wire.service_ids || []).includes(s.id) || ($wire.service_ids || []).includes(String(s.id))"
-                                                        @change="const ids = $wire.service_ids || []; const next = $el.checked ? [...ids, s.id] : ids.filter(id => id != s.id && id != s.id.toString()); $wire.set('service_ids', next)">
-                                                    <span class="text-slate-700 dark:text-servx-silver-light" x-text="s.name"></span>
-                                                </label>
-                                            </template>
-                                            <p x-show="noMatch" class="px-4 py-3 text-slate-500 text-sm">
-                                                {{ __('maintenance.no_services_match') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-slate-500 mt-1">{{ __('maintenance.select_services') }}</p>
-                                </div>
-                                <button type="button" wire:click="openAddServiceModal"
-                                    class="shrink-0 self-start px-3 py-2.5 rounded-xl border border-dashed border-sky-500/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 transition-colors inline-flex items-center gap-1.5"
-                                    title="{{ __('maintenance.add_service') }}">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span class="text-sm font-semibold">{{ __('maintenance.add_service') }}</span>
-                                </button>
-                            </div>
-                            @error('service_ids')
-                                <p class="text-sm text-red-400 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Tax option (appears after amount) --}}
-                        <div x-data="{
-                            get amount() { return parseFloat($wire.amount) || 0; },
-                            get taxType() { return $wire.tax_type || 'without_tax'; },
-                            get vat() { return (this.amount * 0.15).toFixed(2); },
-                            get total() { return (this.amount * 1.15).toFixed(2); },
-                            get showVatSummary() { return this.taxType === 'with_tax' && this.amount > 0; }
-                        }">
-                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
-                            <div class="flex flex-wrap gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" wire:model.live="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
-                                    <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.without_tax') }}</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" wire:model.live="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
-                                    <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
-                                </label>
-                            </div>
-                            <template x-if="showVatSummary">
-                                <div class="mt-3 p-3 rounded-xl bg-sky-500/10 border border-sky-400/30" x-transition x-cloak>
-                                    <p class="text-sm text-slate-700 dark:text-servx-silver-light">
-                                        <span class="font-semibold">{{ __('maintenance.vat_amount') }} (15%):</span>
-                                        <span class="font-bold text-sky-600 dark:text-sky-400" x-text="vat + ' {{ __('company.sar') }}'"></span>
-                                    </p>
-                                    <p class="text-sm text-slate-700 dark:text-servx-silver-light mt-1">
-                                        <span class="font-semibold">{{ __('maintenance.total_with_tax') }}:</span>
-                                        <span class="font-bold text-emerald-600 dark:text-emerald-400" x-text="total + ' {{ __('company.sar') }}'"></span>
-                                    </p>
-                                </div>
-                            </template>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('common.description') }}</label>
-                            <input type="text" wire:model="description" maxlength="500" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="{{ __('common.optional') }}">
-                        </div>
 
                         {{-- Validation errors summary --}}
                         @if($errors->any())

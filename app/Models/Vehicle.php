@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Vehicle extends Model
 {
+    use BelongsToCompany;
+    use HasFactory;
+
     public const TRACKING_DEVICE_API = 'device_api';
     public const TRACKING_MOBILE = 'mobile';
 
@@ -55,8 +59,6 @@ class Vehicle extends Model
         return $this->tracking_source === self::TRACKING_DEVICE_API;
     }
 
-  
-    use HasFactory;
     public function company()
     {
         return $this->belongsTo(Company::class);

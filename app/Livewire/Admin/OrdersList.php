@@ -125,7 +125,7 @@ class OrdersList extends Component
 
     public function render()
     {
-        $orders = $this->baseQuery()->paginate(15)->withQueryString();
+        $orders = $this->baseQuery()->paginate(25)->withQueryString();
 
         return view('livewire.admin.orders-list', [
             'orders' => $orders,

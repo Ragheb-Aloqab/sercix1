@@ -22,13 +22,19 @@ class StoreCustomerRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:2000'],
             'status' => ['nullable', 'in:active,suspended'],
             'vehicle_quota' => ['nullable', 'integer', 'min:1', 'max:9999'],
+            'white_label_enabled' => ['nullable', 'boolean'],
+            'subdomain' => ['nullable', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/', 'unique:companies,subdomain'],
+            'primary_color' => ['nullable', 'string', 'max:20', 'regex:/^#([0-9A-Fa-f]{3}){1,2}$/'],
+            'secondary_color' => ['nullable', 'string', 'max:20', 'regex:/^#([0-9A-Fa-f]{3}){1,2}$/'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ];
     }
 
     protected function prepareForValidation(): void
-{
-    $this->merge([
-        'status' => $this->has('status') ? 'active' : 'suspended',
-    ]);
-}
+    {
+        $this->merge([
+            'status' => $this->has('status') ? 'active' : 'suspended',
+            'white_label_enabled' => $this->boolean('white_label_enabled'),
+        ]);
+    }
 }

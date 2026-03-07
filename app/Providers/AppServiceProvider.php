@@ -53,6 +53,10 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
+        if (app()->environment('local')) {
+            \Illuminate\Database\Eloquent\Model::preventLazyLoading();
+        }
+
         Company::observe(CompanyObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Order::observe(OrderObserver::class);
@@ -63,23 +67,39 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerDomainEvents();
 
-        // Site branding (name + logo) — cached, scoped to views that need it
-        // Note: 'index' excluded — IndexController passes fresh data directly
+        // Site branding (name + logo) — when tenant is bound (white-label subdomain), use tenant; else global settings
+        // Note: 'index' excluded — IndexController passes its own data
         $brandingViews = [
             'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*', 'maintenance-center.*',
             'livewire.dashboard.*', 'components.*', 'errors.*',
         ];
         View::composer($brandingViews, function ($view) {
+            $tenant = app()->bound('tenant') ? app('tenant') : null;
+            $wlBranding = app()->bound('tenant_from_subdomain') && app('tenant_from_subdomain');
             try {
-                $siteName = Setting::get('site_name', 'Servx Motors');
-                $siteLogoUrl = cache()->remember('site_logo_url', 300, fn () => $this->siteLogoUrl());
+                if ($tenant && $wlBranding) {
+                    $siteName = $tenant->company_name;
+                    $siteLogoUrl = $tenant->getLogoUrl() ?? $this->siteLogoUrl();
+                    $brandTitle = $tenant->company_name . ' ' . __('branding.fleet_system');
+                    $brandTitleDriver = $tenant->company_name . ' ' . __('branding.driver_portal');
+                } else {
+                    $siteName = Setting::get('site_name', 'Servx Motors');
+                    $siteLogoUrl = cache()->remember('site_logo_url', 300, fn () => $this->siteLogoUrl());
+                    $brandTitle = $siteName;
+                    $brandTitleDriver = $siteName;
+                }
             } catch (\Throwable $e) {
                 $siteName = 'Servx Motors';
                 $siteLogoUrl = null;
+                $brandTitle = $siteName;
+                $brandTitleDriver = $siteName;
             }
             $view->with([
                 'siteName' => $siteName,
                 'siteLogoUrl' => $siteLogoUrl,
+                'brandTitle' => $brandTitle ?? $siteName,
+                'brandTitleDriver' => $brandTitleDriver ?? $siteName,
+                'wlBranding' => $wlBranding,
             ]);
         });
 

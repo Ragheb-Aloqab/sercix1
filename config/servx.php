@@ -58,4 +58,14 @@ return [
     */
     'invoice_max_size_mb' => (int) (env('INVOICE_MAX_SIZE_MB', 5)),
 
+    /*
+    |--------------------------------------------------------------------------
+    | White-Label Subdomain
+    |--------------------------------------------------------------------------
+    | Base domain for company subdomains (e.g. servx.sa).
+    | Companies with white_label_enabled can access their dashboard at:
+    | {subdomain}.{white_label_domain}
+    */
+    'white_label_domain' => env('WHITE_LABEL_DOMAIN', 'servx.sa'),
+
 ];

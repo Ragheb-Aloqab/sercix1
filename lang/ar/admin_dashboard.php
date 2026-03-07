@@ -141,4 +141,14 @@ return [
     'sidebar_section_system' => 'النظام',
     'sidebar_toggle_tooltip' => 'طي القائمة الجانبية',
     'sidebar_expand_tooltip' => 'توسيع القائمة الجانبية',
+
+    // White-Label Branding
+    'white_label_branding' => 'العلامة البيضاء',
+    'white_label_enabled' => 'تفعيل النطاق الفرعي',
+    'subdomain' => 'النطاق الفرعي',
+    'primary_color' => 'اللون الأساسي',
+    'secondary_color' => 'اللون الثانوي',
+    'company_logo' => 'شعار الشركة',
+    'remove_logo' => 'إزالة الشعار',
+    'logo_hint' => 'PNG, JPG, WEBP. الحد الأقصى 2 ميجابايت.',
 ];

@@ -13,12 +13,15 @@ class EnsureCompany
     /**
      * Handle an incoming request.
      * Ensures user is authenticated via company guard, active, and sets auth for Gate/Policy checks.
-     * Aborts 403 with logging when drivers or web users (admin/technician) try to access company pages.
+     * Redirects to login when not authenticated; aborts 403 with logging when drivers or web users try to access company pages.
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('company')->check()) {
             $actual = $this->detectActualContext($request);
+            if ($actual === 'guest') {
+                return redirect()->guest(route('login'));
+            }
             LogUnauthorizedAccess::log($request, 'company', $actual);
             abort(403, __('errors.forbidden_message'));
         }

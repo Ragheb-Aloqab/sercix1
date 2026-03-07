@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\FuelRefill;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\Cache;
+use App\Services\CompanyAnalyticsService;
 use App\Services\InvoicePdfService;
 
 class FuelRefillObserver
@@ -16,9 +16,9 @@ class FuelRefillObserver
     public function created(FuelRefill $fuelRefill): void
     {
         if ($fuelRefill->company_id) {
-            Cache::forget("company_dashboard_{$fuelRefill->company_id}");
-            Cache::forget("market_comparison_{$fuelRefill->company_id}_6");
-            Cache::forget("market_comparison_{$fuelRefill->company_id}_12");
+            CompanyAnalyticsService::invalidateDashboardCache($fuelRefill->company_id);
+            \Illuminate\Support\Facades\Cache::forget("market_comparison_{$fuelRefill->company_id}_6");
+            \Illuminate\Support\Facades\Cache::forget("market_comparison_{$fuelRefill->company_id}_12");
         }
         if (!$fuelRefill->receipt_path) {
             return;
@@ -42,6 +42,20 @@ class FuelRefillObserver
             app(InvoicePdfService::class)->generate($invoice);
         } catch (\Throwable $e) {
             report($e);
+        }
+    }
+
+    public function updated(FuelRefill $fuelRefill): void
+    {
+        if ($fuelRefill->company_id) {
+            CompanyAnalyticsService::invalidateDashboardCache($fuelRefill->company_id);
+        }
+    }
+
+    public function deleted(FuelRefill $fuelRefill): void
+    {
+        if ($fuelRefill->company_id) {
+            CompanyAnalyticsService::invalidateDashboardCache($fuelRefill->company_id);
         }
     }
 }

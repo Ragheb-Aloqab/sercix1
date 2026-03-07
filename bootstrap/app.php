@@ -23,12 +23,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->web(append: [
             \App\Http\Middleware\SetLocaleFromSession::class,
+            \App\Http\Middleware\LoadCompanyFromSubdomain::class,
+            \App\Http\Middleware\StripTenantInputFromRequest::class,
             \App\Http\Middleware\UpdateSessionCompanyId::class,
             \App\Http\Middleware\BroadcastAuthGuard::class,
         ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'company' => \App\Http\Middleware\EnsureCompany::class,
+            'load.company.subdomain' => \App\Http\Middleware\LoadCompanyFromSubdomain::class,
             'driver' => \App\Http\Middleware\EnsureDriverSession::class,
             'maintenance_center' => \App\Http\Middleware\EnsureMaintenanceCenter::class,
             'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,

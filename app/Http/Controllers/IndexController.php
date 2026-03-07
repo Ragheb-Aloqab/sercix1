@@ -9,11 +9,14 @@ class IndexController extends Controller
 {
     public function __invoke()
     {
-        // Always show main page — logged-in users can access it via "Main page" link in sidebar
+        $tenant = app()->bound('tenant') ? app('tenant') : null;
+        $wlBranding = app()->bound('tenant_from_subdomain') && app('tenant_from_subdomain');
+        $siteName = ($tenant && $wlBranding) ? $tenant->company_name : Setting::get('site_name', 'Servx Motors');
+        $siteLogoUrl = ($tenant && $wlBranding) ? ($tenant->getLogoUrl() ?? $this->siteLogoUrl()) : $this->siteLogoUrl();
+
         $contactEmail = Setting::get('contact_email', 'b2b@oilgo.com');
+
         $contactWhatsapp = Setting::get('contact_whatsapp', '05xxxxxxxx');
-        $siteName = Setting::get('site_name', 'Servx Motors');
-        $siteLogoUrl = $this->siteLogoUrl();
 
         $currentLocale = session('ui.locale', app()->getLocale());
         $user = null;

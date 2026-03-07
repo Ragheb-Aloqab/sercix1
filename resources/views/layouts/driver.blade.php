@@ -4,8 +4,23 @@
     <x-theme-init />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    @if($wlBranding ?? false)
+    <meta name="theme-color" content="{{ app('tenant')->getResolvedPrimaryColor() }}" />
+    <style>
+        :root {
+            --wl-primary: {{ app('tenant')->getResolvedPrimaryColor() }};
+            --wl-secondary: {{ app('tenant')->getResolvedSecondaryColor() }};
+            --tenant-primary: var(--wl-primary);
+            --tenant-secondary: var(--wl-secondary);
+            --tenant-primary-hover: color-mix(in srgb, var(--wl-primary) 85%, white);
+            --tenant-secondary-hover: color-mix(in srgb, var(--wl-secondary) 85%, white);
+            --tenant-primary-muted: color-mix(in srgb, var(--wl-primary) 20%, transparent);
+            --tenant-secondary-muted: color-mix(in srgb, var(--wl-secondary) 20%, transparent);
+        }
+    </style>
+    @endif
     @include('components.seo-meta', [
-        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('driver.dashboard') . ' — ' . ($siteName ?? 'Servx Motors')),
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: ($brandTitleDriver ?? $siteName ?? 'Servx Motors'),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -19,14 +34,14 @@
     <x-vite-cdn-fallback />
     @stack('styles')
 </head>
-<body class="page-tajawal company-dashboard font-servx overflow-x-hidden min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-servx-black dark:text-servx-silver-light">
+<body class="page-tajawal company-dashboard font-servx overflow-x-hidden min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-servx-black dark:text-servx-silver-light" @if($wlBranding ?? false) data-wl-branding @endif>
 <div class="min-h-screen flex flex-col pb-tabbar">
     {{-- Top bar (always visible) --}}
-    <header class="bg-white/95 dark:bg-slate-800/95 border-b border-slate-200 dark:border-slate-600/50 backdrop-blur sticky top-0 z-40 w-full transition-colors duration-300">
+    <header class="bg-white/95 dark:bg-slate-800/95 border-b border-slate-200 dark:border-slate-600/50 backdrop-blur sticky top-0 z-40 w-full transition-colors duration-300 @if($wlBranding ?? false) topbar-wl-branded @endif">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
             <a href="{{ route('driver.dashboard') }}" class="font-extrabold text-lg flex items-center gap-2 min-w-0 truncate shrink-0 text-slate-900 dark:text-white">
                 @if($siteLogoUrl ?? null)<img src="{{ $siteLogoUrl }}" alt="" width="32" height="32" class="h-8 w-8 rounded-lg object-cover shrink-0">@endif
-                <span class="truncate">{{ $siteName ?? 'Servx Motors' }}</span>
+                <span class="truncate">{{ $brandTitleDriver ?? $siteName ?? 'Servx Motors' }}</span>
             </a>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 {{-- Notifications --}}
@@ -36,8 +51,10 @@
                         <span class="absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-xs font-bold px-1">{{ $driverNotificationCount > 99 ? '99+' : $driverNotificationCount }}</span>
                     @endif
                 </a>
-                {{-- Theme toggle --}}
+                {{-- Theme toggle (hidden on white-label) --}}
+                <div class="wl-theme-toggle-wrap">
                 <x-theme-toggle-vanilla />
+                </div>
                 {{-- Language switcher --}}
                 <div class="flex items-center gap-0.5 rounded-xl border border-slate-300 dark:border-slate-600/50 p-0.5 bg-slate-200/80 dark:bg-slate-800/60">
                     <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-colors {{ app()->getLocale() === 'ar' ? 'bg-slate-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">ع</a>

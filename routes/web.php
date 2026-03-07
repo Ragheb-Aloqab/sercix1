@@ -112,9 +112,6 @@ Route::prefix('driver')->name('driver.')->group(function () {
         Route::match(['get', 'patch', 'post'], '/notifications/{notification}/read', [\App\Http\Controllers\Driver\NotificationsController::class, 'markRead'])->name('notifications.read');
     });
 });
-Route::domain('{company}.servexmotors.com')->group(function(){
-
-});
 
 /*
 |--------------------------------------------------------------------------

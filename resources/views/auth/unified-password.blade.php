@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{{ __('login.password_title') }} — {{ $siteName ?? 'Servx Motors' }}</title>
+    <title>{{ __('login.password_title') }} — {{ $brandTitle ?? $siteName ?? 'Servx Motors' }}</title>
     @if($siteLogoUrl ?? null)
         <link rel="icon" href="{{ $siteLogoUrl }}" type="image/png" />
     @else
@@ -26,7 +26,7 @@
             @else
                 <div class="h-11 w-11 rounded-full bg-servx-black-card border-2 border-servx-red/50 flex items-center justify-center text-servx-red font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
             @endif
-            <span class="text-xl font-bold text-servx-silver-light group-hover:text-white transition-colors">{{ $siteName ?? 'Servx Motors' }}</span>
+            <span class="text-xl font-bold text-servx-silver-light group-hover:text-white transition-colors">{{ $brandTitle ?? $siteName ?? 'Servx Motors' }}</span>
         </a>
 
         <div class="bg-servx-black-card rounded-xl border border-servx-red/30 shadow-servx-card p-6 sm:p-8">
@@ -62,7 +62,7 @@
             <span>·</span>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-servx-silver">© All Rights Reserved – Servix Motors</p>
+        <p class="mt-4 text-center text-xs text-servx-silver">© All Rights Reserved – {{ $siteName ?? 'Servx Motors' }}</p>
     </div>
 </div>
 </body>

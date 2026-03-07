@@ -107,7 +107,7 @@ class InvoicesList extends Component
                 ->get();
         }
 
-        $maintenanceInvoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+        $maintenanceInvoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
         $maintenanceSummary = ['total' => 0.0, 'avg' => 0.0, 'count' => 0];
         if ($this->invoiceType === 'maintenance' || $this->invoiceType === '') {
             $maintenanceQuery = MaintenanceRequest::forCompany($company->id)
@@ -117,7 +117,7 @@ class InvoicesList extends Component
                 ->when($from, fn ($q) => $q->where('final_invoice_uploaded_at', '>=', $from))
                 ->when($to, fn ($q) => $q->where('final_invoice_uploaded_at', '<=', $to))
                 ->when($this->q !== '', fn ($q) => $q->where('id', $this->q));
-            $maintenanceInvoices = $maintenanceQuery->latest('final_invoice_uploaded_at')->paginate(12);
+            $maintenanceInvoices = $maintenanceQuery->latest('final_invoice_uploaded_at')->paginate(25);
             $companyMaintenanceInvoices = CompanyMaintenanceInvoice::where('company_id', $company->id)
                 ->with('vehicle')
                 ->when($vehicleIdInt > 0, fn ($q) => $q->where('vehicle_id', $vehicleIdInt))
@@ -129,12 +129,12 @@ class InvoicesList extends Component
             $maintenanceSummary = $summaryService->computeMaintenanceInvoiceSummary($company->id, $from, $to, $vehicleIdInt);
         }
 
-        $invoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+        $invoices = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
         if ($this->invoiceType !== 'maintenance') {
             $invoices = (clone $baseQuery)
                 ->with(['order.services', 'order.vehicle', 'order.invoice', 'fuelRefill.vehicle'])
                 ->latest()
-                ->paginate(12);
+                ->paginate(25);
 
             $invoices->getCollection()->transform(function ($invoice) {
                 $total = (float) ($invoice->total ?? 0);

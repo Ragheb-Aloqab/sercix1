@@ -82,11 +82,11 @@ class OrdersList extends Component
     {
         $statuses = OrderStatus::ALL;
 
-        $orders = $this->baseQuery()->paginate(15)->withQueryString();
+        $orders = $this->baseQuery()->paginate(25)->withQueryString();
         $ordersWithDisplay = $orders->getCollection()->map(fn ($order) => (object) ['order' => $order, 'maintenanceRequest' => null]);
         $orders->setCollection($ordersWithDisplay);
 
-        $maintenanceRequests = $this->maintenanceQuery()->paginate(15)->withQueryString();
+        $maintenanceRequests = $this->maintenanceQuery()->paginate(25)->withQueryString();
 
         return view('livewire.company.orders-list', [
             'orders' => $orders,

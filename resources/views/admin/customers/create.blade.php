@@ -16,7 +16,7 @@
                 </a>
             </div>
             <div class="dash-card">
-                <form method="POST" action="{{ route('admin.customers.store') }}" class="space-y-4">
+                <form method="POST" action="{{ route('admin.customers.store') }}" class="space-y-4" enctype="multipart/form-data">
                     @csrf
                     @include('admin.customers.partials.form', ['customer' => null])
                 </form>

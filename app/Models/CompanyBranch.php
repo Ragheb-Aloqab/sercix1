@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyBranch extends Model
 {
+    use BelongsToCompany;
     use HasFactory;
 
     protected $table = 'company_branches';

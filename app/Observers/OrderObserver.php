@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Order;
 use App\Models\WebhookUrl;
+use App\Services\CompanyAnalyticsService;
 use Illuminate\Support\Facades\Cache;
 use App\Events\OrderCreated;
 use App\Events\OrderStatusChanged;
@@ -25,6 +26,7 @@ class OrderObserver
     {
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
+            CompanyAnalyticsService::invalidateDashboardCache($order->company_id);
             Cache::forget("market_comparison_{$order->company_id}_6");
             Cache::forget("market_comparison_{$order->company_id}_12");
         }
@@ -52,6 +54,7 @@ class OrderObserver
     {
         if ($order->company_id) {
             Cache::forget("company_dashboard_{$order->company_id}");
+            CompanyAnalyticsService::invalidateDashboardCache($order->company_id);
             Cache::forget("market_comparison_{$order->company_id}_6");
             Cache::forget("market_comparison_{$order->company_id}_12");
         }
@@ -70,6 +73,9 @@ class OrderObserver
      */
     public function deleted(Order $order): void
     {
+        if ($order->company_id) {
+            CompanyAnalyticsService::invalidateDashboardCache($order->company_id);
+        }
         $this->invalidateAdminStats();
     }
 

@@ -4,8 +4,11 @@
     <x-theme-init />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    @if($wlBranding ?? false)
+    <meta name="theme-color" content="{{ app('tenant')->getResolvedPrimaryColor() }}" />
+    @endif
     @include('components.seo-meta', [
-        'title' => __('login.title') . ' — ' . ($siteName ?? 'Servx Motors'),
+        'title' => __('login.title') . ' — ' . ($brandTitle ?? $siteName ?? 'Servx Motors'),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -14,6 +17,21 @@
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
+    @if($wlBranding ?? false)
+    <style>
+        :root {
+            --wl-primary: {{ app('tenant')->getResolvedPrimaryColor() }};
+            --wl-secondary: {{ app('tenant')->getResolvedSecondaryColor() }};
+            --tenant-primary: var(--wl-primary);
+            --tenant-secondary: var(--wl-secondary);
+            --tenant-primary-hover: color-mix(in srgb, var(--wl-primary) 85%, white);
+            --tenant-secondary-hover: color-mix(in srgb, var(--wl-secondary) 85%, white);
+        }
+        .page-auth .auth-btn-primary { background-color: var(--tenant-primary) !important; }
+        .page-auth .auth-btn-primary:hover { background-color: var(--tenant-primary-hover) !important; }
+        .page-auth a.text-sky-600, .page-auth a.text-servx-red { color: var(--tenant-primary) !important; }
+    </style>
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -21,19 +39,19 @@
     <x-vite-cdn-fallback />
     @livewireStyles
 </head>
-<body class="page-auth min-h-screen bg-slate-50 dark:bg-servx-black text-slate-900 dark:text-servx-silver-light antialiased overflow-x-hidden font-servx transition-colors duration-300">
+<body class="page-auth min-h-screen bg-slate-50 dark:bg-servx-black text-slate-900 dark:text-servx-silver-light antialiased overflow-x-hidden font-servx transition-colors duration-300" @if($wlBranding ?? false) data-wl-branding @endif>
 <div class="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative">
-    <div class="absolute top-4 end-4">
+    <div class="absolute top-4 end-4 wl-theme-toggle-wrap">
         <livewire:dashboard.theme-toggle-standalone />
     </div>
     <div class="w-full max-w-sm">
         <a href="{{ url('/') }}" class="flex items-center justify-center gap-3 mb-6 group">
             @if($siteLogoUrl ?? null)
-                <img src="{{ $siteLogoUrl }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="44" height="44" class="h-11 w-11 rounded-full object-cover border-2 border-slate-300 dark:border-servx-red/50 group-hover:border-slate-900 dark:group-hover:border-servx-red transition-colors duration-300">
+                <img src="{{ $siteLogoUrl }}" alt="{{ $brandTitle ?? $siteName ?? 'Servx Motors' }}" width="44" height="44" class="h-11 w-11 rounded-full object-cover border-2 border-slate-300 dark:border-servx-red/50 group-hover:border-slate-900 dark:group-hover:border-servx-red transition-colors duration-300">
             @else
                 <div class="h-11 w-11 rounded-full bg-slate-200 dark:bg-servx-black-card border-2 border-slate-300 dark:border-servx-red/50 flex items-center justify-center text-slate-700 dark:text-servx-red font-bold text-lg">{{ strtoupper(substr($siteName ?? 'S', 0, 1)) }}</div>
             @endif
-            <span class="text-xl font-bold text-slate-700 dark:text-servx-silver-light group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300">{{ $siteName ?? 'Servx Motors' }}</span>
+            <span class="text-xl font-bold text-slate-700 dark:text-servx-silver-light group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300">{{ $brandTitle ?? $siteName ?? 'Servx Motors' }}</span>
         </a>
 
         <div class="bg-white dark:bg-servx-black-card rounded-xl border border-slate-200 dark:border-servx-red/30 shadow-lg dark:shadow-servx-card p-6 sm:p-8 transition-colors duration-300">
@@ -51,7 +69,7 @@
                         class="mt-1.5 block w-full rounded-lg border border-slate-300 dark:border-servx-red/30 bg-white dark:bg-servx-black-soft px-3 py-2.5 min-h-[44px] text-slate-900 dark:text-servx-silver-light placeholder-slate-400 dark:placeholder-servx-silver outline-none focus:border-sky-500 dark:focus:border-servx-red focus:ring-2 focus:ring-sky-200 dark:focus:ring-servx-red/20 transition-colors duration-300"
                         autocomplete="username" autofocus />
                 </div>
-                <button type="submit" class="w-full rounded-lg bg-servx-red hover:bg-servx-red-hover px-4 py-2.5 min-h-[44px] text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]">
+                <button type="submit" class="w-full rounded-lg px-4 py-2.5 min-h-[44px] text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.99] {{ ($wlBranding ?? false) ? 'auth-btn-primary' : 'bg-servx-red hover:bg-servx-red-hover' }}">
                     {{ __('login.continue') }}
                 </button>
             </form>
@@ -62,7 +80,7 @@
             <span>·</span>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-sky-600 dark:text-servx-red' : 'hover:text-slate-900 dark:hover:text-servx-red transition-colors duration-300' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-slate-500 dark:text-servx-silver">© All Rights Reserved – Servix Motors</p>
+        <p class="mt-4 text-center text-xs text-slate-500 dark:text-servx-silver">© All Rights Reserved – {{ $siteName ?? 'Servx Motors' }}</p>
     </div>
 </div>
 @livewireScripts

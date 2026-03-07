@@ -142,4 +142,14 @@ return [
     'sidebar_section_system' => 'System',
     'sidebar_toggle_tooltip' => 'Collapse sidebar',
     'sidebar_expand_tooltip' => 'Expand sidebar',
+
+    // White-Label Branding
+    'white_label_branding' => 'White-Label Branding',
+    'white_label_enabled' => 'Enable White-Label Subdomain',
+    'subdomain' => 'Subdomain',
+    'primary_color' => 'Primary Color',
+    'secondary_color' => 'Secondary Color',
+    'company_logo' => 'Company Logo',
+    'remove_logo' => 'Remove logo',
+    'logo_hint' => 'PNG, JPG, WEBP. Max 2MB.',
 ];

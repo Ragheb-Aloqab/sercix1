@@ -427,4 +427,66 @@ class CompanyAnalyticsService
     {
         return new self($company);
     }
+
+    private const DASHBOARD_STATS_TTL = 300; // 5 minutes
+    private const DASHBOARD_STATS_KEY = 'company:%d:dashboard_stats';
+
+    /**
+     * Cached dashboard aggregates for company dashboard (Phase 1).
+     * Invalidated by VehicleObserver, OrderObserver, FuelRefillObserver.
+     */
+    public function getDashboardStats(): array
+    {
+        $key = sprintf(self::DASHBOARD_STATS_KEY, $this->company->id);
+
+        return Cache::remember($key, self::DASHBOARD_STATS_TTL, function () {
+            $company = $this->company;
+            $company->loadCount(['orders', 'invoices', 'branches']);
+            $today = now()->toDateString();
+            $orderStats = \App\Models\Order::query()
+                ->where('company_id', $company->id)
+                ->selectRaw("
+                    SUM(CASE WHEN DATE(created_at) = ? THEN 1 ELSE 0 END) as today_orders,
+                    SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+                ", [$today])
+                ->first();
+            $recentInvoices = $company->invoices()->with('order')->latest()->limit(10)->get();
+            $latestOrders = $company->orders()->with(['vehicle:id,company_id,make,model,plate_number', 'services'])->latest()->limit(6)->get();
+            $enabledServices = $company->services()->wherePivot('is_enabled', true)->take(8)->get(['services.id', 'services.name', 'services.base_price']);
+            $topVehicles = $this->getTopVehiclesByServiceConsumptionAndCost()->take(5);
+            $totalCost = $this->maintenanceCost() + $this->fuelsCost();
+            $top5Summary = [
+                'top_total' => round($topVehicles->sum('total_cost'), 2),
+                'ui_percentage' => $totalCost > 0 ? round(($topVehicles->sum('total_cost') / $totalCost) * 100, 1) : 0,
+            ];
+            return [
+                'todayOrders' => (int) ($orderStats?->today_orders ?? 0),
+                'inProgress' => (int) ($orderStats?->in_progress ?? 0),
+                'completed' => (int) ($orderStats?->completed ?? 0),
+                'latestOrders' => $latestOrders,
+                'enabledServices' => $enabledServices,
+                'recentInvoices' => $recentInvoices,
+                'topVehicles' => $topVehicles,
+                'top5Summary' => $top5Summary,
+                'maintenanceIndicator' => $this->maintenanceCostIndicator(),
+                'fuelIndicator' => $this->fuelConsumptionIndicator(),
+                'operatingIndicator' => $this->operatingCostIndicator(),
+                'fuelSummary' => $this->getFuelCostsSummary(null, null, null),
+                'maintenanceSummary' => $this->getMaintenanceCostsSummary(null, null, null),
+                'vehiclesCount' => $company->vehicles()->count(),
+                'totalCost' => $totalCost,
+                'dailyCost' => round($this->dailyCost(), 0),
+                'monthlyCost' => round($this->monthlyCost(), 1),
+                'sevenMonthPercent' => $this->lastSevenMonthsPercentage(),
+                'lastSevenMonths' => $this->lastSevenMonthsComparison(),
+            ];
+        });
+    }
+
+    public static function invalidateDashboardCache(int $companyId): void
+    {
+        Cache::forget(sprintf(self::DASHBOARD_STATS_KEY, $companyId));
+        Cache::forget("company_dashboard_{$companyId}");
+    }
 }

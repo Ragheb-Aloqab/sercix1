@@ -141,6 +141,21 @@ return [
     'search_services' => 'البحث في الخدمات...',
     'no_services_match' => 'لا توجد خدمات تطابق البحث',
 
+    'choose_vehicle' => 'اختر المركبة',
+    'select_vehicle' => 'اختر المركبة',
+    'service_type' => 'نوع الخدمة',
+    'service_type_maintenance' => 'صيانة',
+    'service_type_oil_change' => 'تغيير زيت',
+    'service_type_painting' => 'صباغة',
+    'service_type_tires' => 'كفرات',
+    'service_type_other' => 'أخرى',
+    'service_amount' => 'مبلغ الخدمة',
+    'service' => 'الخدمة',
+    'select_service' => 'اختر الخدمة',
+    'total_before_tax' => 'الإجمالي قبل الضريبة',
+    'tax_15' => 'الضريبة (15%)',
+    'total' => 'الإجمالي',
+
     // Predefined maintenance service names (Arabic translations)
     'predefined_services' => [
         'oil_change' => 'تغيير الزيت',

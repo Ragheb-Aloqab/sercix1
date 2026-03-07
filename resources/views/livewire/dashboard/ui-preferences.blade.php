@@ -30,7 +30,8 @@
         </div>
     </div>
 
-    {{-- Theme Toggle --}}
+    {{-- Theme Toggle (hidden on white-label / single theme) --}}
+    <div class="wl-theme-toggle-wrap">
     <button
         wire:click="toggleTheme"
         class="min-w-[44px] min-h-[44px] p-2 sm:px-3 sm:py-2 rounded-xl flex items-center justify-center transition-colors duration-300
@@ -47,4 +48,5 @@
         aria-label="{{ $theme === 'dark' ? __('dashboard.theme_light') : __('dashboard.theme_dark') }}">
         <i class="fa-solid {{ $theme === 'dark' ? 'fa-sun' : 'fa-moon' }} transition-transform duration-300"></i>
     </button>
+    </div>
 </div>

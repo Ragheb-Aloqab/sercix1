@@ -16,9 +16,11 @@ class ThemeInit extends Component
         $actor = auth('company')->user() ?? auth('maintenance_center')->user() ?? auth('web')->user();
         $effective = $this->themeService->getEffectiveTheme();
         $pref = $this->themeService->getPreference();
+        $forceLight = app()->bound('tenant_from_subdomain') && app('tenant_from_subdomain');
         return view('components.theme-init', [
-            'initialTheme' => $actor ? $effective : null,
+            'initialTheme' => $forceLight ? 'light' : ($actor ? $effective : null),
             'initialPreference' => $pref,
+            'forceLightTheme' => $forceLight,
         ]);
     }
 }

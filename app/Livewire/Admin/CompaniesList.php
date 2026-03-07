@@ -43,7 +43,7 @@ class CompaniesList extends Component
             ->withCount(['vehicles', 'orders'])
             ->selectRaw('(SELECT COALESCE(COUNT(DISTINCT driver_phone), 0) FROM vehicles WHERE vehicles.company_id = companies.id AND driver_phone IS NOT NULL) as drivers_count')
             ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(12);
+            ->paginate(25);
     }
 
     public function render()
