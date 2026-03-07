@@ -118,7 +118,7 @@
                             {{ app()->getLocale() === 'ar' ? 'إعادة الإرسال خلال:' : 'Resend in:' }} <span id="otp-timer-value" class="font-mono font-bold text-servx-silver-light">02:00</span>
                         </p>
                         <div id="otp-resend-wrap" class="flex items-center justify-between text-sm" style="display:none">
-                            <a href="{{ $isRegistration ?? false ? route('company.register') : route('sign-in.index') }}" class="font-medium text-servx-silver hover:text-servx-red transition-colors">
+                            <a href="{{ route('sign-in.index') }}" class="font-medium text-servx-silver hover:text-servx-red transition-colors">
                                 {{ app()->getLocale() === 'ar' ? 'تعديل رقم الجوال' : 'Change phone number' }}
                             </a>
                             @if($isRegistration ?? false)
@@ -147,7 +147,7 @@
                 <span>·</span>
                 <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
             </div>
-            <p class="mt-4 text-center text-xs text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
+            <p class="mt-4 text-center text-xs text-servx-silver">© All Rights Reserved – Servix Motors</p>
         </div>
     </div>
 </body>

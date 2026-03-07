@@ -124,7 +124,7 @@
             <span>·</span>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-servx-red' : 'hover:text-servx-red transition-colors' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
+        <p class="mt-4 text-center text-xs text-servx-silver">© All Rights Reserved – Servix Motors</p>
     </div>
 </div>
 </body>

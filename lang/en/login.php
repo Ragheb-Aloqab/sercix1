@@ -22,7 +22,7 @@ return [
     'company_no_phone' => 'No phone number linked to this account. Please contact support.',
     'staff_no_phone' => 'No phone number linked to this admin/technician account. Please contact support.',
     'email_not_staff' => 'This email is not registered as admin or technician.',
-    'phone_not_found' => 'This phone number is not registered as company or driver. Create a company account below.',
+    'phone_not_found' => 'This phone number is not registered as company or driver. Contact your administrator to create an account.',
     'session_expired' => 'Session expired. Please enter your email or phone again.',
     'password_title' => 'Enter your password',
     'password_subtitle' => 'Sign in as',

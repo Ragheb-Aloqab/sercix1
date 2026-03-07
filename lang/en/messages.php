@@ -124,9 +124,9 @@ return [
     'technician' => 'Technician',
 
     // Auth (Unified)
-    'phone_not_company' => 'Phone number is not registered as a company. Create an account from the link below.',
+    'phone_not_company' => 'Phone number is not registered as a company. Contact your administrator to create an account.',
     'phone_not_driver' => 'Phone number is not registered as a driver. Contact your company to add your phone.',
-    'phone_not_found' => 'Phone number is not registered as company or driver. Create a company account from the link below.',
+    'phone_not_found' => 'Phone number is not registered as company or driver. Contact your administrator to create an account.',
     'otp_sent' => 'Verification code sent to your phone.',
     'otp_send_error' => 'An error occurred while sending the verification code. Please try again.',
     'otp_no_valid_code' => 'No valid code. Please try again.',

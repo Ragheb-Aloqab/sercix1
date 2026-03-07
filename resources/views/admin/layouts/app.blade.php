@@ -121,7 +121,7 @@
             @yield('content')
 
             <div class="mt-8 text-sm {{ auth('company')->check() || auth('maintenance_center')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">
-                © {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}
+                © All Rights Reserved – Servix Motors
             </div>
         </section>
     </main>

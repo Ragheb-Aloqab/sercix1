@@ -76,7 +76,7 @@
 
     {{-- 4. Fuel (collapsible section) --}}
     @php
-        $fuelActive = request()->routeIs('company.fuel.index') || request()->routeIs('company.fuel-balance') || (request()->routeIs('company.invoices.index') && request()->get('invoice_type') === 'fuel');
+        $fuelActive = request()->routeIs('company.fuel.index') || request()->routeIs('company.fuel-balance');
     @endphp
     <div x-data="{ fuelOpen: {{ $fuelActive ? 'true' : 'false' }} }" class="sidebar-nav-group">
         <button type="button" @click="fuelOpen = !fuelOpen"
@@ -112,14 +112,6 @@
                     <span class="sidebar-nav-icon sidebar-nav-icon--orange"><i class="fa-solid fa-gas-pump"></i></span>
                     <div class="sidebar-nav-text">
                         <p class="sidebar-nav-label">{{ __('fleet.fuel_refills') }}</p>
-                    </div>
-                </a>
-                <a href="{{ route('company.invoices.index', ['invoice_type' => 'fuel']) }}"
-                   class="sidebar-nav-item sidebar-nav-item--sub {{ (request()->routeIs('company.invoices.index') && request()->get('invoice_type') === 'fuel') ? 'sidebar-nav-item--active' : '' }}"
-                   title="{{ __('fleet.fuel_invoices') }}">
-                    <span class="sidebar-nav-icon sidebar-nav-icon--blue"><i class="fa-solid fa-file-invoice"></i></span>
-                    <div class="sidebar-nav-text">
-                        <p class="sidebar-nav-label">{{ __('fleet.fuel_invoices') }}</p>
                     </div>
                 </a>
             </div>

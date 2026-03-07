@@ -159,9 +159,9 @@ Route::prefix('company')->name('company.')->group(function () {
         ->middleware('throttle:10,1')
         ->name('verify_otp');
 
-    // Register
-    Route::get('/register', [OtpAuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [OtpAuthController::class, 'register'])->name('register.store');
+    // Company self-registration disabled — companies are created by Super Admin only
+    Route::get('/register', fn () => abort(404))->name('register');
+    Route::post('/register', fn () => abort(404))->name('register.store');
 
     Route::post('/logout', [OtpAuthController::class, 'logout'])->name('logout');
 });

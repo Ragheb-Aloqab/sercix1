@@ -349,7 +349,6 @@
                         <li><a class="hover:text-servx-red transition-colors" href="#offers" id="fServices">{{ __('index.fServices') }}</a></li>
                         <li><a class="hover:text-servx-red transition-colors" href="#workflow" id="fHow">{{ __('index.fHow') }}</a></li>
                         <li><a class="hover:text-servx-red transition-colors" href="#faq" id="fFaq">{{ __('index.faqTitle') }}</a></li>
-                        <li><a class="hover:text-servx-red transition-colors" href="{{ route('company.register') }}">{{ __('index.create_company_account') }}</a></li>
                     </ul>
                 </div>
 
@@ -371,15 +370,11 @@
             </div>
 
             <div class="mt-10 pt-6 border-t border-servx-red/20 text-xs text-servx-silver flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div>© <span id="year"></span> {{ $siteName ?? 'Servx Motors' }}</div>
+                <div>© All Rights Reserved – Servix Motors</div>
             </div>
             <div class="mt-4 text-center text-xs text-servx-silver" id="footerCredits">
                 <span id="footerCreditsText">{{ __('index.footerCreditsText') }}</span>
-                <a href="mailto:raghebammar201@gmail.com"
-                    class="text-servx-silver-light hover:text-servx-red underline font-semibold transition">Ragheb Aloqab</a>
-                <span id="footerCreditsAnd">{{ __('index.footerCreditsAnd') }}</span>
-                <a href="mailto:abdullahskander8@gmail.com"
-                    class="text-servx-silver-light hover:text-servx-red underline font-semibold transition">Abdullah Eskander</a>
+                <span class="font-semibold">Servix Motors</span>
             </div>
         </div>
     </footer>

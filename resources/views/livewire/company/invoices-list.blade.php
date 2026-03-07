@@ -1,6 +1,7 @@
 <div class="space-y-6">
-    {{-- Summary cards --}}
+    {{-- Summary cards — show only relevant cards per invoice type --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        @if($invoiceType === '' || $invoiceType === 'fuel')
         <x-summary-card
             :label="__('invoice.summary_fuel_total')"
             :value="number_format($summary['fuel_total'], 2) . ' ' . __('company.sar')"
@@ -12,6 +13,8 @@
             :value="number_format($summary['fuel_avg'], 2) . ' ' . __('company.sar')"
             variant="amber"
         />
+        @endif
+        @if($invoiceType === '' || $invoiceType === 'service')
         <x-summary-card
             :label="__('invoice.summary_service_total')"
             :value="number_format($summary['service_total'], 2) . ' ' . __('company.sar')"
@@ -23,12 +26,15 @@
             :value="number_format($summary['service_avg'], 2) . ' ' . __('company.sar')"
             variant="emerald"
         />
+        @endif
+        @if($invoiceType === '' || $invoiceType === 'maintenance')
         <x-summary-card
             :label="__('maintenance.invoice_archive') ?? 'Maintenance'"
             :value="number_format($maintenanceSummary['total'] ?? 0, 2) . ' ' . __('company.sar')"
             :subtext="__('invoice.summary_count', ['count' => $maintenanceSummary['count'] ?? 0])"
             variant="sky"
         />
+        @endif
     </div>
 
     {{-- Filter form (Livewire wire:model for reactive filtering) --}}

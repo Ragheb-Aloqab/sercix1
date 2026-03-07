@@ -13,9 +13,11 @@
                     <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
                 </div>
                 <div class="flex gap-2">
+                    @if(auth()->user()?->role === 'super_admin')
                     <a href="{{ route('admin.customers.create') }}" class="dash-btn dash-btn-primary">
                         <i class="fa-solid fa-plus"></i>{{ __('admin_dashboard.quick_add_company') }}
                     </a>
+                    @endif
                     <a href="{{ route('admin.dashboard') }}" class="dash-btn dash-btn-secondary">
                         <i class="fa-solid fa-arrow-left rtl:rotate-180"></i>{{ __('common.back') }}
                     </a>

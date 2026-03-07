@@ -14,6 +14,10 @@ class InvoicesController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->get('invoice_type') === 'fuel') {
+            $params = array_filter($request->only(['from', 'to', 'vehicle_id']));
+            return redirect()->route('company.fuel.index', $params);
+        }
         return view('company.invoices.index');
     }
 

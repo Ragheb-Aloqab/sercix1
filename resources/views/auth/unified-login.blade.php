@@ -56,16 +56,13 @@
                 </button>
             </form>
 
-            <a href="{{ route('company.register') }}" class="mt-4 block w-full text-center rounded-lg border border-slate-300 dark:border-servx-red/50 px-4 py-2.5 min-h-[44px] flex items-center justify-center text-sm font-semibold text-slate-600 dark:text-servx-silver-light hover:bg-slate-100 dark:hover:bg-servx-red/20 hover:text-slate-900 dark:hover:text-white transition-colors duration-300 active:scale-[0.99]">
-                {{ __('login.create_company_account') }}
-            </a>
         </div>
         <div class="mt-6 flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-servx-silver">
             <a href="{{ route('set-locale', ['lang' => 'ar']) }}" class="{{ app()->getLocale() === 'ar' ? 'font-semibold text-sky-600 dark:text-servx-red' : 'hover:text-slate-900 dark:hover:text-servx-red transition-colors duration-300' }}">العربية</a>
             <span>·</span>
             <a href="{{ route('set-locale', ['lang' => 'en']) }}" class="{{ app()->getLocale() === 'en' ? 'font-semibold text-sky-600 dark:text-servx-red' : 'hover:text-slate-900 dark:hover:text-servx-red transition-colors duration-300' }}">English</a>
         </div>
-        <p class="mt-4 text-center text-xs text-slate-500 dark:text-servx-silver">© {{ date('Y') }} {{ $siteName ?? 'Servx Motors' }}</p>
+        <p class="mt-4 text-center text-xs text-slate-500 dark:text-servx-silver">© All Rights Reserved – Servix Motors</p>
     </div>
 </div>
 @livewireScripts

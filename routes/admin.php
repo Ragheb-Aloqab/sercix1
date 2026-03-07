@@ -111,9 +111,14 @@ Route::middleware(['auth:web', 'admin'])
         });
 
         // =========================
-        // Customers (Companies)
+        // Customers (Companies) — create/store restricted to Super Admin only
         // =========================
-        Route::resource('customers', CustomersController::class)->except(['show'])->names('customers');
+        Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
+        Route::get('/customers/create', [CustomersController::class, 'create'])->middleware('super_admin')->name('customers.create');
+        Route::post('/customers', [CustomersController::class, 'store'])->middleware('super_admin')->name('customers.store');
+        Route::get('/customers/{customer}/edit', [CustomersController::class, 'edit'])->name('customers.edit');
+        Route::put('/customers/{customer}', [CustomersController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{customer}', [CustomersController::class, 'destroy'])->name('customers.destroy');
 
         // =========================
         // Admin Users

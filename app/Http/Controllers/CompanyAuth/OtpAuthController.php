@@ -129,7 +129,7 @@ class OtpAuthController extends Controller
     {
         $registerData = Session::get('otp.register_data');
         if (!$registerData) {
-            return redirect()->route('company.register')
+            return redirect()->route('login')
                 ->withErrors(['otp' => __('messages.otp_no_valid_code')]);
         }
 
@@ -191,7 +191,7 @@ class OtpAuthController extends Controller
             $hasRegisterData = Session::has('otp.register_data');
             Session::forget(['otp.phone', 'otp.code', 'otp.expires_at', 'otp.register_data']);
             if ($hasRegisterData) {
-                return redirect()->route('company.register')
+                return redirect()->route('login')
                     ->withErrors(['otp' => __('messages.otp_expired_resend')]);
             }
             return redirect()->route('company.login')
