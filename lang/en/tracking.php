@@ -61,6 +61,7 @@ return [
     'trip_recorded' => 'Trip recorded',
     'end_odometer_less_than_start' => 'End odometer cannot be less than start odometer.',
     'end_odometer_less_than_previous' => 'Odometer reading cannot be less than the previous recorded value.',
+    'daily_odometer' => 'Daily Odometer',
     'daily_odometer_saved' => 'Daily odometer saved successfully.',
     'enter_daily_odometer' => 'Enter end of day odometer',
     'daily_odometer_hint' => 'Enter the odometer reading at end of your shift. Daily mileage will be calculated from the previous reading.',
