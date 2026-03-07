@@ -283,6 +283,8 @@ Route::middleware(['company'])
         // Maintenance Invoice Archive (view & download final invoices)
         Route::get('/maintenance-invoices', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'index'])
             ->name('maintenance-invoices.index');
+        Route::get('/maintenance-invoices/create', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'create'])
+            ->name('maintenance-invoices.create');
         Route::post('/maintenance-invoices', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'store'])
             ->name('maintenance-invoices.store');
         Route::get('/maintenance-invoices/{maintenanceRequest}/view', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'stream'])

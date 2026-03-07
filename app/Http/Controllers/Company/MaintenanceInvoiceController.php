@@ -32,6 +32,14 @@ class MaintenanceInvoiceController extends Controller
     }
 
     /**
+     * Show form to add a new maintenance invoice.
+     */
+    public function create()
+    {
+        return view('company.maintenance-invoices.create');
+    }
+
+    /**
      * List all maintenance requests with final invoices + company-uploaded invoices.
      */
     public function index(Request $request)

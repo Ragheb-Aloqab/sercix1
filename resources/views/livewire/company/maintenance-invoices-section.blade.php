@@ -9,12 +9,11 @@
     {{-- Invoices section header with Upload button (top right) --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 class="dash-section-title mb-0">{{ __('maintenance.add_invoice') }} — {{ __('common.uploaded') }}</h2>
-        <button type="button"
-            wire:click="openModal"
+        <a href="{{ route('company.maintenance-invoices.create') }}"
             class="shrink-0 px-5 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition-colors inline-flex items-center gap-2">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             {{ __('maintenance.upload_maintenance_invoice') }}
-        </button>
+        </a>
     </div>
 
     {{-- Company-uploaded invoices list --}}
@@ -58,7 +57,7 @@
                                 <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ $inv->vehicle?->display_name ?? $inv->vehicle?->plate_number ?? '-' }}</td>
                                 <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver text-sm">
                                     @if($inv->services->isNotEmpty())
-                                        {{ $inv->services->pluck('name')->join(', ') }}
+                                        {{ $inv->services->map(fn($s) => $s->getTranslatedName())->join(', ') }}
                                     @else
                                         —
                                     @endif
@@ -177,12 +176,12 @@
                             </div>
                         </div>
 
-                        {{-- Services: searchable multi-select with Add Service --}}
+                        {{-- Services: searchable multi-select with Add Service (translated) --}}
                         <div x-data="{
                             open: false,
                             search: '',
-                            services: {{ Js::from($services->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()) }},
-                            get filtered() { const q = this.search.toLowerCase().trim(); return this.services.filter(s => !q || s.name.toLowerCase().includes(q)); },
+                            services: {{ Js::from($services->map(fn($s) => ['id' => $s->id, 'name' => $s->getTranslatedName(), 'nameOriginal' => $s->name])->values()) }},
+                            get filtered() { const q = this.search.toLowerCase().trim(); return this.services.filter(s => !q || s.name.toLowerCase().includes(q) || (s.nameOriginal && s.nameOriginal.toLowerCase().includes(q))); },
                             get noMatch() { return this.open && this.search && this.filtered.length === 0; }
                         }" x-on:click.outside="open = false" class="relative">
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.services') }}</label>
@@ -194,7 +193,7 @@
                                             <div class="flex flex-wrap gap-1.5 p-2 border-b border-slate-200 dark:border-slate-600/50">
                                                 @foreach($services->whereIn('id', $service_ids) as $s)
                                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/20 text-sky-700 dark:text-sky-300 text-sm">
-                                                        {{ $s->name }}
+                                                        {{ $s->getTranslatedName() }}
                                                         <button type="button" wire:click="removeService({{ $s->id }})"
                                                             class="hover:text-red-500 transition-colors" title="{{ __('common.remove') }}">
                                                             <i class="fa-solid fa-xmark text-xs"></i>

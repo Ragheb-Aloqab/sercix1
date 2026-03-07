@@ -4,9 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Service extends Model
 {
+    /**
+     * Get the translated display name for this service.
+     * Uses maintenance.predefined_services.{slug} — falls back to raw name if no translation.
+     */
+    public function getTranslatedName(): string
+    {
+        $key = 'maintenance.predefined_services.' . Str::slug($this->name, '_');
+        $trans = __($key);
+        return $trans !== $key ? $trans : $this->name;
+    }
     use HasFactory;
     protected $fillable = [
         'name',
