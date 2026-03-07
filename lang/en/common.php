@@ -66,6 +66,7 @@ return [
     'upload' => 'Upload',
     'uploaded' => 'Uploaded',
     'choose_file' => 'Choose file',
+    'no_file' => 'No file',
     'preview' => 'Preview',
     'description' => 'Description',
     'done' => 'Done',

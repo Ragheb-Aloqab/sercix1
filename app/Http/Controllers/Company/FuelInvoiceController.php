@@ -21,7 +21,7 @@ class FuelInvoiceController extends Controller
         }
 
         $path = $companyFuelInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 
@@ -61,7 +61,7 @@ class FuelInvoiceController extends Controller
         }
 
         $path = $companyFuelInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 
@@ -96,7 +96,7 @@ class FuelInvoiceController extends Controller
         }
 
         $path = $companyFuelInvoice->invoice_file;
-        if (!Storage::disk('private')->exists($path)) {
+        if (!$path || !Storage::disk('private')->exists($path)) {
             abort(404);
         }
 

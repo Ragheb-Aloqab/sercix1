@@ -46,7 +46,7 @@
                                     <span class="text-sky-400">{{ $invoice_file->getClientOriginalName() }}</span>
                                     <span class="text-slate-500 dark:text-servx-silver">({{ number_format($invoice_file->getSize() / 1024, 1) }} KB)</span>
                                 @else
-                                    {{ __('common.choose_file') }}
+                                    {{ __('common.choose_file') }} <span class="text-slate-400">({{ __('common.optional') }})</span>
                                 @endif
                             </p>
                             <label for="modal_fuel_invoice_file" class="inline-block px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold cursor-pointer transition-colors">

@@ -12,11 +12,8 @@
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
                 <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}"></i> {{ __('fuel.back_to_vehicles') }}
             </a>
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('company.invoices.index', ['invoice_type' => 'fuel']) }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
-                    <i class="fa-solid fa-file-invoice"></i> {{ __('invoice.fuel_invoice') }}
-                </a>
+            <div class="flex flex-wrap gap-2 items-center">
+                <livewire:company.fuel-invoice-upload-section />
                 <a href="{{ route('company.reports.index') }}"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:bg-slate-700/50 transition-colors">
                     <i class="fa-solid fa-chart-pie"></i> {{ __('reports.all_reports') }}
@@ -169,12 +166,16 @@
                                                 <span class="text-xs px-2 py-1 rounded-full bg-amber-500/30 text-amber-300 border border-amber-400/50">{{ __('fuel.company_upload') }}</span>
                                             </td>
                                             <td class="py-3 px-2 min-w-[140px] text-end">
-                                                <a href="{{ route('company.fuel-invoices.view', $inv) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
-                                                    <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
-                                                </a>
-                                                <a href="{{ route('company.fuel-invoices.download', $inv) }}" download class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold ms-2">
-                                                    <i class="fa-solid fa-download"></i> {{ __('common.download') }}
-                                                </a>
+                                                @if($inv->invoice_file)
+                                                    <a href="{{ route('company.fuel-invoices.view', $inv) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
+                                                        <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
+                                                    </a>
+                                                    <a href="{{ route('company.fuel-invoices.download', $inv) }}" download class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold ms-2">
+                                                        <i class="fa-solid fa-download"></i> {{ __('common.download') }}
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-slate-400">—</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endif

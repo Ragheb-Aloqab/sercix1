@@ -24,7 +24,7 @@ class FuelInvoiceUploadSection extends Component
         $maxMb = config('servx.invoice_max_size_mb', 5);
         return [
             'invoice_file' => [
-                'required',
+                'nullable',
                 'file',
                 'mimes:jpg,jpeg,png,webp,pdf',
                 'max:' . ($maxMb * 1024),
@@ -80,20 +80,26 @@ class FuelInvoiceUploadSection extends Component
             return;
         }
 
+        $invoiceFile = null;
+        $fileType = null;
+        $originalFilename = null;
+
         $file = $this->invoice_file;
-        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
-        $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
-        $originalName = $file->getClientOriginalName();
-        $uniqueName = Str::uuid() . '.' . $ext;
-        $path = $file->storeAs('fuel_invoices/' . $company->id, $uniqueName, 'private');
+        if ($file) {
+            $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
+            $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
+            $originalFilename = $file->getClientOriginalName();
+            $uniqueName = Str::uuid() . '.' . $ext;
+            $invoiceFile = $file->storeAs('fuel_invoices/' . $company->id, $uniqueName, 'private');
+        }
 
         CompanyFuelInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
             'amount' => $this->amount ? (float) $this->amount : null,
-            'invoice_file' => $path,
+            'invoice_file' => $invoiceFile,
             'file_type' => $fileType,
-            'original_filename' => $originalName,
+            'original_filename' => $originalFilename,
             'description' => $this->description ?: null,
         ]);
 
@@ -102,10 +108,11 @@ class FuelInvoiceUploadSection extends Component
 
         $this->closeModal();
         session()->flash('fuel_invoice_success', __('invoice.fuel_invoice_uploaded_success'));
-        $params = array_filter(request()->only(['invoice_type', 'vehicle_id', 'from', 'to', 'q']));
-        if (empty($params['invoice_type'])) {
-            $params['invoice_type'] = 'fuel';
+        $params = array_filter(request()->only(['vehicle_id', 'from', 'to']));
+        if (request()->routeIs('company.fuel.index')) {
+            return $this->redirect(route('company.fuel.index', $params), navigate: true);
         }
+        $params['invoice_type'] = 'fuel';
         return $this->redirect(route('company.invoices.index', $params), navigate: true);
     }
 

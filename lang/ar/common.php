@@ -65,6 +65,7 @@ return [
     'optional' => 'اختياري',
     'upload' => 'رفع',
     'choose_file' => 'اختر ملف',
+    'no_file' => 'لا يوجد ملف',
     'preview' => 'معاينة',
     'description' => 'الوصف',
     'uploaded' => 'تم الرفع',
