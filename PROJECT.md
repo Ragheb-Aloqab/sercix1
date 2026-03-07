@@ -277,4 +277,10 @@ Details: `app/Http/Middleware/LoadCompanyFromSubdomain.php`, `app/Providers/AppS
 
 ---
 
-This document describes the full project and structure as of the current codebase. For day-to-day development, refer to the routes, middleware, and the sections above for each area (Admin, Company, Driver, Maintenance Center) and white-label behavior.
+## 13. Deployment
+
+For deploying to **Hostinger** and configuring **white-label subdomains** in production, see **[DEPLOYMENT.md](DEPLOYMENT.md)**. It covers document root, `.env` production values, `WHITE_LABEL_DOMAIN`, DNS wildcard, cron for the scheduler, storage link, and optional `SESSION_DOMAIN` for cross-subdomain sessions.
+
+---
+
+This document describes the full project and structure as of the current codebase. For day-to-day development, refer to the routes, middleware, and the sections above for each area (Admin, Company, Driver, Maintenance Center) and white-label behavior. For production deployment on Hostinger and subdomains, see **DEPLOYMENT.md**.
