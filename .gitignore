@@ -3,3 +3,12 @@
 /.env
 /public/storage
 /public/hot
+
+# Office / document files
+*.doc
+*.docx
+*.bat
+
+# Documentation folders
+/doc/
+/docs/

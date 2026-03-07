@@ -99,21 +99,21 @@
                         </th>
                         <th class="pb-3 pe-4">{{ __('fleet.branch') ?? 'Branch' }}</th>
                         <th class="pb-3 pe-4">
+                            <button type="button" wire:click="sort('total_distance')" class="font-bold hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
+                                {{ __('vehicles.month_total_distance') ?? 'Month Total Distance' }}
+                                @if($sortBy === 'total_distance')<i class="fa-solid fa-sort-{{ $sortDir === 'asc' ? 'up' : 'down' }} ms-1"></i>@endif
+                            </button>
+                        </th>
+                        <th class="pb-3 pe-4">
                             <button type="button" wire:click="sort('current_mileage')" class="font-bold hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
-                                {{ __('vehicles.current_mileage') ?? 'Current' }}
+                                {{ __('vehicles.total_distance_all') ?? 'Total Distance (All)' }}
                                 @if($sortBy === 'current_mileage')<i class="fa-solid fa-sort-{{ $sortDir === 'asc' ? 'up' : 'down' }} ms-1"></i>@endif
                             </button>
                         </th>
                         <th class="pb-3 pe-4">
-                            <button type="button" wire:click="sort('previous_mileage')" class="font-bold hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
-                                {{ __('vehicles.previous_mileage') ?? 'Previous' }}
-                                @if($sortBy === 'previous_mileage')<i class="fa-solid fa-sort-{{ $sortDir === 'asc' ? 'up' : 'down' }} ms-1"></i>@endif
-                            </button>
-                        </th>
-                        <th class="pb-3 pe-4">
-                            <button type="button" wire:click="sort('total_distance')" class="font-bold hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
-                                {{ __('vehicles.total_distance') ?? 'Distance' }}
-                                @if($sortBy === 'total_distance')<i class="fa-solid fa-sort-{{ $sortDir === 'asc' ? 'up' : 'down' }} ms-1"></i>@endif
+                            <button type="button" wire:click="sort('daily_odometer')" class="font-bold hover:text-slate-900 dark:hover:text-white transition-colors duration-300">
+                                {{ __('vehicles.daily_total_distance') ?? 'Daily Distance' }}
+                                @if($sortBy === 'daily_odometer')<i class="fa-solid fa-sort-{{ $sortDir === 'asc' ? 'up' : 'down' }} ms-1"></i>@endif
                             </button>
                         </th>
                         <th class="pb-3 pe-4">{{ __('vehicles.last_update_date') ?? 'Last Update' }}</th>
@@ -126,8 +126,6 @@
                             <td class="py-4 pe-4 font-semibold text-slate-900 dark:text-white">{{ $row['plate_number'] }}</td>
                             <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver-light">{{ $row['vehicle_name'] }}</td>
                             <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ $row['branch_name'] }}</td>
-                            <td class="py-4 pe-4 text-slate-900 dark:text-white">{{ number_format($row['current_mileage'], 1) }}</td>
-                            <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ number_format($row['previous_mileage'], 1) }}</td>
                             <td class="py-4 pe-4 font-bold {{ ($row['has_anomaly'] ?? false) ? 'text-amber-500 dark:text-amber-400' : 'text-sky-600 dark:text-sky-400' }}" title="{{ ($row['has_anomaly'] ?? false) ? __('vehicles.mileage_anomaly_tooltip') : '' }}">
                                 @if($row['has_anomaly'] ?? false)
                                     — <i class="fa-solid fa-triangle-exclamation text-xs ms-0.5"></i>
@@ -135,6 +133,8 @@
                                     {{ number_format($row['total_distance'], 1) }} {{ __('common.km') ?? 'km' }}
                                 @endif
                             </td>
+                            <td class="py-4 pe-4 text-slate-600 dark:text-servx-silver-light font-semibold">{{ number_format($row['current_mileage'], 1) }} {{ __('common.km') ?? 'km' }}</td>
+                            <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ number_format($row['daily_odometer'], 1) }} {{ __('common.km') ?? 'km' }}</td>
                             <td class="py-4 pe-4 text-slate-500 dark:text-servx-silver">{{ $row['last_update_date'] }}</td>
                             <td class="py-4 pe-4">
                                 @php

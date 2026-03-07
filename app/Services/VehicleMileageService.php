@@ -6,6 +6,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleDailyOdometer;
 use App\Models\VehicleMonthlyMileage;
 use App\Models\VehicleMileageHistory;
+use App\Models\VehicleInspection;
 use App\Models\MobileTrackingTrip;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -18,36 +19,99 @@ class VehicleMileageService
     private const MARKET_AVG_CARD_CACHE_TTL = 300; // 5 minutes
 
     /**
-     * Get total accumulated mileage for a vehicle (never reset, historical sum).
-     * Source: vehicle_monthly_mileage.total_km (closed months) + current month from trips/snapshots.
-     * For mobile: sum mobile_tracking_trips when vehicle_monthly_mileage is empty.
-     * For GPS: sum vehicle_mileage_history.calculated_difference when vehicle_monthly_mileage is empty.
-     * Both tracking types produce the same total distance for reports and dashboard.
+     * Get total accumulated mileage for a vehicle = full odometer reading (current total km on car).
+     * Returns MAX(odometer) across all sources — the latest/highest odometer value.
+     * Sources: vehicle_locations, fuel_refills, vehicle_mileage_history, vehicle_daily_odometer.
      */
     public function getAccumulatedMileage(Vehicle $vehicle): float
     {
-        $fromMonthly = (float) VehicleMonthlyMileage::where('vehicle_id', $vehicle->id)
-            ->sum('total_km');
+        return round($this->getLatestOdometerFromAllSources($vehicle->id), 2);
+    }
 
-        if ($fromMonthly <= 0) {
-            if ($vehicle->usesMobileTracking()) {
-                $fromMonthly = (float) MobileTrackingTrip::where('vehicle_id', $vehicle->id)
-                    ->whereNotNull('ended_at')
-                    ->sum('trip_distance_km');
-            } elseif ($vehicle->usesDeviceApiTracking()) {
-                // GPS device: sum trip distances from vehicle_mileage_history (each engine OFF = trip end)
-                $fromMonthly = (float) VehicleMileageHistory::where('vehicle_id', $vehicle->id)
-                    ->where('source', VehicleMileageHistory::SOURCE_VEHICLE_LOCATIONS)
-                    ->sum('calculated_difference');
+    /**
+     * Get the latest (max) odometer reading from all sources — full odometer sum for the car.
+     */
+    private function getLatestOdometerFromAllSources(int $vehicleId): float
+    {
+        $readings = collect();
+
+        // vehicle_locations
+        $locReadings = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->pluck('odometer')
+            ->map(fn ($v) => (float) $v);
+        $readings = $readings->merge($locReadings);
+
+        // fuel_refills
+        $fuelReadings = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->pluck('odometer_km')
+            ->map(fn ($v) => (float) $v);
+        $readings = $readings->merge($fuelReadings);
+
+        // vehicle_mileage_history (previous_reading + current_reading)
+        $history = VehicleMileageHistory::where('vehicle_id', $vehicleId)
+            ->get(['previous_reading', 'current_reading']);
+        foreach ($history as $h) {
+            if ($h->previous_reading !== null && (float) $h->previous_reading > 0) {
+                $readings->push((float) $h->previous_reading);
+            }
+            if ($h->current_reading !== null && (float) $h->current_reading > 0) {
+                $readings->push((float) $h->current_reading);
             }
         }
 
-        // Fallback: sum from raw sources (vehicle_locations, fuel_refills) when no structured data
-        if ($fromMonthly <= 0) {
-            $fromMonthly = $this->getAccumulatedMileageFromRawSources($vehicle->id);
+        // vehicle_daily_odometer
+        $dailyReadings = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->pluck('odometer_km')
+            ->map(fn ($v) => (float) $v);
+        $readings = $readings->merge($dailyReadings);
+
+        // vehicle_monthly_mileage (start_odometer + end_odometer)
+        $monthly = VehicleMonthlyMileage::where('vehicle_id', $vehicleId)->get(['start_odometer', 'end_odometer']);
+        foreach ($monthly as $m) {
+            if ($m->start_odometer !== null && (float) $m->start_odometer > 0) {
+                $readings->push((float) $m->start_odometer);
+            }
+            if ($m->end_odometer !== null && (float) $m->end_odometer > 0) {
+                $readings->push((float) $m->end_odometer);
+            }
         }
 
-        return round($fromMonthly, 2);
+        // mobile_tracking_trips (start_odometer + end_odometer)
+        $trips = MobileTrackingTrip::where('vehicle_id', $vehicleId)->get(['start_odometer', 'end_odometer']);
+        foreach ($trips as $t) {
+            if ($t->start_odometer !== null && (float) $t->start_odometer > 0) {
+                $readings->push((float) $t->start_odometer);
+            }
+            if ($t->end_odometer !== null && (float) $t->end_odometer > 0) {
+                $readings->push((float) $t->end_odometer);
+            }
+        }
+
+        // vehicle_inspections (odometer_reading)
+        $inspectionReadings = VehicleInspection::where('vehicle_id', $vehicleId)
+            ->whereNotNull('odometer_reading')
+            ->where('odometer_reading', '>', 0)
+            ->pluck('odometer_reading')
+            ->map(fn ($v) => (float) $v);
+        $readings = $readings->merge($inspectionReadings);
+
+        $readings = $readings->filter(fn ($v) => $v > 0)->unique()->values();
+        if ($readings->isEmpty()) {
+            // Fallback: mobile_tracking_trips sum (no odometer readings)
+            return (float) MobileTrackingTrip::where('vehicle_id', $vehicleId)
+                ->whereNotNull('ended_at')
+                ->sum('trip_distance_km');
+        }
+
+        return (float) $readings->max();
     }
 
     /**

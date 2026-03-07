@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Vehicle;
 use App\Models\VehicleDailyOdometer;
+use App\Models\VehicleMileageHistory;
 use App\Models\VehicleMonthlyMileage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -85,11 +86,12 @@ class VehicleMileageReportService
 
         $currentMileage = (float) ($currentOdo ?? 0);
         $previousMileage = $previousOdo !== null ? (float) $previousOdo : null;
+        $lastDayStartOdo = $this->getLatestOdometer($vehicle->id, $to->copy()->subDay());
 
-        // Raw difference: Current - Previous (can be negative when odometer reset or data error)
+        // Period distance: current - previous when both exist; else try MIN/MAX within period
         $rawDifference = $previousMileage !== null
             ? $currentMileage - $previousMileage
-            : 0.0;
+            : $this->getPeriodDistanceFromSources($vehicle->id, $from, $to);
 
         $hasAnomaly = $previousMileage !== null && $previousMileage > 0 && $rawDifference < 0;
 
@@ -99,18 +101,174 @@ class VehicleMileageReportService
             ? self::STATUS_DATA_ANOMALY
             : $this->determineStatus($lastUpdate, $totalDistanceForMetrics, $from, $to);
 
+        // Daily distance: actual distance on the last day of the period
+        // 1) Boundary: odometer at end of last day - odometer at start of last day
+        // 2) Fallback: MIN/MAX within last day from vehicle_locations, fuel_refills, vehicle_mileage_history
+        // 3) Fallback: avg daily when period has data but no last-day granularity
+        $dailyDistance = 0.0;
+        if ($lastDayStartOdo !== null) {
+            $dailyDistance = max(0, $currentMileage - (float) $lastDayStartOdo);
+        } else {
+            $dailyDistance = $this->getLastDayDistanceFromSources($vehicle->id, $to);
+            if ($dailyDistance <= 0 && $rawDifference > 0) {
+                $daysInPeriod = max(1, $from->diffInDays($to));
+                $dailyDistance = round($rawDifference / $daysInPeriod, 1);
+            }
+        }
+
         return [
             'vehicle_id' => $vehicle->id,
             'plate_number' => $vehicle->plate_number ?? '-',
             'vehicle_name' => $vehicle->display_name,
             'branch_name' => $vehicle->branch?->name ?? '-',
             'current_mileage' => $currentMileage,
-            'previous_mileage' => $previousMileage ?? 0,
+            'daily_odometer' => round($dailyDistance, 1),
             'total_distance' => $rawDifference,
             'has_anomaly' => $hasAnomaly,
             'last_update_date' => $lastUpdate?->format('Y-m-d H:i') ?? '-',
             'status' => $status,
         ];
+    }
+
+    /**
+     * Get period distance when boundary readings are missing.
+     * Uses vehicle_mileage_history, then MIN/MAX within period from vehicle_locations and fuel_refills.
+     */
+    protected function getPeriodDistanceFromSources(int $vehicleId, Carbon $from, Carbon $to): float
+    {
+        $start = $from->toDateString();
+        $end = $to->toDateString();
+        $fromDt = $from->copy()->startOfDay();
+        $toDt = $to->copy()->endOfDay();
+
+        // vehicle_mileage_history: SUM of calculated_difference in period
+        $fromHistory = (float) VehicleMileageHistory::where('vehicle_id', $vehicleId)
+            ->whereBetween('recorded_date', [$start, $end])
+            ->sum('calculated_difference');
+        if ($fromHistory > 0) {
+            return $fromHistory;
+        }
+
+        // vehicle_locations: MAX - MIN in period
+        $locRange = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('created_at', [$fromDt, $toDt])
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->selectRaw('MIN(odometer) as min_odo, MAX(odometer) as max_odo')
+            ->first();
+        if ($locRange && $locRange->min_odo !== null) {
+            return max(0, (float) $locRange->max_odo - (float) $locRange->min_odo);
+        }
+
+        // fuel_refills: MAX - MIN in period
+        $fuelRange = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('refilled_at', [$fromDt, $toDt])
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->selectRaw('MIN(odometer_km) as min_odo, MAX(odometer_km) as max_odo')
+            ->first();
+        if ($fuelRange && $fuelRange->min_odo !== null) {
+            return max(0, (float) $fuelRange->max_odo - (float) $fuelRange->min_odo);
+        }
+
+        // vehicle_daily_odometer: SUM of day-to-day diffs within period
+        $dailyKm = $this->getPeriodDistanceFromDailyOdometer($vehicleId, $from, $to);
+        if ($dailyKm > 0) {
+            return $dailyKm;
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Get distance for the last day of the period when boundary readings are missing.
+     * Uses MIN/MAX within the last day from vehicle_locations, fuel_refills, vehicle_mileage_history.
+     */
+    protected function getLastDayDistanceFromSources(int $vehicleId, Carbon $to): float
+    {
+        $lastDayStart = $to->copy()->startOfDay();
+        $lastDayEnd = $to->copy()->endOfDay();
+        $dateStr = $to->toDateString();
+
+        // vehicle_mileage_history: SUM for the last day only
+        $fromHistory = (float) VehicleMileageHistory::where('vehicle_id', $vehicleId)
+            ->where('recorded_date', $dateStr)
+            ->sum('calculated_difference');
+        if ($fromHistory > 0) {
+            return $fromHistory;
+        }
+
+        // vehicle_locations: MAX - MIN on the last day
+        $locRange = DB::table('vehicle_locations')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('created_at', [$lastDayStart, $lastDayEnd])
+            ->whereNotNull('odometer')
+            ->where('odometer', '>', 0)
+            ->selectRaw('MIN(odometer) as min_odo, MAX(odometer) as max_odo')
+            ->first();
+        if ($locRange && $locRange->min_odo !== null) {
+            return max(0, (float) $locRange->max_odo - (float) $locRange->min_odo);
+        }
+
+        // fuel_refills: MAX - MIN on the last day
+        $fuelRange = DB::table('fuel_refills')
+            ->where('vehicle_id', $vehicleId)
+            ->whereBetween('refilled_at', [$lastDayStart, $lastDayEnd])
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->selectRaw('MIN(odometer_km) as min_odo, MAX(odometer_km) as max_odo')
+            ->first();
+        if ($fuelRange && $fuelRange->min_odo !== null) {
+            return max(0, (float) $fuelRange->max_odo - (float) $fuelRange->min_odo);
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Compute period distance from vehicle_daily_odometer: SUM of (current - previous) per day in period.
+     */
+    protected function getPeriodDistanceFromDailyOdometer(int $vehicleId, Carbon $from, Carbon $to): float
+    {
+        $start = $from->toDateString();
+        $end = $to->toDateString();
+
+        $records = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->whereBetween('date', [$start, $end])
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->orderBy('date')
+            ->get(['date', 'odometer_km']);
+
+        if ($records->count() < 2) {
+            return 0.0;
+        }
+
+        $total = 0.0;
+        $prev = (float) $records->first()->odometer_km;
+        foreach ($records->skip(1) as $r) {
+            $curr = (float) $r->odometer_km;
+            $total += max(0, $curr - $prev);
+            $prev = $curr;
+        }
+        return $total;
+    }
+
+    /**
+     * Get daily odometer from vehicle_daily_odometer for the given date or closest before.
+     */
+    protected function getDailyOdometerAtDate(int $vehicleId, Carbon $date): ?float
+    {
+        $dateStr = $date->toDateString();
+        $rec = VehicleDailyOdometer::where('vehicle_id', $vehicleId)
+            ->where('date', '<=', $dateStr)
+            ->whereNotNull('odometer_km')
+            ->where('odometer_km', '>', 0)
+            ->orderByDesc('date')
+            ->first();
+        return $rec ? (float) $rec->odometer_km : null;
     }
 
     protected function getLatestOdometer(int $vehicleId, Carbon $before): ?float

@@ -22,10 +22,11 @@ class VehicleMileageReportExport implements FromCollection, WithHeadings, WithMa
     {
         return [
             __('fleet.plate_number'),
-            __('vehicles.vehicle_name'),
-            __('vehicles.current_mileage'),
-            __('vehicles.previous_mileage'),
-            __('vehicles.total_distance'),
+            __('fleet.vehicle_name'),
+            __('fleet.branch'),
+            __('vehicles.month_total_distance'),
+            __('vehicles.total_distance_all'),
+            __('vehicles.daily_total_distance'),
             __('vehicles.last_update_date'),
             __('vehicles.status'),
         ];
@@ -40,9 +41,10 @@ class VehicleMileageReportExport implements FromCollection, WithHeadings, WithMa
         return [
             $row['plate_number'] ?? '-',
             $row['vehicle_name'] ?? '-',
-            number_format($row['current_mileage'] ?? 0, 1),
-            number_format($row['previous_mileage'] ?? 0, 1),
+            $row['branch_name'] ?? '-',
             $distance,
+            number_format($row['current_mileage'] ?? 0, 1),
+            number_format($row['daily_odometer'] ?? 0, 1),
             $row['last_update_date'] ?? '-',
             $row['status_label'] ?? __("vehicles.status_{$row['status']}"),
         ];
