@@ -158,7 +158,7 @@
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-servx-silver-light" id="numbersTitle">{{ __('index.numbersTitle') }}</h1>
                     <div class="mt-4 flex items-center justify-center lg:justify-start gap-2">
                         <span class="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">Servex Motors</span>
-                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo icon-03.png') }}" alt="" width="56" height="56" class="h-10 sm:h-12 lg:h-14 w-auto object-contain" aria-hidden="true" loading="lazy" decoding="async" />
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="" width="56" height="56" class="h-10 sm:h-12 lg:h-14 w-auto object-contain" aria-hidden="true" loading="lazy" decoding="async" />
                     </div>
                     <p class="mt-2 text-lg sm:text-xl font-bold tracking-[0.25em] text-servx-red flex items-center justify-center lg:justify-start gap-1 flex-wrap">M<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>T<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>RS</p>
                 </div>
@@ -189,7 +189,7 @@
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="flex justify-center order-2 lg:order-1 rtl:lg:order-2">
                     <div class="servx-card servx-card-accent w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center p-6">
-                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="128" height="128" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" decoding="async" />
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="128" height="128" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" decoding="async" />
                     </div>
                 </div>
                 <div class="order-1 lg:order-2 rtl:lg:order-1 text-start">
