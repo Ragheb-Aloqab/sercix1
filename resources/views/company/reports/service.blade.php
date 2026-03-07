@@ -12,7 +12,15 @@
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white font-bold hover:border-slate-400/50 transition-colors">
                 <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}"></i> {{ __('reports.back_to_reports') }}
             </a>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('company.reports.service.excel', request()->query()) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-emerald-500/50 bg-emerald-900/20 text-emerald-400 font-bold hover:border-emerald-400/50 transition-colors">
+                    <i class="fa-solid fa-file-excel"></i> {{ __('reports.export_excel') }}
+                </a>
+                <a href="{{ route('company.reports.service.pdf', request()->query()) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-rose-500/50 bg-rose-900/20 text-rose-400 font-bold hover:border-rose-400/50 transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+                </a>
                 <a href="{{ route('company.fuel.index') }}"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-amber-500/50 bg-amber-900/20 text-amber-400 font-bold hover:border-amber-400/50 transition-colors">
                     <i class="fa-solid fa-gas-pump"></i> {{ __('reports.fuel_report') }}
@@ -123,6 +131,7 @@
                                     <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('reports.services') }}</th>
                                     <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('company.cost') }}</th>
                                     <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('orders.status_label') }}</th>
+                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('maintenance.invoice') }}</th>
                                     <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.view') }}</th>
                                 </tr>
                             </thead>
