@@ -22,14 +22,14 @@
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => 'rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm transition-colors duration-300']) }}>
+<div {{ $attributes->merge(['class' => 'report-stat-card rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-500/30 p-4 sm:p-5 backdrop-blur-sm transition-colors duration-300']) }}>
     <div class="flex items-center gap-3 mb-2">
-        <span class="w-10 h-10 rounded-xl flex items-center justify-center {{ $iconBgClass }}">
+        <span class="report-stat-card-icon w-10 h-10 rounded-xl flex items-center justify-center {{ $iconBgClass }}">
             <i class="fa-solid {{ $icon }} {{ $iconTextClass }}"></i>
         </span>
-        <p class="text-slate-600 dark:text-slate-400 text-sm font-bold">{{ $label }}</p>
+        <p class="report-stat-card-label text-slate-600 dark:text-slate-400 text-sm font-bold">{{ $label }}</p>
     </div>
-    <p class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white {{ $iconColor !== 'sky' ? $iconTextClass : '' }}">
+    <p class="report-stat-card-value text-2xl sm:text-3xl font-black text-slate-900 dark:text-white {{ $iconColor !== 'sky' ? $iconTextClass : '' }}">
         {{ $value }}
     </p>
 </div>

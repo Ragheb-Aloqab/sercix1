@@ -9,13 +9,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     @if(auth('company')->check() || auth('maintenance_center')->check())
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="{{ (app()->bound('tenant') || app()->bound('company')) ? (app()->bound('tenant') ? app('tenant') : app('company'))->getResolvedPrimaryColor() : '#0f172a' }}" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
     @endif
     @include('components.seo-meta', [
-        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (__('dashboard.subtitle_default') . ' | ' . ($siteName ?? 'Servx Motors')),
+        'title' => trim((string) ($__env->yieldContent('title') ?? '')) ?: (($brandTitle ?? $siteName ?? 'Servx Motors') . ' — ' . __('dashboard.subtitle_default')),
         'description' => config('seo.default_description'),
         'noindex' => true,
     ])
@@ -27,6 +27,26 @@
 
     @vite(['resources/css/app.css', 'resources/css/style.css', 'resources/js/app.js'])
     <x-vite-cdn-fallback />
+
+    @if($wlBranding ?? false)
+    <style>
+        :root {
+            --wl-primary: {{ (app()->bound('tenant') ? app('tenant') : app('company'))->getResolvedPrimaryColor() }};
+            --wl-secondary: {{ (app()->bound('tenant') ? app('tenant') : app('company'))->getResolvedSecondaryColor() }};
+            --wl-primary-dark: color-mix(in srgb, var(--wl-primary) 85%, black);
+            --tenant-primary: var(--wl-primary);
+            --tenant-secondary: var(--wl-secondary);
+            --tenant-primary-hover: color-mix(in srgb, var(--wl-primary) 85%, white);
+            --tenant-secondary-hover: color-mix(in srgb, var(--wl-secondary) 85%, white);
+            --tenant-primary-muted: color-mix(in srgb, var(--wl-primary) 20%, transparent);
+            --tenant-secondary-muted: color-mix(in srgb, var(--wl-secondary) 20%, transparent);
+            --servx-blue: var(--wl-primary);
+            --servx-blue-hover: var(--tenant-primary-hover);
+            --servx-green: var(--wl-secondary);
+            --servx-green-muted: var(--tenant-secondary-muted);
+        }
+    </style>
+    @endif
 
     @if(auth('company')->check() || auth('maintenance_center')->check())
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +61,7 @@
     @stack('styles')
 </head>
 
-<body class="admin-layout h-full overflow-x-hidden transition-colors duration-300 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard font-servx bg-slate-50 text-slate-900 dark:bg-servx-black dark:text-servx-silver-light' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}">
+<body class="admin-layout h-full overflow-x-hidden transition-colors duration-300 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard font-servx bg-slate-50 text-slate-900 dark:bg-servx-black dark:text-servx-silver-light' : 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }}" @if($wlBranding ?? false) data-wl-branding @endif>
 
 <div x-data="{
         sidebarOpen: false,
@@ -70,7 +90,7 @@
          @click="sidebarOpen = false"
          class="lg:hidden fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm"></div>
 
-    {{-- Sidebar wrapper: fixed 250px, slide-out on mobile, always visible on lg+ --}}
+    {{-- Sidebar wrapper: fixed 260px (WL) or 250px, right in RTL, full height — main content sits beside via margin --}}
     <div class="dashboard-sidebar-wrapper flex flex-col max-w-[90vw]
                 transform transition-transform duration-300 ease-out
                 lg:!translate-x-0"
@@ -81,8 +101,8 @@
     {{-- Mobile bottom tab bar (visible on lg and below) --}}
     <livewire:dashboard.mobile-tab-bar />
 
-    {{-- Main: margin-left 250px on lg+ so content sits next to sidebar --}}
-    <main class="dashboard-main flex-1 min-w-0 w-full transition-[margin] duration-200">
+    {{-- Main: flex-1 fills remaining width; margin-inline-start/end (lg+) reserves space so content does not overlap sidebar --}}
+    <main class="dashboard-main flex-1 min-w-0 w-full transition-[margin] duration-200 flex flex-col">
         {{-- Topbar --}}
         @include('admin.partials.topbar')
 
@@ -121,7 +141,7 @@
             @yield('content')
 
             <div class="mt-8 text-sm {{ auth('company')->check() || auth('maintenance_center')->check() ? 'text-slate-500' : 'text-slate-500 dark:text-slate-400' }}">
-                © All Rights Reserved – Servix Motors
+                © All Rights Reserved – {{ ($wlBranding ?? false) && (app()->bound('tenant') || app()->bound('company')) ? (app()->bound('tenant') ? app('tenant') : app('company'))->company_name : ($siteName ?? 'Servx Motors') }}
             </div>
         </section>
     </main>

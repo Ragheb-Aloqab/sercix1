@@ -2,12 +2,14 @@
     class="flex flex-col w-full h-full min-h-dvh
     backdrop-blur shadow-soft lg:shadow-none
     border-e overflow-hidden transition-colors duration-300
-    {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-white/95 dark:bg-servx-black border-slate-200/70 dark:border-slate-600/50' : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' }}">
-    <div class="px-4 py-4 border-b transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-200/70 dark:border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800' }} flex items-center justify-end gap-2">
+    {{ (in_array($role, ['company', 'maintenance_center']) && ($wlBranding ?? false)) ? 'sidebar-wl bg-white border-e border-slate-200' : '' }}
+    {{ (in_array($role, ['company', 'maintenance_center']) && !($wlBranding ?? false)) ? 'bg-white/95 dark:bg-servx-black border-slate-200/70 dark:border-slate-600/50' : '' }}
+    {{ !in_array($role, ['company', 'maintenance_center']) ? 'bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800' : '' }}">
+    <div class="px-4 py-4 border-b transition-colors duration-300 {{ (in_array($role, ['company', 'maintenance_center']) && ($wlBranding ?? false)) ? 'border-slate-200' : (in_array($role, ['company', 'maintenance_center']) ? 'border-slate-200/70 dark:border-slate-600/50' : 'border-slate-200/70 dark:border-slate-800') }} flex items-center justify-end gap-2">
         {{-- Collapse toggle (lg+ only) — dir=ltr keeps chevron direction consistent in RTL --}}
         <button type="button"
             @click="toggleSidebarCollapse()"
-            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ in_array($role, ['company', 'maintenance_center']) ? 'bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 dark:hover:bg-sky-800/50 text-sky-700 dark:text-sky-300' : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300' }}"
+            class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors duration-300 {{ (in_array($role, ['company', 'maintenance_center']) && ($wlBranding ?? false)) ? 'bg-slate-100 hover:bg-slate-200 text-slate-600' : (in_array($role, ['company', 'maintenance_center']) ? 'bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 dark:hover:bg-sky-800/50 text-sky-700 dark:text-sky-300' : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300') }}"
             :title="sidebarCollapsed ? '{{ __('admin_dashboard.sidebar_expand_tooltip') }}' : '{{ __('admin_dashboard.sidebar_toggle_tooltip') }}'"
             aria-label="{{ __('admin_dashboard.sidebar_toggle_tooltip') }}"
             dir="ltr">
@@ -17,9 +19,9 @@
         <button type="button" id="closeSidebar"
             @click="$dispatch('close-sidebar')"
             class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 transition-colors duration-300
-            {{ in_array($role, ['company', 'maintenance_center']) ? 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}"
+            {{ (in_array($role, ['company', 'maintenance_center']) && ($wlBranding ?? false)) ? 'text-slate-600 hover:bg-slate-100' : (in_array($role, ['company', 'maintenance_center']) ? 'border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-700/50' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800') }}"
             aria-label="{{ __('dashboard.menu') }}">
-            <i class="fa-solid fa-xmark {{ in_array($role, ['company', 'maintenance_center']) ? 'text-slate-700 dark:text-slate-300' : 'text-slate-600 dark:text-slate-400' }}"></i>
+            <i class="fa-solid fa-xmark {{ (in_array($role, ['company', 'maintenance_center']) && ($wlBranding ?? false)) ? 'text-slate-600' : (in_array($role, ['company', 'maintenance_center']) ? 'text-slate-700 dark:text-slate-300' : 'text-slate-600 dark:text-slate-400') }}"></i>
         </button>
     </div>
 

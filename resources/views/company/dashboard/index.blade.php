@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', __('company.dashboard_title') . ' | ' . ($siteName ?? 'Servx Motors'))
+@section('title', ($brandTitle ?? $siteName ?? 'Servx Motors') . ' — ' . __('company.dashboard_title'))
 @section('page_title', auth('company')->check() ? (auth('company')->user()->company_name ?? __('company.dashboard_title')) : __('company.dashboard_title'))
 @section('subtitle', __('dashboard.dashboard_v1'))
 
@@ -57,12 +57,15 @@
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="text-center sm:text-start w-full sm:w-auto">
-                <h1 class="dash-page-title">{{ __('dashboard.data_board') }}</h1>
+                <h1 class="page-title dash-page-title">{{ __('dashboard.data_board') }}</h1>
                 <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
             </div>
             <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
                 <a href="{{ route('company.maintenance-requests.create') }}" class="dash-btn dash-btn-primary">
                     <i class="fa-solid fa-plus"></i>{{ __('fleet.create_request') }}
+                </a>
+                <a href="{{ route('company.maintenance-invoices.index', ['open' => 'add']) }}" class="dash-btn dash-btn-primary">
+                    <i class="fa-solid fa-file-invoice"></i>{{ __('maintenance.add_invoice') }}
                 </a>
                 <a href="{{ route('company.maintenance-requests.index') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-screwdriver-wrench"></i>{{ __('maintenance.maintenance_requests') }}
@@ -200,47 +203,67 @@
         @php $mcData = $mc ?? []; @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
             <div class="dash-card dash-card-kpi group">
-                <p class="dash-card-title">{{ __('company.total_company_maintenance') }}</p>
-                <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value">{{ number_format($mcData['company_total'] ?? 0, 0) }} {{ __('company.sar') }}</p>
-                    <span class="dash-trend dash-trend-stable">
-                        <i class="fa-solid fa-minus"></i>
-                    </span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="dash-card-kpi-icon"><i class="fa-solid fa-wrench"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="dash-card-title">{{ __('company.total_company_maintenance') }}</p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="dash-card-value">{{ number_format($mcData['company_total'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                            <span class="dash-trend dash-trend-stable">
+                                <i class="fa-solid fa-minus"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             @php $mac = $marketAverageCostCard ?? ['value' => 0, 'trend' => 'stable', 'total_mileage_km' => 0]; $marketRate = $mcData['market_rate_per_km'] ?? config('servx.market_avg_per_km', 0.37); @endphp
             <div class="dash-card dash-card-kpi group">
-                <p class="dash-card-title">{{ __('company.market_average_cost') }} <span class="text-xs font-normal opacity-75">({{ $chartMonths ?? 6 }}m)</span></p>
-                <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 0) }} {{ __('company.sar') }}</p>
-                    <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}">
-                        @if(($mac['trend'] ?? 'stable') === 'up')<i class="fa-solid fa-caret-up"></i>
-                        @elseif(($mac['trend'] ?? 'stable') === 'down')<i class="fa-solid fa-caret-down"></i>
-                        @else<i class="fa-solid fa-minus"></i>@endif
-                    </span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="dash-card-kpi-icon"><i class="fa-solid fa-chart-line"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="dash-card-title">{{ __('company.market_average_cost') }} <span class="text-xs font-normal opacity-75">({{ $chartMonths ?? 6 }}m)</span></p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="dash-card-value">{{ number_format($mac['value'] ?? 0, 0) }} {{ __('company.sar') }}</p>
+                            <span class="dash-trend dash-trend-{{ $mac['trend'] ?? 'stable' }}">
+                                @if(($mac['trend'] ?? 'stable') === 'up')<i class="fa-solid fa-caret-up"></i>
+                                @elseif(($mac['trend'] ?? 'stable') === 'down')<i class="fa-solid fa-caret-down"></i>
+                                @else<i class="fa-solid fa-minus"></i>@endif
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="dash-card dash-card-kpi group">
-                <p class="dash-card-title">{{ __('company.difference_saving_over') }}</p>
-                @php $diff = $mcData['total_difference'] ?? (($mcData['company_total'] ?? 0) - ($mcData['market_average'] ?? 0)); @endphp
-                <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value {{ $diff > 0 ? 'text-red-400' : ($diff < 0 ? 'text-emerald-400' : '') }}">
-                        {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0) }} {{ __('company.sar') }}
-                    </p>
-                    <span class="dash-trend dash-trend-{{ $diff > 0 ? 'down' : ($diff < 0 ? 'up' : 'stable') }}">
-                        @if($diff > 0)<i class="fa-solid fa-caret-up"></i>
-                        @elseif($diff < 0)<i class="fa-solid fa-caret-down"></i>
-                        @else<i class="fa-solid fa-minus"></i>@endif
-                    </span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="dash-card-kpi-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="dash-card-title">{{ __('company.difference_saving_over') }}</p>
+                        @php $diff = $mcData['total_difference'] ?? (($mcData['company_total'] ?? 0) - ($mcData['market_average'] ?? 0)); @endphp
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="dash-card-value {{ $diff > 0 ? 'text-red-400' : ($diff < 0 ? 'text-emerald-400' : '') }}">
+                                {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0) }} {{ __('company.sar') }}
+                            </p>
+                            <span class="dash-trend dash-trend-{{ $diff > 0 ? 'down' : ($diff < 0 ? 'up' : 'stable') }}">
+                                @if($diff > 0)<i class="fa-solid fa-caret-up"></i>
+                                @elseif($diff < 0)<i class="fa-solid fa-caret-down"></i>
+                                @else<i class="fa-solid fa-minus"></i>@endif
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="dash-card dash-card-kpi group">
-                <p class="dash-card-title">{{ __('company.total_active_vehicles') }}</p>
-                <div class="flex items-center justify-between gap-2">
-                    <p class="dash-card-value">{{ $vehiclesCount ?? 0 }}</p>
-                    <span class="dash-trend dash-trend-up">
-                        <i class="fa-solid fa-caret-up"></i>
-                    </span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="dash-card-kpi-icon"><i class="fa-solid fa-car"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="dash-card-title">{{ __('company.total_active_vehicles') }}</p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="dash-card-value">{{ $vehiclesCount ?? 0 }}</p>
+                            <span class="dash-trend dash-trend-up">
+                                <i class="fa-solid fa-caret-up"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -288,9 +311,9 @@
                     </div>
                 </div>
                 @if($mcData)
-                    <button type="button" onclick="document.getElementById('marketComparisonModal').classList.remove('hidden')" class="mt-4 text-sm text-sky-400 hover:text-sky-300 font-semibold">
+                    <a href="#" type="button" onclick="document.getElementById('marketComparisonModal').classList.remove('hidden'); return false;" class="dash-comparison-link mt-4 text-sm font-semibold">
                         {{ __('company.view_comparison_details') }}
-                    </button>
+                    </a>
                 @endif
             </div>
 
@@ -299,13 +322,13 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h2 class="dash-section-title">{{ __('company.monthly_comparison') }}</h2>
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ request()->fullUrlWithQuery(['chart_months' => 6]) }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 6 ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50' : 'bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['chart_months' => 6]) }}" class="dash-period-btn px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 6 ? 'dash-period-active' : 'dash-period-inactive' }}">
                             {{ __('company.last_6_months') }}
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['chart_months' => 12]) }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 12 ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50' : 'bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['chart_months' => 12]) }}" class="dash-period-btn px-3 py-1.5 rounded-lg text-sm font-semibold {{ ($chartMonths ?? 6) === 12 ? 'dash-period-active' : 'dash-period-inactive' }}">
                             {{ __('company.last_12_months') }}
                         </a>
-                        <a href="{{ route('company.reports.index') }}" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-slate-700/50 text-servx-silver border border-slate-600/50 hover:border-sky-400/30">
+                        <a href="{{ route('company.reports.index') }}" class="dash-period-btn dash-period-inactive px-3 py-1.5 rounded-lg text-sm font-semibold">
                             {{ __('company.custom_range') }}
                         </a>
                     </div>
@@ -530,7 +553,7 @@
         <div id="marketComparisonModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4">
                 <div class="fixed inset-0 bg-black/60" onclick="document.getElementById('marketComparisonModal').classList.add('hidden')"></div>
-                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-slate-800 border border-slate-600/50 p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-slate-800 border border-slate-600/50 p-6 shadow-xl market-comparison-modal">
                     <h3 class="dash-section-title mb-4">{{ __('company.market_comparison') }}</h3>
                     @if($marketComparison ?? null)
                         <div class="space-y-4">
@@ -574,7 +597,7 @@
                             </div>
                         </div>
                     @endif
-                    <button type="button" onclick="document.getElementById('marketComparisonModal').classList.add('hidden')" class="mt-4 w-full px-4 py-3 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 font-bold text-servx-silver-light">
+                    <button type="button" onclick="document.getElementById('marketComparisonModal').classList.add('hidden')" class="market-comparison-close-btn mt-4 w-full px-4 py-3 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 font-bold text-servx-silver-light">
                         {{ __('company.close') }}
                     </button>
                 </div>

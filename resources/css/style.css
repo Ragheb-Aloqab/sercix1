@@ -35,6 +35,14 @@
     /* Layout */
     --sidebar-width: 250px;
     --sidebar-width-collapsed: 72px;
+
+    /* Tenant theme (fallbacks when no tenant; overridden by layout when tenant bound) */
+    --tenant-primary: #2563eb;
+    --tenant-secondary: #16a34a;
+    --tenant-primary-hover: #3b82f6;
+    --tenant-secondary-hover: #22c55e;
+    --tenant-primary-muted: rgba(37, 99, 235, 0.2);
+    --tenant-secondary-muted: rgba(22, 163, 74, 0.2);
 }
 
 /* ========== Base / Global ========== */
@@ -513,6 +521,298 @@ body.page-figtree {
     overflow-x: hidden;
 }
 
+/* ========== Company Dashboard (non-subdomain) — consistent dark/light theme ========== */
+/* Applies only when NOT white-label (no data-wl-branding). Uses html.dark for dark mode. */
+/* Light mode */
+body.company-dashboard:not([data-wl-branding]) {
+    background: #f9fafb !important;
+    color: #111827 !important;
+}
+body.company-dashboard:not([data-wl-branding]) .dashboard-main,
+body.company-dashboard:not([data-wl-branding]) .company-dashboard-content,
+body.company-dashboard:not([data-wl-branding]) section {
+    background: #f9fafb !important;
+}
+/* Topbar — light */
+body.company-dashboard:not([data-wl-branding]) header.sticky {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+}
+body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-900,
+body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-700,
+body.company-dashboard:not([data-wl-branding]) header.sticky p,
+body.company-dashboard:not([data-wl-branding]) header.sticky h1 {
+    color: #111827 !important;
+}
+body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-500,
+body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-400 {
+    color: #6b7280 !important;
+}
+/* Sidebar — light (non-WL company, not .sidebar-wl) */
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) {
+    background: #ffffff !important;
+    border-inline-end: 1px solid #e5e7eb !important;
+}
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item,
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-label,
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-sublabel {
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-section-header {
+    color: #9ca3af !important;
+}
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item.sidebar-nav-item--active {
+    background: var(--wl-primary, var(--tenant-primary)) !important;
+    color: #fff !important;
+    border-inline-end-color: var(--wl-primary, var(--tenant-primary)) !important;
+}
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon,
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-label,
+body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-sublabel {
+    color: #fff !important;
+}
+/* Theme toggle & language — light (override hardcoded company dark styles) */
+body.company-dashboard:not([data-wl-branding]) .wl-theme-toggle-wrap button {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #e5e7eb !important;
+}
+body.company-dashboard:not([data-wl-branding]) .wl-theme-toggle-wrap button:hover {
+    background: #e5e7eb !important;
+}
+body.company-dashboard:not([data-wl-branding]) header .relative button[title*="Language"],
+body.company-dashboard:not([data-wl-branding]) header .relative button[title*="لغة"] {
+    background: transparent !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) header .relative button[title*="Language"]:hover,
+body.company-dashboard:not([data-wl-branding]) header .relative button[title*="لغة"]:hover {
+    background: #f9fafb !important;
+}
+body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+}
+body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] a {
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] a:hover {
+    background: #f9fafb !important;
+}
+/* Company user dropdown (logo/name) — light */
+body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+}
+body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] a,
+body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] button {
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] a:hover,
+body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] button:hover {
+    background: #f9fafb !important;
+}
+/* Search input in topbar — light */
+body.company-dashboard:not([data-wl-branding]) header input,
+body.company-dashboard:not([data-wl-branding]) header [type="search"] {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+}
+
+/* KPI / dash cards — light */
+body.company-dashboard:not([data-wl-branding]) .dashboard-glass,
+body.company-dashboard:not([data-wl-branding]) .dash-card {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+body.company-dashboard:not([data-wl-branding]) .dash-card-title,
+body.company-dashboard:not([data-wl-branding]) .dash-section-title {
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) .dash-card-value {
+    color: #111827 !important;
+}
+body.company-dashboard:not([data-wl-branding]) .dash-btn-secondary {
+    background: #fff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+}
+body.company-dashboard:not([data-wl-branding]) .dash-btn-secondary:hover {
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+}
+
+/* Dark mode — non-WL company dashboard */
+html.dark body.company-dashboard:not([data-wl-branding]) {
+    background: #0f172a !important;
+    color: #f9fafb !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dashboard-main,
+html.dark body.company-dashboard:not([data-wl-branding]) .company-dashboard-content,
+html.dark body.company-dashboard:not([data-wl-branding]) section {
+    background: #0f172a !important;
+}
+/* Topbar — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky {
+    background: #1f2937 !important;
+    border-bottom: 1px solid #374151 !important;
+    color: #f9fafb !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-900,
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-700,
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky p,
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky h1 {
+    color: #f9fafb !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-500,
+html.dark body.company-dashboard:not([data-wl-branding]) header.sticky .text-slate-400 {
+    color: #d1d5db !important;
+}
+/* Sidebar — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) {
+    background: #111827 !important;
+    border-inline-end: 1px solid #374151 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item,
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-label,
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-sublabel {
+    color: #d1d5db !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-section-header {
+    color: #9ca3af !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item.sidebar-nav-item--active {
+    background: var(--wl-primary, var(--tenant-primary)) !important;
+    color: #fff !important;
+    border-inline-end-color: var(--wl-primary, var(--tenant-primary)) !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon {
+    color: #d1d5db !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) > div:first-child {
+    border-bottom-color: #374151 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) button.w-9.rounded-lg {
+    background: #374151 !important;
+    color: #d1d5db !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) button.w-9.rounded-lg:hover {
+    background: #4b5563 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) button.w-10.rounded-xl {
+    color: #d1d5db !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) #sidebar:not(.sidebar-wl) button.w-10.rounded-xl:hover {
+    background: #374151 !important;
+}
+/* Theme toggle & language — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) .wl-theme-toggle-wrap button {
+    background: #374151 !important;
+    color: #fbbf24 !important;
+    border: 1px solid #4b5563 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .wl-theme-toggle-wrap button:hover {
+    background: #4b5563 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative button[title*="Language"],
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative button[title*="لغة"] {
+    background: transparent !important;
+    border: 1px solid #475569 !important;
+    color: #d1d5db !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative button[title*="Language"]:hover,
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative button[title*="لغة"]:hover {
+    background: #374151 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] a {
+    color: #e2e8f0 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header .relative > div[class*="absolute"] a:hover {
+    background: #334155 !important;
+}
+/* Company user dropdown — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] a,
+html.dark body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] button {
+    color: #e2e8f0 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] a:hover,
+html.dark body.company-dashboard:not([data-wl-branding]) header [x-show].absolute.min-w-\[200px\] button:hover {
+    background: #334155 !important;
+}
+/* Search input — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) header input,
+html.dark body.company-dashboard:not([data-wl-branding]) header [type="search"] {
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    color: #f9fafb !important;
+}
+/* KPI / chart cards — dark */
+html.dark body.company-dashboard:not([data-wl-branding]) .dashboard-glass,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-card {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    box-shadow: none !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-card-title {
+    color: #94a3b8 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-card-value {
+    color: #f8fafc !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-section-title {
+    color: #f1f5f9 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-btn-secondary {
+    background: transparent !important;
+    border: 1px solid #475569 !important;
+    color: #cbd5e1 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-btn-secondary:hover {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
+}
+/* Chart axis / legend text in dark */
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-chart-container,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-gauge-center,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-card .text-slate-500,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-card .text-servx-silver {
+    color: #94a3b8 !important;
+}
+/* List rows / tables dark */
+html.dark body.company-dashboard:not([data-wl-branding]) .bg-servx-inner,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-order-row {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .bg-servx-inner:hover,
+html.dark body.company-dashboard:not([data-wl-branding]) .dash-order-row:hover,
+html.dark body.company-dashboard:not([data-wl-branding]) a.rounded-xl.bg-servx-inner:hover {
+    background: #263148 !important;
+    border-color: #334155 !important;
+}
+/* Mobile grid cards dark */
+html.dark body.company-dashboard:not([data-wl-branding]) .company-mobile-grid-card {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+html.dark body.company-dashboard:not([data-wl-branding]) .company-mobile-grid-card:hover {
+    background: rgba(51, 65, 85, 0.9) !important;
+}
+
 [x-cloak] {
     display: none !important;
 }
@@ -531,8 +831,9 @@ body.page-figtree {
     --servx-red-trend: #EF4444;
 }
 
-/* Page title with blue accent underline */
-.dash-page-title {
+/* Tenant-aware design tokens: company/driver dashboards use these (set by layout when tenant bound) */
+.company-dashboard .dash-page-title,
+.company-dashboard-layout .dash-page-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--servx-white);
@@ -555,7 +856,7 @@ html:not(.dark) .company-glass .dash-page-title {
     margin-block-start: 0.5rem;
 }
 
-/* Dashboard buttons */
+/* Dashboard buttons — original design on main domain; tenant overrides only when data-wl-branding */
 .dash-btn {
     display: inline-flex;
     align-items: center;
@@ -584,6 +885,752 @@ html:not(.dark) .company-glass .dash-page-title {
     border-color: rgba(59, 130, 246, 0.4);
     transform: translateY(-1px);
 }
+
+/* White-Label (dedicated subdomain only): override to tenant colors */
+body[data-wl-branding].company-dashboard .dash-title-accent,
+body[data-wl-branding] .company-dashboard-layout .dash-title-accent {
+    background: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .dash-btn-primary,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-primary {
+    background: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .dash-btn-primary:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-primary:hover {
+    background: var(--tenant-primary-hover) !important;
+}
+
+/* White-Label: secondary buttons use tenant-derived background so all actions match brand */
+body[data-wl-branding].company-dashboard .dash-btn-secondary,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-secondary {
+    background: color-mix(in srgb, var(--tenant-primary) 25%, black) !important;
+    border-color: color-mix(in srgb, var(--tenant-primary) 40%, transparent) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+body[data-wl-branding].company-dashboard .dash-btn-secondary:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-secondary:hover {
+    background: color-mix(in srgb, var(--tenant-primary) 35%, black) !important;
+    border-color: color-mix(in srgb, var(--tenant-primary) 50%, transparent) !important;
+}
+
+/* White-Label: Market Comparison modal — Close button and accents use tenant colors */
+body[data-wl-branding] .market-comparison-close-btn {
+    background: var(--tenant-primary) !important;
+    border-color: color-mix(in srgb, var(--tenant-primary) 60%, black) !important;
+    color: #fff !important;
+}
+body[data-wl-branding] .market-comparison-close-btn:hover {
+    background: var(--tenant-primary-hover) !important;
+    border-color: color-mix(in srgb, var(--tenant-primary) 70%, black) !important;
+}
+/* White-Label: Market Comparison modal — white background, dark text, tenant accents */
+body[data-wl-branding] .market-comparison-modal {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+}
+body[data-wl-branding] .market-comparison-modal .dash-section-title,
+body[data-wl-branding] .market-comparison-modal h3 {
+    color: #0f172a !important;
+}
+body[data-wl-branding] .market-comparison-modal .text-servx-silver,
+body[data-wl-branding] .market-comparison-modal .text-servx-silver-light {
+    color: #475569 !important;
+}
+body[data-wl-branding] .market-comparison-modal .text-white,
+body[data-wl-branding] .market-comparison-modal .font-bold.text-white {
+    color: #0f172a !important;
+}
+body[data-wl-branding] .market-comparison-modal .bg-servx-inner {
+    background: #f1f5f9 !important;
+    border-color: rgba(15, 23, 42, 0.1) !important;
+}
+body[data-wl-branding] .market-comparison-modal .text-red-400 {
+    color: var(--tenant-primary) !important;
+}
+body[data-wl-branding] .market-comparison-modal .bg-red-500\/10 {
+    background-color: var(--tenant-primary-muted) !important;
+}
+body[data-wl-branding] .market-comparison-modal .border-red-500\/30 {
+    border-color: color-mix(in srgb, var(--tenant-primary) 40%, transparent) !important;
+}
+body[data-wl-branding] .market-comparison-modal .text-emerald-400 {
+    color: var(--tenant-secondary) !important;
+}
+body[data-wl-branding] .market-comparison-modal .bg-emerald-500\/10 {
+    background-color: var(--tenant-secondary-muted) !important;
+}
+body[data-wl-branding] .market-comparison-modal .border-emerald-500\/30 {
+    border-color: color-mix(in srgb, var(--tenant-secondary) 40%, transparent) !important;
+}
+
+/* White-Label: topbar uses primary color (non-WL subdomain); WL white topbar overrides below */
+body[data-wl-branding] .topbar-wl-branded:not(.topbar-wl-white) {
+    background: var(--wl-primary) !important;
+    border-color: color-mix(in srgb, var(--wl-primary) 70%, black) !important;
+}
+body[data-wl-branding] .topbar-wl-branded.topbar-wl-white {
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+body[data-wl-branding] .topbar-wl-white .wl-topbar-logo {
+    max-height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+body[data-wl-branding] .topbar-wl-white .wl-topbar-site-name {
+    font-size: 0.75rem;
+}
+body[data-wl-branding] .topbar-wl-white input,
+body[data-wl-branding] .topbar-wl-white [type="search"] {
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+}
+body[data-wl-branding] .topbar-wl-white input::placeholder {
+    color: #9ca3af !important;
+}
+body[data-wl-branding] .topbar-wl-branded .text-slate-900,
+body[data-wl-branding] .topbar-wl-branded .text-slate-500,
+body[data-wl-branding] .topbar-wl-branded .text-slate-400,
+body[data-wl-branding] .topbar-wl-branded .text-slate-600,
+body[data-wl-branding] .topbar-wl-branded .text-slate-300 {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+body[data-wl-branding] .topbar-wl-white .text-slate-900,
+body[data-wl-branding] .topbar-wl-white .text-slate-500,
+body[data-wl-branding] .topbar-wl-white .text-slate-400,
+body[data-wl-branding] .topbar-wl-white .text-slate-600,
+body[data-wl-branding] .topbar-wl-white .text-slate-300 {
+    color: inherit !important;
+}
+body[data-wl-branding] .topbar-wl-branded .text-white { color: #fff !important; }
+body[data-wl-branding] .topbar-wl-branded input::placeholder { color: rgba(255, 255, 255, 0.6); }
+body[data-wl-branding] .topbar-wl-branded input,
+body[data-wl-branding] .topbar-wl-branded [type="search"] {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+}
+body[data-wl-branding] .topbar-wl-white input::placeholder { color: #9ca3af !important; }
+body[data-wl-branding] .topbar-wl-branded button.text-slate-600,
+body[data-wl-branding] .topbar-wl-branded button.text-slate-400,
+body[data-wl-branding] .topbar-wl-branded .text-slate-700 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+body[data-wl-branding] .topbar-wl-white button.text-slate-600,
+body[data-wl-branding] .topbar-wl-white button.text-slate-400,
+body[data-wl-branding] .topbar-wl-white .text-slate-700 {
+    color: #374151 !important;
+}
+body[data-wl-branding] .topbar-wl-white button[class*="border-slate-500/50"] {
+    border-color: #e5e7eb !important;
+    color: #374151 !important;
+}
+body[data-wl-branding] .topbar-wl-white button[class*="border-slate-500/50"]:hover {
+    background: #f3f4f6 !important;
+}
+body[data-wl-branding] .topbar-wl-white .text-cyan-400,
+body[data-wl-branding] .topbar-wl-white .text-cyan-500 {
+    color: var(--wl-primary) !important;
+}
+
+/* ========== Tenant theme: override all sky/emerald utilities in company & driver UI ========== */
+body[data-wl-branding].company-dashboard .bg-sky-500,
+body[data-wl-branding].company-dashboard .bg-sky-600,
+body[data-wl-branding].company-dashboard .bg-sky-700,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-500,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-600,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-700,
+body[data-wl-branding].page-tajawal .bg-sky-500,
+body[data-wl-branding].page-tajawal .bg-sky-600 {
+    background-color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .hover\:bg-sky-400:hover,
+body[data-wl-branding].company-dashboard .hover\:bg-sky-500:hover,
+body[data-wl-branding].company-dashboard .hover\:bg-sky-600:hover,
+body[data-wl-branding].company-dashboard .hover\:bg-sky-700:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-sky-400:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-sky-500:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-sky-600:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-sky-700:hover {
+    background-color: var(--tenant-primary-hover) !important;
+}
+body[data-wl-branding].company-dashboard .bg-sky-500\/20,
+body[data-wl-branding].company-dashboard .bg-sky-500\/30,
+body[data-wl-branding].company-dashboard .bg-sky-600\/30,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-500\/20,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-500\/30,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-600\/30,
+body[data-wl-branding].page-tajawal .bg-sky-500\/20 {
+    background-color: var(--tenant-primary-muted) !important;
+}
+body[data-wl-branding].company-dashboard .text-sky-300,
+body[data-wl-branding].company-dashboard .text-sky-400,
+body[data-wl-branding].company-dashboard .text-sky-500,
+body[data-wl-branding].company-dashboard .text-sky-600,
+body[data-wl-branding] .company-dashboard-layout .text-sky-300,
+body[data-wl-branding] .company-dashboard-layout .text-sky-400,
+body[data-wl-branding] .company-dashboard-layout .text-sky-500,
+body[data-wl-branding] .company-dashboard-layout .text-sky-600,
+body[data-wl-branding].page-tajawal .text-sky-400,
+body[data-wl-branding].page-tajawal .text-sky-600 {
+    color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .border-sky-400\/50,
+body[data-wl-branding].company-dashboard .border-sky-500\/50,
+body[data-wl-branding] .company-dashboard-layout .border-sky-400\/50,
+body[data-wl-branding] .company-dashboard-layout .border-sky-500\/50 {
+    border-color: color-mix(in srgb, var(--tenant-primary) 50%, transparent) !important;
+}
+body[data-wl-branding].company-dashboard .bg-emerald-500,
+body[data-wl-branding].company-dashboard .bg-emerald-600,
+body[data-wl-branding].company-dashboard .bg-emerald-700,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-500,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-600,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-700 {
+    background-color: var(--tenant-secondary) !important;
+}
+body[data-wl-branding].company-dashboard .hover\:bg-emerald-500:hover,
+body[data-wl-branding].company-dashboard .hover\:bg-emerald-600:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-emerald-500:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:bg-emerald-600:hover {
+    background-color: var(--tenant-secondary-hover) !important;
+}
+body[data-wl-branding].company-dashboard .bg-emerald-500\/5,
+body[data-wl-branding].company-dashboard .bg-emerald-500\/10,
+body[data-wl-branding].company-dashboard .bg-emerald-500\/20,
+body[data-wl-branding].company-dashboard .bg-emerald-500\/30,
+body[data-wl-branding].company-dashboard .bg-emerald-600\/30,
+body[data-wl-branding].company-dashboard .bg-emerald-900\/20,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-500\/5,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-500\/10,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-500\/20,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-500\/30,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-600\/30,
+body[data-wl-branding] .company-dashboard-layout .bg-emerald-900\/20 {
+    background-color: var(--tenant-secondary-muted) !important;
+}
+body[data-wl-branding].company-dashboard .text-emerald-300,
+body[data-wl-branding].company-dashboard .text-emerald-400,
+body[data-wl-branding].company-dashboard .text-emerald-600,
+body[data-wl-branding].company-dashboard .text-emerald-700,
+body[data-wl-branding] .company-dashboard-layout .text-emerald-300,
+body[data-wl-branding] .company-dashboard-layout .text-emerald-400,
+body[data-wl-branding] .company-dashboard-layout .text-emerald-600,
+body[data-wl-branding] .company-dashboard-layout .text-emerald-700 {
+    color: var(--tenant-secondary) !important;
+}
+body[data-wl-branding].company-dashboard .border-emerald-400\/50,
+body[data-wl-branding].company-dashboard .border-emerald-500\/30,
+body[data-wl-branding].company-dashboard .border-emerald-500\/40,
+body[data-wl-branding].company-dashboard .border-emerald-500\/50,
+body[data-wl-branding] .company-dashboard-layout .border-emerald-400\/50,
+body[data-wl-branding] .company-dashboard-layout .border-emerald-500\/30,
+body[data-wl-branding] .company-dashboard-layout .border-emerald-500\/40,
+body[data-wl-branding] .company-dashboard-layout .border-emerald-500\/50 {
+    border-color: color-mix(in srgb, var(--tenant-secondary) 50%, transparent) !important;
+}
+/* Chart bars and legend dots */
+body[data-wl-branding].company-dashboard .dash-chart-bar--company,
+body[data-wl-branding] .company-dashboard-layout .dash-chart-bar--company,
+body[data-wl-branding].company-dashboard .bg-sky-500.rounded-t,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-500.rounded-t {
+    background-color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .bg-sky-500.rounded-t:hover,
+body[data-wl-branding] .company-dashboard-layout .bg-sky-500.rounded-t:hover {
+    background-color: var(--tenant-primary-hover) !important;
+}
+body[data-wl-branding].company-dashboard .w-3.h-3.rounded.bg-sky-500,
+body[data-wl-branding] .company-dashboard-layout .w-3.h-3.rounded.bg-sky-500 {
+    background-color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .dash-chart-bar--market,
+body[data-wl-branding] .company-dashboard-layout .dash-chart-bar--market,
+body[data-wl-branding].company-dashboard .dash-chart-bar.dash-chart-bar--market,
+body[data-wl-branding] .company-dashboard-layout .dash-chart-bar.dash-chart-bar--market {
+    background-color: #9ca3af !important;
+}
+body[data-wl-branding].company-dashboard .w-3.h-3.rounded[class*="bg-slate-500"],
+body[data-wl-branding] .company-dashboard-layout .w-3.h-3.rounded[class*="bg-slate-500"] {
+    background-color: #9ca3af !important;
+}
+/* File input buttons (file:bg-sky-600) */
+body[data-wl-branding].company-dashboard input[type="file"]::file-selector-button,
+body[data-wl-branding] .company-dashboard-layout input[type="file"]::file-selector-button {
+    background-color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].company-dashboard .hover\:border-sky-400\/30:hover,
+body[data-wl-branding] .company-dashboard-layout .hover\:border-sky-400\/30:hover {
+    border-color: color-mix(in srgb, var(--tenant-primary) 40%, transparent) !important;
+}
+/* Driver layout: avatar and nav active states */
+body[data-wl-branding].page-tajawal .driver-avatar.bg-sky-500 {
+    background-color: var(--tenant-primary) !important;
+}
+body[data-wl-branding].page-tajawal .bg-sky-500\/20 {
+    background-color: var(--tenant-primary-muted) !important;
+}
+body[data-wl-branding].page-tajawal .text-sky-600.dark\:text-sky-400,
+body[data-wl-branding].page-tajawal .dark\:text-sky-400 {
+    color: var(--tenant-primary) !important;
+}
+/* Sidebar collapse button (company) — use tenant primary tint */
+body[data-wl-branding] #sidebar button[class*="bg-sky"] {
+    background-color: var(--tenant-primary-muted) !important;
+    color: var(--tenant-primary) !important;
+}
+body[data-wl-branding] #sidebar button[class*="bg-sky"]:hover {
+    background-color: color-mix(in srgb, var(--tenant-primary) 30%, transparent) !important;
+}
+
+/* White-Label: single theme — hide theme toggle (no night mode) */
+body[data-wl-branding] .wl-theme-toggle-wrap {
+    display: none !important;
+}
+
+/* White-Label: single theme — light only, all pages white background, dark text */
+body[data-wl-branding].company-dashboard,
+body[data-wl-branding] .company-dashboard-layout {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .dashboard-main,
+body[data-wl-branding] .company-dashboard-layout .dashboard-main {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .company-dashboard-content,
+body[data-wl-branding] .company-dashboard-layout .company-dashboard-content,
+body[data-wl-branding].company-dashboard section,
+body[data-wl-branding] .company-dashboard-layout section {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .text-slate-500,
+body[data-wl-branding].company-dashboard .text-slate-400,
+body[data-wl-branding].company-dashboard .text-slate-600,
+body[data-wl-branding].company-dashboard .text-slate-300,
+body[data-wl-branding] .company-dashboard-layout .text-slate-500,
+body[data-wl-branding] .company-dashboard-layout .text-slate-400,
+body[data-wl-branding] .company-dashboard-layout .text-slate-600,
+body[data-wl-branding] .company-dashboard-layout .text-slate-300 {
+    color: #334155 !important;
+}
+body[data-wl-branding].company-dashboard .text-slate-700,
+body[data-wl-branding].company-dashboard .text-slate-900,
+body[data-wl-branding].company-dashboard h1,
+body[data-wl-branding].company-dashboard h2,
+body[data-wl-branding].company-dashboard h3,
+body[data-wl-branding] .company-dashboard-layout .text-slate-700,
+body[data-wl-branding] .company-dashboard-layout .text-slate-900,
+body[data-wl-branding] .company-dashboard-layout h1,
+body[data-wl-branding] .company-dashboard-layout h2,
+body[data-wl-branding] .company-dashboard-layout h3 {
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .dash-card,
+body[data-wl-branding] .company-dashboard-layout .dash-card {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .dash-card *,
+body[data-wl-branding] .company-dashboard-layout .dash-card * {
+    color: inherit;
+}
+body[data-wl-branding].company-dashboard .dash-card .text-slate-500,
+body[data-wl-branding].company-dashboard .dash-card .text-slate-400,
+body[data-wl-branding] .company-dashboard-layout .dash-card .text-slate-500,
+body[data-wl-branding] .company-dashboard-layout .dash-card .text-slate-400 {
+    color: #475569 !important;
+}
+
+/* WL: Dashboard cards — 12px radius, shadow, accent border, typography, hover */
+body[data-wl-branding].company-dashboard .dash-card,
+body[data-wl-branding] .company-dashboard-layout .dash-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07) !important;
+    transition: all 0.2s ease !important;
+}
+body[data-wl-branding].company-dashboard .dash-card-kpi,
+body[data-wl-branding] .company-dashboard-layout .dash-card-kpi {
+    border-inline-start: 4px solid var(--wl-primary) !important;
+}
+body[data-wl-branding].company-dashboard .dash-card-kpi:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-card-kpi:hover,
+body[data-wl-branding].company-dashboard .dash-card-interactive:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-card-interactive:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10) !important;
+}
+body[data-wl-branding].company-dashboard .dash-card-title,
+body[data-wl-branding] .company-dashboard-layout .dash-card-title {
+    font-size: 0.8rem !important;
+    color: #6b7280 !important;
+}
+body[data-wl-branding].company-dashboard .dash-card-value,
+body[data-wl-branding] .company-dashboard-layout .dash-card-value {
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+body[data-wl-branding].company-dashboard .dash-trend-up,
+body[data-wl-branding] .company-dashboard-layout .dash-trend-up {
+    color: #10b981 !important;
+}
+body[data-wl-branding].company-dashboard .dash-trend-down,
+body[data-wl-branding] .company-dashboard-layout .dash-trend-down {
+    color: #ef4444 !important;
+}
+body[data-wl-branding].company-dashboard .dash-trend-stable,
+body[data-wl-branding] .company-dashboard-layout .dash-trend-stable {
+    color: var(--wl-primary) !important;
+}
+/* WL: KPI card icon circle */
+body[data-wl-branding] .company-dashboard-layout .dash-card-kpi .dash-card-kpi-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--wl-primary) 15%, transparent);
+    color: var(--wl-primary);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+/* WL: Page title with underline */
+body[data-wl-branding] .company-dashboard-layout .page-title,
+body[data-wl-branding] .company-dashboard-layout .dash-page-title {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    border-bottom: 3px solid var(--wl-primary);
+    display: inline-block;
+    padding-bottom: 4px;
+}
+/* WL: Chart period selector buttons */
+body[data-wl-branding] .company-dashboard-layout .dash-period-btn {
+    border-radius: 8px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-period-active {
+    background: var(--wl-primary) !important;
+    color: #fff !important;
+    border: none !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-period-inactive {
+    background: #fff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #6b7280 !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-period-inactive:hover {
+    border-color: var(--wl-primary) !important;
+    color: var(--wl-primary) !important;
+}
+/* WL: Market comparison donut — fill primary, track #f3f4f6, center % bold primary */
+body[data-wl-branding] .company-dashboard-layout .dash-gauge-fill {
+    stroke: var(--wl-primary) !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-gauge-bg {
+    stroke: #f3f4f6 !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-gauge-value {
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-gauge-center + .space-y-2,
+body[data-wl-branding] .company-dashboard-layout .dash-card .space-y-2.border-t {
+    border-color: #f3f4f6 !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-card .space-y-2.border-t > div {
+    border-bottom: 1px solid #f3f4f6;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-card button.text-sky-400,
+body[data-wl-branding] .company-dashboard-layout .dash-card a.text-sm.text-sky-400,
+body[data-wl-branding] .company-dashboard-layout .dash-comparison-link {
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding] .company-dashboard-layout .dash-card button.text-sky-400:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-card a.text-sm[style*="sky"]:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-comparison-link:hover {
+    text-decoration: underline;
+}
+/* WL: ReportStatCard component — accent border, icon circle, typography */
+body[data-wl-branding] .company-dashboard-layout .report-stat-card,
+body[data-wl-branding] .company-dashboard-content .report-stat-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07) !important;
+    border-inline-start: 4px solid var(--wl-primary) !important;
+    transition: all 0.2s ease !important;
+}
+body[data-wl-branding] .company-dashboard-layout .report-stat-card:hover,
+body[data-wl-branding] .company-dashboard-content .report-stat-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10) !important;
+}
+body[data-wl-branding] .company-dashboard-layout .report-stat-card .report-stat-card-icon,
+body[data-wl-branding] .company-dashboard-content .report-stat-card .report-stat-card-icon {
+    background: color-mix(in srgb, var(--wl-primary) 15%, transparent) !important;
+    border-radius: 50% !important;
+}
+body[data-wl-branding] .company-dashboard-layout .report-stat-card .report-stat-card-icon i,
+body[data-wl-branding] .company-dashboard-content .report-stat-card .report-stat-card-icon i {
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding] .company-dashboard-layout .report-stat-card .report-stat-card-label,
+body[data-wl-branding] .company-dashboard-content .report-stat-card .report-stat-card-label {
+    font-size: 0.8rem !important;
+    color: #6b7280 !important;
+}
+body[data-wl-branding] .company-dashboard-layout .report-stat-card .report-stat-card-value,
+body[data-wl-branding] .company-dashboard-content .report-stat-card .report-stat-card-value {
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+/* WL: Primary action buttons */
+body[data-wl-branding].company-dashboard .dash-btn-primary,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-primary {
+    background: var(--wl-primary) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+}
+body[data-wl-branding].company-dashboard .dash-btn-primary:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-primary:hover {
+    background: var(--wl-primary-dark) !important;
+    color: #fff !important;
+}
+/* WL: Secondary action buttons — white bg, primary border, hover fill */
+body[data-wl-branding].company-dashboard .dash-btn-secondary,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-secondary {
+    background: #fff !important;
+    border: 1px solid var(--wl-primary) !important;
+    color: var(--wl-primary) !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+}
+body[data-wl-branding].company-dashboard .dash-btn-secondary:hover,
+body[data-wl-branding] .company-dashboard-layout .dash-btn-secondary:hover {
+    background: var(--wl-primary) !important;
+    color: #fff !important;
+}
+
+body[data-wl-branding].company-dashboard input,
+body[data-wl-branding].company-dashboard select,
+body[data-wl-branding].company-dashboard textarea,
+body[data-wl-branding] .company-dashboard-layout input,
+body[data-wl-branding] .company-dashboard-layout select,
+body[data-wl-branding] .company-dashboard-layout textarea {
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard #sidebar:not(.sidebar-wl),
+body[data-wl-branding] .company-dashboard-layout #sidebar:not(.sidebar-wl) {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+}
+body[data-wl-branding].company-dashboard #sidebar.sidebar-wl,
+body[data-wl-branding] .company-dashboard-layout #sidebar.sidebar-wl {
+    background: #ffffff !important;
+    border-inline-end: 1px solid #e5e7eb !important;
+    border-color: #e5e7eb !important;
+}
+/* WL sidebar width 260px / 64px collapsed */
+body[data-wl-branding] .company-dashboard-layout .dashboard-sidebar-wrapper {
+    width: 260px;
+}
+body[data-wl-branding] .company-dashboard-layout.sidebar-collapsed .dashboard-sidebar-wrapper {
+    width: 64px !important;
+}
+/* Main content beside sidebar: margin on the "start" side (left in LTR, right in RTL) so content never overlaps */
+@media (min-width: 1024px) {
+    body[data-wl-branding] .company-dashboard-layout .dashboard-main,
+    body[data-wl-branding].company-dashboard .company-dashboard-layout .dashboard-main {
+        margin-inline-start: 260px !important;
+        margin-inline-end: 0 !important;
+        min-width: 0;
+    }
+    body[data-wl-branding] .company-dashboard-layout.sidebar-collapsed .dashboard-main {
+        margin-inline-start: 64px !important;
+        margin-inline-end: 0 !important;
+    }
+}
+/* WL sidebar: white theme — menu text #374151, icons var(--wl-primary), active primary with white text, hover rgba(0,0,0,0.04), section labels #9ca3af 0.7rem, active indicator border-inline-start 3px var(--wl-primary) */
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item,
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-label,
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-sublabel {
+    color: #374151 !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-section-header {
+    color: #9ca3af !important;
+    font-size: 0.7rem !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item.sidebar-nav-item--active {
+    background: var(--wl-primary) !important;
+    border-inline-start: 3px solid var(--wl-primary) !important;
+    border-inline-end-color: transparent !important;
+    color: #fff !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-label,
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-sublabel {
+    color: #fff !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon {
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding] #sidebar.sidebar-wl .sidebar-nav-item:not(.sidebar-nav-item--active) {
+    color: #374151 !important;
+}
+
+/* White-Label: company glass wrapper and form containers — white background on every page */
+body[data-wl-branding].company-dashboard .company-glass,
+body[data-wl-branding] .company-dashboard-layout .company-glass {
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+body[data-wl-branding].company-dashboard .company-glass .bg-white,
+body[data-wl-branding] .company-dashboard-layout .company-glass .bg-white {
+    background: #ffffff !important;
+}
+/* Form boxes and content areas that use dark slate — make white with dark text */
+body[data-wl-branding].company-dashboard .bg-slate-800\/40,
+body[data-wl-branding].company-dashboard .bg-slate-800\/50,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/50 {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+}
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 .text-white,
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 h2,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 .text-white,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 h2 {
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 .text-slate-400,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 .text-slate-400 {
+    color: #475569 !important;
+}
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 input,
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 select,
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 textarea,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 input,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 select,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 textarea {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.2) !important;
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .bg-slate-800\/40 input::placeholder,
+body[data-wl-branding] .company-dashboard-layout .bg-slate-800\/40 input::placeholder {
+    color: #94a3b8 !important;
+}
+/* Back button (e.g. رجوع) — tenant primary */
+body[data-wl-branding].company-dashboard a.rounded-2xl.border.border-slate-500\/50.bg-slate-800\/40,
+body[data-wl-branding] .company-dashboard-layout a.rounded-2xl[class*="bg-slate-800"] {
+    background: var(--tenant-primary) !important;
+    border-color: color-mix(in srgb, var(--tenant-primary) 80%, black) !important;
+    color: #fff !important;
+}
+body[data-wl-branding].company-dashboard a.rounded-2xl.border.border-slate-500\/50.bg-slate-800\/40:hover,
+body[data-wl-branding] .company-dashboard-layout a.rounded-2xl[class*="bg-slate-800"]:hover {
+    background: var(--tenant-primary-hover) !important;
+    border-color: var(--tenant-primary-hover) !important;
+}
+
+/* White-Label: Comprehensive report (and similar) stat cards — white background, black text */
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-emerald-500\/20,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-amber-500\/20,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-sky-500\/20,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-violet-500\/20,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-emerald-500\/20,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-amber-500\/20,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-sky-500\/20,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-violet-500\/20 {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+}
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-emerald-500\/20 .text-emerald-300,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-emerald-500\/20 .text-emerald-400,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-amber-500\/20 .text-amber-300,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-amber-500\/20 .text-amber-400,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-sky-500\/20 .text-sky-300,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-sky-500\/20 .text-sky-400,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-violet-500\/20 .text-violet-300,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-violet-500\/20 .text-violet-400,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-emerald-500\/20 .text-emerald-300,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-emerald-500\/20 .text-emerald-400,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-amber-500\/20 .text-amber-300,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-amber-500\/20 .text-amber-400,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-sky-500\/20 .text-sky-300,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-sky-500\/20 .text-sky-400,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-violet-500\/20 .text-violet-300,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-violet-500\/20 .text-violet-400 {
+    color: #0f172a !important;
+}
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-emerald-500\/20 .bg-emerald-500\/30,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-amber-500\/20 .bg-amber-500\/30,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-sky-500\/20 .bg-sky-500\/30,
+body[data-wl-branding].company-dashboard .rounded-2xl.bg-violet-500\/20 .bg-violet-500\/30,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-emerald-500\/20 .bg-emerald-500\/30,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-amber-500\/20 .bg-amber-500\/30,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-sky-500\/20 .bg-sky-500\/30,
+body[data-wl-branding] .company-dashboard-layout .rounded-2xl.bg-violet-500\/20 .bg-violet-500\/30 {
+    background: rgba(15, 23, 42, 0.06) !important;
+}
+
+/* White-Label: sidebar active state and sky/blue icons use primary */
+body[data-wl-branding].company-dashboard .sidebar-nav-item.sidebar-nav-item--active,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item.sidebar-nav-item--active {
+    background: color-mix(in srgb, var(--wl-primary) 15%, transparent) !important;
+    border-inline-end-color: var(--wl-primary) !important;
+}
+body[data-wl-branding].company-dashboard .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon {
+    background: color-mix(in srgb, var(--wl-primary) 20%, transparent) !important;
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding].company-dashboard .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--sky,
+body[data-wl-branding].company-dashboard .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--blue,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--sky,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--blue {
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding].company-dashboard .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--sky,
+body[data-wl-branding].company-dashboard .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--blue,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--sky,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--blue {
+    color: var(--wl-primary) !important;
+}
+body[data-wl-branding].company-dashboard .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--emerald,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item:not(.sidebar-nav-item--active) .sidebar-nav-icon--emerald {
+    color: var(--wl-secondary) !important;
+}
+body[data-wl-branding].company-dashboard .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--emerald,
+body[data-wl-branding] .company-dashboard-layout .sidebar-nav-item.sidebar-nav-item--active .sidebar-nav-icon--emerald {
+    color: var(--wl-secondary) !important;
+}
+body[data-wl-branding].company-dashboard #sidebar button[class*="bg-sky"],
+body[data-wl-branding] .company-dashboard-layout #sidebar button[class*="bg-sky"] {
+    background: color-mix(in srgb, var(--wl-primary) 25%, transparent) !important;
+    color: var(--wl-primary) !important;
+}
+
+/* White-Label: company glass wrapper and form containers — white background on every page */
 
 /* Company Dashboard Cards - light mode default, dark mode per design */
 .dash-card {
