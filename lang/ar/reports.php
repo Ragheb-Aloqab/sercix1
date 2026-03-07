@@ -58,6 +58,7 @@ return [
     'period' => 'الفترة',
     'metric' => 'المقياس',
     'value' => 'القيمة',
+    'vehicle_scope' => 'نطاق المركبة',
 
     // Tax Reports
     'tax_reports' => 'تقارير الضرائب',

@@ -79,8 +79,21 @@ class ComprehensiveReportService
             'month' => $month,
             'year' => $year,
             'vehicle_id' => $vehicleId,
+            'vehicle_scope_label' => $this->getVehicleScopeLabel($companyId, $vehicleId),
         ];
     }
+
+    private function getVehicleScopeLabel(int $companyId, ?int $vehicleId): string
+    {
+        if (!$vehicleId) {
+            return (string) __('company.all_vehicles');
+        }
+        $vehicle = Vehicle::where('company_id', $companyId)->find($vehicleId);
+        if (!$vehicle) {
+            return (string) __('company.all_vehicles');
+        }
+        $name = trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? ''));
+        return $vehicle->plate_number . ($name !== '' ? ' — ' . $name : '');
 
     /**
      * Build report data from request (for controller use).
@@ -107,6 +120,7 @@ class ComprehensiveReportService
             'month' => (int) $from->month,
             'year' => (int) $from->year,
             'vehicle_id' => null,
+            'vehicle_scope_label' => (string) __('company.all_vehicles'),
         ];
     }
 }

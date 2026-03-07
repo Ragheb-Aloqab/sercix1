@@ -47,7 +47,7 @@ class ComprehensiveReportController extends Controller
 
         $pdfContent = $this->pdfService->generate($company, $data);
 
-        $filename = 'comprehensive-report-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->exportFilename($data, 'pdf');
 
         return response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
@@ -63,12 +63,29 @@ class ComprehensiveReportController extends Controller
         $company = auth('company')->user();
         $data = $this->reportService->getReportDataFromRequest($request, $company->id);
 
-        $filename = 'comprehensive-report-' . now()->format('Y-m-d') . '.xlsx';
+        $filename = $this->exportFilename($data, 'xlsx');
 
         return Excel::download(
             new ComprehensiveReportExport($data),
             $filename,
             \Maatwebsite\Excel\Excel::XLSX
         );
+    }
+
+    /**
+     * Build export filename from current filter (all vehicles or specific vehicle).
+     */
+    private function exportFilename(array $data, string $ext): string
+    {
+        $date = now()->format('Y-m-d');
+        $scope = $data['vehicle_scope_label'] ?? '';
+        if (!empty($data['vehicle_id']) && $scope !== '') {
+            $slug = preg_replace('/[^a-zA-Z0-9\-_]/', '-', $scope);
+            $slug = trim(preg_replace('/-+/', '-', $slug), '-');
+            $base = $slug !== '' ? 'comprehensive-report-' . $slug : 'comprehensive-report';
+        } else {
+            $base = 'comprehensive-report-all-vehicles';
+        }
+        return $base . '-' . $date . '.' . $ext;
     }
 }

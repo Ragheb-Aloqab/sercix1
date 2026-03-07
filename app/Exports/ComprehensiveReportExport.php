@@ -14,7 +14,12 @@ class ComprehensiveReportExport implements FromArray, WithHeadings, WithTitle
 
     public function array(): array
     {
+        $scopeLabel = $this->data['vehicle_scope_label'] ?? __('company.all_vehicles');
+        $scopeTitle = __('reports.vehicle_scope');
+
         return [
+            [$scopeTitle, $scopeLabel],
+            [], // empty row
             [__('reports.total_maintenance_cost'), number_format($this->data['total_maintenance_cost'] ?? 0, 2) . ' ' . __('company.sar')],
             [__('reports.total_fuel_cost'), number_format($this->data['total_fuel_cost'] ?? 0, 2) . ' ' . __('company.sar')],
             [__('reports.monthly_mileage'), number_format($this->data['monthly_mileage'] ?? 0, 2) . ' ' . __('common.km')],

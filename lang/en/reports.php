@@ -58,6 +58,7 @@ return [
     'period' => 'Period',
     'metric' => 'Metric',
     'value' => 'Value',
+    'vehicle_scope' => 'Vehicle scope',
 
     // Tax Reports
     'tax_reports' => 'Tax Reports',

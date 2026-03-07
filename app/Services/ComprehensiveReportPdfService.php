@@ -23,6 +23,9 @@ class ComprehensiveReportPdfService
         $title = __('reports.comprehensive_report');
         $companyName = $company->company_name ?? __('common.company');
         $periodLabel = $data['period_label'] ?? Carbon::now()->translatedFormat('F Y');
+        $vehicleScopeLabel = $data['vehicle_scope_label'] ?? __('company.all_vehicles');
+        $vehicleScopeTitle = __('reports.vehicle_scope'); // "Vehicle scope" or "Scope"
+        $vehicleScopeLabelEsc = e($vehicleScopeLabel);
 
         $metricLabel = __('reports.metric');
         $valueLabel = __('reports.value');
@@ -66,6 +69,7 @@ class ComprehensiveReportPdfService
     <div class="meta">
         <p><strong>{$companyName}</strong></p>
         <p><strong>{$periodLabel}</strong></p>
+        <p><strong>{$vehicleScopeTitle}:</strong> {$vehicleScopeLabelEsc}</p>
     </div>
     <table>
         <thead>
