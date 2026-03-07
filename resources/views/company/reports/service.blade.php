@@ -166,6 +166,7 @@
                                                     @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
                                             @endif
                                         </td>
+                                        <td class="py-3 px-2 text-slate-300">{{ $row->invoiceDisplay ?? '—' }}</td>
                                         <td class="py-3 px-2">
                                             @if ($row->type === 'order')
                                                 <a href="{{ route('company.orders.show', $row->order) }}" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
