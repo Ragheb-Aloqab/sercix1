@@ -3,34 +3,40 @@
 namespace App\Http\Controllers\Company;
 
 use App\Enums\MaintenanceType;
+use App\Exports\ServiceReportExport;
 use App\Http\Controllers\Controller;
 use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
 use App\Services\AnalyticsService;
+use App\Services\ServiceReportPdfService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ServiceReportController extends Controller
 {
     public function __construct(
-        private AnalyticsService $analytics
+        private AnalyticsService $analytics,
+        private ServiceReportPdfService $pdfService
     ) {}
 
     /**
-     * Company-wide service/maintenance report.
-     * Includes both Orders and MaintenanceRequests.
+     * Build report data from request (shared by index and exports).
+     * Returns: company, from, to, vehicleId, serviceTypeId, allItems, totals, analytics, byServiceType, vehicles, services.
      */
-    public function index(Request $request)
+    private function getReportDataFromRequest(Request $request): array
     {
         $company = auth('company')->user();
 
         $from = $request->filled('from')
-            ? \Carbon\Carbon::parse($request->from)->startOfDay()
+            ? Carbon::parse($request->from)->startOfDay()
             : now()->startOfMonth();
         $to = $request->filled('to')
-            ? \Carbon\Carbon::parse($request->to)->endOfDay()
+            ? Carbon::parse($request->to)->endOfDay()
             : now()->endOfDay();
         $vehicleId = $request->integer('vehicle_id', 0);
         $serviceTypeId = $request->integer('service_type_id', 0);
@@ -38,7 +44,7 @@ class ServiceReportController extends Controller
         $orderQuery = Order::query()
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$from, $to])
-            ->with(['vehicle:id,plate_number,make,model', 'orderServices.service']);
+            ->with(['vehicle:id,plate_number,make,model', 'orderServices.service', 'invoice:id,order_id,invoice_number']);
 
         if ($vehicleId > 0) {
             $vehicle = Vehicle::where('company_id', $company->id)->find($vehicleId);
@@ -69,14 +75,14 @@ class ServiceReportController extends Controller
         $totalCost = $analytics['total_cost'];
         $orderCount = $analytics['order_count'];
         $totals = ['total_cost' => $totalCost, 'order_count' => $orderCount];
-
         $byServiceType = $this->analytics->getMaintenanceByServiceType($from, $to, $company->id, $vehicleId ?: null);
 
         $ordersWithDisplay = $orders->map(function ($order) {
-            $statusLabel = \Illuminate\Support\Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
+            $statusLabel = Str::startsWith(__('common.status_' . $order->status), 'common.') ? $order->status : __('common.status_' . $order->status);
             $firstService = $order->orderServices->first();
             $serviceName = $firstService?->display_name ?? '-';
             $orderServicesCount = $order->orderServices->count();
+            $invoiceDisplay = $order->invoice?->invoice_number ?? '—';
             return (object) [
                 'type' => 'order',
                 'order' => $order,
@@ -86,12 +92,14 @@ class ServiceReportController extends Controller
                 'serviceName' => $serviceName,
                 'orderServicesCount' => $orderServicesCount,
                 'amount' => (float) $order->total_amount,
+                'invoiceDisplay' => $invoiceDisplay,
             ];
         });
 
         $mrsWithDisplay = $maintenanceRequests->map(function ($mr) {
             $amount = (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0);
             $serviceName = MaintenanceType::tryFrom($mr->maintenance_type)?->label() ?? $mr->maintenance_type ?? __('reports.maintenance_request');
+            $invoiceDisplay = ($mr->final_invoice_amount || $mr->final_invoice_pdf_path) ? __('common.yes') : '—';
             return (object) [
                 'type' => 'maintenance_request',
                 'order' => null,
@@ -101,22 +109,13 @@ class ServiceReportController extends Controller
                 'serviceName' => $serviceName,
                 'orderServicesCount' => 1,
                 'amount' => $amount,
+                'invoiceDisplay' => $invoiceDisplay,
             ];
         });
 
         $allItems = $ordersWithDisplay->concat($mrsWithDisplay)
             ->sortByDesc(fn ($r) => $r->date?->timestamp ?? 0)
             ->values();
-
-        $perPage = 25;
-        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
-        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allItems->forPage($currentPage, $perPage)->values(),
-            $allItems->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
 
         $vehicles = Vehicle::where('company_id', $company->id)
             ->where('is_active', true)
@@ -125,20 +124,94 @@ class ServiceReportController extends Controller
 
         $services = Service::where('is_active', true)->orderBy('name')->get(['id', 'name']);
 
-        return view('company.reports.service', compact(
-            'company',
-            'totals',
-            'totalCost',
-            'orderCount',
-            'paginated',
-            'vehicles',
-            'services',
-            'from',
-            'to',
-            'vehicleId',
-            'serviceTypeId',
-            'analytics',
-            'byServiceType'
-        ));
+        return [
+            'company' => $company,
+            'from' => $from,
+            'to' => $to,
+            'vehicleId' => $vehicleId,
+            'serviceTypeId' => $serviceTypeId,
+            'allItems' => $allItems,
+            'totals' => $totals,
+            'analytics' => $analytics,
+            'byServiceType' => $byServiceType,
+            'vehicles' => $vehicles,
+            'services' => $services,
+        ];
+    }
+
+    /**
+     * Company-wide service/maintenance report.
+     * Includes both Orders and MaintenanceRequests.
+     */
+    public function index(Request $request)
+    {
+        $data = $this->getReportDataFromRequest($request);
+
+        $perPage = 25;
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $data['allItems']->forPage($currentPage, $perPage)->values(),
+            $data['allItems']->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('company.reports.service', [
+            'company' => $data['company'],
+            'totals' => $data['totals'],
+            'totalCost' => $data['analytics']['total_cost'],
+            'orderCount' => $data['analytics']['order_count'],
+            'paginated' => $paginated,
+            'vehicles' => $data['vehicles'],
+            'services' => $data['services'],
+            'from' => $data['from'],
+            'to' => $data['to'],
+            'vehicleId' => $data['vehicleId'],
+            'serviceTypeId' => $data['serviceTypeId'],
+            'analytics' => $data['analytics'],
+            'byServiceType' => $data['byServiceType'],
+        ]);
+    }
+
+    /**
+     * Export service report as Excel.
+     */
+    public function exportExcel(Request $request)
+    {
+        $data = $this->getReportDataFromRequest($request);
+        $filename = 'service-report-' . $data['from']->format('Y-m-d') . '-to-' . $data['to']->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new ServiceReportExport($data['allItems'], $data['totals'], $data['analytics'], $data['byServiceType'], app()->getLocale()),
+            $filename,
+            \Maatwebsite\Excel\Excel::XLSX
+        );
+    }
+
+    /**
+     * Export service report as PDF.
+     */
+    public function exportPdf(Request $request): Response
+    {
+        $data = $this->getReportDataFromRequest($request);
+
+        $pdfContent = $this->pdfService->generate(
+            $data['company'],
+            $data['allItems'],
+            $data['totals'],
+            $data['analytics'],
+            $data['byServiceType'],
+            $data['from']->format('Y-m-d'),
+            $data['to']->format('Y-m-d'),
+            $data['vehicleId'] ? $data['vehicles']->firstWhere('id', $data['vehicleId']) : null
+        );
+
+        $filename = 'service-report-' . $data['from']->format('Y-m-d') . '-to-' . $data['to']->format('Y-m-d') . '.pdf';
+
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

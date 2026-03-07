@@ -37,13 +37,9 @@
                         <button type="button"
                                 @click="companyMenuOpen = !companyMenuOpen"
                                 class="flex items-center gap-2 min-w-0 rounded-xl px-1 py-1.5 -mx-1 hover:bg-slate-200/80 dark:hover:bg-slate-700/50 transition-colors text-left w-full">
-                            @if(app()->bound('company'))
-                                @php
-                                    $logoUrl = ($wlBranding ?? false)
-                                        ? ($siteLogoUrl ?? asset('images/serv.x logo.png'))
-                                        : (app('company')->getLogoUrl() ?? $siteLogoUrl ?? asset('images/serv.x logo.png'));
-                                @endphp
-                                <img src="{{ $logoUrl }}" alt="{{ app('company')->company_name }}" class="w-9 h-9 rounded-xl object-contain shrink-0 bg-white/10">
+                            {{-- Subdomain (WL): show company/site logo when available; no subdomain: always first letter --}}
+                            @if(($wlBranding ?? false) && ($companyForLogo = app()->bound('company') ? app('company') : null) && $companyForLogo->getLogoUrl())
+                                <img src="{{ $companyForLogo->getLogoUrl() }}" alt="{{ $companyForLogo->company_name }}" class="w-9 h-9 rounded-xl object-contain shrink-0 bg-white/10">
                             @else
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black shrink-0 {{ auth('company')->check() ? 'bg-sky-500 text-white' : 'bg-slate-700 text-white' }}">
                                     {{ $avatarLetter }}
