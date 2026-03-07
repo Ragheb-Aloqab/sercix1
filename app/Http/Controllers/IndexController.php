@@ -9,6 +9,14 @@ class IndexController extends Controller
 {
     public function __invoke()
     {
+        // White-label subdomain: root (/) must redirect to login (guest) or company dashboard (logged in)
+        if (app()->bound('tenant_from_subdomain') && app('tenant_from_subdomain')) {
+            if (!Auth::guard('company')->check()) {
+                return redirect()->route('login');
+            }
+            return redirect()->route('company.dashboard');
+        }
+
         $tenant = app()->bound('tenant') ? app('tenant') : null;
         $wlBranding = app()->bound('tenant_from_subdomain') && app('tenant_from_subdomain');
         $siteName = ($tenant && $wlBranding) ? $tenant->company_name : Setting::get('site_name', 'Servx Motors');
