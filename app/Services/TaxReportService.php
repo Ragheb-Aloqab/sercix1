@@ -29,6 +29,10 @@ class TaxReportService
         ?Carbon $dateTo = null
     ): array {
         $query = CompanyMaintenanceInvoice::where('company_id', $companyId)
+            ->where(function ($q) {
+                $q->where('tax_type', CompanyMaintenanceInvoice::TAX_WITH)
+                    ->orWhere('vat_amount', '>', 0);
+            })
             ->when($vehicleId, fn ($q) => $q->where('vehicle_id', $vehicleId))
             ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', $dateFrom->copy()->startOfDay()))
             ->when($dateTo, fn ($q) => $q->where('created_at', '<=', $dateTo->copy()->endOfDay()));

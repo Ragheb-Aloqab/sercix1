@@ -94,6 +94,7 @@ class ComprehensiveReportService
         }
         $name = trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? ''));
         return $vehicle->plate_number . ($name !== '' ? ' — ' . $name : '');
+    }
 
     /**
      * Build report data from request (for controller use).
