@@ -29,7 +29,7 @@ class VehicleQueryService
         $query = $this->buildQuery($search, $status, $branchId);
 
         return $query
-            ->with(['branch:id,name'])
+            ->with(['branch:id,name', 'company:id'])
             ->latest()
             ->paginate($this->perPage)
             ->withQueryString();
