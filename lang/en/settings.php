@@ -43,4 +43,9 @@ return [
     'password_confirm_placeholder' => 'Your password',
     'invalid_password' => 'The provided password is incorrect.',
     'logged_out_other_devices' => 'You have been logged out from all other devices.',
+    'logout_this_device' => 'Log out this device',
+    'logged_out_this_device' => 'Logged out from that device.',
+    'ip_address' => 'IP address',
+    'cannot_logout_current_device' => 'You cannot log out the current device from here.',
+    'invalid_session' => 'Invalid session.',
 ];

@@ -99,6 +99,10 @@ Route::middleware(['company'])
 
         Route::get('/fuel', [FuelController::class, 'index'])
             ->name('fuel.index');
+        Route::get('/fuel/excel', [FuelController::class, 'exportExcel'])
+            ->name('fuel.excel');
+        Route::get('/fuel/pdf', [FuelController::class, 'exportPdf'])
+            ->name('fuel.pdf');
 
         // Fuel Balance (fleet fuel cards)
         Route::get('/fuel-balance', [\App\Http\Controllers\Company\FuelBalanceController::class, 'index'])
@@ -305,6 +309,9 @@ Route::middleware(['company'])
             ->whereNumber('companyMaintenanceInvoice');
         Route::get('/maintenance-invoices/company/{companyMaintenanceInvoice}/download', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'downloadCompanyInvoice'])
             ->name('maintenance-invoices.company.download')
+            ->whereNumber('companyMaintenanceInvoice');
+        Route::delete('/maintenance-invoices/company/{companyMaintenanceInvoice}', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'destroyCompanyInvoice'])
+            ->name('maintenance-invoices.company.destroy')
             ->whereNumber('companyMaintenanceInvoice');
 
         // Vehicle Inspections

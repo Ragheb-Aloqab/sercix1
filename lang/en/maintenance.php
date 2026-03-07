@@ -129,6 +129,8 @@ return [
     'invoice_uploaded_success' => 'Invoice uploaded successfully.',
     'duplicate_invoice_warning' => 'A similar invoice (same vehicle and amount) was added recently. Please confirm this is not a duplicate.',
     'invoice_updated_success' => 'Invoice updated successfully.',
+    'invoice_deleted' => 'Invoice deleted.',
+    'confirm_delete_invoice' => 'Delete this invoice? This cannot be undone.',
     'edit_invoice' => 'Edit Invoice',
     'invoice_validation_type' => 'File must be an image (JPG, JPEG, PNG, WEBP) or PDF.',
     'invoice_validation_size' => 'File size must not exceed :max MB.',

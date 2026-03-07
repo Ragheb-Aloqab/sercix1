@@ -35,6 +35,7 @@ return [
     'manual' => 'Manual',
     'invoice' => 'Invoice',
     'view' => 'View',
+    'receipt' => 'Receipt',
     'no_refills' => 'No refill records in the selected period. Drivers log refills from their dashboard.',
     'no_refills_hint' => 'Add fuel invoices from Invoices → Fuel invoice, or have drivers log refills from their dashboard.',
     'company_upload' => 'Company upload',

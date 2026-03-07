@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Vehicle;
+use App\Services\CompanyMaintenanceInvoicePdfService;
 use App\Services\MaintenanceInvoicePdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -228,13 +229,22 @@ class MaintenanceInvoiceController extends Controller
     }
 
     /**
-     * Stream company-uploaded invoice for view (image inline, PDF inline).
+     * Stream company-uploaded invoice for view (image inline, PDF inline, or generated PDF when no file).
      */
     public function streamCompanyInvoice(CompanyMaintenanceInvoice $companyMaintenanceInvoice): Response
     {
         $company = auth('company')->user();
         if ((int) $companyMaintenanceInvoice->company_id !== (int) $company->id) {
             abort(403);
+        }
+
+        if (!$companyMaintenanceInvoice->hasInvoiceFile()) {
+            $pdfContent = app(CompanyMaintenanceInvoicePdfService::class)->generate($companyMaintenanceInvoice);
+            $filename = $this->companyInvoicePdfFilename($companyMaintenanceInvoice);
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+            ]);
         }
 
         $path = $companyMaintenanceInvoice->invoice_file;
@@ -268,13 +278,24 @@ class MaintenanceInvoiceController extends Controller
     }
 
     /**
-     * Download company-uploaded invoice. Images converted to CamScanner-style PDF.
+     * Download company-uploaded invoice. Images converted to PDF; no file → generated PDF with services & amounts.
      */
     public function downloadCompanyInvoice(CompanyMaintenanceInvoice $companyMaintenanceInvoice): Response
     {
         $company = auth('company')->user();
         if ((int) $companyMaintenanceInvoice->company_id !== (int) $company->id) {
             abort(403);
+        }
+
+        if (!$companyMaintenanceInvoice->hasInvoiceFile()) {
+            $pdfContent = app(CompanyMaintenanceInvoicePdfService::class)->generate($companyMaintenanceInvoice);
+            $filename = $this->companyInvoicePdfFilename($companyMaintenanceInvoice);
+            return response()->streamDownload(function () use ($pdfContent) {
+                echo $pdfContent;
+            }, $filename, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
+            ]);
         }
 
         $path = $companyMaintenanceInvoice->invoice_file;
@@ -324,5 +345,40 @@ class MaintenanceInvoiceController extends Controller
             'Content-Type' => $mime,
             'Cache-Control' => 'private, max-age=3600',
         ]);
+    }
+
+    private function companyInvoicePdfFilename(CompanyMaintenanceInvoice $invoice): string
+    {
+        $company = $invoice->company;
+        $name = $company ? Str::slug($company->company_name ?? 'company') : 'company';
+        return $name . '-invoice-' . $invoice->id . '.pdf';
+    }
+
+    /**
+     * Delete a company-uploaded maintenance invoice.
+     */
+    public function destroyCompanyInvoice(CompanyMaintenanceInvoice $companyMaintenanceInvoice): \Illuminate\Http\RedirectResponse
+    {
+        $company = auth('company')->user();
+        if ((int) $companyMaintenanceInvoice->company_id !== (int) $company->id) {
+            abort(403);
+        }
+
+        $path = $companyMaintenanceInvoice->invoice_file;
+        if ($path && Storage::disk('private')->exists($path)) {
+            Storage::disk('private')->delete($path);
+        }
+
+        $vehicleId = $companyMaintenanceInvoice->vehicle_id;
+        $companyMaintenanceInvoice->delete();
+
+        \App\Listeners\InvalidateCompanyAnalyticsCache::forCompany($company->id);
+        if ($vehicleId) {
+            \App\Listeners\InvalidateCompanyAnalyticsCache::forVehicle((int) $vehicleId);
+        }
+
+        return redirect()
+            ->route('company.maintenance-invoices.index')
+            ->with('invoice_success', __('maintenance.invoice_deleted'));
     }
 }

@@ -34,7 +34,7 @@ class MaintenanceInvoicesSection extends Component
     {
         $maxMb = config('servx.invoice_max_size_mb', 5);
         $rules = [
-            'vehicle_id' => ['nullable', 'string'],
+            'vehicle_id' => ['required', 'string', 'exists:vehicles,id'],
             'amount' => ['nullable', 'numeric', 'min:0'],
             'tax_type' => ['required', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
@@ -58,6 +58,7 @@ class MaintenanceInvoicesSection extends Component
     {
         return [
             'invoice_file' => __('maintenance.invoice_file_label'),
+            'vehicle_id' => __('maintenance.choose_vehicle'),
         ];
     }
 
@@ -65,6 +66,8 @@ class MaintenanceInvoicesSection extends Component
     {
         $maxMb = config('servx.invoice_max_size_mb', 5);
         return [
+            'vehicle_id.required' => __('validation.required', ['attribute' => __('maintenance.choose_vehicle')]),
+            'vehicle_id.exists' => __('validation.exists', ['attribute' => __('driver.vehicle')]),
             'invoice_file.mimes' => __('maintenance.invoice_validation_type'),
             'invoice_file.max' => __('maintenance.invoice_validation_size', ['max' => $maxMb]),
         ];
@@ -161,13 +164,26 @@ class MaintenanceInvoicesSection extends Component
 
         $this->editingInvoiceId = $inv->id;
         $this->vehicle_id = $inv->vehicle_id ? (string) $inv->vehicle_id : '';
-        $this->amount = $inv->original_amount !== null ? (string) $inv->original_amount : '';
         $this->tax_type = $inv->tax_type ?? CompanyMaintenanceInvoice::TAX_WITHOUT;
         $this->service_type = $inv->service_type ?? '';
         $this->description = $inv->description ?? '';
-        $this->service_ids = $inv->services->pluck('id')->map(fn ($id) => (int) $id)->all();
         $this->invoice_file = null;
-        $this->lineItems = [['service_id' => '', 'price' => '']];
+
+        $this->lineItems = [];
+        if ($inv->services->isNotEmpty()) {
+            foreach ($inv->services as $s) {
+                $price = $s->pivot && isset($s->pivot->price) && $s->pivot->price !== null && $s->pivot->price !== ''
+                    ? (string) $s->pivot->price
+                    : '';
+                $this->lineItems[] = ['service_id' => (string) $s->id, 'price' => $price];
+            }
+        }
+        if (empty($this->lineItems)) {
+            $this->lineItems = [['service_id' => '', 'price' => '']];
+        }
+
+        $this->service_ids = $inv->services->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+        $this->amount = '';
         $this->resetValidation();
         $this->modalOpen = true;
     }
@@ -176,15 +192,35 @@ class MaintenanceInvoicesSection extends Component
     {
         $company = auth('company')->user();
 
-        $this->service_ids = is_array($this->service_ids) ? $this->service_ids : [];
-        $this->validate([
+        $serviceIdsFromLines = [];
+        $subtotal = 0.0;
+        foreach ($this->lineItems as $row) {
+            $sid = $row['service_id'] ?? '';
+            $price = isset($row['price']) ? (float) str_replace(',', '.', (string) $row['price']) : 0;
+            if ($sid !== '' && $sid !== null && $price > 0) {
+                $serviceIdsFromLines[] = (int) $sid;
+                $subtotal += $price;
+            }
+        }
+        $this->service_ids = array_values(array_unique($serviceIdsFromLines));
+
+        if ($subtotal <= 0 && $this->amount !== '' && $this->amount !== null) {
+            $subtotal = (float) $this->amount;
+        }
+        $this->amount = (string) $subtotal;
+
+        $rules = [
             'vehicle_id' => ['nullable', 'string'],
             'amount' => ['nullable', 'numeric', 'min:0'],
             'tax_type' => ['required', 'in:without_tax,with_tax'],
             'description' => ['nullable', 'string', 'max:500'],
             'service_ids' => ['nullable', 'array'],
             'service_ids.*' => ['integer', 'exists:services,id'],
-        ]);
+        ];
+        if ($subtotal <= 0) {
+            $rules['amount'] = ['required', 'numeric', 'min:0.01'];
+        }
+        $this->validate($rules);
 
         $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)->findOrFail($this->editingInvoiceId);
         $oldVehicleId = $inv->vehicle_id ? (int) $inv->vehicle_id : null;
@@ -195,11 +231,11 @@ class MaintenanceInvoicesSection extends Component
             return;
         }
 
-        $originalAmount = $this->amount ? (float) $this->amount : null;
+        $originalAmount = $subtotal > 0 ? $subtotal : (float) $this->amount;
         $vatAmount = null;
         $totalAmount = $originalAmount;
 
-        if ($originalAmount !== null && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
+        if ($originalAmount > 0 && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
             $vatAmount = round($originalAmount * CompanyMaintenanceInvoice::VAT_RATE, 2);
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
@@ -214,7 +250,19 @@ class MaintenanceInvoicesSection extends Component
             'description' => $this->description ?: null,
         ]);
 
-        $inv->services()->sync($this->service_ids);
+        $syncWithPrices = [];
+        foreach ($this->lineItems as $row) {
+            $sid = $row['service_id'] ?? '';
+            $price = isset($row['price']) ? (float) str_replace(',', '.', (string) $row['price']) : 0;
+            if ($sid !== '' && $sid !== null && $price > 0) {
+                $sid = (int) $sid;
+                if (!isset($syncWithPrices[$sid])) {
+                    $syncWithPrices[$sid] = ['price' => 0];
+                }
+                $syncWithPrices[$sid]['price'] += $price;
+            }
+        }
+        $inv->services()->sync($syncWithPrices);
 
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
         if ($vehicleId) {
@@ -313,7 +361,19 @@ class MaintenanceInvoicesSection extends Component
             'description' => $this->description ?: null,
         ]);
 
-        $inv->services()->sync($this->service_ids);
+        $syncWithPrices = [];
+        foreach ($this->lineItems as $row) {
+            $sid = $row['service_id'] ?? '';
+            $price = isset($row['price']) ? (float) str_replace(',', '.', (string) $row['price']) : 0;
+            if ($sid !== '' && $sid !== null && $price > 0) {
+                $sid = (int) $sid;
+                if (!isset($syncWithPrices[$sid])) {
+                    $syncWithPrices[$sid] = ['price' => 0];
+                }
+                $syncWithPrices[$sid]['price'] += $price;
+            }
+        }
+        $inv->services()->sync($syncWithPrices);
 
         InvalidateCompanyAnalyticsCache::forCompany($company->id);
         if ($vehicleId) {
@@ -327,9 +387,6 @@ class MaintenanceInvoicesSection extends Component
 
     public function getSubtotal(): float
     {
-        if ($this->editingInvoiceId) {
-            return (float) ($this->amount ?: 0);
-        }
         $s = 0.0;
         foreach ($this->lineItems as $row) {
             $price = isset($row['price']) ? (float) str_replace(',', '.', (string) ($row['price'] ?? '')) : 0;

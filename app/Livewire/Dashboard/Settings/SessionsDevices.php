@@ -103,6 +103,42 @@ class SessionsDevices extends Component
         session()->flash('success', __('settings.logged_out_other_devices'));
     }
 
+    /**
+     * Log out a single device/session by session id.
+     * Only allows revoking sessions that belong to the current company or user.
+     */
+    public function logoutDevice(string $sessionId): void
+    {
+        $table = config('session.table', 'sessions');
+        $currentId = session()->getId();
+
+        if ($sessionId === $currentId) {
+            session()->flash('error', __('settings.cannot_logout_current_device'));
+            return;
+        }
+
+        $query = DB::table($table)->where('id', $sessionId);
+
+        if ($this->isCompany) {
+            $companyId = Auth::guard('company')->id();
+            if (!$companyId) {
+                session()->flash('error', __('settings.invalid_session'));
+                return;
+            }
+            $query->where('company_id', $companyId);
+        } else {
+            $userId = Auth::id();
+            if (!$userId) {
+                session()->flash('error', __('settings.invalid_session'));
+                return;
+            }
+            $query->where('user_id', $userId);
+        }
+
+        $query->delete();
+        session()->flash('success', __('settings.logged_out_this_device'));
+    }
+
     public function render()
     {
         return view('livewire.dashboard.settings.sessions-devices');

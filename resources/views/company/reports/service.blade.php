@@ -120,28 +120,36 @@
                 <h2 class="text-lg font-black text-white">{{ __('reports.services_log') }}</h2>
             </div>
             <div class="p-5">
-                @if ($paginated->count())
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-slate-500/30">
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.date') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">#</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.vehicle') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('reports.services') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('company.cost') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('orders.status_label') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('maintenance.invoice') }}</th>
-                                    <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.view') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-500/30">
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.date') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">#</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.vehicle') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('reports.services') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('company.cost') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('orders.status_label') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('maintenance.invoice') }}</th>
+                                <th class="text-start py-3 px-2 font-bold text-slate-400">{{ __('fuel.view') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if ($paginated->count())
                                 @foreach ($paginated as $row)
                                     <tr class="border-b border-slate-500/20 hover:bg-slate-700/30 transition-colors">
                                         <td class="py-3 px-2 text-slate-300">{{ $row->date?->translatedFormat('d M Y، H:i') ?? '—' }}</td>
-                                        <td class="py-3 px-2 font-mono text-slate-300">{{ $row->type === 'order' ? $row->order->id : 'MR-' . $row->maintenanceRequest->id }}</td>
+                                        <td class="py-3 px-2 font-mono text-slate-300">
+                                            @if ($row->type === 'order')
+                                                {{ $row->order->id }}
+                                            @elseif ($row->type === 'company_maintenance_invoice')
+                                                CMI-{{ $row->companyMaintenanceInvoice->id }}
+                                            @else
+                                                MR-{{ $row->maintenanceRequest->id }}
+                                            @endif
+                                        </td>
                                         <td class="py-3 px-2">
-                                            @php $vehicle = $row->order?->vehicle ?? $row->maintenanceRequest?->vehicle; @endphp
+                                            @php $vehicle = $row->order?->vehicle ?? $row->maintenanceRequest?->vehicle ?? $row->companyMaintenanceInvoice?->vehicle; @endphp
                                             @if ($vehicle)
                                                 <a href="{{ route('company.vehicles.show', $vehicle) }}" class="text-emerald-400 hover:text-emerald-300 hover:underline">
                                                     {{ $vehicle->plate_number }} — {{ trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')) }}
@@ -150,7 +158,7 @@
                                                 <span class="text-slate-500">—</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2 text-slate-300">{{ $row->serviceName }}{{ $row->orderServicesCount > 1 ? ' +' . ($row->orderServicesCount - 1) : '' }}</td>
+                                        <td class="py-3 px-2 text-slate-300">{{ $row->serviceName }}{{ ($row->orderServicesCount ?? 0) > 1 ? ' +' . ($row->orderServicesCount - 1) : '' }}</td>
                                         <td class="py-3 px-2 font-bold text-white">{{ number_format($row->amount, 2) }} {{ __('company.sar') }}</td>
                                         <td class="py-3 px-2">
                                             @if ($row->type === 'order')
@@ -159,6 +167,8 @@
                                                     @elseif($row->order->status === 'rejected') bg-red-500/30 text-red-300 border border-red-400/50
                                                     @elseif($row->order->status === 'completed') bg-emerald-500/30 text-emerald-300 border border-emerald-400/50
                                                     @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
+                                            @elseif ($row->type === 'company_maintenance_invoice')
+                                                <span class="px-2 py-1 rounded-xl text-xs font-semibold bg-sky-500/30 text-sky-300 border border-sky-400/50">{{ $row->statusLabel }}</span>
                                             @else
                                                 <span class="px-2 py-1 rounded-xl text-xs font-semibold
                                                     @if($row->maintenanceRequest->status === 'closed') bg-emerald-500/30 text-emerald-300 border border-emerald-400/50
@@ -166,10 +176,14 @@
                                                     @else bg-slate-600/50 text-slate-300 border border-slate-500/50 @endif">{{ $row->statusLabel }}</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 px-2 text-slate-300">{{ $row->invoiceDisplay ?? '—' }}</td>
+                                        <td class="py-3 px-2 text-slate-300">{{ data_get($row, 'invoiceDisplay', '—') }}</td>
                                         <td class="py-3 px-2">
                                             @if ($row->type === 'order')
                                                 <a href="{{ route('company.orders.show', $row->order) }}" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
+                                                    <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
+                                                </a>
+                                            @elseif ($row->type === 'company_maintenance_invoice')
+                                                <a href="{{ route('company.maintenance-invoices.company.view', $row->companyMaintenanceInvoice) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline text-sm font-bold">
                                                     <i class="fa-solid fa-eye"></i> {{ __('fuel.view') }}
                                                 </a>
                                             @else
@@ -180,12 +194,16 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            @else
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-slate-500">{{ __('reports.no_services') }}</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+                @if ($paginated->hasPages())
                     <div class="mt-4">{{ $paginated->links() }}</div>
-                @else
-                    <p class="text-slate-500">{{ __('reports.no_services') }}</p>
                 @endif
             </div>
         </div>

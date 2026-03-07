@@ -43,4 +43,9 @@ return [
     'password_confirm_placeholder' => 'كلمة المرور',
     'invalid_password' => 'كلمة المرور غير صحيحة.',
     'logged_out_other_devices' => 'تم تسجيل الخروج من جميع الأجهزة الأخرى.',
+    'logout_this_device' => 'تسجيل الخروج من هذا الجهاز',
+    'logged_out_this_device' => 'تم تسجيل الخروج من ذلك الجهاز.',
+    'ip_address' => 'عنوان IP',
+    'cannot_logout_current_device' => 'لا يمكنك تسجيل الخروج من هذا الجهاز من هنا.',
+    'invalid_session' => 'جلسة غير صالحة.',
 ];

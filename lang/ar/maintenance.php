@@ -129,6 +129,8 @@ return [
     'invoice_uploaded_success' => 'تم رفع الفاتورة بنجاح.',
     'duplicate_invoice_warning' => 'تم إضافة فاتورة مشابهة (نفس المركبة والمبلغ) مؤخراً. يرجى التأكد من أنها ليست مكررة.',
     'invoice_updated_success' => 'تم تحديث الفاتورة بنجاح.',
+    'invoice_deleted' => 'تم حذف الفاتورة.',
+    'confirm_delete_invoice' => 'حذف هذه الفاتورة؟ لا يمكن التراجع عن ذلك.',
     'edit_invoice' => 'تعديل الفاتورة',
     'invoice_validation_type' => 'يجب أن يكون الملف صورة (JPG, JPEG, PNG, WEBP) أو PDF.',
     'invoice_validation_size' => 'يجب ألا يتجاوز حجم الملف :max ميجابايت.',

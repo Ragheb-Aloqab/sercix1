@@ -16,11 +16,16 @@
             {{ session('success') }}
         </div>
     @endif
+    @if (session('error'))
+        <div class="mt-4 p-3 rounded-2xl {{ $isCompany ? 'bg-rose-500/10 border border-rose-500/40 text-rose-400' : 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200' }} text-sm">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <div class="mt-4 space-y-3">
         @forelse ($this->sessions as $session)
             <div class="flex items-center justify-between gap-4 p-3 rounded-2xl border {{ $borderClass }} {{ $session['is_current'] ? $currentBg : $sessionBg }}">
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                     <p class="font-semibold truncate {{ $isCompany ? 'text-servx-silver-light' : '' }}">
                         {{ $session['user_agent'] }}
                         @if ($session['is_current'])
@@ -28,9 +33,18 @@
                         @endif
                     </p>
                     <p class="text-xs {{ $textMuted }} mt-0.5">
-                        {{ $session['ip_address'] }} · {{ \Carbon\Carbon::createFromTimestamp($session['last_activity'])->diffForHumans() }}
+                        <span class="font-medium">{{ __('settings.ip_address') }}:</span> {{ $session['ip_address'] }}
+                        · {{ \Carbon\Carbon::createFromTimestamp($session['last_activity'])->diffForHumans() }}
                     </p>
                 </div>
+                @if (!$session['is_current'])
+                    <div class="shrink-0">
+                        <button type="button" wire:click="logoutDevice({{ json_encode($session['id']) }})" wire:loading.attr="disabled"
+                            class="{{ $isCompany ? 'dash-btn px-3 py-2 rounded-xl border border-rose-500/50 bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 text-sm font-bold' : 'px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold' }} disabled:opacity-50">
+                            {{ __('settings.logout_this_device') }}
+                        </button>
+                    </div>
+                @endif
             </div>
         @empty
             <p class="text-sm {{ $textMuted }} py-4">{{ __('settings.no_sessions') }}</p>

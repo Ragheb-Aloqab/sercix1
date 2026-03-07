@@ -74,6 +74,7 @@ class CompanyMaintenanceInvoice extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class, 'company_maintenance_invoice_service')
+            ->withPivot('price')
             ->withTimestamps();
     }
 

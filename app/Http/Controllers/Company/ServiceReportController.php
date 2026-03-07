@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Enums\MaintenanceType;
 use App\Exports\ServiceReportExport;
 use App\Http\Controllers\Controller;
+use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
 use App\Models\Order;
 use App\Models\Service;
@@ -71,6 +72,21 @@ class ServiceReportController extends Controller
 
         $maintenanceRequests = $mrQuery->latest('created_at')->get();
 
+        $cmiQuery = CompanyMaintenanceInvoice::query()
+            ->where('company_id', $company->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->with(['vehicle:id,plate_number,make,model', 'services:id,name']);
+
+        if ($vehicleId > 0) {
+            $cmiQuery->where('vehicle_id', $vehicleId);
+        }
+
+        if ($serviceTypeId > 0) {
+            $cmiQuery->whereHas('services', fn ($q) => $q->where('services.id', $serviceTypeId));
+        }
+
+        $companyMaintenanceInvoices = $cmiQuery->latest('created_at')->get();
+
         $analytics = $this->analytics->getMaintenanceAnalytics($from, $to, $company->id, $vehicleId ?: null, $serviceTypeId ?: null);
         $totalCost = $analytics['total_cost'];
         $orderCount = $analytics['order_count'];
@@ -113,7 +129,30 @@ class ServiceReportController extends Controller
             ];
         });
 
-        $allItems = $ordersWithDisplay->concat($mrsWithDisplay)
+        $serviceTypeKey = 'maintenance.service_type_' . str_replace('-', '_', (string) (CompanyMaintenanceInvoice::SERVICE_TYPE_MAINTENANCE ?? 'maintenance'));
+        $cmiWithDisplay = $companyMaintenanceInvoices->map(function ($cmi) {
+            $serviceName = $cmi->services->isNotEmpty()
+                ? $cmi->services->pluck('name')->join(', ')
+                : (function () use ($cmi) {
+                    $key = 'maintenance.service_type_' . str_replace('-', '_', (string) ($cmi->service_type ?? 'maintenance'));
+                    $t = __($key);
+                    return $t !== $key ? $t : ($cmi->service_type ?? __('maintenance.invoice'));
+                })();
+            return (object) [
+                'type' => 'company_maintenance_invoice',
+                'order' => null,
+                'maintenanceRequest' => null,
+                'companyMaintenanceInvoice' => $cmi,
+                'date' => $cmi->created_at,
+                'statusLabel' => __('reports.company_invoice') ?: 'Company invoice',
+                'serviceName' => $serviceName,
+                'orderServicesCount' => 1,
+                'amount' => (float) $cmi->amount,
+                'invoiceDisplay' => __('common.yes'),
+            ];
+        });
+
+        $allItems = $ordersWithDisplay->concat($mrsWithDisplay)->concat($cmiWithDisplay)
             ->sortByDesc(fn ($r) => $r->date?->timestamp ?? 0)
             ->values();
 
@@ -156,6 +195,7 @@ class ServiceReportController extends Controller
             $currentPage,
             ['path' => $request->url(), 'query' => $request->query()]
         );
+        $paginated->withQueryString();
 
         return view('company.reports.service', [
             'company' => $data['company'],

@@ -87,15 +87,27 @@
                                                     <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
                                                 </a>
                                             @endif
-                                            <a href="{{ route('company.maintenance-invoices.company.download', $inv) }}"
-                                                class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
-                                                <i class="fa-solid fa-download me-1"></i> {{ __('fleet.download_pdf') }}
+                                        @else
+                                            <a href="{{ route('company.maintenance-invoices.company.view', $inv) }}" target="_blank"
+                                                class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold">
+                                                <i class="fa-solid fa-eye me-1"></i> {{ __('common.view') }}
                                             </a>
                                         @endif
+                                        <a href="{{ route('company.maintenance-invoices.company.download', $inv) }}"
+                                            class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
+                                            <i class="fa-solid fa-download me-1"></i> {{ __('fleet.download_pdf') }}
+                                        </a>
                                         <button type="button" wire:click="openEditModal({{ $inv->id }})"
                                             class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-servx-silver-light text-sm font-semibold transition-colors duration-300">
                                             <i class="fa-solid fa-pen me-1"></i> {{ __('common.edit') }}
                                         </button>
+                                        <form method="POST" action="{{ route('company.maintenance-invoices.company.destroy', $inv) }}" class="inline" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-3 py-2 rounded-xl border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-semibold transition-colors duration-300">
+                                                <i class="fa-solid fa-trash-can me-1"></i> {{ __('common.delete') }}
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -128,9 +140,9 @@
                     </div>
 
                     <form wire:submit.prevent="saveInvoice" @submit.prevent class="space-y-6">
-                        {{-- 1. Choose Vehicle --}}
+                        {{-- 1. Choose Vehicle (required) --}}
                         <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.choose_vehicle') }}</label>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.choose_vehicle') }} <span class="text-red-500">*</span></label>
                             <select wire:model="vehicle_id" name="vehicle_id"
                                 class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2.5 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
                                 <option value="">{{ __('maintenance.select_vehicle') }}</option>
@@ -138,10 +150,12 @@
                                     <option value="{{ $v->id }}">{{ $v->display_name }} ({{ $v->plate_number ?? '-' }})</option>
                                 @endforeach
                             </select>
+                            @error('vehicle_id')
+                                <p class="text-sm text-red-400 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
-                        {{-- 2. Service Type (create only) --}}
-                        @if(!$editingInvoiceId)
+                        {{-- 2. Service Type --}}
                         <div>
                             <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.service_type') }}</label>
                             <div class="flex flex-wrap gap-2">
@@ -154,12 +168,9 @@
                                 @endforeach
                             </div>
                         </div>
-                        @endif
 
-                        {{-- 3. Service Amount: line items (create) or single amount (edit) --}}
-                        @if(!$editingInvoiceId)
-                            {{-- Line items table --}}
-                            <div>
+                        {{-- 3. Service amount: line items table (add & edit) --}}
+                        <div>
                                 <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.service_amount') }}</label>
                                 <div class="rounded-xl border border-slate-300 dark:border-slate-600/50 overflow-hidden">
                                     <table class="w-full text-start">
@@ -232,29 +243,7 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
-                        @else
-                            {{-- Edit: single amount + tax --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-1">{{ __('maintenance.invoice_amount') }} ({{ __('company.sar') }})</label>
-                                    <input type="number" wire:model.live="amount" step="0.01" min="0" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="0.00">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-servx-silver-light mb-2">{{ __('maintenance.tax_option') }}</label>
-                                <div class="flex flex-wrap gap-4">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" wire:model.live="tax_type" value="without_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
-                                        <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.without_tax') }}</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" wire:model.live="tax_type" value="with_tax" class="w-4 h-4 rounded-full border-slate-400 text-sky-600 focus:ring-sky-500">
-                                        <span class="text-slate-700 dark:text-servx-silver-light">{{ __('maintenance.with_tax_vat') }}</span>
-                                    </label>
-                                </div>
-                            </div>
-                        @endif
+                        </div>
 
                         {{-- Description (optional) --}}
                         <div>

@@ -60,12 +60,14 @@ class ServiceReportExport implements FromArray, WithEvents, WithTitle
             $rows[] = $headerRow;
 
             foreach ($this->allItems as $row) {
-                $vehicle = $row->order?->vehicle ?? $row->maintenanceRequest?->vehicle;
+                $vehicle = $row->order?->vehicle ?? $row->maintenanceRequest?->vehicle ?? $row->companyMaintenanceInvoice?->vehicle ?? null;
                 $vehicleStr = $vehicle
                     ? ($vehicle->plate_number . ' — ' . trim(($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')))
                     : '—';
-                $ref = $row->type === 'order' ? (string) $row->order->id : 'MR-' . $row->maintenanceRequest->id;
-                $serviceStr = $row->serviceName . ($row->orderServicesCount > 1 ? ' +' . ($row->orderServicesCount - 1) : '');
+                $ref = $row->type === 'order'
+                    ? (string) $row->order->id
+                    : ($row->type === 'company_maintenance_invoice' ? 'CMI-' . $row->companyMaintenanceInvoice->id : 'MR-' . $row->maintenanceRequest->id);
+                $serviceStr = $row->serviceName . (($row->orderServicesCount ?? 0) > 1 ? ' +' . ($row->orderServicesCount - 1) : '');
                 $rows[] = [
                     $row->date?->format('Y-m-d H:i') ?? '—',
                     $ref,
