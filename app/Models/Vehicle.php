@@ -19,6 +19,7 @@ class Vehicle extends Model
         'model',
         'year',
         'plate_number',
+        'original_vehicle_number',
         'imei',
         'tracking_source',
         'is_tracking_active',

@@ -24,7 +24,10 @@ return [
     'no_vehicles' => 'لا توجد مركبات حالياً.',
 
     // Vehicle info fields
+    'vehicle_information' => 'معلومات المركبة',
     'plate_number' => 'لوحة المركبة',
+    'original_vehicle_number' => 'الرقم الأصلي للمركبة',
+    'original_vehicle_number_placeholder' => 'رقم الاستمارة الأصلي',
     'make_model' => 'الماركة / الموديل',
     'year' => 'سنة الصنع',
     'vin' => 'VIN',

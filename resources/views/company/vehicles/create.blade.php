@@ -46,6 +46,13 @@
                 </div>
 
                 <div>
+                    <label class="text-sm font-bold text-slate-400">{{ __('vehicles.original_vehicle_number') }} ({{ __('common.optional') }})</label>
+                    <input type="text" name="original_vehicle_number" value="{{ old('original_vehicle_number') }}"
+                        class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white placeholder-slate-500"
+                        placeholder="{{ __('vehicles.original_vehicle_number_placeholder') }}">
+                </div>
+
+                <div>
                     <label class="text-sm font-bold text-slate-400">{{ __('tracking.tracking_source') }}</label>
                     <select name="tracking_source" id="tracking_source"
                         class="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-500/50 bg-slate-800/40 text-white">

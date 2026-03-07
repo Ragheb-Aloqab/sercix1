@@ -65,6 +65,7 @@ class VehiclesController extends Controller
 
             'name'            => ['nullable', 'string', 'max:150'],
             'plate_number'    => ['required', 'string', 'max:50'],
+            'original_vehicle_number' => ['nullable', 'string', 'max:50'],
             'imei'            => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
             'tracking_source' => ['required', 'string', 'in:device_api,mobile'],
             'brand'           => ['nullable', 'string', 'max:100'],
@@ -85,6 +86,7 @@ class VehiclesController extends Controller
         }
         $data['make'] = $data['brand'] ?? null;
         unset($data['brand']);
+        $data['original_vehicle_number'] = !empty($data['original_vehicle_number']) ? trim($data['original_vehicle_number']) : null;
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);
             $this->authorize('view', $branch);
@@ -300,6 +302,7 @@ class VehiclesController extends Controller
 
             'name'            => ['nullable', 'string', 'max:150'],
             'plate_number'    => ['required', 'string', 'max:50'],
+            'original_vehicle_number' => ['nullable', 'string', 'max:50'],
             'imei'            => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{10,20}$/'],
             'tracking_source' => ['required', 'string', 'in:device_api,mobile'],
             'brand'           => ['nullable', 'string', 'max:100'],
@@ -320,6 +323,7 @@ class VehiclesController extends Controller
         }
         $data['make'] = $data['brand'] ?? null;
         unset($data['brand']);
+        $data['original_vehicle_number'] = !empty($data['original_vehicle_number']) ? trim($data['original_vehicle_number']) : null;
 
         if (!empty($data['company_branch_id'])) {
             $branch = CompanyBranch::findOrFail($data['company_branch_id']);

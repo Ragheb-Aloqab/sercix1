@@ -24,7 +24,10 @@ return [
     'no_vehicles' => 'No vehicles at the moment.',
 
     // Vehicle info fields
+    'vehicle_information' => 'Vehicle Information',
     'plate_number' => 'Plate number',
+    'original_vehicle_number' => 'Original Vehicle Number',
+    'original_vehicle_number_placeholder' => 'Original registration number',
     'make_model' => 'Make / Model',
     'year' => 'Year',
     'vin' => 'VIN',
