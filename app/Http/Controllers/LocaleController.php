@@ -42,7 +42,15 @@ class LocaleController extends Controller
         Session::save();
 
         $previous = url()->previous();
-        $target = $previous && !str_contains($previous, '/set-locale') ? $previous : route('index');
+        $base = $request->getSchemeAndHttpHost();
+        if ($previous && !str_contains($previous, '/set-locale')) {
+            $parsed = parse_url($previous);
+            $path = $parsed['path'] ?? '/';
+            $query = isset($parsed['query']) && $parsed['query'] !== '' ? '?' . $parsed['query'] : '';
+            $target = $base . $path . $query;
+        } else {
+            $target = $base . '/';
+        }
         Session::put('locale_just_changed', true);
 
         return redirect()->to($target)

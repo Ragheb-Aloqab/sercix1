@@ -7,6 +7,7 @@ use App\Services\TenantSecurityLogger;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class LoadCompanyFromSubdomain
@@ -37,6 +38,9 @@ class LoadCompanyFromSubdomain
 
             $this->bindTenant($company);
             app()->instance('tenant_from_subdomain', true);
+
+            // Keep links (e.g. set-locale) on this subdomain so session and locale persist
+            URL::forceRootUrl($request->getSchemeAndHttpHost());
 
             if (Auth::guard('company')->check()) {
                 $authCompany = Auth::guard('company')->user();
