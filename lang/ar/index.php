@@ -4,7 +4,28 @@ return [
     'pageTitle' => 'إدارة أساطيل الشركات (زيوت وفلاتر)',
     'skipToContent' => 'انتقل للمحتوى',
 
-    // Hero - Numbers
+    // Hero - Fleet features (replaces numeric stats)
+    'heroHeadline' => 'إدارة أسطولك بكل سهولة مع Servx Motors',
+    'heroSubline' => 'منصة واحدة لإدارة المركبات، الفواتير، التتبع، والتقارير — مع تنفيذ مباشر للصيانة وتوثيق ضريبي كامل.',
+    'heroFeatureInvoicing' => 'الفواتير',
+    'heroFeatureInvoicingDesc' => 'فواتير موحدة ومجمعة، ربط تلقائي بالمركبة والطلب، وجاهزية ضريبية.',
+    'heroFeatureInvoicingExpand' => 'رفع الفواتير من مراكز الصيانة، اعتمادها من الشركة، وتصديرها للمحاسبة.',
+    'heroFeatureTracking' => 'التتبع',
+    'heroFeatureTrackingDesc' => 'تتبع المركبات والرحلات وعداد المسافات من لوحة واحدة.',
+    'heroFeatureTrackingExpand' => 'سجل الرحلات، المسافات الشهرية والتراكمية، وتكلفة الكيلومتر.',
+    'heroFeatureReports' => 'التقارير والتحليلات',
+    'heroFeatureReportsDesc' => 'تقارير وقود وصيانة وضريبية مع مقارنة أداء المركبات.',
+    'heroFeatureReportsExpand' => 'تقارير PDF و Excel، تكلفة لكل مركبة، ومقارنة مع متوسط السوق.',
+    'heroFeatureVehicles' => 'إدارة المركبات',
+    'heroFeatureVehiclesDesc' => 'إضافة المركبات، المستندات، الصور، وربط السائقين والطلبات.',
+    'heroFeatureVehiclesExpand' => 'ملف مركبة كامل: تفاصيل، تتبع، صور، تقارير، وعداد مسافات.',
+    'heroFeatureOperations' => 'عمليات الأسطول',
+    'heroFeatureOperationsDesc' => 'طلبات صيانة، عروض أسعار، اعتماد فواتير، وجدولة الخدمات.',
+    'heroFeatureOperationsExpand' => 'من طلب السائق حتى تنفيذ المركز والفاتورة النهائية في سير عمل واحد.',
+    'heroTryNow' => 'جرّب الآن',
+    'heroClickExpand' => 'اضغط للمزيد',
+
+    // Legacy (kept for reference / other uses)
     'numbersTitle' => 'أرقام',
     'numbersBrand' => 'Servx Motors',
     'statCompanies' => 'شركة',

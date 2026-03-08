@@ -4,7 +4,28 @@ return [
     'pageTitle' => 'Corporate fleet management (oil & filters)',
     'skipToContent' => 'Skip to content',
 
-    // Hero - Numbers
+    // Hero - Fleet features (replaces numeric stats)
+    'heroHeadline' => 'Manage your fleet with ease with Servx Motors',
+    'heroSubline' => 'One platform for vehicles, invoicing, tracking, and reports — with direct maintenance execution and full tax documentation.',
+    'heroFeatureInvoicing' => 'Invoicing',
+    'heroFeatureInvoicingDesc' => 'Unified and consolidated invoices, automatic link to vehicle and request, tax-ready.',
+    'heroFeatureInvoicingExpand' => 'Upload invoices from maintenance centers, company approval, and export for accounting.',
+    'heroFeatureTracking' => 'Tracking',
+    'heroFeatureTrackingDesc' => 'Track vehicles, trips, and odometer from a single dashboard.',
+    'heroFeatureTrackingExpand' => 'Trip log, monthly and cumulative mileage, and cost per kilometer.',
+    'heroFeatureReports' => 'Reports & analytics',
+    'heroFeatureReportsDesc' => 'Fuel, maintenance, and tax reports with vehicle performance comparison.',
+    'heroFeatureReportsExpand' => 'PDF and Excel reports, cost per vehicle, and comparison with market average.',
+    'heroFeatureVehicles' => 'Vehicle management',
+    'heroFeatureVehiclesDesc' => 'Add vehicles, documents, images, and link drivers and requests.',
+    'heroFeatureVehiclesExpand' => 'Full vehicle file: details, tracking, images, reports, and odometer.',
+    'heroFeatureOperations' => 'Fleet operations',
+    'heroFeatureOperationsDesc' => 'Maintenance requests, quotes, invoice approval, and service scheduling.',
+    'heroFeatureOperationsExpand' => 'From driver request to center execution and final invoice in one workflow.',
+    'heroTryNow' => 'Try Now',
+    'heroClickExpand' => 'Click for more',
+
+    // Legacy (kept for reference / other uses)
     'numbersTitle' => 'Numbers',
     'numbersBrand' => 'Servx Motors',
     'statCompanies' => 'Company',

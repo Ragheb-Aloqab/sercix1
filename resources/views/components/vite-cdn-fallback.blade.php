@@ -1,4 +1,4 @@
-{{-- CDN fallback when build assets fail - loads full styling from CDN --}}
+{{-- CDN fallback when build assets fail or missing - loads full styling from CDN --}}
 <script>
 (function(){
     var d=document;
@@ -20,7 +20,8 @@
         var links=d.querySelectorAll('link[href*="/build/"]');
         var anyLoaded=false;
         for(var i=0;i<links.length;i++){if(links[i].sheet){anyLoaded=true;break;}}
-        if(links.length>0&&!anyLoaded)loadCdnFallback();
+        var noBuildOrFailed=(links.length===0)||(links.length>0&&!anyLoaded);
+        if(noBuildOrFailed)loadCdnFallback();
     }
     if(d.readyState==='complete')setTimeout(check,800);
     else window.addEventListener('load',function(){setTimeout(check,800);});
