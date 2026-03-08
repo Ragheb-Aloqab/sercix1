@@ -156,6 +156,7 @@ In Hostinger: **Advanced** → **Cron Jobs** → create new cron, set schedule t
 |-------|--------|
 | 500 error | `storage/logs/laravel.log`, file permissions (`storage/`, `bootstrap/cache/` writable) |
 | CSS/JS not loading | `APP_ENV=production`, `APP_DEBUG=false`, correct `APP_URL` |
+| **Route [login.verify-otp] not defined** / OTP login broken | Ensure `routes/web.php` matches repo: `/verify-otp` routes must be **inside** `Route::prefix('login')->name('login.')->group(...)` so the route name is `login.verify-otp` and URL is `/login/verify-otp`. Then run `php artisan route:clear` and `php artisan route:cache`. |
 | Subdomain shows main site | DNS wildcard, `WHITE_LABEL_DOMAIN` in `.env`, company has `subdomain` + `white_label_enabled` |
 | Session lost on subdomain | Consider `SESSION_DOMAIN=.yourdomain.com` |
 | Storage links (images) 404 | Run `php artisan storage:link` or create symlink manually (see 1.2) |

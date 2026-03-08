@@ -251,14 +251,31 @@
                             <input type="text" wire:model="description" maxlength="500" class="w-full rounded-xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-2 text-slate-900 dark:text-servx-silver-light transition-colors duration-300" placeholder="{{ __('common.optional') }}">
                         </div>
 
-                        {{-- 4. Upload Invoice --}}
-                        @if(!$editingInvoiceId)
+                        {{-- 4. Upload Invoice (add and edit: can upload or replace photo) --}}
                         <div x-data="{ dragging: false }"
                              @dragover.prevent="dragging = true"
                              @dragleave.prevent="dragging = false"
                              @drop.prevent="dragging = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.fileInput.dispatchEvent(new Event('change'))"
                              class="rounded-xl border-2 border-dashed transition-colors px-6 py-8 text-center"
                              :class="dragging ? 'border-sky-500 bg-sky-500/10' : 'border-slate-300 dark:border-slate-600/50 bg-slate-50 dark:bg-slate-800/30'">
+                            @if($editingInvoiceId && $editingInvoice?->hasInvoiceFile())
+                                <p class="text-sm text-slate-600 dark:text-servx-silver-light mb-3">
+                                    {{ __('maintenance.current_invoice_file') }}
+                                    @if($editingInvoice->isImage())
+                                        <button type="button"
+                                            @click="$dispatch('open-image-preview', { url: '{{ route('company.maintenance-invoices.company.view', $editingInvoice) }}' })"
+                                            class="text-sky-600 dark:text-sky-400 font-semibold hover:underline">
+                                            {{ __('common.view') }}
+                                        </button>
+                                    @else
+                                        <a href="{{ route('company.maintenance-invoices.company.view', $editingInvoice) }}" target="_blank"
+                                            class="text-sky-600 dark:text-sky-400 font-semibold hover:underline">
+                                            {{ __('common.view') }}
+                                        </a>
+                                    @endif
+                                    — {{ __('maintenance.upload_new_optional') }}
+                                </p>
+                            @endif
                             <input type="file" wire:model="invoice_file" id="modal_invoice_file"
                                    accept=".pdf,.jpg,.jpeg,.png,.webp"
                                    class="hidden"
@@ -266,7 +283,13 @@
                             <p class="text-slate-600 dark:text-servx-silver-light mb-2">
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-sky-600 dark:text-sky-400"></i>
                             </p>
-                            <p class="text-slate-600 dark:text-servx-silver-light text-sm mb-1">{{ __('maintenance.invoice_file_optional') }}</p>
+                            <p class="text-slate-600 dark:text-servx-silver-light text-sm mb-1">
+                                @if($editingInvoiceId)
+                                    {{ __('maintenance.invoice_upload_replace') }}
+                                @else
+                                    {{ __('maintenance.invoice_file_optional') }}
+                                @endif
+                            </p>
                             <p class="text-slate-500 text-xs mb-1">{{ __('maintenance.invoice_file_accept', ['max' => $maxFileMb]) }}</p>
                             <p class="text-slate-500 text-xs mb-3">
                                 @if($invoice_file)
@@ -283,7 +306,6 @@
                         @error('invoice_file')
                             <p class="text-sm text-red-400">{{ $message }}</p>
                         @enderror
-                        @endif
 
                         {{-- Validation errors summary --}}
                         @if($errors->any())

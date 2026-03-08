@@ -59,14 +59,14 @@ Route::prefix('login')->name('login.')->group(function () {
     Route::get('/verify-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showOtpVerify'])->name('verify-otp');
     Route::post('/verify-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'verifyOtp'])
         ->middleware('throttle:10,1')
-        ->name('verify-otp');
+        ->name('verify-otp.store');
     Route::post('/resend-otp', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'resendOtp'])
         ->middleware('throttle:5,1')
         ->name('resend-otp');
     Route::get('/verify', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'showVerify'])->name('verify');
     Route::post('/verify', [\App\Http\Controllers\Auth\UnifiedLoginController::class, 'verifyOtpGeneric'])
         ->middleware('throttle:15,1')
-        ->name('verify');
+        ->name('verify.store');
 });
 
 Route::get('/sign-in', fn () => redirect()->route('login'))->name('sign-in.index');
@@ -126,7 +126,7 @@ Route::prefix('maintenance-center')->name('maintenance-center.')->group(function
     Route::get('/verify', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'showVerify'])->name('verify');
     Route::post('/verify', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'verifyOtp'])
         ->middleware('throttle:10,1')
-        ->name('verify');
+        ->name('verify.store');
     Route::post('/logout', [\App\Http\Controllers\MaintenanceCenterAuth\OtpAuthController::class, 'logout'])->name('logout');
 
     Route::middleware('maintenance_center')->group(function () {

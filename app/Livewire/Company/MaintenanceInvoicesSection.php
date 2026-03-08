@@ -6,8 +6,7 @@ use App\Listeners\InvalidateCompanyAnalyticsCache;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\Service;
 use App\Models\Vehicle;
-use App\Rules\PreventDuplicateMaintenanceInvoice;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
@@ -40,16 +39,13 @@ class MaintenanceInvoicesSection extends Component
             'description' => ['nullable', 'string', 'max:500'],
             'service_ids' => ['nullable', 'array'],
             'service_ids.*' => ['integer', 'exists:services,id'],
-        ];
-
-        if (!$this->editingInvoiceId) {
-            $rules['invoice_file'] = [
+            'invoice_file' => [
                 'nullable',
                 'file',
                 'mimes:jpg,jpeg,png,webp,pdf',
                 'max:' . ($maxMb * 1024),
-            ];
-        }
+            ],
+        ];
 
         return $rules;
     }
@@ -220,6 +216,8 @@ class MaintenanceInvoicesSection extends Component
         if ($subtotal <= 0) {
             $rules['amount'] = ['required', 'numeric', 'min:0.01'];
         }
+        $maxMb = config('servx.invoice_max_size_mb', 5);
+        $rules['invoice_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:' . ($maxMb * 1024)];
         $this->validate($rules);
 
         $inv = CompanyMaintenanceInvoice::where('company_id', $company->id)->findOrFail($this->editingInvoiceId);
@@ -240,6 +238,23 @@ class MaintenanceInvoicesSection extends Component
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
 
+        $path = $inv->invoice_file;
+        $fileType = $inv->file_type;
+        $originalName = $inv->original_filename;
+
+        if ($this->invoice_file) {
+            $file = $this->invoice_file;
+            $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension());
+            $fileType = in_array($ext, ['jpg', 'jpeg', 'png', 'webp']) ? 'image' : 'pdf';
+            $originalName = $file->getClientOriginalName();
+            $uniqueName = Str::uuid() . '.' . $ext;
+            $newPath = $file->storeAs('maintenance_invoices/' . $company->id, $uniqueName, 'private');
+            if ($path && Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->delete($path);
+            }
+            $path = $newPath;
+        }
+
         $inv->update([
             'vehicle_id' => $vehicleId,
             'service_type' => $this->service_type ?: null,
@@ -247,6 +262,9 @@ class MaintenanceInvoicesSection extends Component
             'original_amount' => $originalAmount,
             'vat_amount' => $vatAmount,
             'tax_type' => $this->tax_type,
+            'invoice_file' => $path,
+            'file_type' => $fileType,
+            'original_filename' => $originalName,
             'description' => $this->description ?: null,
         ]);
 
@@ -340,13 +358,6 @@ class MaintenanceInvoicesSection extends Component
             $totalAmount = round($originalAmount + $vatAmount, 2);
         }
 
-        if ($totalAmount !== null && $totalAmount > 0) {
-            Validator::make(
-                ['amount' => $totalAmount],
-                ['amount' => [new PreventDuplicateMaintenanceInvoice($company->id, $vehicleId, $totalAmount)]]
-            )->validate();
-        }
-
         $inv = CompanyMaintenanceInvoice::create([
             'company_id' => $company->id,
             'vehicle_id' => $vehicleId,
@@ -424,12 +435,16 @@ class MaintenanceInvoicesSection extends Component
             ->orderBy('name')
             ->get(['id', 'name']);
         $maxFileMb = config('servx.invoice_max_size_mb', 5);
+        $editingInvoice = $this->editingInvoiceId
+            ? CompanyMaintenanceInvoice::where('company_id', $company->id)->find($this->editingInvoiceId)
+            : null;
 
         return view('livewire.company.maintenance-invoices-section', [
             'companyInvoices' => $companyInvoices,
             'vehicles' => $vehicles,
             'services' => $services,
             'maxFileMb' => $maxFileMb,
+            'editingInvoice' => $editingInvoice,
         ]);
     }
 }

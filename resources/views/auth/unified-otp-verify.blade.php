@@ -39,7 +39,7 @@
             @if (session('success'))<div class="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400">{{ session('success') }}</div>@endif
             @if ($errors->any())<div class="mt-4 rounded-lg border border-rose-500/50 bg-rose-500/10 p-3 text-sm text-rose-400"><ul class="list-disc ms-5 space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
-            <form method="POST" action="{{ route('login.verify-otp') }}" class="mt-6 space-y-4" id="otp-form">
+            <form method="POST" action="{{ route('login.verify-otp.store') }}" class="mt-6 space-y-4" id="otp-form">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-servx-silver-light">{{ __('login.verify_otp_label') ?? 'Verification code (6 digits)' }}</label>

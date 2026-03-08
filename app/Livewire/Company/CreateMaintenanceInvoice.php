@@ -6,9 +6,7 @@ use App\Listeners\InvalidateCompanyAnalyticsCache;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\Service;
 use App\Models\Vehicle;
-use App\Rules\PreventDuplicateMaintenanceInvoice;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -132,13 +130,6 @@ class CreateMaintenanceInvoice extends Component
         if ($originalAmount !== null && $this->tax_type === CompanyMaintenanceInvoice::TAX_WITH) {
             $vatAmount = round($originalAmount * CompanyMaintenanceInvoice::VAT_RATE, 2);
             $totalAmount = round($originalAmount + $vatAmount, 2);
-        }
-
-        if ($totalAmount !== null) {
-            Validator::make(
-                ['amount' => $totalAmount],
-                ['amount' => [new PreventDuplicateMaintenanceInvoice($company->id, $vehicleId, $totalAmount)]]
-            )->validate();
         }
 
         $inv = CompanyMaintenanceInvoice::create([

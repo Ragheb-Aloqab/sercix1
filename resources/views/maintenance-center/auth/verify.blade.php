@@ -37,7 +37,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('maintenance-center.verify') }}" class="mt-6">
+                <form method="POST" action="{{ route('maintenance-center.verify.store') }}" class="mt-6">
                     @csrf
                     <label class="block text-sm font-medium text-slate-600 dark:text-servx-silver-light">{{ __('maintenance.otp_code') ?? 'رمز التحقق (6 أرقام)' }}</label>
                     <input type="text" name="otp" inputmode="numeric" maxlength="6" required placeholder="123456" class="mt-2 w-full tracking-widest text-center text-2xl font-bold rounded-lg border border-slate-300 dark:border-servx-red/30 bg-white dark:bg-servx-black-soft px-4 py-3 text-slate-900 dark:text-servx-silver-light transition-colors duration-300">
