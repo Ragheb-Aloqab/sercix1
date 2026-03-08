@@ -15,6 +15,11 @@
 
     RewriteEngine On
 
+    # Block WordPress paths (security)
+    RewriteRule ^wp-admin - [F,L]
+    RewriteRule ^wp-login\.php - [F,L]
+    RewriteRule ^wordpress - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

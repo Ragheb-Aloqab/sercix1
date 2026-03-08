@@ -123,7 +123,7 @@ class FuelInvoiceUploadSection extends Component
             ->with('vehicle')
             ->latest()
             ->get();
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model']);

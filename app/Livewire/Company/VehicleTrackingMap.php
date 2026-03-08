@@ -102,7 +102,7 @@ class VehicleTrackingMap extends Component
         $company = auth('company')->user();
 
         if ($this->vehicleId) {
-            $vehicle = Vehicle::where('company_id', $company->id)->with('latestLocation')->find($this->vehicleId);
+            $vehicle = $company->vehicles()->with('latestLocation')->find($this->vehicleId);
             if (!$vehicle) {
                 return;
             }

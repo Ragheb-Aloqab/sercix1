@@ -38,7 +38,7 @@ class FuelController extends Controller
             : now()->endOfDay();
         $vehicleId = $request->integer('vehicle_id', 0);
 
-        $vehicleFilter = $vehicleId > 0 && Vehicle::where('company_id', $company->id)->where('id', $vehicleId)->exists();
+        $vehicleFilter = $vehicleId > 0 && $company->vehicles()->where('id', $vehicleId)->exists();
 
         $fuelQuery = FuelRefill::query()
             ->where('company_id', $company->id)
@@ -107,7 +107,7 @@ class FuelController extends Controller
         $totalLiters = $fuelTotalLiters ?? 0;
         $refillCount = $fuelRefillCount + $companyInvoiceCount;
 
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model']);

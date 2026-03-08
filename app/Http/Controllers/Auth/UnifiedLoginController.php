@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Helpers\PhoneHelper;
 use App\Models\LoginAudit;
 use App\Models\MaintenanceCenter;
 use App\Models\User;
@@ -83,7 +84,7 @@ class UnifiedLoginController extends Controller
     private function handlePhoneIdentifier(string $phone)
     {
         $normalized = $this->normalizePhone($phone);
-        $variants = $this->phoneVariants($normalized);
+        $variants = PhoneHelper::variants($normalized);
 
         $company = Company::whereIn('phone', $variants)->first();
         $maintenanceCenter = MaintenanceCenter::active()->whereIn('phone', $variants)->first();
@@ -104,7 +105,7 @@ class UnifiedLoginController extends Controller
             }
         }
 
-        $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+        $vehicle = Vehicle::forDriverPhone($variants)->where('is_active', true)->first();
         if ($vehicle) {
             return $this->sendDriverOtp($normalized);
         }
@@ -416,7 +417,7 @@ class UnifiedLoginController extends Controller
             return back()->withErrors(['otp' => __('messages.otp_invalid_try_again')]);
         }
 
-        $company = Company::whereIn('phone', $this->phoneVariants($phone))->first();
+        $company = Company::whereIn('phone', PhoneHelper::variants($phone))->first();
         if (!$company) {
             Session::forget(['login_flow', 'otp.phone', 'otp.code', 'otp.expires_at']);
             return redirect()->route('login')->withErrors(['otp' => __('messages.no_company_for_phone')]);
@@ -544,21 +545,5 @@ class UnifiedLoginController extends Controller
             return '+966' . $digits;
         }
         return $phone;
-    }
-
-    private function phoneVariants(?string $phone): array
-    {
-        if ($phone === null || $phone === '') {
-            return [];
-        }
-        $variants = [trim($phone)];
-        if (str_starts_with($phone, '+966')) {
-            $variants[] = '0' . substr($phone, 4);
-        }
-        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            $variants[] = '+966' . substr($digits, 1, 9);
-        }
-        return array_unique(array_filter($variants));
     }
 }

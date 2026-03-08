@@ -27,7 +27,7 @@ class CompanyDetails extends Component
 
     public function getDriversProperty(): array
     {
-        $drivers = Vehicle::where('company_id', $this->company->id)
+        $drivers = $this->company->vehicles()
             ->whereNotNull('driver_phone')
             ->select('driver_name', 'driver_phone')
             ->distinct()
@@ -60,7 +60,7 @@ class CompanyDetails extends Component
     public function getVehiclesGrowthDataProperty(): array
     {
         $start = now()->subMonths(6)->startOfMonth();
-        $rows = Vehicle::where('company_id', $this->company->id)
+        $rows = $this->company->vehicles()
             ->where('created_at', '>=', $start)
             ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month')
             ->selectRaw('COUNT(*) as count')

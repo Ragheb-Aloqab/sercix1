@@ -1,4 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Block WordPress paths (security)
+    RewriteRule ^wp-admin - [F,L]
+    RewriteRule ^wp-login\.php - [F,L]
+    RewriteRule ^wordpress - [F,L]
+
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

@@ -95,7 +95,7 @@ class DashboardController extends Controller
         ];
 
         // Fuel balance total (from vehicles)
-        $fuelBalanceTotal = (float) \App\Models\Vehicle::where('company_id', $company->id)->where('is_active', true)->sum('fuel_balance');
+        $fuelBalanceTotal = (float) $company->vehicles()->where('is_active', true)->sum('fuel_balance');
 
         $mileageService = app(VehicleMileageService::class);
         $totalAccumulatedMileage = $mileageService->getCompanyAccumulatedMileage($company->id);

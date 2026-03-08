@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Driver;
 
+use App\Helpers\PhoneHelper;
 use App\Enums\MaintenanceRequestStatus;
 use App\Enums\MaintenanceType;
 use App\Http\Controllers\Controller;
@@ -16,8 +17,8 @@ class MaintenanceRequestController extends Controller
     public function create()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
-        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $phoneVariants = PhoneHelper::variants($phone);
+        $vehicles = Vehicle::forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->with('company:id,company_name')
             ->get();
@@ -36,7 +37,7 @@ class MaintenanceRequestController extends Controller
     public function store(Request $request)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
@@ -49,7 +50,7 @@ class MaintenanceRequestController extends Controller
             'images.*' => ['image', 'mimes:jpg,jpeg,png', 'max:5120'],
         ]);
 
-        $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])->forDriverPhone($phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -89,7 +90,7 @@ class MaintenanceRequestController extends Controller
     public function show(MaintenanceRequest $maintenanceRequest)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $maintenanceRequest->load(['vehicle', 'company:id,company_name', 'attachments']);
 
@@ -100,21 +101,5 @@ class MaintenanceRequestController extends Controller
         return view('driver.maintenance-request.show', [
             'request' => $maintenanceRequest,
         ]);
-    }
-
-    private function driverPhoneVariants(?string $phone): array
-    {
-        if ($phone === null || $phone === '') {
-            return [];
-        }
-        $variants = [trim($phone)];
-        if (str_starts_with($phone, '+966')) {
-            $variants[] = '0' . substr($phone, 4);
-        }
-        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            $variants[] = '+966' . substr($digits, 1, 9);
-        }
-        return array_unique(array_filter($variants));
     }
 }

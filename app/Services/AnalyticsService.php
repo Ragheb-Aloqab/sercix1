@@ -98,7 +98,7 @@ class AnalyticsService
         $totalCount = $orderCount + $mrCount + $invoiceCount;
 
         $vehicleCount = $vehicleId ? 1 : ($companyId
-            ? Vehicle::where('company_id', $companyId)->count()
+            ? Vehicle::forCompany($companyId)->count()
             : Vehicle::count());
         $vehicleCount = max(1, $vehicleCount);
 
@@ -240,7 +240,7 @@ class AnalyticsService
         $totalOdometer = (float) ($totals->total_odometer ?? 0);
 
         $vehicleCount = $vehicleId ? 1 : ($companyId
-            ? Vehicle::where('company_id', $companyId)->count()
+            ? Vehicle::forCompany($companyId)->count()
             : Vehicle::count());
         $vehicleCount = max(1, $vehicleCount);
 
@@ -282,7 +282,7 @@ class AnalyticsService
         $fuel = $this->getFuelAnalytics($dateFrom, $dateTo, $companyId, null);
 
         $vehicleCount = $companyId
-            ? Vehicle::where('company_id', $companyId)->count()
+            ? Vehicle::forCompany($companyId)->count()
             : Vehicle::count();
         $vehicleCount = max(1, $vehicleCount);
 

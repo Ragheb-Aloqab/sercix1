@@ -39,7 +39,7 @@ class VehicleMileageReportService
         $from = $from ?? now()->startOfMonth();
         $to = $to ?? now()->endOfDay();
 
-        $query = Vehicle::where('company_id', $companyId)
+        $query = Vehicle::forCompany($companyId)
             ->where('is_active', true)
             ->with('branch');
 

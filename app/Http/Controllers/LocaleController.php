@@ -43,8 +43,11 @@ class LocaleController extends Controller
 
         $previous = url()->previous();
         $target = $previous && !str_contains($previous, '/set-locale') ? $previous : route('index');
-        $sep = str_contains($target, '?') ? '&' : '?';
-        return redirect()->to($target . $sep . '_=' . time())
-            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+        Session::put('locale_just_changed', true);
+
+        return redirect()->to($target)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

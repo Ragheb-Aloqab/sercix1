@@ -352,7 +352,7 @@ class VehicleMileageService
      */
     public function getCompanyAccumulatedMileage(int $companyId): float
     {
-        $vehicleIds = Vehicle::where('company_id', $companyId)->pluck('id');
+        $vehicleIds = Vehicle::forCompany($companyId)->pluck('id');
         $total = 0.0;
         foreach ($vehicleIds as $vid) {
             $v = Vehicle::find($vid);
@@ -374,7 +374,7 @@ class VehicleMileageService
      */
     public function getCompanyMonthlyMileage(int $companyId, int $month, int $year): float
     {
-        $vehicles = Vehicle::where('company_id', $companyId)->get();
+        $vehicles = Vehicle::forCompany($companyId)->get();
         if ($vehicles->isEmpty()) {
             return 0.0;
         }

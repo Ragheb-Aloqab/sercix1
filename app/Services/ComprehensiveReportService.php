@@ -56,7 +56,7 @@ class ComprehensiveReportService
 
         // Monthly Mileage (recorded during the month)
         if ($vehicleId) {
-            $vehicle = Vehicle::where('company_id', $companyId)->find($vehicleId);
+            $vehicle = Vehicle::forCompany($companyId)->find($vehicleId);
             $monthlyMileage = $vehicle
                 ? $this->mileageService->getMonthlyMileage($vehicle, $month, $year)
                 : 0.0;
@@ -88,7 +88,7 @@ class ComprehensiveReportService
         if (!$vehicleId) {
             return (string) __('company.all_vehicles');
         }
-        $vehicle = Vehicle::where('company_id', $companyId)->find($vehicleId);
+        $vehicle = Vehicle::forCompany($companyId)->find($vehicleId);
         if (!$vehicle) {
             return (string) __('company.all_vehicles');
         }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PhoneHelper;
 use App\Jobs\GenerateMaintenanceInvoicePdfJob;
 use App\Models\Attachment;
 use App\Services\ImageOptimizationService;
@@ -23,13 +24,13 @@ class DriverController extends Controller
     public function dashboard()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
-        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $phoneVariants = PhoneHelper::variants($phone);
+        $vehicles = Vehicle::forDriverPhone($phoneVariants)
             ->with('company:id,company_name')
             ->where('is_active', true)
             ->get();
 
-        $requests = \App\Models\MaintenanceRequest::whereIn('driver_phone', $phoneVariants)
+        $requests = \App\Models\MaintenanceRequest::forDriver($phoneVariants)
             ->with(['vehicle', 'company:id,company_name'])
             ->latest()
             ->take(10)
@@ -58,9 +59,9 @@ class DriverController extends Controller
     public function history()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
-        $requests = \App\Models\MaintenanceRequest::whereIn('driver_phone', $phoneVariants)
+        $requests = \App\Models\MaintenanceRequest::forDriver($phoneVariants)
             ->with(['vehicle', 'company:id,company_name'])
             ->latest()
             ->paginate(15)
@@ -77,8 +78,8 @@ class DriverController extends Controller
     public function createRequest()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
-        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $phoneVariants = PhoneHelper::variants($phone);
+        $vehicles = Vehicle::forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->with([
                 'company:id,company_name',
@@ -111,7 +112,7 @@ class DriverController extends Controller
     public function storeRequest(Request $request)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $serviceType = $request->input('service_type', 'existing');
         $rules = [
@@ -134,7 +135,7 @@ class DriverController extends Controller
 
         $data = $request->validate($rules);
 
-        $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])->forDriverPhone($phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -206,7 +207,7 @@ class DriverController extends Controller
     public function showRequest(Order $order)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
         $order->load(['orderServices.service', 'vehicle', 'company:id,company_name', 'attachments']);
 
         if (!in_array($order->driver_phone, $phoneVariants)) {
@@ -225,7 +226,7 @@ class DriverController extends Controller
     public function startRequest(Request $request, Order $order)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
         if (!in_array($order->driver_phone, $phoneVariants)) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -240,7 +241,7 @@ class DriverController extends Controller
     public function uploadInvoice(Request $request, Order $order)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
         if (!in_array($order->driver_phone, $phoneVariants)) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -284,8 +285,8 @@ class DriverController extends Controller
     public function createFuelRefill()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
-        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $phoneVariants = PhoneHelper::variants($phone);
+        $vehicles = Vehicle::forDriverPhone($phoneVariants)
             ->with('company:id,company_name')
             ->where('is_active', true)
             ->get();
@@ -300,7 +301,7 @@ class DriverController extends Controller
     public function storeFuelRefill(Request $request)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
@@ -313,7 +314,7 @@ class DriverController extends Controller
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max, optional
         ]);
 
-        $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
+        $vehicle = Vehicle::where('id', $data['vehicle_id'])->forDriverPhone($phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -351,11 +352,11 @@ class DriverController extends Controller
     public function tracking(Request $request)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
         $vehicleId = (int) $request->query('vehicle');
 
         $vehicle = Vehicle::where('id', $vehicleId)
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->first();
 
@@ -384,10 +385,10 @@ class DriverController extends Controller
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'start_odometer' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
         ]);
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->first();
 
@@ -399,7 +400,7 @@ class DriverController extends Controller
         }
 
         // Stop any other active tracking for this driver's vehicles (prevent duplicates)
-        Vehicle::whereIn('driver_phone', $phoneVariants)
+        Vehicle::forDriverPhone($phoneVariants)
             ->where('is_tracking_active', true)
             ->update(['is_tracking_active' => false, 'tracking_driver_phone' => null]);
 
@@ -442,10 +443,10 @@ class DriverController extends Controller
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'end_odometer' => ['required', 'numeric', 'min:0', 'max:9999999'],
         ]);
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->first();
 
         if (!$vehicle) {
@@ -455,7 +456,7 @@ class DriverController extends Controller
         // Find active trip for this vehicle (most recent unended)
         $trip = \App\Models\MobileTrackingTrip::where('vehicle_id', $vehicle->id)
             ->whereNull('ended_at')
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->orderByDesc('started_at')
             ->first();
 
@@ -520,8 +521,8 @@ class DriverController extends Controller
             return response()->json(['active' => false]);
         }
 
-        $phoneVariants = $this->driverPhoneVariants($phone);
-        $vehicle = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $phoneVariants = PhoneHelper::variants($phone);
+        $vehicle = Vehicle::forDriverPhone($phoneVariants)
             ->where('is_tracking_active', true)
             ->whereIn('tracking_driver_phone', $phoneVariants)
             ->where('is_active', true)
@@ -557,9 +558,9 @@ class DriverController extends Controller
             'speed' => ['nullable', 'numeric', 'min:0', 'max:500'],
         ]);
 
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->first();
 
         if (!$vehicle) {
@@ -600,10 +601,10 @@ class DriverController extends Controller
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'odometer_km' => ['required', 'numeric', 'min:0', 'max:9999999'],
         ]);
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])
-            ->whereIn('driver_phone', $phoneVariants)
+            ->forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->first();
 
@@ -634,22 +635,5 @@ class DriverController extends Controller
         $odometerService->clearMileageCache($vehicle->company_id);
 
         return response()->json(['ok' => true, 'message' => __('tracking.daily_odometer_saved')]);
-    }
-
-    /** Match DB whether company saved +966... or 05... */
-    private function driverPhoneVariants(?string $phone): array
-    {
-        if ($phone === null || $phone === '') {
-            return [];
-        }
-        $variants = [trim($phone)];
-        if (str_starts_with($phone, '+966')) {
-            $variants[] = '0' . substr($phone, 4);
-        }
-        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            $variants[] = '+966' . substr($digits, 1, 9);
-        }
-        return array_unique(array_filter($variants));
     }
 }

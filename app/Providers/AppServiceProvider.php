@@ -13,6 +13,7 @@ use App\Models\Setting;
 use App\Models\Vehicle;
 use App\Models\DriverNotification;
 use App\Models\Company;
+use App\Helpers\PhoneHelper;
 use App\Models\VehicleLocation;
 use App\Models\MaintenanceRequest;
 use App\Observers\CompanyObserver;
@@ -146,10 +147,10 @@ class AppServiceProvider extends ServiceProvider
             $driverInitial = mb_substr($driverName, 0, 1);
             $driverNotificationCount = 0;
             if ($phone) {
-                $variants = $this->driverPhoneVariants($phone);
+                $variants = PhoneHelper::variants($phone);
                 $cacheKey = 'driver_layout_' . md5($phone);
                 $cached = cache()->remember($cacheKey, 300, function () use ($variants) {
-                    $vehicle = Vehicle::whereIn('driver_phone', $variants)->where('is_active', true)->first();
+                    $vehicle = Vehicle::forDriverPhone($variants)->where('is_active', true)->first();
                     $name = ($vehicle && $vehicle->driver_name) ? $vehicle->driver_name : __('driver.driver');
                     return ['driverName' => $name, 'driverInitial' => mb_substr($name, 0, 1)];
                 });
@@ -176,22 +177,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderStatusChanged::class, \App\Listeners\InvalidateCacheOnOrderStatusChanged::class);
         Event::listen(MaintenanceRequestCreated::class, \App\Listeners\InvalidateCacheOnMaintenanceRequestCreated::class);
         Event::listen(InvoiceCreated::class, \App\Listeners\InvalidateCacheOnInvoiceCreated::class);
-    }
-
-    private function driverPhoneVariants(?string $phone): array
-    {
-        if ($phone === null || $phone === '') {
-            return [];
-        }
-        $variants = [trim($phone)];
-        if (str_starts_with($phone, '+966')) {
-            $variants[] = '0' . substr($phone, 4);
-        }
-        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            $variants[] = '+966' . substr($digits, 1, 9);
-        }
-        return array_unique(array_filter($variants));
     }
 
     private function siteLogoUrl(): ?string

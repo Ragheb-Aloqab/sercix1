@@ -48,7 +48,7 @@ class ServiceReportController extends Controller
             ->with(['vehicle:id,plate_number,make,model', 'orderServices.service', 'invoice:id,order_id,invoice_number']);
 
         if ($vehicleId > 0) {
-            $vehicle = Vehicle::where('company_id', $company->id)->find($vehicleId);
+            $vehicle = $company->vehicles()->find($vehicleId);
             if ($vehicle) {
                 $orderQuery->where('vehicle_id', $vehicleId);
             }
@@ -156,7 +156,7 @@ class ServiceReportController extends Controller
             ->sortByDesc(fn ($r) => $r->date?->timestamp ?? 0)
             ->values();
 
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model']);

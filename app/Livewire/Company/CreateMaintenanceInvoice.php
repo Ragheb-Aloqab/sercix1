@@ -160,7 +160,7 @@ class CreateMaintenanceInvoice extends Component
     public function render()
     {
         $company = auth('company')->user();
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'make', 'model', 'name']);

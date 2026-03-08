@@ -9,6 +9,7 @@ use App\Models\FuelRefill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CompanyAnalyticsService
 {
@@ -17,6 +18,22 @@ class CompanyAnalyticsService
     public function __construct(
         private readonly Company $company
     ) {}
+
+    /** SQLite uses strftime; MySQL uses YEAR/MONTH. Returns [selectRaw, groupByRaw] for the given column (e.g. "orders.created_at"). */
+    private function yearMonthRaw(string $column): array
+    {
+        $driver = Schema::getConnection()->getDriverName();
+        if ($driver === 'sqlite') {
+            return [
+                "CAST(strftime('%Y', {$column}) AS INTEGER) as year, CAST(strftime('%m', {$column}) AS INTEGER) as month",
+                "strftime('%Y', {$column}), strftime('%m', {$column})",
+            ];
+        }
+        return [
+            "YEAR({$column}) as year, MONTH({$column}) as month",
+            "YEAR({$column}), MONTH({$column})",
+        ];
+    }
 
     public function maintenanceCost(): float
     {
@@ -172,22 +189,24 @@ class CompanyAnalyticsService
         $start = now()->subMonths(6)->startOfMonth();
         $end = now()->endOfMonth();
 
+        [$orderSelect, $orderGroup] = $this->yearMonthRaw('orders.created_at');
         $rows = DB::table('order_services')
             ->join('orders', 'orders.id', '=', 'order_services.order_id')
             ->where('orders.company_id', $this->company->id)
             ->whereBetween('orders.created_at', [$start, $end])
-            ->selectRaw('YEAR(orders.created_at) as year, MONTH(orders.created_at) as month')
+            ->selectRaw($orderSelect)
             ->selectRaw('COALESCE(SUM(COALESCE(order_services.total_price, order_services.qty * order_services.unit_price)), 0) as total_cost')
-            ->groupByRaw('YEAR(orders.created_at), MONTH(orders.created_at)')
+            ->groupByRaw($orderGroup)
             ->orderByRaw('year, month')
             ->get()
             ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
 
+        [$invSelect, $invGroup] = $this->yearMonthRaw('created_at');
         $invoiceRows = CompanyMaintenanceInvoice::where('company_id', $this->company->id)
             ->whereBetween('created_at', [$start, $end])
-            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month')
+            ->selectRaw($invSelect)
             ->selectRaw('COALESCE(SUM(amount), 0) as total_cost')
-            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+            ->groupByRaw($invGroup)
             ->get()
             ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
 
@@ -235,21 +254,23 @@ class CompanyAnalyticsService
         $start = now()->subMonths(6)->startOfMonth();
         $end = now()->endOfMonth();
 
+        [$refillSelect, $refillGroup] = $this->yearMonthRaw('refilled_at');
         $refillRows = DB::table('fuel_refills')
             ->where('company_id', $this->company->id)
             ->whereBetween('refilled_at', [$start, $end])
-            ->selectRaw('YEAR(refilled_at) as year, MONTH(refilled_at) as month')
+            ->selectRaw($refillSelect)
             ->selectRaw('COALESCE(SUM(cost), 0) as total_cost')
-            ->groupByRaw('YEAR(refilled_at), MONTH(refilled_at)')
+            ->groupByRaw($refillGroup)
             ->orderByRaw('year, month')
             ->get()
             ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
 
+        [$invSelect, $invGroup] = $this->yearMonthRaw('created_at');
         $invoiceRows = CompanyFuelInvoice::where('company_id', $this->company->id)
             ->whereBetween('created_at', [$start, $end])
-            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month')
+            ->selectRaw($invSelect)
             ->selectRaw('COALESCE(SUM(amount), 0) as total_cost')
-            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+            ->groupByRaw($invGroup)
             ->get()
             ->keyBy(fn ($r) => "{$r->year}-{$r->month}");
 

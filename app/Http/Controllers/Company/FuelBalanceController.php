@@ -14,7 +14,7 @@ class FuelBalanceController extends Controller
     public function index()
     {
         $company = auth('company')->user();
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
             ->get(['id', 'plate_number', 'name', 'make', 'model', 'fuel_balance']);
@@ -46,9 +46,7 @@ class FuelBalanceController extends Controller
             'receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
-        $vehicle = Vehicle::where('id', $data['vehicle_id'])
-            ->where('company_id', $company->id)
-            ->firstOrFail();
+        $vehicle = $company->vehicles()->findOrFail($data['vehicle_id']);
 
         $receiptPath = null;
         $receiptOriginal = null;
@@ -84,7 +82,7 @@ class FuelBalanceController extends Controller
             'receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
-        $vehicles = Vehicle::where('company_id', $company->id)
+        $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->get();
 

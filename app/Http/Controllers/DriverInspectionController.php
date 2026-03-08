@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PhoneHelper;
 use App\Models\CompanyInspectionSetting;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
@@ -14,31 +15,15 @@ use Illuminate\Support\Facades\Storage;
 
 class DriverInspectionController extends Controller
 {
-    private function driverPhoneVariants(?string $phone): array
-    {
-        if ($phone === null || $phone === '') {
-            return [];
-        }
-        $variants = [trim($phone)];
-        if (str_starts_with($phone, '+966')) {
-            $variants[] = '0' . substr($phone, 4);
-        }
-        if (str_starts_with($phone, '0') && strlen(preg_replace('/[^0-9]/', '', $phone)) >= 10) {
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            $variants[] = '+966' . substr($digits, 1, 9);
-        }
-        return array_unique(array_filter($variants));
-    }
-
     /**
      * GET /driver/inspections
      */
     public function index()
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
-        $vehicles = Vehicle::whereIn('driver_phone', $phoneVariants)
+        $vehicles = Vehicle::forDriverPhone($phoneVariants)
             ->where('is_active', true)
             ->with(['company:id,company_name', 'company.inspectionSettings'])
             ->get();
@@ -60,9 +45,9 @@ class DriverInspectionController extends Controller
     public function requestInspection(Vehicle $vehicle)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
-        $linked = Vehicle::where('id', $vehicle->id)->whereIn('driver_phone', $phoneVariants)->first();
+        $linked = Vehicle::where('id', $vehicle->id)->forDriverPhone($phoneVariants)->first();
         if (!$linked) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -83,9 +68,9 @@ class DriverInspectionController extends Controller
     public function showUploadForm(VehicleInspection $inspection)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
-        $vehicle = Vehicle::where('id', $inspection->vehicle_id)->whereIn('driver_phone', $phoneVariants)->first();
+        $vehicle = Vehicle::where('id', $inspection->vehicle_id)->forDriverPhone($phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
@@ -102,9 +87,9 @@ class DriverInspectionController extends Controller
     public function upload(Request $request, VehicleInspection $inspection)
     {
         $phone = Session::get('driver_phone');
-        $phoneVariants = $this->driverPhoneVariants($phone);
+        $phoneVariants = PhoneHelper::variants($phone);
 
-        $vehicle = Vehicle::where('id', $inspection->vehicle_id)->whereIn('driver_phone', $phoneVariants)->first();
+        $vehicle = Vehicle::where('id', $inspection->vehicle_id)->forDriverPhone($phoneVariants)->first();
         if (!$vehicle) {
             abort(403, __('messages.driver_vehicle_not_linked'));
         }

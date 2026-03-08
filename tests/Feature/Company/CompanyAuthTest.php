@@ -15,7 +15,7 @@ class CompanyAuthTest extends TestCase
     {
         $response = $this->get(route('company.login'));
 
-        $response->assertRedirect(route('sign-in.index'));
+        $response->assertRedirect(route('login'));
     }
 
     public function test_company_can_receive_otp_for_existing_account(): void
@@ -101,7 +101,7 @@ class CompanyAuthTest extends TestCase
 
         $response = $this->post(route('company.logout'));
 
-        $response->assertRedirect(route('company.login'));
+        $response->assertRedirect('/');
         $this->assertGuest('company');
     }
 }

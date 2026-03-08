@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -120,5 +121,34 @@ class Vehicle extends Model
             return $this->name;
         }
         return trim(($this->make ?? '') . ' ' . ($this->model ?? '')) ?: $this->plate_number ?? __('vehicles.vehicle');
+    }
+
+    /**
+     * Scope: vehicles belonging to a company (by ID).
+     */
+    public function scopeForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->where('company_id', $companyId);
+    }
+
+    /**
+     * Scope: only active vehicles.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope: vehicles linked to a driver by phone (use with PhoneHelper::variants()).
+     *
+     * @param  array<int, string>  $phoneVariants
+     */
+    public function scopeForDriverPhone(Builder $query, array $phoneVariants): Builder
+    {
+        if ($phoneVariants === []) {
+            return $query->whereRaw('1 = 0');
+        }
+        return $query->whereIn('driver_phone', $phoneVariants);
     }
 }

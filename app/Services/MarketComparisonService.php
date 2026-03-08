@@ -280,24 +280,43 @@ class MarketComparisonService
 
     private function getMarketAverageBySegment($since): array
     {
-        $sql = "
-            SELECT
-                COALESCE(v.type, '') as vehicle_type,
-                TRIM(CONCAT(COALESCE(v.make,''), ' ', COALESCE(v.model,''))) as vehicle_model,
-                mr.maintenance_type as service_type,
-                IFNULL(NULLIF(TRIM(mr.city), ''), 'unknown') as city,
-                AVG(q.price) as avg_price
-            FROM quotations q
-            INNER JOIN maintenance_requests mr ON mr.id = q.maintenance_request_id
-            INNER JOIN vehicles v ON v.id = mr.vehicle_id
-            WHERE q.submitted_at IS NOT NULL AND q.submitted_at >= ?
-            GROUP BY v.type, v.make, v.model, mr.maintenance_type, mr.city
-        ";
+        $driver = Schema::getConnection()->getDriverName();
+        if ($driver === 'mysql') {
+            $sql = "
+                SELECT
+                    COALESCE(v.type, '') as vehicle_type,
+                    TRIM(CONCAT(COALESCE(v.make,''), ' ', COALESCE(v.model,''))) as vehicle_model,
+                    mr.maintenance_type as service_type,
+                    IFNULL(NULLIF(TRIM(mr.city), ''), 'unknown') as city,
+                    AVG(q.price) as avg_price
+                FROM quotations q
+                INNER JOIN maintenance_requests mr ON mr.id = q.maintenance_request_id
+                INNER JOIN vehicles v ON v.id = mr.vehicle_id
+                WHERE q.submitted_at IS NOT NULL AND q.submitted_at >= ?
+                GROUP BY v.type, v.make, v.model, mr.maintenance_type, mr.city
+            ";
+        } elseif ($driver === 'sqlite') {
+            $sql = "
+                SELECT
+                    COALESCE(v.type, '') as vehicle_type,
+                    TRIM(COALESCE(v.make,'') || ' ' || COALESCE(v.model,'')) as vehicle_model,
+                    mr.maintenance_type as service_type,
+                    COALESCE(NULLIF(TRIM(mr.city), ''), 'unknown') as city,
+                    AVG(q.price) as avg_price
+                FROM quotations q
+                INNER JOIN maintenance_requests mr ON mr.id = q.maintenance_request_id
+                INNER JOIN vehicles v ON v.id = mr.vehicle_id
+                WHERE q.submitted_at IS NOT NULL AND q.submitted_at >= ?
+                GROUP BY v.type, v.make, v.model, mr.maintenance_type, mr.city
+            ";
+        } else {
+            return [];
+        }
         $rows = DB::select($sql, [$since]);
 
         $segments = [];
         foreach ($rows as $r) {
-            $key = $this->segmentKey($r->vehicle_type, $r->vehicle_model, $r->service_type, $r->city);
+            $key = $this->segmentKey($r->vehicle_type, $r->vehicle_model ?? '', $r->service_type, $r->city ?? 'unknown');
             $segments[$key] = (float) $r->avg_price;
         }
         return $segments;
