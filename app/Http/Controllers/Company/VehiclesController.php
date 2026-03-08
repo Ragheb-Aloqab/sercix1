@@ -113,8 +113,7 @@ class VehiclesController extends Controller
     {
         $this->authorize('view', $vehicle);
         $company = auth('company')->user();
-        $analytics = app(\App\Services\VehicleAnalyticsService::class)->getVehicleAnalytics($vehicle);
-        return view('company.vehicles.show', compact('company', 'vehicle', 'analytics'));
+        return view('company.vehicles.show', compact('company', 'vehicle'));
     }
 
     /**
