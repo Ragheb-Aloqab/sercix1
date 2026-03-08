@@ -33,90 +33,91 @@
 </head>
 
 <body class="page-index bg-servx-black text-servx-silver-light antialiased overflow-x-hidden min-h-screen font-servx">
-    <a href="#home" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:start-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-servx-red focus:text-white focus:rounded-lg">{{ __('index.skipToContent') }}</a>
+    <!-- Skip to main content (accessibility) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:start-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-servx-red focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white">{{ __('index.skipToContent') }}</a>
 
-    <!-- Navbar: Black + subtle red bottom border -->
-    <header class="sticky top-0 z-40 bg-servx-black backdrop-blur-sm border-b border-servx-red/30">
+    <!-- ========== HEADER / NAVBAR ========== -->
+    <header role="banner" class="sticky top-0 z-40 bg-servx-black backdrop-blur-sm border-b border-servx-red/30">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-row items-center justify-between gap-4">
-            <!-- Logo -->
-            <a href="{{ url('/') }}" class="flex items-center gap-3 group">
+            <!-- Logo / Brand -->
+            <a href="{{ url('/') }}" class="flex items-center gap-3 group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
                 <div class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden shrink-0 border-2 border-servx-red/50">
-                    <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="48" height="48" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
+                    <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }} — {{ __('index.brandTag') }}" width="48" height="48" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
                 </div>
                 <div class="min-w-0">
-                    <div class="text-lg font-bold leading-5 truncate text-servx-silver-light group-hover:text-white transition-colors" id="brandName">{{ $siteName ?? 'Servx Motors' }}</div>
-                    <div class="text-xs text-servx-silver truncate" id="brandTag">{{ __('index.brandTag') }}</div>
+                    <span class="text-lg font-bold leading-5 truncate text-servx-silver-light group-hover:text-white transition-colors block" id="brandName">{{ $siteName ?? 'Servx Motors' }}</span>
+                    <span class="text-xs text-servx-silver truncate block" id="brandTag">{{ __('index.brandTag') }}</span>
                 </div>
             </a>
 
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex flex-row items-center gap-6 text-sm font-semibold">
-                <a href="#offers" class="text-servx-silver hover:text-servx-red transition-colors nav-link" id="navOffers">{{ __('index.navOffers') }}</a>
-                <a href="#why" class="text-servx-silver hover:text-servx-red transition-colors nav-link" id="navWhy">{{ __('index.navWhy') }}</a>
-                <a href="#workflow" class="text-servx-silver hover:text-servx-red transition-colors nav-link" id="navHow">{{ __('index.navHow') }}</a>
-                <a href="#faq" class="text-servx-silver hover:text-servx-red transition-colors nav-link" id="navFaq">{{ __('index.navFaq') }}</a>
+            <!-- Desktop navigation -->
+            <nav aria-label="{{ __('index.navMain') }}" class="hidden md:flex flex-row items-center gap-6 text-sm font-semibold">
+                <a href="#offers" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navOffers">{{ __('index.navOffers') }}</a>
+                <a href="#why" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navWhy">{{ __('index.navWhy') }}</a>
+                <a href="#workflow" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navHow">{{ __('index.navHow') }}</a>
+                <a href="#faq" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navFaq">{{ __('index.navFaq') }}</a>
 
-                <!-- Language Menu -->
+                <!-- Language switcher -->
                 <div class="relative" id="langMenuWrap">
-                    <button type="button" id="langMenuBtn" aria-expanded="false" aria-haspopup="true"
-                        class="inline-flex items-center gap-2 text-servx-silver hover:text-white transition-colors">
-                        <i class="fa-solid fa-globe"></i>
+                    <button type="button" id="langMenuBtn" aria-expanded="false" aria-haspopup="true" aria-label="{{ __('index.language') }}"
+                        class="inline-flex items-center gap-2 text-servx-silver hover:text-white transition-colors rounded-lg py-1.5 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
+                        <i class="fa-solid fa-globe" aria-hidden="true"></i>
                         <span>{{ $currentLocale === 'ar' ? __('index.langAr') : __('index.langEn') }}</span>
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
                     </button>
-                    <div id="langDropdown"
-                        class="hidden absolute end-0 mt-2 w-40 bg-servx-black-card rounded-lg shadow-servx-card py-2 text-sm z-50 border border-white/10">
-                        <a href="{{ route('set-locale', ['lang' => 'ar']) }}"
-                            class="block px-4 py-2 text-servx-silver-light hover:bg-servx-red/20 hover:text-white transition-colors {{ $currentLocale === 'ar' ? 'text-servx-red font-bold' : '' }}">
+                    <div id="langDropdown" role="menu"
+                        class="hidden absolute end-0 mt-2 w-40 bg-servx-black-card rounded-xl shadow-servx-card py-2 text-sm z-50 border border-servx-red/20">
+                        <a href="{{ route('set-locale', ['lang' => 'ar']) }}" role="menuitem"
+                            class="block px-4 py-2.5 text-servx-silver-light hover:bg-servx-red/20 hover:text-white transition-colors rounded-lg mx-2 {{ $currentLocale === 'ar' ? 'text-servx-red font-bold' : '' }}">
                             {{ __('index.langAr') }}
                         </a>
-                        <a href="{{ route('set-locale', ['lang' => 'en']) }}"
-                            class="block px-4 py-2 text-servx-silver-light hover:bg-servx-red/20 hover:text-white transition-colors {{ $currentLocale === 'en' ? 'text-servx-red font-bold' : '' }}">
+                        <a href="{{ route('set-locale', ['lang' => 'en']) }}" role="menuitem"
+                            class="block px-4 py-2.5 text-servx-silver-light hover:bg-servx-red/20 hover:text-white transition-colors rounded-lg mx-2 {{ $currentLocale === 'en' ? 'text-servx-red font-bold' : '' }}">
                             {{ __('index.langEn') }}
                         </a>
                     </div>
                 </div>
 
                 @if ($user)
+                    <!-- User menu (Admin / Company profile) -->
                     <div class="relative" id="userMenuWrap">
-                        <button type="button" id="userMenuBtn" aria-expanded="false" aria-haspopup="true"
-                            class="inline-flex items-center gap-2 text-servx-silver-light hover:text-white font-bold transition-colors">
-                            <i class="fa-solid fa-user"></i>
-                            <span>{{ $user->name ?? $user->company_name }}</span>
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <button type="button" id="userMenuBtn" aria-expanded="false" aria-haspopup="true" aria-label="{{ __('index.navDashboard') }}"
+                            class="inline-flex items-center gap-2 text-servx-silver-light hover:text-white font-bold transition-colors rounded-lg py-1.5 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            <span id="userName">{{ $user->name ?? $user->company_name }}</span>
+                            <i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
                         </button>
-                        <div id="userDropdown"
-                            class="hidden absolute end-0 mt-2 w-48 bg-servx-black-card text-servx-silver-light rounded-lg shadow-servx-card py-2 text-sm z-50 border border-white/10">
-                            <a href="{{ $dashboardRoute }}" data-i18n="navDashboard"
-                                class="block px-4 py-2 hover:bg-servx-red/20 hover:text-white transition-colors">{{ __('index.navDashboard') }}</a>
-                            <form method="POST" action="{{ $logoutRoute }}">
+                        <div id="userDropdown" role="menu"
+                            class="hidden absolute end-0 mt-2 w-48 bg-servx-black-card text-servx-silver-light rounded-xl shadow-servx-card py-2 text-sm z-50 border border-servx-red/20">
+                            <a href="{{ $dashboardRoute }}" role="menuitem" data-i18n="navDashboard"
+                                class="block px-4 py-2.5 hover:bg-servx-red/20 hover:text-white transition-colors rounded-lg mx-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-inset">{{ __('index.navDashboard') }}</a>
+                            <form method="POST" action="{{ $logoutRoute }}" class="block">
                                 @csrf
-                                <button type="submit" data-i18n="navLogout"
-                                    class="w-full text-start px-4 py-2 hover:bg-servx-red/20 hover:text-white transition-colors">
+                                <button type="submit" role="menuitem" data-i18n="navLogout"
+                                    class="w-full text-start px-4 py-2.5 hover:bg-servx-red/20 hover:text-white transition-colors rounded-lg mx-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-inset">
                                     {{ __('index.navLogout') }}
                                 </button>
                             </form>
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}"
-                        class="inline-flex items-center gap-2 bg-servx-red hover:bg-servx-red-hover text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 hover:scale-[1.02]">
+                    <a href="{{ route('login') }}" id="navLoginBtn"
+                        class="inline-flex items-center gap-2 bg-servx-red hover:bg-servx-red-hover text-white font-bold px-5 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
                         <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
                         <span>{{ __('index.navLogin') }}</span>
                     </a>
                 @endif
             </nav>
 
-            <div class="flex items-center gap-2">
-                <button id="btnMobile" type="button" aria-label="{{ __('common.menu') }}"
-                    class="md:hidden inline-flex items-center justify-center rounded-lg border border-servx-red/50 bg-servx-black-card min-w-[44px] min-h-[44px] px-3 py-2 text-sm font-semibold text-servx-silver-light hover:text-servx-red hover:border-servx-red transition-all active:scale-95">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
+            <!-- Mobile menu trigger -->
+            <button id="btnMobile" type="button" aria-label="{{ __('common.menu') }}" aria-expanded="false" aria-controls="mobileMenu"
+                class="md:hidden inline-flex items-center justify-center rounded-xl border border-servx-red/50 bg-servx-black-card min-w-[44px] min-h-[44px] px-3 py-2 text-sm font-semibold text-servx-silver-light hover:text-servx-red hover:border-servx-red transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
         </div>
 
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="md:hidden hidden border-t border-servx-red/20 bg-servx-black overflow-x-hidden">
+        <!-- Mobile menu panel -->
+        <div id="mobileMenu" class="md:hidden hidden border-t border-servx-red/20 bg-servx-black overflow-x-hidden" role="navigation" aria-label="{{ __('index.navMain') }}">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-1 text-sm font-medium text-servx-silver-light">
                 <a href="#offers" class="py-3 min-h-[44px] flex items-center rounded-lg px-2 -mx-2 hover:bg-servx-red/10 hover:text-servx-red transition-colors" id="mNavOffers">{{ __('index.navOffers') }}</a>
                 <a href="#why" class="py-3 min-h-[44px] flex items-center rounded-lg px-2 -mx-2 hover:bg-servx-red/10 hover:text-servx-red transition-colors" id="mNavWhy">{{ __('index.navWhy') }}</a>
@@ -148,54 +149,77 @@
         </div>
     </header>
 
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="main-content" role="main">
 
-
-    <!-- Hero - Numbers -->
+    <!-- ---------- Hero: Fleet management features ---------- -->
     <section id="home" class="hero-servx relative min-h-[75vh] flex items-center overflow-hidden">
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-24 w-full">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-16">
-                <div class="text-servx-silver-light text-center lg:text-start">
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-servx-silver-light" id="numbersTitle">{{ __('index.numbersTitle') }}</h1>
-                    <div class="mt-4 flex items-center justify-center lg:justify-start gap-2">
-                        <span class="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">Servex Motors</span>
-                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="" width="56" height="56" class="h-10 sm:h-12 lg:h-14 w-auto object-contain" aria-hidden="true" loading="lazy" decoding="async" />
+            <div class="flex flex-col gap-12 lg:gap-14">
+                <!-- Headline & subline -->
+                <div class="text-center max-w-4xl mx-auto">
+                    <h1 class="hero-fleet-title text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white" id="heroHeadline">
+                        {{ __('index.heroHeadline') }}
+                    </h1>
+                    <p class="hero-fleet-subline mt-4 text-lg sm:text-xl text-servx-silver-light/90 leading-relaxed">
+                        {{ __('index.heroSubline') }}
+                    </p>
+                    <div class="mt-6 flex items-center justify-center gap-2">
+                        <span class="text-xl sm:text-2xl font-bold tracking-[0.2em] text-servx-red">M<span class="inline-block w-1.5 h-1.5 rounded-full bg-servx-red align-middle"></span>T<span class="inline-block w-1.5 h-1.5 rounded-full bg-servx-red align-middle"></span>RS</span>
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="" width="48" height="48" class="h-10 w-auto object-contain" aria-hidden="true" loading="lazy" decoding="async" role="presentation" />
                     </div>
-                    <p class="mt-2 text-lg sm:text-xl font-bold tracking-[0.25em] text-servx-red flex items-center justify-center lg:justify-start gap-1 flex-wrap">M<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>T<span class="inline-block w-2 h-2 rounded-full bg-servx-red"></span>RS</p>
                 </div>
-                <div class="flex flex-col gap-8 w-full max-w-sm">
-                    <div class="flex flex-row items-center gap-4">
-                        <span class="text-servx-silver text-base font-medium shrink-0 text-start" id="statCompanies">{{ __('index.statCompanies') }}</span>
-                        <div class="h-1 flex-1 stat-bar-servx min-w-[40px]"></div>
-                        <span class="count-up text-4xl sm:text-5xl font-bold text-white tabular-nums shrink-0" id="statCompaniesValue" data-count="16">0</span>
-                    </div>
-                    <div class="flex flex-row items-center gap-4">
-                        <span class="text-servx-silver text-base font-medium shrink-0 text-start" id="statVehicles">{{ __('index.statVehicles') }}</span>
-                        <div class="h-1 flex-1 stat-bar-servx min-w-[40px]"></div>
-                        <span class="count-up text-4xl sm:text-5xl font-bold text-white tabular-nums shrink-0" id="statVehiclesValue" data-count="360">0</span>
-                    </div>
-                    <div class="flex flex-row items-center gap-4">
-                        <span class="text-servx-silver text-base font-medium shrink-0 text-start" id="statSavings">{{ __('index.statSavings') }}</span>
-                        <div class="h-1 flex-1 stat-bar-servx min-w-[40px]"></div>
-                        <span class="count-up text-4xl sm:text-5xl font-bold text-white tabular-nums shrink-0" id="statSavingsValue" data-count="100000">0</span>
-                    </div>
-                    <p class="try-now-text mt-8 text-end text-2xl sm:text-3xl font-bold text-white" dir="rtl" id="tryNowText"><span class="try-now-inner">{{ __('index.try_now') }}<span class="try-now-cursor" aria-hidden="true">|</span></span></p>
+
+                <!-- Feature cards: scroll-in + hover + expand -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5" id="heroFeatureGrid">
+                    @foreach([
+                        'invoicing' => ['icon' => 'fa-file-invoice', 'title' => 'heroFeatureInvoicing', 'desc' => 'heroFeatureInvoicingDesc', 'expand' => 'heroFeatureInvoicingExpand'],
+                        'tracking' => ['icon' => 'fa-location-dot', 'title' => 'heroFeatureTracking', 'desc' => 'heroFeatureTrackingDesc', 'expand' => 'heroFeatureTrackingExpand'],
+                        'reports' => ['icon' => 'fa-chart-line', 'title' => 'heroFeatureReports', 'desc' => 'heroFeatureReportsDesc', 'expand' => 'heroFeatureReportsExpand'],
+                        'vehicles' => ['icon' => 'fa-car', 'title' => 'heroFeatureVehicles', 'desc' => 'heroFeatureVehiclesDesc', 'expand' => 'heroFeatureVehiclesExpand'],
+                        'operations' => ['icon' => 'fa-gears', 'title' => 'heroFeatureOperations', 'desc' => 'heroFeatureOperationsDesc', 'expand' => 'heroFeatureOperationsExpand'],
+                    ] as $key => $item)
+                    <details class="hero-feature-card group/details rounded-xl border border-servx-red/20 bg-servx-black-card/80 backdrop-blur-sm p-5 text-start transition-all duration-300 hover:border-servx-red/40 hover:shadow-[0_0_24px_rgba(239,68,68,0.12)] open:border-servx-red/50 open:shadow-[0_0_28px_rgba(239,68,68,0.15)]" data-hero-feature>
+                        <summary class="list-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded-lg">
+                            <span class="flex items-center gap-3">
+                                <span class="hero-feature-icon flex items-center justify-center w-12 h-12 rounded-xl bg-servx-red/15 text-servx-red group-hover/details:bg-servx-red/25 group-hover/details:scale-110 transition-all duration-300">
+                                    <i class="fa-solid {{ $item['icon'] }} text-xl" aria-hidden="true"></i>
+                                </span>
+                                <span class="font-bold text-white text-lg">{{ __("index.{$item['title']}") }}</span>
+                                <i class="fa-solid fa-chevron-down text-servx-silver text-sm ms-auto transition-transform duration-200 group-open/details:rotate-180" aria-hidden="true"></i>
+                            </span>
+                            <p class="mt-3 text-sm text-servx-silver leading-relaxed">{{ __("index.{$item['desc']}") }}</p>
+                            <span class="mt-2 inline-block text-xs text-servx-red font-semibold">{{ __('index.heroClickExpand') }}</span>
+                        </summary>
+                        <div class="mt-4 pt-4 border-t border-servx-red/20">
+                            <p class="text-sm text-servx-silver-light leading-relaxed">{{ __("index.{$item['expand']}") }}</p>
+                        </div>
+                    </details>
+                    @endforeach
+                </div>
+
+                <!-- CTA -->
+                <div class="text-center">
+                    <a href="{{ route('login') }}" class="try-now-text inline-block text-2xl sm:text-3xl font-bold text-white no-underline" dir="rtl" id="tryNowText">
+                        <span class="try-now-inner">{{ __('index.heroTryNow') }}<span class="try-now-cursor" aria-hidden="true">|</span></span>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Offers: Dark cards, red accent on hover -->
+    <!-- ---------- Offers: What we offer ---------- -->
     <section id="offers" class="relative py-24 bg-servx-black-soft overflow-hidden">
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="flex justify-center order-2 lg:order-1 rtl:lg:order-2">
                     <div class="servx-card servx-card-accent w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center p-6">
-                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="128" height="128" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" decoding="async" />
+                        <img src="{{ asset('images/serv.x logo icon-03.png') }}" alt="{{ $siteName ?? 'Servx Motors' }} — {{ __('index.offersTitle') }}" width="128" height="128" class="max-w-[80%] max-h-[80%] w-auto h-24 sm:h-32 object-contain" loading="lazy" decoding="async" />
                     </div>
                 </div>
                 <div class="order-1 lg:order-2 rtl:lg:order-1 text-start">
                     <p class="text-xl sm:text-2xl font-bold text-servx-silver" id="offersTitle">{{ __('index.offersTitle') }}</p>
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-2">{{ $siteName ?? 'Servx Motors' }}</h2>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-2" id="offersBrand">{{ $siteName ?? 'Servx Motors' }}</h2>
                     <div class="mt-10 space-y-5">
                         @foreach(['offersDesc1'=>'offersFeature1','offersDesc2'=>'offersFeature2','offersDesc3'=>'offersFeature3','offersDesc4'=>'offersFeature4','offersDesc5'=>'offersFeature5'] as $desc => $feat)
                         <div class="flex flex-row gap-4 items-start p-4 rounded-lg servx-card servx-card-accent transition-all duration-200">
@@ -209,7 +233,7 @@
         </div>
     </section>
 
-    <!-- Why SERVX: Dark section, red accent lines -->
+    <!-- ---------- Why Servx Motors ---------- -->
     <section id="why" class="py-20 bg-servx-black">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-start">
@@ -233,15 +257,12 @@
         </div>
     </section>
 
-    <!-- Workflow: Dark cards, red accents -->
+    <!-- ---------- Workflow: How it works ---------- -->
     <section id="workflow" class="relative py-24 bg-servx-black-soft overflow-hidden">
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="text-center lg:text-start mb-14">
                 <h2 class="text-3xl sm:text-4xl font-bold text-white" id="workflowTitle">{{ __('index.workflowTitle') }}</h2>
                 <p class="text-xl sm:text-2xl font-bold text-servx-red mt-2" id="workflowBrand">{{ $siteName ?? 'Servx Motors' }}</p>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                @foreach(['workflowStep1'=>'workflowDesc1','workflowStep2'=>'workflowDesc2','workflowStep3'=>'workflowDesc3','workflowStep4'=>'workflowDesc4','workflowStep5'=>'workflowDesc5'] as $step => $desc)
                 <div class="servx-card servx-card-accent p-6 text-center hover:border-servx-red/40 transition-all duration-200">
                     <div class="w-12 h-12 rounded-lg border-2 border-servx-red flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-servx-red text-lg" aria-hidden="true"></i></div>
                     <h3 class="font-bold text-white" id="{{ $step }}">{{ __("index.$step") }}</h3>
@@ -257,126 +278,130 @@
         </div>
     </section>
 
-    <!-- Plans (kept for compatibility, hidden or minimal) -->
-    <section id="plans" class="hidden mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div class="flex flex-row items-end justify-between gap-6 flex-wrap">
-            <div class="text-start">
-                <h2 class="text-3xl font-extrabold" id="pricingTitle">{{ __('index.pricingTitle') }}</h2>
-                <p class="mt-2 text-slate-600" id="pricingDesc">{{ __('index.pricingDesc') }}</p>
+    <!-- ---------- Plans / Pricing ---------- -->
+    <section id="plans" class="relative py-24 bg-servx-black overflow-hidden" aria-labelledby="pricingTitle">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white" id="pricingTitle">{{ __('index.pricingTitle') }}</h2>
+                <p class="mt-2 text-servx-silver max-w-2xl mx-auto" id="pricingDesc">{{ __('index.pricingDesc') }}</p>
             </div>
-        </div>
-
-        <div class="mt-8 grid lg:grid-cols-3 gap-6">
-            <div class="rounded-3xl bg-white border border-slate-200 p-7 shadow-soft text-start">
-                <div class="text-sm text-slate-500" id="plan1Tag">{{ __('index.plan1Tag') }}</div>
-                <div class="mt-2 text-2xl font-extrabold" id="plan1Title">{{ __('index.plan1Title') }}</div>
-                <div class="mt-4 text-4xl font-extrabold">129 <span class="text-base font-bold text-slate-500">/ {{ __('index.perVehicle') }}</span></div>
-                <ul class="mt-6 space-y-3 text-sm text-slate-700">
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan1Item1') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan1Item2') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan1Item3') }}</li>
-                </ul>
-            </div>
-
-            <div
-                class="rounded-3xl bg-slate-900 text-white border border-slate-800 p-7 shadow-soft relative overflow-hidden text-start">
-                <div class="absolute -top-12 -end-12 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-                <div class="text-sm text-white/70" id="plan2Tag">{{ __('index.plan2Tag') }}</div>
-                <div class="mt-2 text-2xl font-extrabold" id="plan2Title">{{ __('index.plan2Title') }}</div>
-                <div class="mt-4 text-4xl font-extrabold">169 <span class="text-base font-bold text-white/70">/ {{ __('index.perVehicle') }}</span></div>
-                <ul class="mt-6 space-y-3 text-sm text-white/90">
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300 shrink-0"></i>{{ __('index.plan2Item1') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300 shrink-0"></i>{{ __('index.plan2Item2') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300 shrink-0"></i>{{ __('index.plan2Item3') }}</li>
-                </ul>
-            </div>
-
-            <div class="rounded-3xl bg-white border border-slate-200 p-7 shadow-soft text-start">
-                <div class="text-sm text-slate-500" id="plan3Tag">{{ __('index.plan3Tag') }}</div>
-                <div class="mt-2 text-2xl font-extrabold" id="plan3Title">{{ __('index.plan3Title') }}</div>
-                <div class="mt-4 text-4xl font-extrabold">{{ __('index.contactUs') }}</div>
-                <ul class="mt-6 space-y-3 text-sm text-slate-700">
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan3Item1') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan3Item2') }}</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-700 shrink-0"></i>{{ __('index.plan3Item3') }}</li>
-                </ul>
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border border-servx-red/20 hover:border-servx-red/40 transition-all duration-200 text-start">
+                    <p class="text-sm text-servx-silver" id="plan1Tag">{{ __('index.plan1Tag') }}</p>
+                    <h3 class="mt-2 text-2xl font-bold text-white" id="plan1Title">{{ __('index.plan1Title') }}</h3>
+                    <p class="mt-4 text-3xl font-bold text-servx-silver-light"><span id="plan1Price">129</span> <span class="text-base font-semibold text-servx-silver">/ {{ __('index.perVehicle') }}</span></p>
+                    <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item1') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item2') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item3') }}</li>
+                    </ul>
+                </div>
+                <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border-2 border-servx-red/50 bg-servx-red/5 hover:border-servx-red/70 transition-all duration-200 text-start relative overflow-hidden">
+                    <div class="absolute -top-12 -end-12 h-32 w-32 rounded-full bg-servx-red/10 blur-2xl" aria-hidden="true"></div>
+                    <p class="text-sm text-servx-silver" id="plan2Tag">{{ __('index.plan2Tag') }}</p>
+                    <h3 class="mt-2 text-2xl font-bold text-white" id="plan2Title">{{ __('index.plan2Title') }}</h3>
+                    <p class="mt-4 text-3xl font-bold text-white"><span id="plan2Price">169</span> <span class="text-base font-semibold text-servx-silver-light/80">/ {{ __('index.perVehicle') }}</span></p>
+                    <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item1') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item2') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item3') }}</li>
+                    </ul>
+                </div>
+                <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border border-servx-red/20 hover:border-servx-red/40 transition-all duration-200 text-start">
+                    <p class="text-sm text-servx-silver" id="plan3Tag">{{ __('index.plan3Tag') }}</p>
+                    <h3 class="mt-2 text-2xl font-bold text-white" id="plan3Title">{{ __('index.plan3Title') }}</h3>
+                    <p class="mt-4 text-3xl font-bold text-servx-silver-light" id="plan3Price">{{ __('index.contactUs') }}</p>
+                    <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item1') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item2') }}</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item3') }}</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- FAQ: Dark cards, red accent on hover -->
-    <section id="faq" class="bg-servx-black py-24">
+    <!-- ---------- FAQ ---------- -->
+    <section id="faq" class="bg-servx-black py-24" aria-labelledby="faqTitle">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl sm:text-4xl font-bold text-white text-start" id="faqTitle">{{ __('index.faqTitle') }}</h2>
             <div class="mt-10 grid lg:grid-cols-2 gap-6">
                 <details class="servx-card servx-card-accent p-6 group text-start hover:border-servx-red/40 transition-all duration-200">
-                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors" id="q1">{{ __('index.q1') }}</summary>
+                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded" id="q1">{{ __('index.q1') }}</summary>
                     <p class="mt-3 text-servx-silver text-sm" id="a1">{{ __('index.a1') }}</p>
                 </details>
                 <details class="servx-card servx-card-accent p-6 group text-start hover:border-servx-red/40 transition-all duration-200">
-                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors" id="q2">{{ __('index.q2') }}</summary>
+                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded" id="q2">{{ __('index.q2') }}</summary>
                     <p class="mt-3 text-servx-silver text-sm" id="a2">{{ __('index.a2') }}</p>
                 </details>
                 <details class="servx-card servx-card-accent p-6 group text-start hover:border-servx-red/40 transition-all duration-200">
-                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors" id="q3">{{ __('index.q3') }}</summary>
+                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded" id="q3">{{ __('index.q3') }}</summary>
                     <p class="mt-3 text-servx-silver text-sm" id="a3">{{ __('index.a3') }}</p>
                 </details>
                 <details class="servx-card servx-card-accent p-6 group text-start hover:border-servx-red/40 transition-all duration-200">
-                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors" id="q4">{{ __('index.q4') }}</summary>
+                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded" id="q4">{{ __('index.q4') }}</summary>
                     <p class="mt-3 text-servx-silver text-sm" id="a4">{{ __('index.a4') }}</p>
+                </details>
+                <details class="servx-card servx-card-accent p-6 group text-start hover:border-servx-red/40 transition-all duration-200 lg:col-span-2">
+                    <summary class="cursor-pointer font-bold text-servx-silver-light group-hover:text-servx-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded" id="q5">{{ __('index.q5') }}</summary>
+                    <p class="mt-3 text-servx-silver text-sm" id="a5">{{ __('index.a5') }}</p>
                 </details>
             </div>
         </div>
     </section>
 
-    <!-- Footer: Black + red border -->
-    <footer class="bg-servx-black border-t border-servx-red/30 text-servx-silver-light">
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer role="contentinfo" class="bg-servx-black border-t border-servx-red/30 text-servx-silver-light">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="text-start order-1 rtl:md:order-3">
                     <div class="flex flex-row items-center gap-3">
-                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }}" width="40" height="40" class="h-10 w-10 rounded-full object-cover border-2 border-servx-red/50" loading="lazy" decoding="async" />
+                        <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }} — {{ __('index.footerTag') }}" width="40" height="40" class="h-10 w-10 rounded-full object-cover border-2 border-servx-red/50" loading="lazy" decoding="async" />
                         <div>
-                            <div class="text-lg font-bold text-white">{{ $siteName ?? 'Servx Motors' }}</div>
-                            <div class="text-xs text-servx-silver" id="footerTag">{{ __('index.footerTag') }}</div>
+                            <span class="text-lg font-bold text-white block" id="footerBrandName">{{ $siteName ?? 'Servx Motors' }}</span>
+                            <span class="text-xs text-servx-silver block" id="footerTag">{{ __('index.footerTag') }}</span>
                         </div>
                     </div>
                     <p class="mt-4 text-sm text-servx-silver" id="footerDesc">{{ __('index.footerDesc') }}</p>
                 </div>
 
                 <div class="text-start order-2">
-                    <div class="font-bold text-white mb-3" id="footerLinks">{{ __('index.footerLinks') }}</div>
+                    <span class="font-bold text-white mb-3 block" id="footerLinks">{{ __('index.footerLinks') }}</span>
                     <ul class="space-y-2 text-sm text-servx-silver">
-                        <li><a class="hover:text-servx-red transition-colors" href="#offers" id="fServices">{{ __('index.fServices') }}</a></li>
-                        <li><a class="hover:text-servx-red transition-colors" href="#workflow" id="fHow">{{ __('index.fHow') }}</a></li>
-                        <li><a class="hover:text-servx-red transition-colors" href="#faq" id="fFaq">{{ __('index.faqTitle') }}</a></li>
+                        <li><a class="hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black" href="#offers" id="fServices">{{ __('index.fServices') }}</a></li>
+                        <li><a class="hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black" href="#workflow" id="fHow">{{ __('index.fHow') }}</a></li>
+                        <li><a class="hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black" href="#faq" id="fFaq">{{ __('index.faqTitle') }}</a></li>
                     </ul>
                 </div>
 
                 <div class="text-start order-3 rtl:md:order-1">
-                    <div class="font-bold text-white mb-3" id="footerContact">{{ __('index.footerContact') }}</div>
+                    <span class="font-bold text-white mb-3 block" id="footerContact">{{ __('index.footerContact') }}</span>
                     <div class="text-sm text-servx-silver space-y-2">
-                        <div class="flex items-center gap-2"><i class="fa-brands fa-whatsapp shrink-0 text-servx-red"></i>WhatsApp: <a
+                        <div class="flex items-center gap-2"><i class="fa-brands fa-whatsapp shrink-0 text-servx-red" aria-hidden="true"></i>WhatsApp: <a
                                 href="https://wa.me/{{ $waNumber ?? '966512345678' }}" target="_blank"
-                                rel="noopener"
-                                class="font-bold hover:text-servx-red transition">{{ $contactWhatsapp ?? '05xxxxxxxx' }}</a>
+                                rel="noopener noreferrer"
+                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactWhatsapp ?? '05xxxxxxxx' }}</a>
                         </div>
-                        <div class="flex items-center gap-2"><i class="fa-regular fa-envelope shrink-0 text-servx-red"></i>Email: <a
+                        <div class="flex items-center gap-2"><i class="fa-regular fa-envelope shrink-0 text-servx-red" aria-hidden="true"></i>Email: <a
                                 href="mailto:{{ $contactEmail ?? 'b2b@oilgo.com' }}"
-                                class="font-bold hover:text-servx-red transition">{{ $contactEmail ?? 'b2b@oilgo.com' }}</a>
+                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactEmail ?? 'b2b@oilgo.com' }}</a>
                         </div>
-                        <div class="text-xs text-servx-silver/60" id="footerNote">{{ __('index.footerNote') }}</div>
+                        @if(__('index.footerNote'))
+                        <p class="text-xs text-servx-silver/60" id="footerNote">{{ __('index.footerNote') }}</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <div class="mt-10 pt-6 border-t border-servx-red/20 text-xs text-servx-silver flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div>© All Rights Reserved – Servix Motors</div>
+                <span id="footerCopyright">© {{ date('Y') }} <span id="footerCopyrightBrand">{{ $siteName ?? 'Servx Motors' }}</span>. {{ __('index.footerAllRightsReserved') }}</span>
             </div>
-            <div class="mt-4 text-center text-xs text-servx-silver" id="footerCredits">
+            <p class="mt-4 text-center text-xs text-servx-silver" id="footerCredits">
                 <span id="footerCreditsText">{{ __('index.footerCreditsText') }}</span>
-                <span class="font-semibold">Servix Motors</span>
-            </div>
+                <span class="font-semibold" id="footerCreditsBrand">{{ $siteName ?? 'Servx Motors' }}</span>
+            </p>
         </div>
     </footer>
 
@@ -386,20 +411,40 @@
             const btnMobile = $("btnMobile");
             const mobileMenu = $("mobileMenu");
             if (btnMobile && mobileMenu) {
-                btnMobile.addEventListener("click", () => mobileMenu.classList.toggle("hidden"));
-                mobileMenu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => mobileMenu.classList.add("hidden")));
+                btnMobile.addEventListener("click", () => {
+                    const open = mobileMenu.classList.toggle("hidden");
+                    btnMobile.setAttribute("aria-expanded", open ? "false" : "true");
+                });
+                mobileMenu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
+                    mobileMenu.classList.add("hidden");
+                    btnMobile.setAttribute("aria-expanded", "false");
+                }));
             }
             const userBtn = $("userMenuBtn");
             const userDropdown = $("userDropdown");
             if (userBtn && userDropdown) {
-                userBtn.addEventListener("click", e => { e.stopPropagation(); userDropdown.classList.toggle("hidden"); });
-                document.addEventListener("click", () => userDropdown.classList.add("hidden"));
+                userBtn.addEventListener("click", e => {
+                    e.stopPropagation();
+                    const open = userDropdown.classList.toggle("hidden");
+                    userBtn.setAttribute("aria-expanded", open ? "false" : "true");
+                });
+                document.addEventListener("click", () => {
+                    userDropdown.classList.add("hidden");
+                    userBtn.setAttribute("aria-expanded", "false");
+                });
             }
             const langBtn = $("langMenuBtn");
             const langDropdown = $("langDropdown");
             if (langBtn && langDropdown) {
-                langBtn.addEventListener("click", e => { e.stopPropagation(); langDropdown.classList.toggle("hidden"); });
-                document.addEventListener("click", () => langDropdown.classList.add("hidden"));
+                langBtn.addEventListener("click", e => {
+                    e.stopPropagation();
+                    const open = langDropdown.classList.toggle("hidden");
+                    langBtn.setAttribute("aria-expanded", open ? "false" : "true");
+                });
+                document.addEventListener("click", () => {
+                    langDropdown.classList.add("hidden");
+                    langBtn.setAttribute("aria-expanded", "false");
+                });
             }
             const yearEl = $("year");
             if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -417,41 +462,20 @@
             }, { threshold: 0.2 });
             ["home","offers","why","workflow","faq"].forEach(id => { const el = $(id); if (el) spyObserver.observe(el); });
 
-            // Animated count-up when hero enters viewport
+            // Hero fleet section: scroll-in animations
             const hero = $("home");
-            const countUps = document.querySelectorAll(".count-up");
-            if (hero && countUps.length) {
-                const locale = document.documentElement.lang === "ar" ? "ar-SA" : "en-US";
-                const format = n => n >= 1000 ? n.toLocaleString(locale) : String(n);
-                const easeOutExpo = t => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-                const DURATION = 1800;
-
-                const animate = (el, target) => {
-                    const start = performance.now();
-                    const run = now => {
-                        const elapsed = now - start;
-                        const progress = Math.min(elapsed / DURATION, 1);
-                        const eased = easeOutExpo(progress);
-                        const value = Math.round(target * eased);
-                        el.textContent = format(value);
-                        if (progress < 1) requestAnimationFrame(run);
-                        else el.textContent = format(target);
-                    };
-                    requestAnimationFrame(run);
-                };
-
-                const observer = new IntersectionObserver((entries) => {
-                    for (const e of entries) {
-                        if (!e.isIntersecting) continue;
-                        observer.disconnect();
-                        countUps.forEach(el => {
-                            const target = parseInt(el.dataset.count || "0", 10);
-                            if (!isNaN(target)) animate(el, target);
-                        });
-                        break;
-                    }
-                }, { threshold: 0.2, rootMargin: "0px" });
-                observer.observe(hero);
+            const featureCards = document.querySelectorAll(".hero-feature-card");
+            if (hero) {
+                const heroObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("hero-visible"); });
+                }, { threshold: 0.15 });
+                heroObserver.observe(hero);
+            }
+            if (featureCards.length) {
+                const cardObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("hero-card-visible"); });
+                }, { threshold: 0.2, rootMargin: "0px 0px -20px 0px" });
+                featureCards.forEach(el => cardObserver.observe(el));
             }
         })();
     </script>
