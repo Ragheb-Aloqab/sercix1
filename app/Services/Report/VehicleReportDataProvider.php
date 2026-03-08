@@ -86,11 +86,14 @@ class VehicleReportDataProvider implements ReportDataProviderInterface
             $q->where('refilled_at', '<=', $dateTo . ' 23:59:59');
         }
         foreach ($q->orderBy('refilled_at')->get() as $fr) {
-            $cost = (float) $fr->cost;
+            $cost = (float) ($fr->cost ?? 0);
+            $desc = $fr->liters !== null
+                ? $fr->liters . ' L @ ' . ($fr->price_per_liter ?? 0) . ' SAR'
+                : ($fr->refilled_at?->format('Y-m-d H:i') ?? 'Fuel refill');
             $rows->push([
                 'date' => $fr->refilled_at?->format('Y-m-d H:i'),
                 'type' => 'fuel',
-                'description' => $fr->liters . ' L @ ' . ($fr->price_per_liter ?? 0) . ' SAR',
+                'description' => $desc,
                 'cost' => $cost,
             ]);
         }

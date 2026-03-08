@@ -119,10 +119,10 @@
     <tbody>
         @if($invoice->isFuel() && $invoice->fuelRefill)
             <tr>
-                <td>{{ $invoice->service_type_label }} — {{ number_format($invoice->fuelRefill->liters, 1) }} {{ __('fuel.quantity') }}</td>
+                <td>{{ $invoice->service_type_label }}@if($invoice->fuelRefill->liters !== null) — {{ number_format($invoice->fuelRefill->liters, 1) }} {{ __('fuel.quantity') }}@endif</td>
                 <td>1</td>
-                <td>{{ number_format($invoice->fuelRefill->cost, 2) }}</td>
-                <td>{{ number_format($invoice->fuelRefill->cost, 2) }}</td>
+                <td>{{ $invoice->fuelRefill->cost !== null ? number_format($invoice->fuelRefill->cost, 2) : '—' }}</td>
+                <td>{{ $invoice->fuelRefill->cost !== null ? number_format($invoice->fuelRefill->cost, 2) : '—' }}</td>
             </tr>
         @else
             @forelse($orderItems as $os)

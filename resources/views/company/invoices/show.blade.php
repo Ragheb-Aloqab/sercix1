@@ -65,10 +65,12 @@
                     </div>
                 @endif
                 @if($invoice->fuelRefill)
+                    @if($invoice->fuelRefill->liters !== null)
                     <div class="flex justify-between items-center py-2 border-b border-slate-600/50">
                         <span class="font-bold text-white">{{ number_format($invoice->fuelRefill->liters, 1) }} L</span>
                         <span class="text-slate-400">{{ __('fuel.quantity') }}</span>
                     </div>
+                    @endif
                     <div class="flex justify-between items-center py-2 border-b border-slate-600/50">
                         <span class="font-bold text-white">{{ $invoice->fuelRefill->refilled_at?->format('Y-m-d H:i') ?? '-' }}</span>
                         <span class="text-slate-400">{{ __('fuel.refilled_at') }}</span>

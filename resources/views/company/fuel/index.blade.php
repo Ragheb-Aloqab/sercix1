@@ -150,7 +150,12 @@
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <span class="text-xs text-slate-400">—</span>
+                                                    <form method="POST" action="{{ route('company.fuel.generate-invoice', $fr) }}" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="text-amber-400 hover:text-amber-300 text-xs font-bold">
+                                                            {{ __('invoice.create_invoice') }}
+                                                        </button>
+                                                    </form>
                                                 @endif
                                             </td>
                                         </tr>

@@ -204,7 +204,7 @@ class FuelController extends Controller
 
     /**
      * Generate invoice for a fuel refill (from fuel reports section).
-     * Used for refills with receipt that don't have an invoice yet.
+     * Works with or without receipt: PDF uses same style; without receipt shows refill details (vehicle, date, cost/liters) only.
      */
     public function generateInvoice(FuelRefill $fuelRefill)
     {
@@ -212,20 +212,19 @@ class FuelController extends Controller
         if ((int) $fuelRefill->company_id !== (int) $company->id) {
             abort(403);
         }
-        if (!$fuelRefill->receipt_path) {
-            return back()->with('error', __('messages.fuel_invoice_requires_receipt'));
-        }
         if ($fuelRefill->invoice()->exists()) {
             return redirect()->route('company.invoices.show', $fuelRefill->invoice)
                 ->with('success', __('messages.invoice_already_exists'));
         }
+
+        $subtotal = $fuelRefill->cost !== null ? (float) $fuelRefill->cost : 0;
 
         $invoice = Invoice::create([
             'company_id' => $fuelRefill->company_id,
             'fuel_refill_id' => $fuelRefill->id,
             'invoice_type' => Invoice::TYPE_FUEL,
             'invoice_number' => 'INV-F-' . $fuelRefill->id . '-' . now()->format('Ymd'),
-            'subtotal' => (float) $fuelRefill->cost,
+            'subtotal' => $subtotal,
             'tax' => 0,
             'paid_amount' => 0,
         ]);

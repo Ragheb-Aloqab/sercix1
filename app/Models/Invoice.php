@@ -142,14 +142,14 @@ class Invoice extends Model
             return round((float) $this->order->total_amount, 2);
         }
         if ($this->fuel_refill_id && $this->relationLoaded('fuelRefill') && $this->fuelRefill) {
-            return round((float) $this->fuelRefill->cost, 2);
+            return round((float) ($this->fuelRefill->cost ?? 0), 2);
         }
         $this->loadMissing(['order', 'fuelRefill']);
         if ($this->order) {
             return round((float) $this->order->total_amount, 2);
         }
         if ($this->fuelRefill) {
-            return round((float) $this->fuelRefill->cost, 2);
+            return round((float) ($this->fuelRefill->cost ?? 0), 2);
         }
         return 0.0;
     }

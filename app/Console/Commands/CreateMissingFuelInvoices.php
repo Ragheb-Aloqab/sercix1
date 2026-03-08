@@ -11,12 +11,11 @@ class CreateMissingFuelInvoices extends Command
 {
     protected $signature = 'invoices:create-missing-fuel';
 
-    protected $description = 'Create invoices for fuel refills that have receipts but no invoice';
+    protected $description = 'Create invoices for fuel refills that have no invoice yet (with or without receipt)';
 
     public function handle(): int
     {
         $refills = FuelRefill::query()
-            ->whereNotNull('receipt_path')
             ->whereDoesntHave('invoice')
             ->get();
 
@@ -32,7 +31,7 @@ class CreateMissingFuelInvoices extends Command
                 'fuel_refill_id' => $fuelRefill->id,
                 'invoice_type' => Invoice::TYPE_FUEL,
                 'invoice_number' => 'INV-F-' . $fuelRefill->id . '-' . now()->format('Ymd'),
-                'subtotal' => (float) $fuelRefill->cost,
+                'subtotal' => (float) ($fuelRefill->cost ?? 0),
                 'tax' => 0,
                 'paid_amount' => 0,
             ]);

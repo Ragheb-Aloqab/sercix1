@@ -304,13 +304,13 @@ class DriverController extends Controller
 
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
-            'liters' => ['required', 'numeric', 'min:0.01', 'max:9999'],
-            'cost' => ['required', 'numeric', 'min:0', 'max:999999'],
+            'liters' => ['nullable', 'numeric', 'min:0', 'max:9999'],
+            'cost' => ['nullable', 'numeric', 'min:0', 'max:999999'],
             'refilled_at' => ['required', 'date'],
             'odometer_km' => ['nullable', 'integer', 'min:0', 'max:9999999'],
             'fuel_type' => ['nullable', 'string', 'in:petrol,diesel,premium'],
             'notes' => ['nullable', 'string', 'max:500'],
-            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max
+            'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max, optional
         ]);
 
         $vehicle = Vehicle::where('id', $data['vehicle_id'])->whereIn('driver_phone', $phoneVariants)->first();
@@ -318,7 +318,9 @@ class DriverController extends Controller
             abort(403, __('messages.driver_vehicle_not_linked'));
         }
 
-        $pricePerLiter = $data['liters'] > 0 ? round($data['cost'] / $data['liters'], 2) : null;
+        $liters = isset($data['liters']) && $data['liters'] !== '' ? (float) $data['liters'] : null;
+        $cost = isset($data['cost']) && $data['cost'] !== '' ? (float) $data['cost'] : null;
+        $pricePerLiter = ($liters !== null && $liters > 0 && $cost !== null) ? round($cost / $liters, 2) : null;
 
         $receiptPath = null;
         if ($request->hasFile('receipt')) {
@@ -328,8 +330,8 @@ class DriverController extends Controller
         FuelRefill::create([
             'vehicle_id' => $vehicle->id,
             'company_id' => $vehicle->company_id,
-            'liters' => $data['liters'],
-            'cost' => $data['cost'],
+            'liters' => $liters,
+            'cost' => $cost,
             'price_per_liter' => $pricePerLiter,
             'refilled_at' => $data['refilled_at'],
             'odometer_km' => $data['odometer_km'] ?? null,

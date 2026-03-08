@@ -200,8 +200,8 @@ class VehiclesController extends Controller
                 $reportTransactions->push((object) [
                     'date' => $fr->refilled_at,
                     'type' => 'fuel',
-                    'description' => $fr->liters . ' L',
-                    'cost' => (float) $fr->cost,
+                    'description' => ($fr->liters !== null ? $fr->liters . ' L' : __('fuel.refills_log')),
+                    'cost' => (float) ($fr->cost ?? 0),
                 ]);
             }
             // Company-uploaded fuel invoices (linked to this vehicle)

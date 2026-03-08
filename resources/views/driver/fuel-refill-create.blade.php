@@ -61,19 +61,7 @@
         <div>
             <label class="text-sm font-bold text-slate-700 dark:text-servx-silver-light">{{ __('fuel.receipt_image') }} — {{ __('common.optional') }}</label>
             <p class="text-xs text-slate-600 dark:text-servx-silver mt-1 mb-2">{{ __('fuel.receipt_hint') }} {{ __('fuel.receipt_camera_or_gallery') }}</p>
-            <div class="flex flex-wrap gap-3 mt-2">
-                <label class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors file:me-2 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:font-bold file:text-amber-400 min-h-[44px]">
-                    <i class="fa-solid fa-camera text-amber-500"></i>
-                    <span class="text-slate-700 dark:text-servx-silver-light font-semibold">{{ __('fuel.take_photo') }}</span>
-                    <input type="file" name="receipt" accept="image/*" capture="environment" class="sr-only" id="receipt-camera" />
-                </label>
-                <label class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors file:me-2 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:font-bold file:text-amber-400 min-h-[44px]">
-                    <i class="fa-solid fa-images text-amber-500"></i>
-                    <span class="text-slate-700 dark:text-servx-silver-light font-semibold">{{ __('fuel.choose_from_gallery') }}</span>
-                    <input type="file" name="receipt" accept="image/*" class="sr-only" id="receipt-gallery" />
-                </label>
-            </div>
-            <p class="text-slate-500 text-xs mt-2" id="receipt-file-name"></p>
+            <input type="file" name="receipt" accept="image/*" id="receipt-input" class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 file:me-2 file:rounded-xl file:border-0 file:bg-amber-500/20 file:px-4 file:py-2 file:font-bold file:text-amber-400 transition-colors duration-300" />
             @error('receipt')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
         </div>
         <div class="flex flex-col sm:flex-row gap-3 pt-4">
