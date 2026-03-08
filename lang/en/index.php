@@ -13,6 +13,7 @@ return [
     'statVehiclesValue' => '360',
     'statSavings' => 'Savings Value',
     'statSavingsValue' => '100.000',
+    'try_now' => 'Try Now',
 
     // Servx Motors offers you
     'offersTitle' => 'Servx Motors offers you',

@@ -13,6 +13,7 @@ return [
     'statVehiclesValue' => '360',
     'statSavings' => 'قيمة التوفير',
     'statSavingsValue' => '100.000',
+    'try_now' => 'جرّب الآن',
 
     // Servx Motors offers you
     'offersTitle' => 'تقدم لك',

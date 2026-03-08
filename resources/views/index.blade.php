@@ -178,6 +178,7 @@
                         <div class="h-1 flex-1 stat-bar-servx min-w-[40px]"></div>
                         <span class="count-up text-4xl sm:text-5xl font-bold text-white tabular-nums shrink-0" id="statSavingsValue" data-count="100000">0</span>
                     </div>
+                    <p class="try-now-text mt-8 text-end text-2xl sm:text-3xl font-bold text-white" dir="rtl" id="tryNowText"><span class="try-now-inner">{{ __('index.try_now') }}<span class="try-now-cursor" aria-hidden="true">|</span></span></p>
                 </div>
             </div>
         </div>
