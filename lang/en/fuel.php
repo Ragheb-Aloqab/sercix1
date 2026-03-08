@@ -13,6 +13,8 @@ return [
     'odometer_hint' => 'To help calculate consumption',
     'fuel_type' => 'Fuel type',
     'petrol' => 'Petrol',
+    'petrol_91' => 'Petrol 91',
+    'petrol_95' => 'Petrol 95',
     'diesel' => 'Diesel',
     'premium' => 'Premium petrol',
     'notes' => 'Notes',

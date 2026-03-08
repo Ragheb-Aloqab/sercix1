@@ -43,7 +43,7 @@ class FuelController extends Controller
         $fuelQuery = FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
-            ->with(['vehicle:id,plate_number,make,model', 'invoice']);
+            ->with(['vehicle:id,plate_number,make,model,driver_name', 'invoice']);
         if ($vehicleFilter) {
             $fuelQuery->where('vehicle_id', $vehicleId);
         }
@@ -77,16 +77,16 @@ class FuelController extends Controller
         }
         $rows = $rows->sortByDesc('date')->values();
 
-        $fuelTotalCost = (float) FuelRefill::query()
+        $fuelTotalCost = (float) (FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
             ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
-            ->sum('cost');
-        $fuelTotalLiters = (float) FuelRefill::query()
+            ->sum('cost') ?? 0);
+        $fuelTotalLiters = (float) (FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
             ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
-            ->sum('liters');
+            ->sum('liters') ?? 0);
         $fuelRefillCount = (int) FuelRefill::query()
             ->where('company_id', $company->id)
             ->whereBetween('refilled_at', [$from, $to])
@@ -103,8 +103,8 @@ class FuelController extends Controller
             ->when($vehicleFilter, fn ($q) => $q->where('vehicle_id', $vehicleId))
             ->count();
 
-        $totalCost = $fuelTotalCost + $companyInvoiceTotal;
-        $totalLiters = $fuelTotalLiters;
+        $totalCost = ($fuelTotalCost ?? 0) + $companyInvoiceTotal;
+        $totalLiters = $fuelTotalLiters ?? 0;
         $refillCount = $fuelRefillCount + $companyInvoiceCount;
 
         $vehicles = Vehicle::where('company_id', $company->id)
@@ -114,7 +114,7 @@ class FuelController extends Controller
 
         $analytics = $this->analytics->getFuelAnalytics($from, $to, $company->id, $vehicleId ?: null);
         $analytics['avg_per_vehicle'] = $analytics['avg_per_vehicle'] ?? 0;
-        $analytics['avg_per_transaction'] = $refillCount > 0 ? round($totalCost / $refillCount, 2) : 0;
+        $analytics['avg_per_transaction'] = $refillCount > 0 ? round((float) $totalCost / $refillCount, 2) : 0;
 
         return [
             'company' => $company,

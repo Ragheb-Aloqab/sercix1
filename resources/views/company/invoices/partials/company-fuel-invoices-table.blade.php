@@ -51,11 +51,23 @@
                                     @endif
                                     <a href="{{ route('company.fuel-invoices.download', $inv) }}"
                                         class="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-500/50 font-semibold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-300">
-                                        <i class="fa-solid fa-download shrink-0"></i><span>{{ __('invoice.download_invoice') }}</span>
+                                        <i class="fa-solid fa-file-pdf shrink-0"></i><span>{{ __('invoice.download_pdf') }}</span>
                                     </a>
                                 @else
                                     <span class="text-slate-500 text-sm">—</span>
                                 @endif
+                                <a href="{{ route('company.fuel-invoices.edit', $inv) }}"
+                                    class="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-amber-500/50 bg-amber-500/20 font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/30 transition-colors duration-300">
+                                    <i class="fa-solid fa-pen shrink-0"></i><span>{{ __('common.edit') }}</span>
+                                </a>
+                                <form method="POST" action="{{ route('company.fuel-invoices.destroy', $inv) }}" class="inline" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="from" value="invoices">
+                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-rose-500/50 bg-rose-500/20 font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/30 transition-colors duration-300">
+                                        <i class="fa-solid fa-trash-can shrink-0"></i><span>{{ __('common.delete') }}</span>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

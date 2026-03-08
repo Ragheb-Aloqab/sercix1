@@ -131,4 +131,24 @@ class InvoicesController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
+
+    /**
+     * Delete an invoice (e.g. fuel invoice). Removes stored PDF file if present.
+     */
+    public function destroy(Invoice $invoice)
+    {
+        $this->authorize('delete', $invoice);
+
+        if ($invoice->pdf_path && Storage::disk('public')->exists($invoice->pdf_path)) {
+            Storage::disk('public')->delete($invoice->pdf_path);
+        }
+        $invoice->update(['pdf_path' => null]);
+        $invoice->delete();
+
+        $redirect = request()->input('from') === 'fuel'
+            ? redirect()->route('company.fuel.index')->with('success', __('maintenance.invoice_deleted'))
+            : redirect()->route('company.invoices.index')->with('success', __('maintenance.invoice_deleted'));
+
+        return $redirect;
+    }
 }

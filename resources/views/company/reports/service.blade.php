@@ -74,7 +74,7 @@
                 <p class="text-2xl font-black mt-1 text-emerald-300">{{ number_format($totalCost, 2) }} {{ __('company.sar') }}</p>
             </div>
             <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm">
-                <p class="text-slate-500 text-sm">{{ __('reports.order_count') }}</p>
+                <p class="text-slate-500 text-sm">{{ __('reports.invoice_count') }}</p>
                 <p class="text-2xl font-black mt-1 text-white">{{ $orderCount }}</p>
             </div>
             <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-4 backdrop-blur-sm" title="{{ __('reports.avg_per_vehicle') }}">
@@ -96,7 +96,7 @@
                         <tr class="border-b border-slate-600/50 text-slate-400">
                             <th class="text-end py-2 font-bold">{{ __('reports.services') }}</th>
                             <th class="text-end py-2 font-bold">{{ __('company.cost') }}</th>
-                            <th class="text-end py-2 font-bold">{{ __('reports.order_count') }}</th>
+                            <th class="text-end py-2 font-bold">{{ __('reports.invoice_count') }}</th>
                             <th class="text-end py-2 font-bold">{{ __('reports.avg_per_order') }}</th>
                         </tr>
                     </thead>

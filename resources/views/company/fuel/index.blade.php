@@ -126,7 +126,7 @@
                                                 @if ($fr->isFromExternalProvider())
                                                     <span class="text-xs px-2 py-1 rounded-full bg-sky-500/30 text-sky-300 border border-sky-400/50">{{ $fr->provider }}</span>
                                                 @else
-                                                    <span class="text-xs text-slate-500">{{ __('fuel.manual') }}</span>
+                                                    <span class="text-xs text-slate-300">{{ $fr->vehicle?->driver_name ?? __('fuel.manual') }}</span>
                                                 @endif
                                             </td>
                                             <td class="py-3 px-2 min-w-[140px] text-end">
@@ -138,6 +138,14 @@
                                                         <a href="{{ route('company.invoices.pdf', $fr->invoice) }}" download class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
                                                             <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_invoice') }}
                                                         </a>
+                                                        <form method="POST" action="{{ route('company.invoices.destroy', $fr->invoice) }}" class="inline" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <input type="hidden" name="from" value="fuel">
+                                                            <button type="submit" class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 text-sm font-bold">
+                                                                <i class="fa-solid fa-trash-can"></i> {{ __('common.delete') }}
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 @elseif ($fr->receipt_path)
                                                     <a href="{{ asset('storage/' . $fr->receipt_path) }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-bold">
@@ -184,10 +192,29 @@
                                                         <i class="fa-solid fa-image"></i> {{ __('fuel.view') }}
                                                     </a>
                                                     <a href="{{ route('company.fuel-invoices.download', $inv) }}" download class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-bold ms-2">
-                                                        <i class="fa-solid fa-download"></i> {{ __('common.download') }}
+                                                        <i class="fa-solid fa-file-pdf"></i> {{ __('invoice.download_pdf') }}
                                                     </a>
+                                                    <a href="{{ route('company.fuel-invoices.edit', $inv) }}?{{ http_build_query(request()->only(['from','to','vehicle_id'])) }}" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-sm font-bold ms-2">
+                                                        <i class="fa-solid fa-pen"></i> {{ __('common.edit') }}
+                                                    </a>
+                                                    <form method="POST" action="{{ route('company.fuel-invoices.destroy', $inv) }}" class="inline ms-1" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 text-sm font-bold">
+                                                            <i class="fa-solid fa-trash-can"></i> {{ __('common.delete') }}
+                                                        </button>
+                                                    </form>
                                                 @else
-                                                    <span class="text-xs text-slate-400">—</span>
+                                                    <a href="{{ route('company.fuel-invoices.edit', $inv) }}?{{ http_build_query(request()->only(['from','to','vehicle_id'])) }}" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-sm font-bold">
+                                                        <i class="fa-solid fa-pen"></i> {{ __('common.edit') }}
+                                                    </a>
+                                                    <form method="POST" action="{{ route('company.fuel-invoices.destroy', $inv) }}" class="inline ms-1" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 text-sm font-bold">
+                                                            <i class="fa-solid fa-trash-can"></i> {{ __('common.delete') }}
+                                                        </button>
+                                                    </form>
                                                 @endif
                                             </td>
                                         </tr>

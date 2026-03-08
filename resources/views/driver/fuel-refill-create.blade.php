@@ -34,8 +34,8 @@
                 <input type="number" name="liters" step="0.01" min="0" value="{{ old('liters') }}" placeholder="{{ __('driver.example_liters') }}" class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300" />
             </div>
             <div>
-                <label class="text-sm font-bold text-slate-700 dark:text-servx-silver-light">{{ __('fuel.cost') }} — {{ __('common.optional') }}</label>
-                <input type="number" name="cost" step="0.01" min="0" value="{{ old('cost') }}" placeholder="{{ __('driver.example_cost') }}" class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300" />
+                <label class="text-sm font-bold text-slate-700 dark:text-servx-silver-light">{{ __('fuel.cost') }} *</label>
+                <input type="number" name="cost" step="0.01" min="0" value="{{ old('cost') }}" placeholder="{{ __('driver.example_cost') }}" required class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300" />
             </div>
         </div>
         <div>
@@ -47,11 +47,11 @@
             <input type="number" name="odometer_km" min="0" value="{{ old('odometer_km') }}" placeholder="{{ __('fuel.odometer_hint') }}" class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300" />
         </div>
         <div>
-            <label class="text-sm font-bold text-slate-700 dark:text-servx-silver-light">{{ __('fuel.fuel_type') }}</label>
-            <select name="fuel_type" class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300">
-                <option value="petrol" @selected(old('fuel_type', 'petrol') === 'petrol')>{{ __('fuel.petrol') }}</option>
+            <label class="text-sm font-bold text-slate-700 dark:text-servx-silver-light">{{ __('fuel.fuel_type') }} *</label>
+            <select name="fuel_type" required class="mt-2 w-full rounded-2xl border border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-800/60 px-4 py-3 min-h-[44px] text-slate-900 dark:text-servx-silver-light outline-none focus:ring-4 focus:ring-amber-500/20 transition-colors duration-300">
+                <option value="petrol_91" @selected(old('fuel_type', 'petrol_91') === 'petrol_91')>{{ __('fuel.petrol_91') }}</option>
+                <option value="petrol_95" @selected(old('fuel_type') === 'petrol_95')>{{ __('fuel.petrol_95') }}</option>
                 <option value="diesel" @selected(old('fuel_type') === 'diesel')>{{ __('fuel.diesel') }}</option>
-                <option value="premium" @selected(old('fuel_type') === 'premium')>{{ __('fuel.premium') }}</option>
             </select>
         </div>
         <div>

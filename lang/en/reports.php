@@ -13,6 +13,7 @@ return [
     'other_per_vehicle_desc' => 'Details for each car',
     'total_service_cost' => 'Total service cost',
     'order_count' => 'Number of orders',
+    'invoice_count' => 'Number of invoices',
     'services_log' => 'Services log',
     'services' => 'Services',
     'no_services' => 'No service orders or maintenance requests in the selected period.',

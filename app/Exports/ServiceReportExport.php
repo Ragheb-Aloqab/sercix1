@@ -81,7 +81,7 @@ class ServiceReportExport implements FromArray, WithEvents, WithTitle
 
             $rows[] = [];
             $rows[] = [__('reports.total_service_cost'), number_format($this->totals['total_cost'] ?? 0, 2) . ' ' . __('company.sar'), '', '', '', '', ''];
-            $rows[] = [__('reports.order_count'), (string) ($this->totals['order_count'] ?? 0), '', '', '', '', ''];
+            $rows[] = [__('reports.invoice_count'), (string) ($this->totals['order_count'] ?? 0), '', '', '', '', ''];
 
             return $rows;
         } finally {

@@ -36,7 +36,7 @@ class ServiceReportPdfService
 
         $summaryRows = [
             [__('reports.total_service_cost'), number_format($totals['total_cost'] ?? 0, 2) . ' ' . __('company.sar')],
-            [__('reports.order_count'), (string) ($totals['order_count'] ?? 0)],
+            [__('reports.invoice_count'), (string) ($totals['order_count'] ?? 0)],
         ];
 
         $summaryTable = '';

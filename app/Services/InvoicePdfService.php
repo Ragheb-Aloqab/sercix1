@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Setting;
+use App\Services\FuelInvoicePdfService;
 use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 use Illuminate\Support\Facades\Storage;
 use Picqer\Barcode\BarcodeGeneratorSVG;
@@ -15,6 +16,9 @@ class InvoicePdfService
      */
     public function getPdfContent(Invoice $invoice): string
     {
+        if ($invoice->isFuel()) {
+            return app(FuelInvoicePdfService::class)->getPdfContent($invoice);
+        }
         return $this->buildPdf($invoice)->output();
     }
 
@@ -23,6 +27,9 @@ class InvoicePdfService
      */
     public function generate(Invoice $invoice): string
     {
+        if ($invoice->isFuel()) {
+            return app(FuelInvoicePdfService::class)->generate($invoice);
+        }
         $pdf = $this->buildPdf($invoice);
         $path = 'invoices/' . $invoice->id . '.pdf';
         Storage::disk('public')->put($path, $pdf->output());

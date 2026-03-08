@@ -64,6 +64,10 @@ Route::middleware(['company'])
             ->name('invoices.pdf')
             ->whereNumber('invoice');
 
+        Route::delete('/invoices/{invoice}', [InvoicesController::class, 'destroy'])
+            ->name('invoices.destroy')
+            ->whereNumber('invoice');
+
         Route::get('/invoices/{invoice}/maintenance-pdf', [InvoicesController::class, 'downloadMaintenancePdf'])
             ->name('invoices.maintenance-pdf')
             ->whereNumber('invoice');
@@ -77,6 +81,16 @@ Route::middleware(['company'])
             ->whereNumber('companyFuelInvoice');
         Route::get('/fuel-invoices/{companyFuelInvoice}/download', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'download'])
             ->name('fuel-invoices.download')
+            ->whereNumber('companyFuelInvoice');
+
+        Route::get('/fuel-invoices/{companyFuelInvoice}/edit', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'edit'])
+            ->name('fuel-invoices.edit')
+            ->whereNumber('companyFuelInvoice');
+        Route::patch('/fuel-invoices/{companyFuelInvoice}', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'update'])
+            ->name('fuel-invoices.update')
+            ->whereNumber('companyFuelInvoice');
+        Route::delete('/fuel-invoices/{companyFuelInvoice}', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'destroy'])
+            ->name('fuel-invoices.destroy')
             ->whereNumber('companyFuelInvoice');
 
         // Payments (only when config servx.payments_enabled = true)

@@ -13,6 +13,7 @@ return [
     'other_per_vehicle_desc' => 'تفاصيل كل مركبة',
     'total_service_cost' => 'إجمالي تكلفة الخدمات',
     'order_count' => 'عدد الطلبات',
+    'invoice_count' => 'عدد الفواتير',
     'services_log' => 'سجل الخدمات',
     'services' => 'الخدمات',
     'no_services' => 'لا توجد طلبات خدمة أو طلبات صيانة في الفترة المحددة.',

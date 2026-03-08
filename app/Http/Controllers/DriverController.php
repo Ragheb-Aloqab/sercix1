@@ -305,10 +305,10 @@ class DriverController extends Controller
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'liters' => ['nullable', 'numeric', 'min:0', 'max:9999'],
-            'cost' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'cost' => ['required', 'numeric', 'min:0.01', 'max:999999'],
             'refilled_at' => ['required', 'date'],
             'odometer_km' => ['nullable', 'integer', 'min:0', 'max:9999999'],
-            'fuel_type' => ['nullable', 'string', 'in:petrol,diesel,premium'],
+            'fuel_type' => ['required', 'string', 'in:petrol_91,petrol_95,diesel'],
             'notes' => ['nullable', 'string', 'max:500'],
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // 5MB max, optional
         ]);
@@ -319,8 +319,8 @@ class DriverController extends Controller
         }
 
         $liters = isset($data['liters']) && $data['liters'] !== '' ? (float) $data['liters'] : null;
-        $cost = isset($data['cost']) && $data['cost'] !== '' ? (float) $data['cost'] : null;
-        $pricePerLiter = ($liters !== null && $liters > 0 && $cost !== null) ? round($cost / $liters, 2) : null;
+        $cost = (float) $data['cost'];
+        $pricePerLiter = ($liters !== null && $liters > 0) ? round($cost / $liters, 2) : null;
 
         $receiptPath = null;
         if ($request->hasFile('receipt')) {
@@ -335,7 +335,7 @@ class DriverController extends Controller
             'price_per_liter' => $pricePerLiter,
             'refilled_at' => $data['refilled_at'],
             'odometer_km' => $data['odometer_km'] ?? null,
-            'fuel_type' => $data['fuel_type'] ?? 'petrol',
+            'fuel_type' => $data['fuel_type'],
             'notes' => $data['notes'] ?? null,
             'receipt_path' => $receiptPath,
             'provider' => FuelRefill::PROVIDER_MANUAL,

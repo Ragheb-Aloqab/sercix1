@@ -1,10 +1,10 @@
 @extends('admin.layouts.app')
 
-@section('page_title', __('invoice.invoice_details') ?? 'تفاصيل الفاتورة')
+@section('page_title', __('invoice.invoice_details') ?? 'invoice details')
 @section('subtitle', __('invoice.overview') ?? 'Invoice overview')
 
 @section('content')
-@include('company.partials.glass-start', ['title' => (__('invoice.invoice') ?? 'فاتورة') . ' #' . ($invoice->invoice_number ?? $invoice->id)])
+@include('company.partials.glass-start', ['title' => (__('invoice.invoice') ?? 'invoice') . ' #' . ($invoice->invoice_number ?? $invoice->id)])
 
     <div class="space-y-6">
         <div class="rounded-2xl bg-slate-800/40 border border-slate-500/30 p-5 sm:p-6 backdrop-blur-sm hover:border-slate-400/50 transition-all duration-300">
@@ -13,16 +13,10 @@
                     <p class="font-black text-xl text-white">
                         {{ __('invoice.invoice') ?? 'فاتورة' }} #{{ $invoice->invoice_number ?? $invoice->id }}
                     </p>
-                    <div class="mt-2 flex items-center gap-3">
-                        <div class="inline-block p-2 bg-slate-700/50 border border-slate-500/30 rounded-xl">
-                            {!! $barcodeImg !!}
-                        </div>
-                        <span class="text-xs font-mono text-slate-400">{{ $barcodeData }}</span>
-                    </div>
-                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.date') ?? 'التاريخ' }}: {{ optional($invoice->created_at)->format('Y-m-d H:i') }}</p>
-                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.service') ?? 'الخدمة' }}: {{ $invoice->service_type_label }}</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.date') ?? 'date' }}: {{ optional($invoice->created_at)->format('Y-m-d H:i') }}</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.service') ?? ' service' }}: {{ $invoice->service_type_label }}</p>
                     <p class="text-sm text-slate-500 mt-1">{{ __('invoice.driver_name') }}: {{ $invoice->driver_name ?? '-' }}</p>
-                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.driver_phone') ?? 'جوال السائق' }}: {{ $invoice->driver_phone ?? '-' }}</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ __('invoice.driver_phone') ?? 'driver phone' }}: {{ $invoice->driver_phone ?? '-' }}</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2 shrink-0">
@@ -31,6 +25,16 @@
                        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-colors">
                         <i class="fa-solid fa-file-pdf me-1"></i> {{ __('common.download') ?? 'تحميل PDF' }}
                     </a>
+                    @if($invoice->isFuel())
+                    <form method="POST" action="{{ route('company.invoices.destroy', $invoice) }}" class="inline" onsubmit="return confirm({{ json_encode(__('maintenance.confirm_delete_invoice')) }});">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="from" value="fuel">
+                        <button type="submit" class="px-4 py-2 rounded-xl border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold transition-colors">
+                            <i class="fa-solid fa-trash-can me-1"></i> {{ __('common.delete') }}
+                        </button>
+                    </form>
+                    @endif
                     <a href="{{ route('company.invoices.index') }}"
                        class="px-4 py-2 rounded-xl border border-slate-500/50 bg-slate-800/40 text-white font-semibold hover:bg-slate-700/50 transition-colors">
                         {{ __('common.back') ?? 'رجوع' }}
