@@ -142,6 +142,7 @@ class DriverNotificationService
 
         $center = $request->approvedCenter;
         $centerName = $center?->name ?? __('maintenance.center');
+        $centerPhone = $center?->phone ?? null;
         $url = route('driver.maintenance-request.show', $request);
 
         $title = __('maintenance.center_approved_for_driver') ?: 'Center approved for your request';
@@ -153,11 +154,25 @@ class DriverNotificationService
             $message = "{$centerName} " . __('maintenance.center_approved_for_request') . " #{$request->id}";
         }
 
+        $whatsappLink = null;
+        if ($centerPhone) {
+            $digits = preg_replace('/[^0-9]/', '', $centerPhone);
+            if (str_starts_with($digits, '966')) {
+                $whatsappLink = 'https://wa.me/' . $digits;
+            } elseif (str_starts_with($digits, '0') && strlen($digits) >= 10) {
+                $whatsappLink = 'https://wa.me/966' . substr($digits, 1);
+            } else {
+                $whatsappLink = 'https://wa.me/966' . $digits;
+            }
+        }
+
         $this->notify($phone, 'maintenance_center_approved', [
             'title' => $title,
             'message' => $message,
             'maintenance_request_id' => $request->id,
             'center_name' => $centerName,
+            'center_phone' => $centerPhone,
+            'center_whatsapp' => $whatsappLink,
             'url' => $url,
             'route' => $url,
         ]);

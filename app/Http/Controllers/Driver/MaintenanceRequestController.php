@@ -27,11 +27,7 @@ class MaintenanceRequestController extends Controller
             return redirect()->route('driver.dashboard')->with('error', __('messages.driver_no_vehicles'));
         }
 
-        return view('driver.maintenance-request.create', [
-            'vehicles' => $vehicles,
-            'maintenanceTypes' => MaintenanceType::cases(),
-            'selectedVehicleId' => old('vehicle_id') ?: request('vehicle'),
-        ]);
+        return view('driver.maintenance-request.create');
     }
 
     public function store(Request $request)
@@ -92,7 +88,7 @@ class MaintenanceRequestController extends Controller
         $phone = Session::get('driver_phone');
         $phoneVariants = PhoneHelper::variants($phone);
 
-        $maintenanceRequest->load(['vehicle', 'company:id,company_name', 'attachments']);
+        $maintenanceRequest->load(['vehicle', 'company:id,company_name', 'attachments', 'approvedCenter', 'requestServices.service', 'requestServices.driverProposedService']);
 
         if (!in_array($maintenanceRequest->driver_phone, $phoneVariants)) {
             abort(403, __('messages.driver_vehicle_not_linked'));

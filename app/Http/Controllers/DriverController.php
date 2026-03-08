@@ -10,7 +10,6 @@ use App\Models\FuelRefill;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\Vehicle;
-use App\Models\VehicleInspection;
 use App\Models\VehicleLocation;
 use App\Models\VehicleMileageHistory;
 use App\Services\OdometerTrackingService;
@@ -23,37 +22,7 @@ class DriverController extends Controller
 {
     public function dashboard()
     {
-        $phone = Session::get('driver_phone');
-        $phoneVariants = PhoneHelper::variants($phone);
-        $vehicles = Vehicle::forDriverPhone($phoneVariants)
-            ->with('company:id,company_name')
-            ->where('is_active', true)
-            ->get();
-
-        $requests = \App\Models\MaintenanceRequest::forDriver($phoneVariants)
-            ->with(['vehicle', 'company:id,company_name'])
-            ->latest()
-            ->take(10)
-            ->get();
-
-        $requestsWithDisplay = $requests->map(function ($r) {
-            $statusLabel = $r->status_label;
-            return (object) ['request' => $r, 'statusLabel' => $statusLabel];
-        });
-
-        $vehicleIds = $vehicles->pluck('id');
-        $pendingInspectionsCount = VehicleInspection::whereIn('vehicle_id', $vehicleIds)
-            ->where('status', VehicleInspection::STATUS_PENDING)
-            ->count();
-
-        $firstTrackableVehicle = $vehicles->first(fn ($v) => $v->usesMobileTracking() || empty($v->imei));
-        $trackingUrl = $firstTrackableVehicle
-            ? route('driver.tracking', ['vehicle' => $firstTrackableVehicle->id])
-            : route('driver.dashboard');
-
-        $firstOdometerVehicle = $vehicles->first(fn ($v) => $v->usesMobileTracking());
-
-        return view('driver.dashboard', compact('vehicles', 'requests', 'requestsWithDisplay', 'pendingInspectionsCount', 'trackingUrl', 'firstOdometerVehicle'));
+        return view('driver.dashboard');
     }
 
     public function history()

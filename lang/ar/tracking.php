@@ -65,6 +65,12 @@ return [
     'enter_daily_odometer' => 'أدخل قراءة نهاية اليوم',
     'daily_odometer_hint' => 'أدخل قراءة عداد المسافات في نهاية نوبتك. سيتم حساب المسافة اليومية من القراءة السابقة.',
 
+    'initial_odometer_title' => 'قراءة العداد الأولية مطلوبة',
+    'initial_odometer_message' => 'يرجى إدخال قراءة العداد الأولية لهذه المركبة.',
+    'initial_odometer_required' => 'يرجى إدخال قيمة.',
+    'initial_odometer_must_be_positive' => 'يجب أن يكون العداد رقماً أكبر من صفر.',
+    'initial_odometer_saved' => 'تم حفظ قراءة العداد الأولية بنجاح.',
+
     'map_style' => 'نمط الخريطة',
     'map_style_carto_dark' => 'كارتو داكن',
     'map_style_osm_humanitarian' => 'إنساني',

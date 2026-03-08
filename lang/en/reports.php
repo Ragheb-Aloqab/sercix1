@@ -44,6 +44,7 @@ return [
     'generate_excel_in_background' => 'Generate Excel in background',
     'export_expired' => 'This report has expired and is no longer available.',
     'export_not_found' => 'Report file not found.',
+    'export' => 'Export',
 
     // Comprehensive Report
     'comprehensive_report' => 'Comprehensive Report',

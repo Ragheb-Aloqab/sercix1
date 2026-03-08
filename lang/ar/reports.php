@@ -44,6 +44,7 @@ return [
     'generate_excel_in_background' => 'إنشاء Excel في الخلفية',
     'export_expired' => 'انتهت صلاحية هذا التقرير ولم يعد متاحاً.',
     'export_not_found' => 'ملف التقرير غير موجود.',
+    'export' => 'تصدير',
 
     // Comprehensive Report
     'comprehensive_report' => 'التقرير الشامل',

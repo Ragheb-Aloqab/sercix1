@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Enums\MaintenanceRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MaintenanceRequest;
+use App\Models\DriverProposedService;
 use App\Services\MaintenanceRfqService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -127,14 +128,52 @@ class MaintenanceRequestController extends Controller
             'company',
             'attachments',
             'quotations.maintenanceCenter',
-            'approvedQuotation',
+            'quotations.lineItems',
+            'approvedQuotation.lineItems.maintenanceRequestService.service',
+            'approvedQuotation.lineItems.maintenanceRequestService.driverProposedService',
             'approvedCenter',
             'rfqAssignments.maintenanceCenter',
+            'requestServices.service',
+            'requestServices.driverProposedService',
         ]);
 
         return view('company.maintenance-requests.show', [
             'request' => $maintenanceRequest,
         ]);
+    }
+
+    public function approveProposedService(MaintenanceRequest $maintenanceRequest, DriverProposedService $proposedService)
+    {
+        $company = auth('company')->user();
+        if ((int) $maintenanceRequest->company_id !== (int) $company->id || (int) $proposedService->company_id !== (int) $company->id) {
+            abort(403);
+        }
+        if ($proposedService->status !== DriverProposedService::STATUS_PENDING) {
+            return back()->with('error', __('maintenance.proposed_service_already_processed'));
+        }
+        $proposedService->update([
+            'status' => DriverProposedService::STATUS_APPROVED,
+            'approved_at' => now(),
+            'approved_by' => $company->id,
+        ]);
+        return back()->with('success', __('maintenance.proposed_service_approved'));
+    }
+
+    public function rejectProposedService(\Illuminate\Http\Request $request, MaintenanceRequest $maintenanceRequest, DriverProposedService $proposedService)
+    {
+        $company = auth('company')->user();
+        if ((int) $maintenanceRequest->company_id !== (int) $company->id || (int) $proposedService->company_id !== (int) $company->id) {
+            abort(403);
+        }
+        if ($proposedService->status !== DriverProposedService::STATUS_PENDING) {
+            return back()->with('error', __('maintenance.proposed_service_already_processed'));
+        }
+        $reason = $request->validate(['rejection_reason' => ['nullable', 'string', 'max:500']])['rejection_reason'] ?? null;
+        $proposedService->update([
+            'status' => DriverProposedService::STATUS_REJECTED,
+            'rejection_reason' => $reason,
+        ]);
+        return back()->with('success', __('maintenance.proposed_service_rejected'));
     }
 
     public function reject(Request $request, MaintenanceRequest $maintenanceRequest)

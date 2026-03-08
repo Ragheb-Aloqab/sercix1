@@ -14,6 +14,7 @@ class VehicleMileageHistory extends Model
     public const SOURCE_FUEL_REFILLS = 'fuel_refills';
     public const SOURCE_MOBILE_TRIPS = 'mobile_tracking_trips';
     public const SOURCE_MANUAL_DAILY = 'manual_daily';
+    public const SOURCE_INITIAL = 'initial';
 
     protected $table = 'vehicle_mileage_history';
 

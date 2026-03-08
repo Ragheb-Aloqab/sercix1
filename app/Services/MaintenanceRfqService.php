@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\MaintenanceCenter;
 use App\Models\MaintenanceRequest;
 use App\Models\Quotation;
+use App\Models\QuotationLineItem;
 use App\Models\RfqAssignment;
 use Illuminate\Support\Facades\DB;
 
@@ -77,6 +78,8 @@ class MaintenanceRfqService
 
     /**
      * Submit quotation (maintenance center action).
+     * When the request has request_services, pass line_items: [ maintenance_request_service_id => ['price' => x, 'image' => UploadedFile|null], ... ]
+     * and optionally notes, quotation_pdf. Price on quotation = sum of line item prices.
      */
     public function submitQuotation(MaintenanceRequest $request, MaintenanceCenter $center, array $data): Quotation
     {
@@ -89,21 +92,70 @@ class MaintenanceRfqService
         }
 
         return DB::transaction(function () use ($request, $center, $data) {
-            $quotation = Quotation::updateOrCreate(
-                [
-                    'maintenance_request_id' => $request->id,
-                    'maintenance_center_id' => $center->id,
-                ],
-                [
-                    'price' => $data['price'],
-                    'estimated_duration_minutes' => $data['estimated_duration_minutes'] ?? null,
-                    'notes' => $data['notes'] ?? null,
-                    'quotation_pdf_path' => $data['quotation_pdf_path'] ?? null,
-                    'original_pdf_name' => $data['original_pdf_name'] ?? null,
-                    'submitted_by' => $center->id,
-                    'submitted_at' => now(),
-                ]
-            );
+            $request->load('requestServices');
+            $hasLineItems = !empty($data['line_items']) && $request->requestServices->isNotEmpty();
+
+            if ($hasLineItems) {
+                $totalPrice = 0;
+                foreach ($data['line_items'] as $mrsId => $item) {
+                    $price = (float) ($item['price'] ?? 0);
+                    if ($price < 0) {
+                        throw new \InvalidArgumentException('Price must be non-negative.');
+                    }
+                    $totalPrice += $price;
+                }
+                $quotation = Quotation::updateOrCreate(
+                    [
+                        'maintenance_request_id' => $request->id,
+                        'maintenance_center_id' => $center->id,
+                    ],
+                    [
+                        'price' => $totalPrice,
+                        'estimated_duration_minutes' => $data['estimated_duration_minutes'] ?? null,
+                        'notes' => $data['notes'] ?? null,
+                        'quotation_pdf_path' => $data['quotation_pdf_path'] ?? null,
+                        'original_pdf_name' => $data['original_pdf_name'] ?? null,
+                        'invoice_image_path' => $data['invoice_image_path'] ?? null,
+                        'invoice_image_original_name' => $data['invoice_image_original_name'] ?? null,
+                        'submitted_by' => $center->id,
+                        'submitted_at' => now(),
+                    ]
+                );
+                foreach ($data['line_items'] as $mrsId => $item) {
+                    $price = (float) ($item['price'] ?? 0);
+                    $notes = $item['notes'] ?? null;
+                    QuotationLineItem::updateOrCreate(
+                        [
+                            'quotation_id' => $quotation->id,
+                            'maintenance_request_service_id' => $mrsId,
+                        ],
+                        [
+                            'price' => $price,
+                            'image_path' => null,
+                            'original_image_name' => null,
+                            'notes' => $notes,
+                        ]
+                    );
+                }
+            } else {
+                $quotation = Quotation::updateOrCreate(
+                    [
+                        'maintenance_request_id' => $request->id,
+                        'maintenance_center_id' => $center->id,
+                    ],
+                    [
+                        'price' => $data['price'],
+                        'estimated_duration_minutes' => $data['estimated_duration_minutes'] ?? null,
+                        'notes' => $data['notes'] ?? null,
+                        'quotation_pdf_path' => $data['quotation_pdf_path'] ?? null,
+                        'original_pdf_name' => $data['original_pdf_name'] ?? null,
+                        'invoice_image_path' => $data['invoice_image_path'] ?? null,
+                        'invoice_image_original_name' => $data['invoice_image_original_name'] ?? null,
+                        'submitted_by' => $center->id,
+                        'submitted_at' => now(),
+                    ]
+                );
+            }
 
             $request->refresh();
             if ($request->status === MaintenanceRequestStatus::WAITING_FOR_QUOTES->value) {
@@ -229,6 +281,7 @@ class MaintenanceRfqService
                 'file_type' => $data['file_type'] ?? null,
                 'final_invoice_amount' => $data['final_invoice_amount'] ?? null,
                 'final_invoice_uploaded_at' => now(),
+                'final_invoice_tax_type' => $data['final_invoice_tax_type'] ?? null,
                 'completion_date' => $data['completion_date'] ?? null,
             ]);
             $this->transitionStatus($request, MaintenanceRequestStatus::WAITING_FOR_INVOICE_APPROVAL->value, [], 'maintenance_center', $center->id);
@@ -282,6 +335,7 @@ class MaintenanceRfqService
             'final_invoice_original_name' => null,
             'final_invoice_amount' => null,
             'final_invoice_uploaded_at' => null,
+            'final_invoice_tax_type' => null,
             'rejection_reason' => $reason,
         ]);
         $this->transitionStatus($request, MaintenanceRequestStatus::IN_PROGRESS->value, [], 'company', $company->id);

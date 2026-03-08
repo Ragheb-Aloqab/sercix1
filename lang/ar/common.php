@@ -33,6 +33,7 @@ return [
     'update' => 'تحديث',
     'saving' => 'جاري الحفظ...',
     'cancel' => 'إلغاء',
+    'remove' => 'إزالة',
     'search' => 'بحث',
     'view' => 'عرض',
     'view_all' => 'عرض الكل',

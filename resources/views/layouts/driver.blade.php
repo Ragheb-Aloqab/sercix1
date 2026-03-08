@@ -30,7 +30,7 @@
         <link rel="icon" href="{{ asset('favicon.ico') }}" />
     @endif
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/style.css'])
+    @vite(['resources/css/app.css', 'resources/css/style.css', 'resources/js/app.js'])
     <x-vite-cdn-fallback />
     @stack('styles')
 </head>
@@ -110,9 +110,9 @@
                     <i class="fa-solid fa-bell w-5 text-center"></i>
                     {{ __('common.notifications') }}
                 </a>
-                <a href="{{ route('driver.request.create') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors {{ request()->routeIs('driver.request.create') ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300' }}">
+                <a href="{{ route('driver.maintenance-request.create') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors {{ request()->routeIs('driver.maintenance-request.*') ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300' }}">
                     <i class="fa-solid fa-wrench w-5 text-center"></i>
-                    {{ __('driver.new_service_request') }}
+                    {{ __('driver.new_maintenance_request') }}
                 </a>
                 <a href="{{ route('driver.fuel-refill.create') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors {{ request()->routeIs('driver.fuel-refill.*') ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300' }}">
                     <i class="fa-solid fa-gas-pump w-5 text-center"></i>
@@ -150,7 +150,7 @@
                 <i class="fa-solid fa-clock-rotate-left text-xl mb-0.5"></i>
                 <span class="text-xs">{{ __('driver.nav_history') }}</span>
             </a>
-            <a href="{{ route('driver.request.create') }}" class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-2 text-slate-500 dark:text-slate-400 active:scale-[0.98] {{ request()->routeIs('driver.request.create') ? 'text-sky-600 dark:text-sky-400 font-bold' : 'hover:text-slate-900 dark:hover:text-white' }}">
+            <a href="{{ route('driver.maintenance-request.create') }}" class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-2 text-slate-500 dark:text-slate-400 active:scale-[0.98] {{ request()->routeIs('driver.maintenance-request.*') ? 'text-sky-600 dark:text-sky-400 font-bold' : 'hover:text-slate-900 dark:hover:text-white' }}">
                 <i class="fa-solid fa-wrench text-xl mb-0.5"></i>
                 <span class="text-xs">{{ __('driver.nav_service') }}</span>
             </a>
@@ -287,6 +287,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+@livewireStyles
+@livewireScripts
 @stack('scripts')
 </body>
 </html>

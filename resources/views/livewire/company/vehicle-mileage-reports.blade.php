@@ -53,30 +53,14 @@
         </div>
     </div>
 
-    {{-- Export buttons --}}
+    {{-- Export dropdown (PDF / Excel, optional background generation) --}}
     <div class="flex flex-wrap gap-3 mb-6">
-        <a href="{{ route('company.reports.mileage.pdf', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null]) }}"
-           class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 dark:hover:bg-red-500 text-white font-bold inline-flex items-center gap-2 transition-colors duration-300">
-            <i class="fa-solid fa-file-pdf"></i>
-            {{ __('fleet.export_pdf') }}
-        </a>
-        <a href="{{ route('company.reports.mileage.excel', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null]) }}"
-           class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold inline-flex items-center gap-2">
-            <i class="fa-solid fa-file-excel"></i>
-            {{ __('fleet.export_excel') }}
-        </a>
-        <a href="{{ route('company.reports.mileage.pdf', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null, 'queue' => 1]) }}"
-           class="px-4 py-2 rounded-xl border border-slate-500/50 hover:bg-slate-700/50 text-servx-silver font-bold inline-flex items-center gap-2"
-           title="{{ __('reports.queued_for_generation') }}">
-            <i class="fa-solid fa-clock"></i>
-            {{ __('reports.generate_in_background') ?? 'Generate PDF in background' }}
-        </a>
-        <a href="{{ route('company.reports.mileage.excel', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null, 'queue' => 1]) }}"
-           class="px-4 py-2 rounded-xl border border-slate-500/50 hover:bg-slate-700/50 text-servx-silver font-bold inline-flex items-center gap-2"
-           title="{{ __('reports.queued_for_generation') }}">
-            <i class="fa-solid fa-clock"></i>
-            {{ __('reports.generate_excel_in_background') ?? 'Generate Excel in background' }}
-        </a>
+        <x-export-dropdown
+            :pdfUrl="route('company.reports.mileage.pdf', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null])"
+            :excelUrl="route('company.reports.mileage.excel', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null])"
+            :pdfQueueUrl="route('company.reports.mileage.pdf', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null, 'queue' => 1])"
+            :excelQueueUrl="route('company.reports.mileage.excel', ['from' => $from, 'to' => $to, 'vehicle_id' => $vehicleId ?: null, 'branch_id' => $branchId ?: null, 'queue' => 1])"
+        />
     </div>
 
     {{-- Table --}}

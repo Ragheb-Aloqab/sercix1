@@ -20,7 +20,7 @@ class RfqController extends Controller
         $center = auth('maintenance_center')->user();
         $assignment = $maintenanceRequest->rfqAssignments()->where('maintenance_center_id', $center->id)->firstOrFail();
 
-        $maintenanceRequest->load(['vehicle', 'company', 'attachments', 'quotations']);
+        $maintenanceRequest->load(['vehicle', 'company', 'attachments', 'quotations', 'requestServices.service', 'requestServices.driverProposedService']);
 
         return view('maintenance-center.rfq.show', [
             'request' => $maintenanceRequest,
@@ -31,24 +31,77 @@ class RfqController extends Controller
     {
         $center = auth('maintenance_center')->user();
         $maintenanceRequest->rfqAssignments()->where('maintenance_center_id', $center->id)->firstOrFail();
+        $maintenanceRequest->load('requestServices');
 
-        $data = $request->validate([
-            'price' => ['required', 'numeric', 'min:0'],
-            'estimated_duration_minutes' => ['nullable', 'integer', 'min:1', 'max:9999'],
-            'notes' => ['nullable', 'string', 'max:2000'],
-            'quotation_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
+        $hasServices = $maintenanceRequest->requestServices->isNotEmpty();
 
-        $quotationPdfPath = null;
-        $originalPdfName = null;
-        if ($request->hasFile('quotation_pdf')) {
-            $file = $request->file('quotation_pdf');
-            $quotationPdfPath = $file->store('quotation-pdfs/' . $maintenanceRequest->id, 'public');
-            $originalPdfName = $file->getClientOriginalName();
+        if ($hasServices) {
+            $rules = [
+                'estimated_duration_minutes' => ['nullable', 'integer', 'min:1', 'max:9999'],
+                'notes' => ['nullable', 'string', 'max:2000'],
+                'quotation_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+                'invoice_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            ];
+            foreach ($maintenanceRequest->requestServices as $rs) {
+                $rules["line_items.{$rs->id}.price"] = ['required', 'numeric', 'min:0'];
+                $rules["line_items.{$rs->id}.notes"] = ['nullable', 'string', 'max:500'];
+            }
+            $data = $request->validate($rules);
+            $quotationPdfPath = null;
+            $originalPdfName = null;
+            if ($request->hasFile('quotation_pdf')) {
+                $file = $request->file('quotation_pdf');
+                $quotationPdfPath = $file->store('quotation-pdfs/' . $maintenanceRequest->id, 'public');
+                $originalPdfName = $file->getClientOriginalName();
+            }
+            $data['quotation_pdf_path'] = $quotationPdfPath;
+            $data['original_pdf_name'] = $originalPdfName;
+            $invoiceImagePath = null;
+            $invoiceImageOriginalName = null;
+            if ($request->hasFile('invoice_image')) {
+                $img = $request->file('invoice_image');
+                $invoiceImagePath = $img->store('quotation-invoice-images/' . $maintenanceRequest->id, 'public');
+                $invoiceImageOriginalName = $img->getClientOriginalName();
+            }
+            $data['invoice_image_path'] = $invoiceImagePath;
+            $data['invoice_image_original_name'] = $invoiceImageOriginalName;
+            $lineItems = [];
+            foreach ($maintenanceRequest->requestServices as $rs) {
+                $lineItems[$rs->id] = [
+                    'price' => (float) ($data['line_items'][$rs->id]['price'] ?? 0),
+                    'image_path' => null,
+                    'original_image_name' => null,
+                    'notes' => $data['line_items'][$rs->id]['notes'] ?? null,
+                ];
+            }
+            $data['line_items'] = $lineItems;
+        } else {
+            $data = $request->validate([
+                'price' => ['required', 'numeric', 'min:0'],
+                'estimated_duration_minutes' => ['nullable', 'integer', 'min:1', 'max:9999'],
+                'notes' => ['nullable', 'string', 'max:2000'],
+                'quotation_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+                'invoice_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            ]);
+            $quotationPdfPath = null;
+            $originalPdfName = null;
+            if ($request->hasFile('quotation_pdf')) {
+                $file = $request->file('quotation_pdf');
+                $quotationPdfPath = $file->store('quotation-pdfs/' . $maintenanceRequest->id, 'public');
+                $originalPdfName = $file->getClientOriginalName();
+            }
+            $data['quotation_pdf_path'] = $quotationPdfPath;
+            $data['original_pdf_name'] = $originalPdfName;
+            $invoiceImagePath = null;
+            $invoiceImageOriginalName = null;
+            if ($request->hasFile('invoice_image')) {
+                $img = $request->file('invoice_image');
+                $invoiceImagePath = $img->store('quotation-invoice-images/' . $maintenanceRequest->id, 'public');
+                $invoiceImageOriginalName = $img->getClientOriginalName();
+            }
+            $data['invoice_image_path'] = $invoiceImagePath;
+            $data['invoice_image_original_name'] = $invoiceImageOriginalName;
         }
-
-        $data['quotation_pdf_path'] = $quotationPdfPath;
-        $data['original_pdf_name'] = $originalPdfName;
 
         try {
             $this->rfqService->submitQuotation($maintenanceRequest, $center, $data);
@@ -80,6 +133,7 @@ class RfqController extends Controller
         $data = $request->validate([
             'final_invoice' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:' . $maxKb],
             'final_invoice_amount' => ['nullable', 'numeric', 'min:0'],
+            'final_invoice_tax_type' => ['required', 'string', 'in:with_tax,without_tax'],
             'completion_date' => ['nullable', 'date'],
         ]);
 
@@ -107,6 +161,7 @@ class RfqController extends Controller
         $data['final_invoice_original_name'] = $originalName;
         $data['file_type'] = $fileType;
         $data['final_invoice_amount'] = $data['final_invoice_amount'] ?? null;
+        $data['final_invoice_tax_type'] = $data['final_invoice_tax_type'];
         $data['completion_date'] = $data['completion_date'] ?? null;
 
         try {

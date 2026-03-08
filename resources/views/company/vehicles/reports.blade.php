@@ -78,14 +78,11 @@
             </table>
         </div>
         <div class="flex flex-wrap gap-2 mt-6">
-            <a href="{{ route('company.vehicles.report.excel', $vehicle) }}?{{ $reportQs ?? '' }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600/30 text-emerald-300 border border-emerald-400/50 hover:bg-emerald-600/50 font-bold">
-                <i class="fa-solid fa-file-excel"></i> {{ __('vehicles.download_excel') }}
-            </a>
-            <a href="{{ route('company.vehicles.report.pdf', $vehicle) }}?{{ $reportQs ?? '' }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600/30 text-red-300 border border-red-400/50 hover:bg-red-600/50 font-bold">
-                <i class="fa-solid fa-file-pdf"></i> {{ __('vehicles.download_pdf') }}
-            </a>
+            @php $reportQuery = $reportQs ?? ''; @endphp
+            <x-export-dropdown
+                :pdfUrl="route('company.vehicles.report.pdf', $vehicle) . ($reportQuery ? '?' . $reportQuery : '')"
+                :excelUrl="route('company.vehicles.report.excel', $vehicle) . ($reportQuery ? '?' . $reportQuery : '')"
+            />
         </div>
     </div>
 </div>

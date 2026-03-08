@@ -183,4 +183,28 @@ class OdometerTrackingService
         Cache::forget("market_monthly_{$companyId}_12");
         Cache::forget("company_dashboard_{$companyId}");
     }
+
+    /**
+     * Ensure vehicle_monthly_mileage has a row for the current month for this vehicle.
+     * Used after recording initial odometer so monthly reports and backfill logic see the vehicle.
+     */
+    public function ensureCurrentMonthMileageRecord(int $vehicleId, float $odometer): void
+    {
+        $month = (int) now()->month;
+        $year = (int) now()->year;
+
+        \App\Models\VehicleMonthlyMileage::firstOrCreate(
+            [
+                'vehicle_id' => $vehicleId,
+                'month' => $month,
+                'year' => $year,
+            ],
+            [
+                'start_odometer' => $odometer,
+                'end_odometer' => $odometer,
+                'total_km' => 0,
+                'is_closed' => false,
+            ]
+        );
+    }
 }

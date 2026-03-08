@@ -141,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Driver layout: driver name, initial, and unread notification count
+        // Driver name is not cached so when the company updates driver_name on the vehicle,
+        // the driver sees the new name on the next page load.
         View::composer('layouts.driver', function ($view) {
             $phone = Session::get('driver_phone');
             $driverName = __('driver.driver');
@@ -148,14 +150,11 @@ class AppServiceProvider extends ServiceProvider
             $driverNotificationCount = 0;
             if ($phone) {
                 $variants = PhoneHelper::variants($phone);
-                $cacheKey = 'driver_layout_' . md5($phone);
-                $cached = cache()->remember($cacheKey, 300, function () use ($variants) {
-                    $vehicle = Vehicle::forDriverPhone($variants)->where('is_active', true)->first();
-                    $name = ($vehicle && $vehicle->driver_name) ? $vehicle->driver_name : __('driver.driver');
-                    return ['driverName' => $name, 'driverInitial' => mb_substr($name, 0, 1)];
-                });
-                $driverName = $cached['driverName'];
-                $driverInitial = $cached['driverInitial'] ?? mb_substr($driverName, 0, 1);
+                $vehicle = Vehicle::forDriverPhone($variants)->where('is_active', true)->first();
+                if ($vehicle && $vehicle->driver_name) {
+                    $driverName = $vehicle->driver_name;
+                    $driverInitial = mb_substr($driverName, 0, 1);
+                }
                 $driverNotificationCount = DriverNotification::whereIn('driver_phone', $variants)
                     ->whereNull('read_at')
                     ->count();

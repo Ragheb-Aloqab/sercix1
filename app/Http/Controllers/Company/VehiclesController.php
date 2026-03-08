@@ -93,7 +93,7 @@ class VehiclesController extends Controller
         }
 
         $data['company_id'] = $company->id;
-        $data['is_active'] = (bool)($data['is_active'] ?? true);
+        $data['is_active'] = $request->boolean('is_active');
         if (!empty($data['driver_phone'])) {
             $data['driver_phone'] = $this->normalizePhone($data['driver_phone']);
         }
@@ -330,7 +330,7 @@ class VehiclesController extends Controller
             $this->authorize('view', $branch);
         }
 
-        $data['is_active'] = (bool)($data['is_active'] ?? $vehicle->is_active);
+        $data['is_active'] = $request->boolean('is_active');
         if (array_key_exists('driver_phone', $data) && $data['driver_phone'] !== null) {
             $data['driver_phone'] = $data['driver_phone'] === '' ? null : $this->normalizePhone($data['driver_phone']);
         }

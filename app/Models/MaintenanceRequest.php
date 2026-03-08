@@ -39,6 +39,7 @@ class MaintenanceRequest extends Model
         'file_type',
         'final_invoice_amount',
         'final_invoice_uploaded_at',
+        'final_invoice_tax_type',
         'completion_date',
         'completed_at',
     ];
@@ -108,6 +109,20 @@ class MaintenanceRequest extends Model
     public function statusLogs()
     {
         return $this->hasMany(MaintenanceRequestStatusLog::class);
+    }
+
+    public function requestServices()
+    {
+        return $this->hasMany(MaintenanceRequestService::class, 'maintenance_request_id')->orderBy('sort_order');
+    }
+
+    /** Whether the request has any driver-proposed services still pending approval. */
+    public function hasPendingProposedServices(): bool
+    {
+        return $this->requestServices()
+            ->whereNotNull('driver_proposed_service_id')
+            ->whereHas('driverProposedService', fn ($q) => $q->where('status', DriverProposedService::STATUS_PENDING))
+            ->exists();
     }
 
     public function approverCompany()

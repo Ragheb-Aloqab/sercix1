@@ -33,6 +33,7 @@ return [
     'update' => 'Update',
     'saving' => 'Saving...',
     'cancel' => 'Cancel',
+    'remove' => 'Remove',
     'search' => 'Search',
     'view' => 'View',
     'view_all' => 'View all',

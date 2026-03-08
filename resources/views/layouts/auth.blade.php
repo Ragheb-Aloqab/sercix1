@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @livewireStyles
-    @vite(['resources/js/app.js', 'resources/css/style.css'])
+    @vite(['resources/js/app.js', 'resources/css/app.css', 'resources/css/style.css'])
     <x-vite-cdn-fallback />
 </head>
 <body class="page-auth min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80 dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 antialiased overflow-x-hidden transition-colors duration-300">

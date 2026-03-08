@@ -64,10 +64,14 @@ class ServiceReportController extends Controller
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$from, $to])
             ->whereRaw('(COALESCE(final_invoice_amount, 0) > 0 OR COALESCE(approved_quote_amount, 0) > 0)')
-            ->with(['vehicle:id,plate_number,make,model']);
+            ->with(['vehicle:id,plate_number,make,model', 'requestServices.service', 'requestServices.driverProposedService']);
 
         if ($vehicleId > 0) {
             $mrQuery->where('vehicle_id', $vehicleId);
+        }
+
+        if ($serviceTypeId > 0) {
+            $mrQuery->whereHas('requestServices', fn ($q) => $q->where('service_id', $serviceTypeId));
         }
 
         $maintenanceRequests = $mrQuery->latest('created_at')->get();
@@ -114,7 +118,12 @@ class ServiceReportController extends Controller
 
         $mrsWithDisplay = $maintenanceRequests->map(function ($mr) {
             $amount = (float) ($mr->final_invoice_amount ?? $mr->approved_quote_amount ?? 0);
-            $serviceName = MaintenanceType::tryFrom($mr->maintenance_type)?->label() ?? $mr->maintenance_type ?? __('reports.maintenance_request');
+            $servicesList = $mr->requestServices->isNotEmpty()
+                ? $mr->requestServices->map(fn ($rs) => $rs->display_name)->filter()->values()->join(', ')
+                : null;
+            $serviceName = $servicesList !== null && $servicesList !== ''
+                ? $servicesList
+                : (MaintenanceType::tryFrom($mr->maintenance_type)?->label() ?? $mr->maintenance_type ?? __('reports.maintenance_request'));
             $invoiceDisplay = ($mr->final_invoice_amount || $mr->final_invoice_pdf_path) ? __('common.yes') : '—';
             return (object) [
                 'type' => 'maintenance_request',
@@ -123,7 +132,7 @@ class ServiceReportController extends Controller
                 'date' => $mr->created_at,
                 'statusLabel' => $mr->status_label,
                 'serviceName' => $serviceName,
-                'orderServicesCount' => 1,
+                'orderServicesCount' => $mr->requestServices->count(),
                 'amount' => $amount,
                 'invoiceDisplay' => $invoiceDisplay,
             ];

@@ -66,6 +66,12 @@ return [
     'enter_daily_odometer' => 'Enter end of day odometer',
     'daily_odometer_hint' => 'Enter the odometer reading at end of your shift. Daily mileage will be calculated from the previous reading.',
 
+    'initial_odometer_title' => 'Initial odometer required',
+    'initial_odometer_message' => 'Please enter the initial odometer value for this vehicle.',
+    'initial_odometer_required' => 'Please enter a value.',
+    'initial_odometer_must_be_positive' => 'Odometer must be a number greater than 0.',
+    'initial_odometer_saved' => 'Initial odometer saved successfully.',
+
     'map_style' => 'Map style',
     'map_style_carto_dark' => 'Carto Dark',
     'map_style_osm_humanitarian' => 'Humanitarian',

@@ -278,6 +278,12 @@ Route::middleware(['company'])
         Route::post('/maintenance-requests/{maintenanceRequest}/reject', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'reject'])
             ->name('maintenance-requests.reject')
             ->whereNumber('maintenanceRequest');
+        Route::post('/maintenance-requests/{maintenanceRequest}/approve-proposed-service/{proposedService}', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'approveProposedService'])
+            ->name('maintenance-requests.approve-proposed-service')
+            ->whereNumber(['maintenanceRequest', 'proposedService']);
+        Route::post('/maintenance-requests/{maintenanceRequest}/reject-proposed-service/{proposedService}', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'rejectProposedService'])
+            ->name('maintenance-requests.reject-proposed-service')
+            ->whereNumber(['maintenanceRequest', 'proposedService']);
         Route::post('/maintenance-requests/{maintenanceRequest}/send-rfq', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'sendRfq'])
             ->name('maintenance-requests.send-rfq')
             ->whereNumber('maintenanceRequest');

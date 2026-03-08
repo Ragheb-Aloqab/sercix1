@@ -1,4 +1,3 @@
-{{-- @extends('dashboard.layout.app') --}}
 @extends('admin.layouts.app')
 
 @section('title', 'إضافة فني | Servx Motors')

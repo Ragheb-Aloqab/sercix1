@@ -78,17 +78,17 @@
      @close-sidebar.window="sidebarOpen = false"
      class="min-h-screen flex w-full min-w-0 transition-colors duration-300 {{ auth('company')->check() || auth('maintenance_center')->check() ? 'company-dashboard-layout' : '' }}"
      :class="{ 'sidebar-collapsed': sidebarCollapsed }">
-    {{-- Mobile backdrop --}}
-    <div x-show="sidebarOpen"
-         x-cloak
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click="sidebarOpen = false"
-         class="lg:hidden fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm"></div>
+    {{-- Mobile backdrop: only in DOM when sidebar is open so it does not appear in Inspect when closed --}}
+    <template x-if="sidebarOpen">
+        <div x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false"
+             class="lg:hidden fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm"></div>
+    </template>
 
     {{-- Sidebar wrapper: fixed 260px (WL) or 250px, right in RTL, full height — main content sits beside via margin --}}
     <div class="dashboard-sidebar-wrapper flex flex-col max-w-[90vw]
