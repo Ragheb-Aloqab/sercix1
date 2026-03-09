@@ -40,6 +40,7 @@
             <p class="sidebar-nav-label">{{ __('dashboard.customers') }}</p>
         </div>
     </a>
+    @if(Route::has('admin.plans.index'))
     <a href="{{ route('admin.plans.index') }}"
        class="sidebar-nav-item {{ $this->isActive('admin.plans.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('plans.title') }}">
@@ -48,6 +49,7 @@
             <p class="sidebar-nav-label">{{ __('plans.title') }}</p>
         </div>
     </a>
+    @endif
     <a href="{{ route('admin.users.index') }}"
        class="sidebar-nav-item {{ $this->isActive('admin.users.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('admin_dashboard.admin_users') }}">

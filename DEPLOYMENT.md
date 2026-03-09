@@ -56,6 +56,20 @@ SESSION_LIFETIME=120
 
 - **Important**: `APP_ENV=production` and `APP_DEBUG=false` are required so assets and styling load correctly.
 
+### 2.1 SEO: Canonical URLs & www redirect
+
+To avoid Google Search Console issues ("Alternate page with proper canonical tag", "Duplicate, Google chose different canonical than user"):
+
+1. **Set `APP_URL` to your preferred domain** (with or without `www`):
+   - `APP_URL=https://servxmotors.com` → non-www is canonical; `www.servxmotors.com` redirects 301 to `servxmotors.com`
+   - `APP_URL=https://www.servxmotors.com` → www is canonical; `servxmotors.com` redirects 301 to `www.servxmotors.com`
+
+2. **Canonical tags** are built from `APP_URL` + path, so they stay consistent regardless of how users arrive.
+
+3. **robots.txt** uses `Host:` from `APP_URL` to tell search engines the preferred host.
+
+4. After changing `APP_URL`, run: `php artisan config:cache`
+
 ---
 
 ## 3. Subdomain setup (white-label)
@@ -161,6 +175,7 @@ In Hostinger: **Advanced** → **Cron Jobs** → create new cron, set schedule t
 | Session lost on subdomain | Consider `SESSION_DOMAIN=.yourdomain.com` |
 | Storage links (images) 404 | Run `php artisan storage:link` or create symlink manually (see 1.2) |
 | ModSecurity / script blocked | App uses meta tags for theme (no inline script) to reduce blocks; if needed, adjust ModSecurity rules in Hostinger |
+| **Google: "Duplicate, chose different canonical"** | Ensure `APP_URL` matches your preferred domain (www or non-www). Deploy latest `seo-meta` + `ForcePreferredDomain` middleware. Run `php artisan config:cache`. |
 
 ---
 

@@ -191,7 +191,8 @@ class SuperDashboard extends Component
         $current = $from->copy();
         while ($current <= $to) {
             $key = "{$current->year}-{$current->month}";
-            $orderCount = (int) ($orderRows[$key]->count ?? 0);
+            $row = $orderRows[$key] ?? null;
+            $orderCount = $row ? (int) $row->count : 0;
             $vehiclesAtMonthEnd = Vehicle::where('created_at', '<=', $current->copy()->endOfMonth())->count();
             $ratio = $vehiclesAtMonthEnd > 0 ? round($orderCount / $vehiclesAtMonthEnd, 2) : 0;
             $out[] = [
@@ -481,25 +482,39 @@ class SuperDashboard extends Component
         session()->flash('success', __('admin_dashboard.clear_cache') . ' — ' . __('common.done'));
     }
 
+    /** Safely get a computed property, returning fallback on exception. */
+    private function safeGet(string $property, mixed $fallback = []): mixed
+    {
+        try {
+            return $this->{$property};
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SuperDashboard property failed: ' . $property, [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $fallback;
+        }
+    }
+
     public function render()
     {
         return view('livewire.admin.super-dashboard', [
-            'stats' => $this->stats,
-            'alerts' => $this->alerts,
-            'companies' => $this->companies,
-            'recentActivity' => $this->recentActivity,
-            'ordersPerCompany' => $this->ordersPerCompany,
-            'ordersPerVehicle' => $this->ordersPerVehicle,
-            'ordersPerVehicleOverTime' => $this->ordersPerVehicleOverTime,
-            'monthlyOrders' => $this->monthlyOrders,
-            'orderStatusDistribution' => $this->orderStatusDistribution,
-            'averageResolutionHours' => $this->averageResolutionHours,
-            'systemHealth' => $this->systemHealth,
-            'fleetAnalytics' => $this->fleetAnalytics,
-            'monthlyMaintenanceTrend' => $this->monthlyMaintenanceTrend,
-            'monthlyFuelTrend' => $this->monthlyFuelTrend,
-            'topVehiclesByCost' => $this->topVehiclesByCost,
-            'maintenanceVsFuel' => $this->maintenanceVsFuel,
+            'stats' => $this->safeGet('stats', ['companies' => 0, 'vehicles' => 0, 'orders' => 0, 'pending_quota_requests' => 0]),
+            'alerts' => $this->safeGet('alerts'),
+            'companies' => $this->safeGet('companies', new \Illuminate\Pagination\LengthAwarePaginator([], 0, 8)),
+            'recentActivity' => $this->safeGet('recentActivity'),
+            'ordersPerCompany' => $this->safeGet('ordersPerCompany'),
+            'ordersPerVehicle' => $this->safeGet('ordersPerVehicle'),
+            'ordersPerVehicleOverTime' => $this->safeGet('ordersPerVehicleOverTime'),
+            'monthlyOrders' => $this->safeGet('monthlyOrders'),
+            'orderStatusDistribution' => $this->safeGet('orderStatusDistribution'),
+            'averageResolutionHours' => $this->safeGet('averageResolutionHours'),
+            'systemHealth' => $this->safeGet('systemHealth'),
+            'fleetAnalytics' => $this->safeGet('fleetAnalytics'),
+            'monthlyMaintenanceTrend' => $this->safeGet('monthlyMaintenanceTrend'),
+            'monthlyFuelTrend' => $this->safeGet('monthlyFuelTrend'),
+            'topVehiclesByCost' => $this->safeGet('topVehiclesByCost'),
+            'maintenanceVsFuel' => $this->safeGet('maintenanceVsFuel'),
         ]);
     }
 }

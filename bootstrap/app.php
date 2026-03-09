@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'payments/tap/webhook',
         ]);
         $middleware->appendToGroup('web', \App\Http\Middleware\ForceHttps::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\ForcePreferredDomain::class);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->web(append: [
             \App\Http\Middleware\SetLocaleFromSession::class,

@@ -19,8 +19,18 @@
         $image = $siteUrl . '/' . ltrim($image, '/');
     }
     $image = $image ?: $siteUrl . '/images/og-default.png';
-    $canonical = $canonical ?? url()->current();
-    $canonical = str_starts_with($canonical, 'http') ? $canonical : $siteUrl . parse_url($canonical, PHP_URL_PATH);
+    // Canonical: always use APP_URL as base to avoid www/non-www and duplicate-indexing issues
+    $preferredHost = parse_url($siteUrl, PHP_URL_HOST);
+    $currentHost = request()->getHost();
+    $isMainDomain = in_array($currentHost, [$preferredHost, 'www.' . $preferredHost], true);
+    if (isset($canonical)) {
+        $canonical = str_starts_with($canonical, 'http') ? $canonical : $siteUrl . parse_url($canonical, PHP_URL_PATH);
+    } elseif ($isMainDomain) {
+        $path = '/' . ltrim(request()->path(), '/');
+        $canonical = $siteUrl . ($path === '/' ? '/' : rtrim($path, '/'));
+    } else {
+        $canonical = url()->current();
+    }
     $noindex = $noindex ?? false;
     $breadcrumbs = $breadcrumbs ?? [];
 @endphp
