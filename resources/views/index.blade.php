@@ -54,7 +54,7 @@
             <div class="hidden md:block flex-1 min-w-0 max-w-md" aria-hidden="true"></div>
 
             <!-- Desktop navigation -->
-            <nav aria-label="{{ __('index.navMain') }}" class="hidden md:flex flex-row items-center gap-6 text-sm font-semibold">
+            <nav aria-label="{{ __('index.navMain') }}" class="hidden md:flex flex-row items-center gap-6 text-sm font-semibold shrink-0 ms-auto">
                 <a href="#offers" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navOffers">{{ __('index.navOffers') }}</a>
                 <a href="#why" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navWhy">{{ __('index.navWhy') }}</a>
                 <a href="#workflow" class="text-servx-silver hover:text-servx-red transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black py-1 px-1" id="navHow">{{ __('index.navHow') }}</a>
