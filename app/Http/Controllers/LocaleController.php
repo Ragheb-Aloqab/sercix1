@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class LocaleController extends Controller
@@ -11,6 +12,7 @@ class LocaleController extends Controller
     /**
      * Set language and direction; persists to session so main index and dashboards stay in sync.
      * GET /set-locale?lang=ar|en or /set-locale?dir=rtl|ltr
+     * Optional: ?return=/path to redirect back to a specific path (must start with /).
      */
     public function __invoke(Request $request)
     {
@@ -39,19 +41,34 @@ class LocaleController extends Controller
             ]);
         }
 
-        Session::save();
-
-        $previous = url()->previous();
         $base = $request->getSchemeAndHttpHost();
-        if ($previous && !str_contains($previous, '/set-locale')) {
-            $parsed = parse_url($previous);
-            $path = $parsed['path'] ?? '/';
-            $query = isset($parsed['query']) && $parsed['query'] !== '' ? '?' . $parsed['query'] : '';
-            $target = $base . $path . $query;
+        $returnPath = $request->query('return');
+        // Safe redirect: only allow relative paths, block protocol-relative (//) and colons (e.g. /https:evil.com)
+        if (is_string($returnPath) && str_starts_with($returnPath, '/') && !str_contains($returnPath, '//') && !str_contains($returnPath, ':')) {
+            $target = $base . $returnPath;
         } else {
-            $target = $base . '/';
+            $previous = url()->previous();
+            if ($previous && !str_contains($previous, '/set-locale')) {
+                $parsed = parse_url($previous);
+                $path = $parsed['path'] ?? '/';
+                $query = isset($parsed['query']) && $parsed['query'] !== '' ? '?' . $parsed['query'] : '';
+                $target = $base . $path . $query;
+            } else {
+                $target = $base . '/';
+                if (Auth::guard('company')->check()) {
+                    $target = $base . '/company/dashboard';
+                } elseif ($request->session()->has('driver_phone')) {
+                    $target = $base . '/driver';
+                } elseif (Auth::guard('maintenance_center')->check()) {
+                    $target = $base . '/maintenance-center/dashboard';
+                }
+            }
         }
+
         Session::put('locale_just_changed', true);
+
+        // Force session write so the next request sees the new locale
+        Session::save();
 
         return redirect()->to($target)
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')

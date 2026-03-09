@@ -6,6 +6,7 @@ use App\Exports\ComprehensiveReportExport;
 use App\Http\Controllers\Controller;
 use App\Services\ComprehensiveReportPdfService;
 use App\Services\ComprehensiveReportService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -18,23 +19,14 @@ class ComprehensiveReportController extends Controller
     ) {}
 
     /**
-     * Display the Comprehensive Report page.
+     * Display the Comprehensive Report page (filters and data are handled by Livewire).
      */
     public function index(Request $request)
     {
         $company = auth('company')->user();
-        $data = $this->reportService->getReportDataFromRequest($request, $company->id);
+        SubscriptionService::authorize($company, 'advanced_reports');
 
-        $vehicles = $company->vehicles()
-            ->where('is_active', true)
-            ->orderBy('plate_number')
-            ->get(['id', 'plate_number', 'make', 'model']);
-
-        return view('company.reports.comprehensive', [
-            'data' => $data,
-            'vehicles' => $vehicles,
-            'company' => $company,
-        ]);
+        return view('company.reports.comprehensive');
     }
 
     /**
@@ -43,6 +35,7 @@ class ComprehensiveReportController extends Controller
     public function exportPdf(Request $request): Response
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'advanced_reports');
         $data = $this->reportService->getReportDataFromRequest($request, $company->id);
 
         $pdfContent = $this->pdfService->generate($company, $data);
@@ -61,6 +54,7 @@ class ComprehensiveReportController extends Controller
     public function exportExcel(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'advanced_reports');
         $data = $this->reportService->getReportDataFromRequest($request, $company->id);
 
         $filename = $this->exportFilename($data, 'xlsx');

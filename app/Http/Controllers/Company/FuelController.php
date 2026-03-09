@@ -11,6 +11,7 @@ use App\Models\Vehicle;
 use App\Services\AnalyticsService;
 use App\Services\FuelReportPdfService;
 use App\Services\InvoicePdfService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -29,6 +30,7 @@ class FuelController extends Controller
     private function getReportDataFromRequest(Request $request): array
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'fuel_manual');
 
         $from = $request->filled('from')
             ? \Carbon\Carbon::parse($request->from)->startOfDay()
@@ -209,6 +211,7 @@ class FuelController extends Controller
     public function generateInvoice(FuelRefill $fuelRefill)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'fuel_manual');
         if ((int) $fuelRefill->company_id !== (int) $company->id) {
             abort(403);
         }

@@ -40,6 +40,14 @@
             <p class="sidebar-nav-label">{{ __('dashboard.customers') }}</p>
         </div>
     </a>
+    <a href="{{ route('admin.plans.index') }}"
+       class="sidebar-nav-item {{ $this->isActive('admin.plans.*') ? 'sidebar-nav-item--active' : '' }}"
+       title="{{ __('plans.title') }}">
+        <span class="sidebar-nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+        <div class="sidebar-nav-text">
+            <p class="sidebar-nav-label">{{ __('plans.title') }}</p>
+        </div>
+    </a>
     <a href="{{ route('admin.users.index') }}"
        class="sidebar-nav-item {{ $this->isActive('admin.users.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('admin_dashboard.admin_users') }}">

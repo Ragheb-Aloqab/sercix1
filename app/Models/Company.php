@@ -16,6 +16,7 @@ class Company extends Authenticatable
         'phone',
         'email',
         'status',
+        'plan_id',
         'theme_preference',
         'vehicle_quota',
         'password',
@@ -77,6 +78,22 @@ class Company extends Authenticatable
     {
         return $this->hasMany(\App\Models\CompanyBranch::class);
     }
+
+    public function subscriptionPlan()
+    {
+        return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
+    }
+
+    /** Whether the company's plan allows the given feature. No plan = allow all (backward compat). */
+    public function canUseFeature(string $featureKey): bool
+    {
+        $plan = $this->subscriptionPlan;
+        if (!$plan || !$plan->is_active) {
+            return true;
+        }
+        return $plan->hasFeature($featureKey);
+    }
+
     public function services()
     {
         return $this->belongsToMany(\App\Models\Service::class, 'company_services')

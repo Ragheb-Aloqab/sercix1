@@ -19,7 +19,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/health', fn () => response()->json(['status' => 'ok', 'version' => '1.0']))->name('api.v1.health');
 
     Route::prefix('auth')->group(function () {
-        Route::post('/login', [AuthController::class, 'login'])->name('api.v1.auth.login');
+        Route::post('/login', [AuthController::class, 'login'])
+            ->middleware('throttle:5,1')
+            ->name('api.v1.auth.login');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('api.v1.auth.logout');
     });
 

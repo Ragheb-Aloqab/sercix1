@@ -111,6 +111,19 @@ Route::middleware(['auth:web', 'admin'])
         });
 
         // =========================
+        // Subscription Plans
+        // =========================
+        Route::prefix('plans')->name('plans.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\PlanController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\PlanController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\PlanController::class, 'store'])->name('store');
+            Route::get('/{plan}/edit', [\App\Http\Controllers\Admin\PlanController::class, 'edit'])->name('edit')->whereNumber('plan');
+            Route::put('/{plan}', [\App\Http\Controllers\Admin\PlanController::class, 'update'])->name('update')->whereNumber('plan');
+            Route::delete('/{plan}', [\App\Http\Controllers\Admin\PlanController::class, 'destroy'])->name('destroy')->whereNumber('plan');
+            Route::patch('/{plan}/toggle', [\App\Http\Controllers\Admin\PlanController::class, 'toggle'])->name('toggle')->whereNumber('plan');
+        });
+
+        // =========================
         // Customers (Companies) — create/store restricted to Super Admin only
         // =========================
         Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');

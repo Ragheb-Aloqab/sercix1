@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\MaintenanceCenter;
+use App\Services\SubscriptionService;
 
 class MaintenanceCenterController extends Controller
 {
@@ -14,6 +15,9 @@ class MaintenanceCenterController extends Controller
      */
     public function index()
     {
+        $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
+
         $centers = MaintenanceCenter::active()
             ->orderBy('name')
             ->get();

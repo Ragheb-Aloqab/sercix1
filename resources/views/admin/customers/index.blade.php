@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            {{-- Search --}}
+            {{-- Search & filter by plan --}}
             <div class="dash-card">
                 <form method="GET" class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
@@ -39,9 +39,21 @@
                             class="w-full ps-10 pe-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-600/50 text-white placeholder-slate-400 focus:border-sky-500/50"
                             placeholder="{{ __('admin_dashboard.filter_by_company') }}" />
                     </div>
-                    <button type="submit" class="dash-btn dash-btn-primary">
-                        <i class="fa-solid fa-magnifying-glass"></i>{{ __('common.search') }}
-                    </button>
+                    <div class="w-full sm:w-56">
+                        <label class="text-xs text-slate-500 block mb-1">{{ __('plans.filter_by_plan') }}</label>
+                        <select name="plan_id" class="w-full rounded-xl bg-slate-800/50 border border-slate-600/50 text-white px-4 py-2.5 focus:border-sky-500/50" onchange="this.form.submit()">
+                            <option value="">{{ __('plans.all_plans') }}</option>
+                            <option value="0" {{ (string)($planId ?? '') === '0' ? 'selected' : '' }}>{{ __('plans.no_plan') }}</option>
+                            @foreach($plans ?? [] as $plan)
+                                <option value="{{ $plan->id }}" {{ (string)($planId ?? '') === (string)$plan->id ? 'selected' : '' }}>{{ $plan->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="dash-btn dash-btn-primary">
+                            <i class="fa-solid fa-magnifying-glass"></i>{{ __('common.search') }}
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -53,6 +65,7 @@
                             <tr>
                                 <th class="p-4 text-start font-semibold text-slate-300">{{ __('common.company') }}</th>
                                 <th class="p-4 text-start font-semibold text-slate-300">{{ __('admin_dashboard.phone') }}</th>
+                                <th class="p-4 text-start font-semibold text-slate-300">{{ __('plans.title') }}</th>
                                 <th class="p-4 text-start font-semibold text-slate-300">{{ __('admin_dashboard.subscription_status') }}</th>
                                 <th class="p-4 text-end font-semibold text-slate-300">{{ __('common.actions') }}</th>
                             </tr>
@@ -65,6 +78,7 @@
                                         <p class="text-xs text-slate-400">{{ $customer->email ?? '' }}</p>
                                     </td>
                                     <td class="p-4 text-slate-300">{{ $customer->phone ?? '—' }}</td>
+                                    <td class="p-4 text-slate-300">{{ $customer->subscriptionPlan?->name ?? '—' }}</td>
                                     <td class="p-4">
                                         <span class="px-2 py-1 rounded-full text-xs font-medium {{ $customer->status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }}">
                                             {{ $customer->status === 'active' ? __('admin_dashboard.active') : __('admin_dashboard.inactive') }}
@@ -87,7 +101,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="p-8 text-center text-slate-400">{{ __('admin_dashboard.no_companies') }}</td>
+                                    <td colspan="5" class="p-8 text-center text-slate-400">{{ __('admin_dashboard.no_companies') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

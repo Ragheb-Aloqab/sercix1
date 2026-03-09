@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Exports\MileageReportExport;
 use App\Exports\VehicleMileageReportExport;
 use App\Jobs\GenerateMileageReportJob;
+use App\Services\SubscriptionService;
 use App\Services\VehicleMileageService;
 use App\Services\VehicleMileageReportService;
 use App\Services\MileageReportPdfService;
@@ -25,6 +26,7 @@ class MileageReportController extends Controller
     public function exportExcel(Request $request): Response|RedirectResponse
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'distance_reports');
 
         if ($request->boolean('queue')) {
             return $this->dispatchExportJob($company, 'excel', $request);
@@ -64,6 +66,7 @@ class MileageReportController extends Controller
     public function exportPdf(Request $request): Response|RedirectResponse
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'distance_reports');
 
         if ($request->boolean('queue')) {
             return $this->dispatchExportJob($company, 'pdf', $request);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Exports\TaxReportExport;
 use App\Http\Controllers\Controller;
+use App\Services\SubscriptionService;
 use App\Services\TaxReportPdfService;
 use App\Services\TaxReportService;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ class TaxReportController extends Controller
     private function getDataFromRequest(Request $request): array
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'tax_reports');
 
         $dateFrom = $request->filled('from')
             ? Carbon::parse($request->from)->startOfDay()
@@ -62,25 +64,14 @@ class TaxReportController extends Controller
 
     /**
      * GET /company/reports/tax
-     * Tax Reports page with vehicle filter.
+     * Tax Reports page (filters and data are handled by Livewire).
      */
     public function index(Request $request)
     {
-        $result = $this->getDataFromRequest($request);
-        $company = $result['company'];
+        $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'tax_reports');
 
-        $vehicles = $company->vehicles()
-            ->where('is_active', true)
-            ->orderBy('plate_number')
-            ->get(['id', 'plate_number', 'make', 'model']);
-
-        return view('company.reports.tax', [
-            'data' => $result['data'],
-            'vehicles' => $vehicles,
-            'vehicleId' => $result['vehicleId'],
-            'dateFrom' => $result['dateFrom'],
-            'dateTo' => $result['dateTo'],
-        ]);
+        return view('company.reports.tax');
     }
 
     /**

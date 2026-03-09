@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Blade;
 use App\Models\FuelRefill;
 use App\Models\Invoice;
 use App\Models\Order;
@@ -69,7 +70,6 @@ class AppServiceProvider extends ServiceProvider
         $this->registerDomainEvents();
 
         // Site branding (name + logo) — when tenant is bound (white-label subdomain), use tenant; else global settings
-        // Note: 'index' excluded — IndexController passes its own data
         $brandingViews = [
             'layouts.*', 'auth.*', 'driver.*', 'company.*', 'admin.*', 'maintenance-center.*',
             'livewire.dashboard.*', 'components.*', 'errors.*',
@@ -102,6 +102,14 @@ class AppServiceProvider extends ServiceProvider
                 'brandTitleDriver' => $brandTitleDriver ?? $siteName,
                 'wlBranding' => $wlBranding,
             ]);
+        });
+
+        // @companyCan('feature_key') ... @endcompanyCan — show content only if company's plan allows the feature
+        Blade::directive('companyCan', function (string $expression) {
+            return "<?php if(auth()->guard('company')->check() && auth()->guard('company')->user()->canUseFeature({$expression})): ?>";
+        });
+        Blade::directive('endcompanyCan', function () {
+            return '<?php endif; ?>';
         });
 
         // Admin order partials: _services and _attachments — compute display data from $order

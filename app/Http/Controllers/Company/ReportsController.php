@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReportExport;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,9 @@ class ReportsController extends Controller
      */
     public function index()
     {
+        $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'basic_reports');
+
         return view('company.reports.index');
     }
 
@@ -22,6 +26,9 @@ class ReportsController extends Controller
      */
     public function mileage()
     {
+        $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'basic_reports');
+
         return view('company.reports.mileage');
     }
 
@@ -32,6 +39,7 @@ class ReportsController extends Controller
     public function downloadExport(ReportExport $export): Response
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'basic_reports');
 
         if ($export->notifiable_type !== \App\Models\Company::class || (int) $export->notifiable_id !== (int) $company->id) {
             abort(403);

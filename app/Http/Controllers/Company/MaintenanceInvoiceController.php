@@ -8,6 +8,7 @@ use App\Models\MaintenanceRequest;
 use App\Models\Vehicle;
 use App\Services\CompanyMaintenanceInvoicePdfService;
 use App\Services\MaintenanceInvoicePdfService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,6 +38,9 @@ class MaintenanceInvoiceController extends Controller
      */
     public function create()
     {
+        $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
+
         return view('company.maintenance-invoices.create');
     }
 
@@ -46,6 +50,7 @@ class MaintenanceInvoiceController extends Controller
     public function index(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
 
         $requests = MaintenanceRequest::forCompany($company->id)
             ->whereNotNull('final_invoice_pdf_path')

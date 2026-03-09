@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\FuelPaymentTransaction;
 use App\Models\FuelRefill;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,7 @@ class FuelBalanceController extends Controller
     public function index()
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'fuel_manual');
         $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
@@ -39,6 +41,7 @@ class FuelBalanceController extends Controller
     public function addBalance(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'fuel_manual');
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'amount' => ['required', 'numeric', 'min:1', 'max:999999'],
@@ -76,6 +79,7 @@ class FuelBalanceController extends Controller
     public function addBalanceAll(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'fuel_manual');
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:1', 'max:999999'],
             'payment_method' => ['required', 'string', 'in:bank_transfer'],

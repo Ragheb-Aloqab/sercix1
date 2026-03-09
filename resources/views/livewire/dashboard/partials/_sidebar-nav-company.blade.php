@@ -12,6 +12,7 @@
     </a>
 
     {{-- 2. My Vehicles --}}
+    @companyCan('limited_vehicles')
     <a href="{{ route('company.vehicles.index') }}"
        class="sidebar-nav-item {{ $this->isActive('company.vehicles.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.my_vehicles') }}">
@@ -24,8 +25,10 @@
             <span class="sidebar-nav-badge sidebar-nav-badge--warning" title="{{ __('vehicles.expiring_documents') }}">{{ $expiringDocumentsCount > 99 ? '99+' : $expiringDocumentsCount }}</span>
         @endif
     </a>
+    @endcompanyCan
 
     {{-- 3. Maintenance (collapsible section) --}}
+    @companyCan('request_maintenance_offers')
     <div x-data="{ maintenanceOpen: {{ ($this->isActive('company.maintenance-requests.*') || $this->isActive('company.maintenance-offers.*') || $this->isActive('company.maintenance-invoices.*')) ? 'true' : 'false' }} }" class="sidebar-nav-group">
         <button type="button" @click="maintenanceOpen = !maintenanceOpen"
                 class="sidebar-nav-item w-full text-start {{ ($this->isActive('company.maintenance-requests.*') || $this->isActive('company.maintenance-offers.*') || $this->isActive('company.maintenance-invoices.*')) ? 'sidebar-nav-item--active' : '' }}"
@@ -73,8 +76,10 @@
             </div>
         </div>
     </div>
+    @endcompanyCan
 
     {{-- 4. Fuel (collapsible section) --}}
+    @companyCan('fuel_manual')
     @php
         $fuelActive = request()->routeIs('company.fuel.index') || request()->routeIs('company.fuel-balance');
     @endphp
@@ -117,8 +122,10 @@
             </div>
         </div>
     </div>
+    @endcompanyCan
 
     {{-- 5. Tracking --}}
+    @companyCan('vehicle_tracking')
     <a href="{{ route('company.tracking.index') }}"
        class="sidebar-nav-item {{ $this->isActive('company.tracking.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.tracking') }}">
@@ -128,8 +135,10 @@
             <p class="sidebar-nav-sublabel">{{ __('fleet.tracking_desc') }}</p>
         </div>
     </a>
+    @endcompanyCan
 
     {{-- 6. Reports --}}
+    @companyCan('basic_reports')
     <a href="{{ route('company.reports.index') }}"
        class="sidebar-nav-item {{ $this->isActive('company.reports.*') ? 'sidebar-nav-item--active' : '' }}"
        title="{{ __('fleet.reports') }}">
@@ -139,6 +148,7 @@
             <p class="sidebar-nav-sublabel">{{ __('fleet.reports_desc') }}</p>
         </div>
     </a>
+    @endcompanyCan
 
     {{-- 7. Notifications --}}
     <a href="{{ route('company.notifications.index') }}"

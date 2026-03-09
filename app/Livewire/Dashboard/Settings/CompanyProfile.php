@@ -20,7 +20,7 @@ class CompanyProfile extends Component
     public ?string $address = null;
 
     public $logo; // uploaded file
-    public ?string $logo_path = null;
+    public ?string $logo_path = null; // display: current logo path from DB (column: logo)
 
     public function mount()
     {
@@ -32,7 +32,7 @@ class CompanyProfile extends Component
         $this->contact_person = $c->contact_person;
         $this->city           = $c->city;
         $this->address        = $c->address;
-        $this->logo_path      = $c->logo_path;
+        $this->logo_path      = $c->logo;
     }
 
     public function save()
@@ -49,20 +49,19 @@ class CompanyProfile extends Component
             'logo'           => ['nullable','image','max:2048'],
         ]);
 
-        $before = $c->only(['company_name','email','phone','contact_person','city','address','logo_path']);
+        $before = $c->only(['company_name','email','phone','contact_person','city','address','logo']);
 
-      
         if ($this->logo) {
-            if ($c->logo_path) {
-                Storage::disk('public')->delete($c->logo_path);
+            if ($c->logo) {
+                Storage::disk('public')->delete($c->logo);
             }
             $path = $this->logo->store('companies/logos', 'public');
-            $data['logo_path'] = $path;
+            $data['logo'] = $path;
         }
 
         $c->update($data);
 
-        $after = $c->only(['company_name','email','phone','contact_person','city','address','logo_path']);
+        $after = $c->only(['company_name','email','phone','contact_person','city','address','logo']);
         $changes = array_diff_assoc($after, $before);
 
         if (!empty($changes)) {
@@ -72,7 +71,7 @@ class CompanyProfile extends Component
             }
         }
 
-        $this->logo_path = $c->logo_path;
+        $this->logo_path = $c->logo;
         $this->reset('logo');
 
         session()->flash('success_company', 'تم حفظ بيانات الشركة.');

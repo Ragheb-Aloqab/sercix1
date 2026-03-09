@@ -19,7 +19,7 @@
                 <form method="POST" action="{{ route('admin.customers.update', $customer) }}" class="space-y-4" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    @include('admin.customers.partials.form', ['customer' => $customer])
+                    @include('admin.customers.partials.form', ['customer' => $customer, 'plans' => $plans ?? collect()])
                 </form>
             </div>
         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\MaintenanceRequest;
 use App\Models\Quotation;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 
 class MaintenanceOffersController extends Controller
@@ -15,6 +16,7 @@ class MaintenanceOffersController extends Controller
     public function index(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
 
         $query = MaintenanceRequest::forCompany($company->id)
             ->with(['vehicle', 'approvedCenter', 'quotations.maintenanceCenter', 'approvedQuotation'])

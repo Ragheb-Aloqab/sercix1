@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\AdminOtpService;
 use App\Services\OtpService;
+use App\Services\SubdomainRedirectService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -435,7 +436,8 @@ class UnifiedLoginController extends Controller
         Session::forget(['login_flow', 'otp.phone', 'otp.code', 'otp.expires_at']);
         Session::regenerate();
 
-        return redirect()->route('company.dashboard')->with('success', __('messages.company_login_success'));
+        $dashboardUrl = SubdomainRedirectService::companyDashboardUrl($company);
+        return redirect()->to($dashboardUrl)->with('success', __('messages.company_login_success'));
     }
 
     private function verifyDriverOtp(Request $request, string $otp)

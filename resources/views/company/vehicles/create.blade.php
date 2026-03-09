@@ -134,7 +134,7 @@
                 <div class="lg:col-span-2 flex items-center gap-2">
                     <input type="hidden" name="is_active" value="0">
                     <input id="is_active" type="checkbox" name="is_active" value="1" class="rounded accent-sky-500"
-                        @checked(old('is_active', 1))>
+                        @checked((string) old('is_active', '1') === '1')>
                     <label for="is_active" class="text-sm font-bold text-slate-300">نشط</label>
                 </div>
             </div>

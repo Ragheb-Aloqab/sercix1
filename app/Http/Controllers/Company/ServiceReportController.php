@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\Vehicle;
 use App\Services\AnalyticsService;
 use App\Services\ServiceReportPdfService;
+use App\Services\SubscriptionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,6 +33,7 @@ class ServiceReportController extends Controller
     private function getReportDataFromRequest(Request $request): array
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'basic_reports');
 
         $from = $request->filled('from')
             ? Carbon::parse($request->from)->startOfDay()

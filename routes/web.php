@@ -32,7 +32,7 @@ Route::post('/theme-preference', function (Request $request) {
         : 'light';
     app(\App\Services\ThemeService::class)->setPreference($theme);
     return response()->json(['theme' => $theme]);
-})->middleware('web')->name('theme-preference');
+})->middleware(['web', 'throttle:30,1'])->name('theme-preference');
 
 /*
 |--------------------------------------------------------------------------

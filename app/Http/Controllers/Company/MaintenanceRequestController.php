@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MaintenanceRequest;
 use App\Models\DriverProposedService;
 use App\Services\MaintenanceRfqService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +20,7 @@ class MaintenanceRequestController extends Controller
     public function create()
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
         $vehicles = $company->vehicles()
             ->where('is_active', true)
             ->orderBy('plate_number')
@@ -39,6 +41,7 @@ class MaintenanceRequestController extends Controller
     public function store(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
         $data = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
             'maintenance_type' => ['required', 'string', 'in:' . implode(',', \App\Enums\MaintenanceType::all())],
@@ -85,6 +88,7 @@ class MaintenanceRequestController extends Controller
     public function index(Request $request)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
         $query = MaintenanceRequest::forCompany($company->id)
             ->with(['vehicle', 'approvedCenter', 'quotations.maintenanceCenter'])
             ->latest();
@@ -119,6 +123,7 @@ class MaintenanceRequestController extends Controller
     public function show(MaintenanceRequest $maintenanceRequest)
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'request_maintenance_offers');
         if ((int) $maintenanceRequest->company_id !== (int) $company->id) {
             abort(403);
         }

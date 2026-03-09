@@ -86,12 +86,20 @@ class DashboardController extends Controller
         $avgCostPerVehicle = $vehiclesCount > 0 ? round($companyTotal / $vehiclesCount, 0) : 0;
         $totalYearlySavings = max(0, $marketAvg - $companyTotal);
 
-        // Maintenance request counts (non-closed, actionable)
+        // Maintenance request counts (single query with conditional aggregation)
+        $counts = MaintenanceRequest::forCompany($company->id)
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN status = 'waiting_for_quotes' THEN 1 ELSE 0 END), 0) as waiting_quotes,
+                COALESCE(SUM(CASE WHEN status = 'quote_submitted' THEN 1 ELSE 0 END), 0) as quote_submitted,
+                COALESCE(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END), 0) as in_progress,
+                COALESCE(SUM(CASE WHEN status NOT IN ('closed', 'rejected') THEN 1 ELSE 0 END), 0) as total_active
+            ")
+            ->first();
         $maintenanceRequestCounts = [
-            'waiting_quotes' => MaintenanceRequest::forCompany($company->id)->where('status', 'waiting_for_quotes')->count(),
-            'quote_submitted' => MaintenanceRequest::forCompany($company->id)->where('status', 'quote_submitted')->count(),
-            'in_progress' => MaintenanceRequest::forCompany($company->id)->where('status', 'in_progress')->count(),
-            'total_active' => MaintenanceRequest::forCompany($company->id)->whereNotIn('status', ['closed', 'rejected'])->count(),
+            'waiting_quotes' => (int) ($counts?->waiting_quotes ?? 0),
+            'quote_submitted' => (int) ($counts?->quote_submitted ?? 0),
+            'in_progress' => (int) ($counts?->in_progress ?? 0),
+            'total_active' => (int) ($counts?->total_active ?? 0),
         ];
 
         // Fuel balance total (from vehicles)

@@ -38,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'checkrole' => \App\Http\Middleware\CheckRole::class,
             'payments' => \App\Http\Middleware\EnsurePaymentsEnabled::class,
+            'company.feature' => \App\Http\Middleware\CompanyPlanFeature::class,
+            'redirect.company.subdomain' => \App\Http\Middleware\RedirectCompanyToSubdomain::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

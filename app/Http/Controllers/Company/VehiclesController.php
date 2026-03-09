@@ -10,6 +10,7 @@ use App\Models\CompanyBranch;
 use App\Models\CompanyFuelInvoice;
 use App\Models\CompanyMaintenanceInvoice;
 use App\Models\MaintenanceRequest;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 
 class VehiclesController extends Controller
@@ -187,6 +188,7 @@ class VehiclesController extends Controller
     {
         $this->authorize('view', $vehicle);
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'vehicle_cost_reports');
         $reportType = request('report_type', 'all');
         $reportFrom = request('report_from');
         $reportTo = request('report_to');

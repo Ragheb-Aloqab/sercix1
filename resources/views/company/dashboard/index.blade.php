@@ -5,21 +5,31 @@
 @section('subtitle', __('dashboard.dashboard_v1'))
 
 @section('content')
-{{-- Mobile: 3x3 grid (visible when viewport < lg) --}}
+{{-- Mobile: 3x3 grid (visible when viewport < lg) — items filtered by plan features --}}
 <div class="lg:hidden pb-4">
     <div class="grid grid-cols-3 gap-3 sm:gap-4">
         @php
-            $mobileGridItems = [
-                ['href' => route('company.vehicles.index'), 'icon' => 'fa-car', 'label' => __('fleet.my_vehicles')],
-                ['href' => route('company.maintenance-requests.index'), 'icon' => 'fa-screwdriver-wrench', 'label' => __('fleet.maintenance_requests')],
-                ['href' => route('company.maintenance-offers.index'), 'icon' => 'fa-tags', 'label' => __('fleet.maintenance_offers')],
-                ['href' => route('company.maintenance-invoices.index'), 'icon' => 'fa-file-invoice', 'label' => __('fleet.maintenance_invoices')],
-                ['href' => route('company.fuel-balance'), 'icon' => 'fa-gas-pump', 'label' => __('fleet.fuel')],
-                ['href' => route('company.tracking.index'), 'icon' => 'fa-location-dot', 'label' => __('fleet.tracking')],
-                ['href' => route('company.reports.index'), 'icon' => 'fa-chart-pie', 'label' => __('fleet.reports')],
-                ['href' => route('company.insurances.index'), 'icon' => 'fa-shield-halved', 'label' => __('fleet.my_insurance')],
-                ['href' => route('company.settings'), 'icon' => 'fa-gear', 'label' => __('fleet.settings')],
-            ];
+            $c = auth('company')->user();
+            $mobileGridItems = [];
+            if ($c->canUseFeature('limited_vehicles')) {
+                $mobileGridItems[] = ['href' => route('company.vehicles.index'), 'icon' => 'fa-car', 'label' => __('fleet.my_vehicles')];
+            }
+            if ($c->canUseFeature('request_maintenance_offers')) {
+                $mobileGridItems[] = ['href' => route('company.maintenance-requests.index'), 'icon' => 'fa-screwdriver-wrench', 'label' => __('fleet.maintenance_requests')];
+                $mobileGridItems[] = ['href' => route('company.maintenance-offers.index'), 'icon' => 'fa-tags', 'label' => __('fleet.maintenance_offers')];
+                $mobileGridItems[] = ['href' => route('company.maintenance-invoices.index'), 'icon' => 'fa-file-invoice', 'label' => __('fleet.maintenance_invoices')];
+            }
+            if ($c->canUseFeature('fuel_manual')) {
+                $mobileGridItems[] = ['href' => route('company.fuel-balance'), 'icon' => 'fa-gas-pump', 'label' => __('fleet.fuel')];
+            }
+            if ($c->canUseFeature('vehicle_tracking')) {
+                $mobileGridItems[] = ['href' => route('company.tracking.index'), 'icon' => 'fa-location-dot', 'label' => __('fleet.tracking')];
+            }
+            if ($c->canUseFeature('basic_reports')) {
+                $mobileGridItems[] = ['href' => route('company.reports.index'), 'icon' => 'fa-chart-pie', 'label' => __('fleet.reports')];
+            }
+            $mobileGridItems[] = ['href' => route('company.insurances.index'), 'icon' => 'fa-shield-halved', 'label' => __('fleet.my_insurance')];
+            $mobileGridItems[] = ['href' => route('company.settings'), 'icon' => 'fa-gear', 'label' => __('fleet.settings')];
         @endphp
         @foreach ($mobileGridItems as $item)
             <a href="{{ $item['href'] }}" wire:navigate class="company-mobile-grid-card flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-2xl bg-slate-100 dark:bg-white/5 backdrop-blur-sm border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:border-sky-400 dark:hover:border-sky-500/30 active:scale-[0.98] transition-all duration-200 min-h-[100px] sm:min-h-[120px]">
@@ -32,7 +42,7 @@
     </div>
     @if(($expiringDocumentsCount ?? 0) > 0 || ($inspectionPendingCount ?? 0) > 0 || ($pendingInvoiceApprovalsCount ?? 0) > 0)
         <div class="mt-4 space-y-3">
-            @if(($expiringDocumentsCount ?? 0) > 0)
+            @if(($expiringDocumentsCount ?? 0) > 0 && ($c ?? auth('company')->user())->canUseFeature('limited_vehicles'))
                 <a href="{{ route('company.vehicles.index') }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm font-semibold">
                     <i class="fa-solid fa-file-circle-exclamation me-2"></i>{{ __('vehicles.expiring_documents') }} ({{ $expiringDocumentsCount }})
                 </a>
@@ -42,7 +52,7 @@
                     <i class="fa-solid fa-camera me-2"></i>{{ __('inspections.vehicles_pending') }} ({{ $inspectionPendingCount }})
                 </a>
             @endif
-            @if(($pendingInvoiceApprovalsCount ?? 0) > 0)
+            @if(($pendingInvoiceApprovalsCount ?? 0) > 0 && ($c ?? auth('company')->user())->canUseFeature('request_maintenance_offers'))
                 <a href="{{ route('company.maintenance-requests.index', ['status' => 'waiting_for_invoice_approval']) }}" class="block p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm font-semibold">
                     <i class="fa-solid fa-file-invoice me-2"></i>{{ __('maintenance.invoice_approval') ?? 'Invoices Pending Approval' }} ({{ $pendingInvoiceApprovalsCount }})
                 </a>
@@ -61,6 +71,7 @@
                 <div class="dash-title-accent mx-auto sm:ms-0 sm:me-0"></div>
             </div>
             <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
+                @companyCan('request_maintenance_offers')
                 <a href="{{ route('company.maintenance-requests.create') }}" class="dash-btn dash-btn-primary">
                     <i class="fa-solid fa-plus"></i>{{ __('fleet.create_request') }}
                 </a>
@@ -70,15 +81,22 @@
                 <a href="{{ route('company.maintenance-requests.index') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-screwdriver-wrench"></i>{{ __('maintenance.maintenance_requests') }}
                 </a>
+                @endcompanyCan
+                @companyCan('limited_vehicles')
                 <a href="{{ route('company.vehicles.index') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-car"></i>{{ __('company.vehicles') }}
                 </a>
+                @endcompanyCan
+                @companyCan('fuel_manual')
                 <a href="{{ route('company.fuel-balance') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-gas-pump"></i>{{ __('fleet.fuel') }}
                 </a>
+                @endcompanyCan
+                @companyCan('basic_reports')
                 <a href="{{ route('company.reports.index') }}" class="dash-btn dash-btn-secondary">
                     <i class="fa-solid fa-chart-pie"></i>{{ __('fleet.reports') }}
                 </a>
+                @endcompanyCan
             </div>
         </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Company;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Services\VehicleTrackingApiService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,7 @@ class TrackingController extends Controller
         $this->authorize('view', $vehicle);
 
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'vehicle_tracking');
         if ($vehicle->company_id !== $company->id) {
             abort(403);
         }
@@ -58,6 +60,7 @@ class TrackingController extends Controller
     public function index()
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'vehicle_tracking');
         $vehicles = $company->vehicles()
             ->where(function ($q) {
                 $q->where('tracking_source', Vehicle::TRACKING_MOBILE)
@@ -108,6 +111,7 @@ class TrackingController extends Controller
         $this->authorize('view', $vehicle);
 
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'vehicle_tracking');
         if ($vehicle->company_id !== $company->id) {
             return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
         }
@@ -148,6 +152,7 @@ class TrackingController extends Controller
     public function fetchAll(Request $request): JsonResponse
     {
         $company = auth('company')->user();
+        SubscriptionService::authorize($company, 'vehicle_tracking');
         $results = $this->trackingService->fetchAllForCompany($company);
 
         $data = [];

@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'خطط الاشتراك',
+    'plan_created' => 'تم إنشاء الخطة بنجاح.',
+    'plan_updated' => 'تم تحديث الخطة بنجاح.',
+    'plan_deleted' => 'تم حذف الخطة بنجاح.',
+    'plan_activated' => 'تم تفعيل الخطة.',
+    'plan_deactivated' => 'تم إلغاء تفعيل الخطة.',
+    'cannot_delete_has_companies' => 'لا يمكن حذف الخطة: توجد شركات مرتبطة بها.',
+    'name' => 'الاسم',
+    'slug' => 'المعرّف',
+    'tag' => 'الوسم',
+    'description' => 'الوصف',
+    'price' => 'السعر',
+    'price_unit' => 'وحدة السعر',
+    'is_active' => 'فعّال',
+    'sort_order' => 'ترتيب العرض',
+    'features' => 'المميزات',
+    'companies_count' => 'الشركات',
+    'no_plans' => 'لا توجد خطط بعد.',
+    'add_plan' => 'إضافة خطة',
+    'edit_plan' => 'تعديل الخطة',
+    'filter_by_plan' => 'تصفية حسب الخطة',
+    'all_plans' => 'كل الخطط',
+    'no_plan' => 'بدون خطة',
+    'feature_not_included' => 'هذه الميزة غير مشمولة في خطتك.',
+];

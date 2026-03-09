@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Subscription Plans',
+    'plan_created' => 'Plan created successfully.',
+    'plan_updated' => 'Plan updated successfully.',
+    'plan_deleted' => 'Plan deleted successfully.',
+    'plan_activated' => 'Plan activated.',
+    'plan_deactivated' => 'Plan deactivated.',
+    'cannot_delete_has_companies' => 'Cannot delete plan: companies are assigned to it.',
+    'name' => 'Name',
+    'slug' => 'Slug',
+    'tag' => 'Tag',
+    'description' => 'Description',
+    'price' => 'Price',
+    'price_unit' => 'Price unit',
+    'is_active' => 'Active',
+    'sort_order' => 'Sort order',
+    'features' => 'Features',
+    'companies_count' => 'Companies',
+    'no_plans' => 'No plans yet.',
+    'add_plan' => 'Add Plan',
+    'edit_plan' => 'Edit Plan',
+    'filter_by_plan' => 'Filter by plan',
+    'all_plans' => 'All plans',
+    'no_plan' => 'No plan',
+    'feature_not_included' => 'This feature is not included in your subscription plan.',
+];

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\GenerateVehicleReportJob;
 use App\Models\Vehicle;
 use App\Exports\VehicleReportExport;
+use App\Services\SubscriptionService;
 use App\Services\VehicleReportPdfService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class VehicleReportController extends Controller
     public function exportExcel(Request $request, Vehicle $vehicle): Response|RedirectResponse
     {
         $this->authorize('view', $vehicle);
+        SubscriptionService::authorize($vehicle->company, 'vehicle_cost_reports');
 
         if ($request->boolean('queue')) {
             return $this->dispatchVehicleReportJob($request, $vehicle, 'excel');
@@ -49,6 +51,7 @@ class VehicleReportController extends Controller
     public function exportPdf(Request $request, Vehicle $vehicle): Response|RedirectResponse
     {
         $this->authorize('view', $vehicle);
+        SubscriptionService::authorize($vehicle->company, 'vehicle_cost_reports');
 
         if ($request->boolean('queue')) {
             return $this->dispatchVehicleReportJob($request, $vehicle, 'pdf');
