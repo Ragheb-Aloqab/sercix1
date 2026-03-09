@@ -80,7 +80,6 @@ return [
     'url' => 'يجب أن يكون حقل :attribute رابطاً صالحاً.',
     'uuid' => 'يجب أن يكون حقل :attribute UUID صالحاً.',
 
-    'contact_phone_format' => 'رقم الهاتف يجب أن يحتوي على أرقام و + و - ومسافات فقط.',
     'custom' => [],
     'attributes' => [
         'name' => 'الاسم',
@@ -92,6 +91,5 @@ return [
         'address' => 'العنوان',
         'quotation_invoice' => 'عرض السعر / الفاتورة',
         'receipt' => 'صورة الإيصال',
-        'contact_phone' => 'رقم الهاتف للتواصل',
     ],
 ];
