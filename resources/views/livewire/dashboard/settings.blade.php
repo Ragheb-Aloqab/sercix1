@@ -12,7 +12,7 @@
             <button wire:click="setTab('sessions')"
                 class="{{ $btn }} {{ $tab === 'sessions' ? $active : $normal }}">{{ __('settings.sessions_devices') }}</button>
 
-            @if ($role === 'admin')
+            @if (in_array($role, ['admin', 'super_admin']))
                 <button wire:click="setTab('branding')"
                     class="{{ $btn }} {{ $tab === 'branding' ? $active : $normal }}">{{ __('settings.site_branding') }}</button>
                 <button wire:click="setTab('invoice')"
@@ -44,13 +44,13 @@
             <livewire:dashboard.settings.user-password />
         @elseif($actorType === 'user' && $tab === 'sessions')
             <livewire:dashboard.settings.sessions-devices />
-        @elseif($actorType === 'user' && $role === 'admin' && $tab === 'branding')
+        @elseif($actorType === 'user' && in_array($role, ['admin', 'super_admin']) && $tab === 'branding')
             <livewire:dashboard.settings.system-branding />
-        @elseif($actorType === 'user' && $role === 'admin' && $tab === 'invoice')
+        @elseif($actorType === 'user' && in_array($role, ['admin', 'super_admin']) && $tab === 'invoice')
             <livewire:dashboard.settings.invoice-settings />
-        @elseif($actorType === 'user' && $role === 'admin' && $tab === 'otp')
+        @elseif($actorType === 'user' && in_array($role, ['admin', 'super_admin']) && $tab === 'otp')
             <livewire:dashboard.settings.otp-provider />
-        @elseif($actorType === 'user' && $role === 'admin' && config('servx.payments_enabled', false) && $tab === 'tap')
+        @elseif($actorType === 'user' && in_array($role, ['admin', 'super_admin']) && config('servx.payments_enabled', false) && $tab === 'tap')
             <livewire:dashboard.settings.tap-payments />
         @elseif($actorType === 'company' && $tab === 'company_profile')
             <livewire:dashboard.settings.company-profile />

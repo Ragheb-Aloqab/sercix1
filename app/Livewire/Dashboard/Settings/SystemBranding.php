@@ -33,10 +33,8 @@ class SystemBranding extends Component
             'site_name' => ['required', 'string', 'max:255'],
             'site_logo' => ['nullable', 'image', 'max:2048'],
             'contact_email' => ['nullable', 'email', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:50', 'regex:/^[\d\s\+\-]+$/'],
+            'contact_phone' => ['nullable', 'string', 'max:50', 'regex:/^[\d\s+\-]+$/'],
             'footer_contact_visible' => ['boolean'],
-        ], [
-            'contact_phone.regex' => __('validation.contact_phone_format'),
         ]);
 
         Setting::put('site_name', $data['site_name']);
@@ -55,8 +53,7 @@ class SystemBranding extends Component
             $this->reset('site_logo');
         }
 
-        $this->footer_contact_visible = (bool) ($data['footer_contact_visible'] ?? true);
-        session()->flash('success_brand', __('settings.settings_saved'));
+        session()->flash('success_brand', __('settings.saved_successfully') ?: 'Settings saved successfully.');
     }
 
     public function render()

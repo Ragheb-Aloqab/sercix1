@@ -30,7 +30,7 @@ return [
     'email_placeholder_user' => 'Email',
     'phone_placeholder_optional' => 'Phone (optional)',
     'save' => 'Save',
-    'settings_saved' => 'Settings saved successfully.',
+    'saved_successfully' => 'Settings saved successfully.',
 
     // Sessions / Devices
     'sessions_devices' => 'Sessions & devices',

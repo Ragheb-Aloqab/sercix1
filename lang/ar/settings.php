@@ -30,7 +30,7 @@ return [
     'email_placeholder_user' => 'الإيميل',
     'phone_placeholder_optional' => 'الجوال (اختياري)',
     'save' => 'حفظ',
-    'settings_saved' => 'تم حفظ الإعدادات بنجاح.',
+    'saved_successfully' => 'تم حفظ الإعدادات بنجاح.',
 
     // Sessions / Devices
     'sessions_devices' => 'الجلسات والأجهزة',
