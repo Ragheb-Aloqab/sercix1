@@ -263,6 +263,7 @@
             <div class="text-center lg:text-start mb-14">
                 <h2 class="text-3xl sm:text-4xl font-bold text-white" id="workflowTitle">{{ __('index.workflowTitle') }}</h2>
                 <p class="text-xl sm:text-2xl font-bold text-servx-red mt-2" id="workflowBrand">{{ $siteName ?? 'Servx Motors' }}</p>
+                @foreach(['workflowStep1' => 'workflowDesc1', 'workflowStep2' => 'workflowDesc2', 'workflowStep3' => 'workflowDesc3', 'workflowStep4' => 'workflowDesc4', 'workflowStep5' => 'workflowDesc5'] as $step => $desc)
                 <div class="servx-card servx-card-accent p-6 text-center hover:border-servx-red/40 transition-all duration-200">
                     <div class="w-12 h-12 rounded-lg border-2 border-servx-red flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-servx-red text-lg" aria-hidden="true"></i></div>
                     <h3 class="font-bold text-white" id="{{ $step }}">{{ __("index.$step") }}</h3>
@@ -278,7 +279,8 @@
         </div>
     </section>
 
-    <!-- ---------- Plans / Pricing ---------- -->
+    {{-- ---------- Plans / Pricing (disabled; uncomment to enable) ---------- --}}
+    {{--
     <section id="plans" class="relative py-24 bg-servx-black overflow-hidden" aria-labelledby="pricingTitle">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -320,6 +322,7 @@
             </div>
         </div>
     </section>
+    --}}
 
     <!-- ---------- FAQ ---------- -->
     <section id="faq" class="bg-servx-black py-24" aria-labelledby="faqTitle">
