@@ -38,9 +38,9 @@
 
     <!-- ========== HEADER / NAVBAR ========== -->
     <header role="banner" class="sticky top-0 z-40 bg-servx-black backdrop-blur-sm border-b border-servx-red/30">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-row items-center justify-between gap-4">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-row items-center gap-4">
             <!-- Logo / Brand -->
-            <a href="{{ url('/') }}" class="flex items-center gap-3 group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black">
+            <a href="{{ url('/') }}" class="flex items-center gap-3 group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black shrink-0">
                 <div class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden shrink-0 border-2 border-servx-red/50">
                     <img src="{{ $siteLogoUrl ?? asset('images/serv.x logo.png') }}" alt="{{ $siteName ?? 'Servx Motors' }} — {{ __('index.brandTag') }}" width="48" height="48" class="h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" />
                 </div>
@@ -49,6 +49,9 @@
                     <span class="text-xs text-servx-silver truncate block" id="brandTag">{{ __('index.brandTag') }}</span>
                 </div>
             </a>
+
+            <!-- Spacer: limits gap between logo and nav -->
+            <div class="hidden md:block flex-1 min-w-0 max-w-md" aria-hidden="true"></div>
 
             <!-- Desktop navigation -->
             <nav aria-label="{{ __('index.navMain') }}" class="hidden md:flex flex-row items-center gap-6 text-sm font-semibold">
