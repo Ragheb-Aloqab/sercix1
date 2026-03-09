@@ -266,6 +266,7 @@
             <div class="text-center lg:text-start mb-14">
                 <h2 class="text-3xl sm:text-4xl font-bold text-white" id="workflowTitle">{{ __('index.workflowTitle') }}</h2>
                 <p class="text-xl sm:text-2xl font-bold text-servx-red mt-2" id="workflowBrand">{{ $siteName ?? 'Servx Motors' }}</p>
+                <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 @foreach(['workflowStep1' => 'workflowDesc1', 'workflowStep2' => 'workflowDesc2', 'workflowStep3' => 'workflowDesc3', 'workflowStep4' => 'workflowDesc4', 'workflowStep5' => 'workflowDesc5'] as $step => $desc)
                 <div class="servx-card servx-card-accent p-6 text-center hover:border-servx-red/40 transition-all duration-200">
                     <div class="w-12 h-12 rounded-lg border-2 border-servx-red flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-servx-red text-lg" aria-hidden="true"></i></div>
@@ -274,6 +275,7 @@
                     <p class="mt-2 text-sm text-servx-silver" id="{{ $desc }}">{{ __("index.$desc") }}</p>
                 </div>
                 @endforeach
+                </div>
             </div>
             <div class="mt-10 servx-card servx-card-accent p-6 max-w-xl mx-auto text-start">
                 <h4 class="font-bold text-white" id="workflowConclusion">{{ __('index.workflowConclusion') }}</h4>
@@ -282,8 +284,7 @@
         </div>
     </section>
 
-    {{-- ---------- Plans / Pricing (disabled; uncomment to enable) ---------- --}}
-    {{--
+    <!-- ---------- Plans / Pricing ---------- -->
     <section id="plans" class="relative py-24 bg-servx-black overflow-hidden" aria-labelledby="pricingTitle">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -291,41 +292,45 @@
                 <p class="mt-2 text-servx-silver max-w-2xl mx-auto" id="pricingDesc">{{ __('index.pricingDesc') }}</p>
             </div>
             <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Basic Plan -->
                 <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border border-servx-red/20 hover:border-servx-red/40 transition-all duration-200 text-start">
                     <p class="text-sm text-servx-silver" id="plan1Tag">{{ __('index.plan1Tag') }}</p>
                     <h3 class="mt-2 text-2xl font-bold text-white" id="plan1Title">{{ __('index.plan1Title') }}</h3>
-                    <p class="mt-4 text-3xl font-bold text-servx-silver-light"><span id="plan1Price">129</span> <span class="text-base font-semibold text-servx-silver">/ {{ __('index.perVehicle') }}</span></p>
+                    <p class="mt-4 text-3xl font-bold text-servx-silver-light"><span id="plan1Price" class="inline-flex items-center gap-1.5 flex-wrap">@if(trim(__('index.plan1Price')) !== ''){{ __('index.plan1Price') }}<x-riyal-icon />{{ __('index.pricePerVehicle') }} / {{ __('index.perVehicle') }}@else{{ __('index.contactUs') }}@endif</span></p>
                     <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item1') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item2') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan1Item3') }}</li>
+                        @foreach(['plan1Item1','plan1Item2','plan1Item3','plan1Item4','plan1Item5','plan1Item6','plan1Item7'] as $key)
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __("index.$key") }}</li>
+                        @endforeach
                     </ul>
                 </div>
+                <!-- Standard Plan -->
                 <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border-2 border-servx-red/50 bg-servx-red/5 hover:border-servx-red/70 transition-all duration-200 text-start relative overflow-hidden">
                     <div class="absolute -top-12 -end-12 h-32 w-32 rounded-full bg-servx-red/10 blur-2xl" aria-hidden="true"></div>
                     <p class="text-sm text-servx-silver" id="plan2Tag">{{ __('index.plan2Tag') }}</p>
                     <h3 class="mt-2 text-2xl font-bold text-white" id="plan2Title">{{ __('index.plan2Title') }}</h3>
-                    <p class="mt-4 text-3xl font-bold text-white"><span id="plan2Price">169</span> <span class="text-base font-semibold text-servx-silver-light/80">/ {{ __('index.perVehicle') }}</span></p>
-                    <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item1') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item2') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan2Item3') }}</li>
+                    <p class="mt-4 text-3xl font-bold text-white"><span id="plan2Price" class="inline-flex items-center gap-1.5 flex-wrap">@if(trim(__('index.plan2Price')) !== ''){{ __('index.plan2Price') }}<x-riyal-icon />{{ __('index.pricePerVehicle') }} / {{ __('index.perVehicle') }}@else{{ __('index.contactUs') }}@endif</span></p>
+                    <p class="mt-3 text-xs font-semibold text-servx-red/90">{{ __('index.plan2Includes') }}</p>
+                    <ul class="mt-4 space-y-3 text-sm text-servx-silver-light">
+                        @foreach(['plan2Item1','plan2Item2','plan2Item3','plan2Item4','plan2Item5','plan2Item6','plan2Item7'] as $key)
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __("index.$key") }}</li>
+                        @endforeach
                     </ul>
                 </div>
+                <!-- Pro Plan -->
                 <div class="servx-card servx-card-accent p-6 sm:p-7 rounded-2xl border border-servx-red/20 hover:border-servx-red/40 transition-all duration-200 text-start">
                     <p class="text-sm text-servx-silver" id="plan3Tag">{{ __('index.plan3Tag') }}</p>
                     <h3 class="mt-2 text-2xl font-bold text-white" id="plan3Title">{{ __('index.plan3Title') }}</h3>
-                    <p class="mt-4 text-3xl font-bold text-servx-silver-light" id="plan3Price">{{ __('index.contactUs') }}</p>
-                    <ul class="mt-6 space-y-3 text-sm text-servx-silver-light">
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item1') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item2') }}</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __('index.plan3Item3') }}</li>
+                    <p class="mt-4 text-3xl font-bold text-servx-silver-light" id="plan3Price"><span class="inline-flex items-center gap-1.5 flex-wrap">@if(trim(__('index.plan3Price')) !== ''){{ __('index.plan3Price') }}<x-riyal-icon />{{ __('index.pricePerVehicle') }} / {{ __('index.perVehicle') }}@else{{ __('index.contactUs') }}@endif</span></p>
+                    <p class="mt-3 text-xs font-semibold text-servx-red/90">{{ __('index.plan3Includes') }}</p>
+                    <ul class="mt-4 space-y-3 text-sm text-servx-silver-light">
+                        @foreach(['plan3Item1','plan3Item2','plan3Item3','plan3Item4','plan3Item5'] as $key)
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-servx-red shrink-0" aria-hidden="true"></i>{{ __("index.$key") }}</li>
+                        @endforeach
                     </ul>
                 </div>
             </div>
         </div>
     </section>
-    --}}
 
     <!-- ---------- FAQ ---------- -->
     <section id="faq" class="bg-servx-black py-24" aria-labelledby="faqTitle">
@@ -383,21 +388,27 @@
                 </div>
 
                 <div class="text-start order-3 rtl:md:order-1">
+                    @if($footerContactVisible ?? true)
                     <span class="font-bold text-white mb-3 block" id="footerContact">{{ __('index.footerContact') }}</span>
                     <div class="text-sm text-servx-silver space-y-2">
+                        @if($contactPhone ?? '')
                         <div class="flex items-center gap-2"><i class="fa-brands fa-whatsapp shrink-0 text-servx-red" aria-hidden="true"></i>WhatsApp: <a
                                 href="https://wa.me/{{ $waNumber ?? '966512345678' }}" target="_blank"
                                 rel="noopener noreferrer"
-                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactWhatsapp ?? '05xxxxxxxx' }}</a>
+                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactPhone }}</a>
                         </div>
+                        @endif
+                        @if($contactEmail ?? '')
                         <div class="flex items-center gap-2"><i class="fa-regular fa-envelope shrink-0 text-servx-red" aria-hidden="true"></i>Email: <a
-                                href="mailto:{{ $contactEmail ?? 'b2b@oilgo.com' }}"
-                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactEmail ?? 'b2b@oilgo.com' }}</a>
+                                href="mailto:{{ $contactEmail }}"
+                                class="font-bold hover:text-servx-red transition focus:outline-none focus-visible:ring-2 focus-visible:ring-servx-red focus-visible:ring-offset-2 focus-visible:ring-offset-servx-black rounded">{{ $contactEmail }}</a>
                         </div>
+                        @endif
                         @if(__('index.footerNote'))
                         <p class="text-xs text-servx-silver/60" id="footerNote">{{ __('index.footerNote') }}</p>
                         @endif
                     </div>
+                    @endif
                 </div>
             </div>
 

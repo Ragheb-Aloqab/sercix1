@@ -80,6 +80,7 @@ return [
     'url' => 'The :attribute field must be a valid URL.',
     'uuid' => 'The :attribute field must be a valid UUID.',
 
+    'contact_phone_format' => 'The contact phone must contain only numbers, +, -, and spaces.',
     'custom' => [],
     'attributes' => [
         'name' => 'Name',
@@ -91,5 +92,6 @@ return [
         'address' => 'Address',
         'quotation_invoice' => 'Quotation invoice',
         'receipt' => 'Receipt image',
+        'contact_phone' => 'Contact phone',
     ],
 ];

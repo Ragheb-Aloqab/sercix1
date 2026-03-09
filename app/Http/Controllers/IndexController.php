@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\Auth;
 
 class IndexController extends Controller
@@ -22,9 +23,9 @@ class IndexController extends Controller
         $siteName = ($tenant && $wlBranding) ? $tenant->company_name : Setting::get('site_name', 'Servx Motors');
         $siteLogoUrl = ($tenant && $wlBranding) ? ($tenant->getLogoUrl() ?? $this->siteLogoUrl()) : $this->siteLogoUrl();
 
-        $contactEmail = Setting::get('contact_email', 'b2b@oilgo.com');
-
-        $contactWhatsapp = Setting::get('contact_whatsapp', '05xxxxxxxx');
+        $contactEmail = Setting::get('contact_email', '');
+        $contactPhone = Setting::get('contact_phone', Setting::get('contact_whatsapp', ''));
+        $footerContactVisible = (bool) Setting::get('footer_contact_visible', true);
 
         $currentLocale = session('ui.locale', app()->getLocale());
         $user = null;
@@ -43,7 +44,7 @@ class IndexController extends Controller
             $dashboardRoute = route('admin.dashboard');
         }
 
-        $waNumber = preg_replace('/[^0-9]/', '', $contactWhatsapp ?? '');
+        $waNumber = preg_replace('/[^0-9]/', '', $contactPhone ?? '');
         if (str_starts_with($waNumber, '0')) {
             $waNumber = '966' . substr($waNumber, 1);
         } elseif (!str_starts_with($waNumber, '966') && strlen($waNumber) <= 10) {
@@ -52,7 +53,8 @@ class IndexController extends Controller
 
         return view('index', [
             'contactEmail' => $contactEmail,
-            'contactWhatsapp' => $contactWhatsapp,
+            'contactPhone' => $contactPhone,
+            'footerContactVisible' => $footerContactVisible,
             'siteName' => $siteName,
             'siteLogoUrl' => $siteLogoUrl,
             'currentLocale' => $currentLocale,
@@ -60,6 +62,7 @@ class IndexController extends Controller
             'dashboardRoute' => $dashboardRoute,
             'logoutRoute' => $logoutRoute,
             'waNumber' => $waNumber ?: '966512345678',
+            'subscriptionPlans' => SubscriptionService::activePlansForDisplay(),
         ]);
     }
 
@@ -73,8 +76,8 @@ class IndexController extends Controller
 
         // 2. Company logo (Company → Settings → Company Profile) when company is logged in
         $company = Auth::guard('company')->user();
-        if ($company?->logo_path && $this->logoFileExists($company->logo_path)) {
-            return $this->logoUrl($company->logo_path);
+        if ($company?->logo && $this->logoFileExists($company->logo)) {
+            return $this->logoUrl($company->logo);
         }
 
         return asset('images/serv.x logo.png');

@@ -29,10 +29,16 @@
         </div>
 
         <div>
-            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ __('common.contact_whatsapp_label') }}</label>
-            <input wire:model="contact_whatsapp"
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ __('common.contact_phone_label') }}</label>
+            <input wire:model="contact_phone"
                 class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent"
-                placeholder="05xxxxxxxx">
+                placeholder="+966 5xxxxxxxx or 05xxxxxxxx">
+            <p class="mt-1 text-xs text-slate-400">{{ __('common.contact_phone_hint') }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <input type="checkbox" wire:model="footer_contact_visible" id="footer_contact_visible"
+                class="rounded accent-sky-500">
+            <label for="footer_contact_visible" class="text-sm text-slate-600 dark:text-slate-300">{{ __('common.footer_contact_visible') }}</label>
         </div>
 
         <div class="flex items-center gap-3">
