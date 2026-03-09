@@ -4,6 +4,8 @@ namespace App\Http\Controllers\CompanyAuth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Services\SubdomainService;
+use App\Services\SubdomainRedirectService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -205,12 +207,18 @@ class OtpAuthController extends Controller
         $registerData = Session::get('otp.register_data');
 
         if ($registerData) {
-            $company = Company::create([
+            $subdomain = SubdomainService::generateFromName($registerData['name']);
+            $companyData = [
                 'company_name' => $registerData['name'],
                 'phone' => $registerData['phone'],
                 'email' => $registerData['email'] ?? null,
                 'password' => Hash::make(Str::random(32)),
-            ]);
+                'subdomain' => $subdomain,
+            ];
+            if (config('servx.default_plan_id')) {
+                $companyData['plan_id'] = (int) config('servx.default_plan_id');
+            }
+            $company = Company::create($companyData);
             Session::forget(['otp.phone', 'otp.code', 'otp.expires_at', 'otp.register_data']);
         } else {
             $company = Company::query()->where('phone', $savedPhone)->first();
@@ -224,9 +232,9 @@ class OtpAuthController extends Controller
 
         Auth::guard('company')->login($company, remember: true);
 
-        // ✅ وجّه إلى داشبورد الشركة
+        $dashboardUrl = SubdomainRedirectService::companyDashboardUrl($company);
         return redirect()
-            ->route('company.dashboard')
+            ->to($dashboardUrl)
             ->with('success', __('messages.company_login_success'));
     }
 

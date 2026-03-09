@@ -64,6 +64,18 @@
            class="mt-1 w-full rounded-xl bg-slate-800/50 border border-slate-600 text-white px-4 py-2.5 focus:border-sky-500/50">
 </div>
 
+@if(isset($plans) && $plans->isNotEmpty())
+<div>
+    <label class="text-xs font-semibold text-slate-400">{{ __('plans.title') }}</label>
+    <select name="plan_id" class="mt-1 w-full rounded-xl bg-slate-800/50 border border-slate-600 text-white px-4 py-2.5 focus:border-sky-500/50">
+        <option value="">{{ __('common.none') ?? 'None' }}</option>
+        @foreach($plans as $plan)
+            <option value="{{ $plan->id }}" {{ old('plan_id', $c?->plan_id) == $plan->id ? 'selected' : '' }}>{{ $plan->name }}</option>
+        @endforeach
+    </select>
+</div>
+@endif
+
 {{-- White-Label Branding (Super Admin) --}}
 <div class="border-t border-slate-600/50 pt-6 mt-6">
     <h3 class="text-sm font-bold text-slate-300 mb-4">{{ __('admin_dashboard.white_label_branding') ?? 'White-Label Branding' }}</h3>
@@ -77,9 +89,9 @@
             <label class="text-xs font-semibold text-slate-400">{{ __('admin_dashboard.subdomain') ?? 'Subdomain' }}</label>
             <div class="flex items-center gap-2 mt-1">
                 <input name="subdomain" value="{{ old('subdomain', $c?->subdomain) }}"
-                       placeholder="toyota"
+                       placeholder="{{ __('admin_dashboard.subdomain_auto_hint') ?? 'Leave empty to auto-generate from company name' }}"
                        class="flex-1 rounded-xl bg-slate-800/50 border border-slate-600 text-white px-4 py-2.5 focus:border-sky-500/50">
-                <span class="text-slate-500 text-sm">.{{ config('servx.white_label_domain', 'servx.sa') }}</span>
+                <span class="text-slate-500 text-sm">.{{ config('servx.white_label_domain', 'servxmotors.com') }}</span>
             </div>
             @error('subdomain')
                 <p class="text-rose-400 text-xs mt-1">{{ $message }}</p>

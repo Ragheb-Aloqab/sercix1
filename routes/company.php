@@ -28,7 +28,7 @@ use App\Livewire\Company\Settings;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['company'])
+Route::middleware(['company', 'redirect.company.subdomain'])
     ->prefix('company')
     ->name('company.')
     ->group(function () {
@@ -73,6 +73,7 @@ Route::middleware(['company'])
             ->whereNumber('invoice');
 
         // Company-uploaded fuel invoices (view, download, thumbnail)
+        Route::middleware('company.feature:fuel_manual')->group(function () {
         Route::get('/fuel-invoices/{companyFuelInvoice}/view', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'view'])
             ->name('fuel-invoices.view')
             ->whereNumber('companyFuelInvoice');
@@ -92,6 +93,7 @@ Route::middleware(['company'])
         Route::delete('/fuel-invoices/{companyFuelInvoice}', [\App\Http\Controllers\Company\FuelInvoiceController::class, 'destroy'])
             ->name('fuel-invoices.destroy')
             ->whereNumber('companyFuelInvoice');
+        });
 
         // Payments (only when config servx.payments_enabled = true)
         Route::middleware('payments')->group(function () {
@@ -108,9 +110,12 @@ Route::middleware(['company'])
             ->name('services.index');
 
         // Vehicles
+        Route::middleware('company.feature:limited_vehicles')->group(function () {
         Route::get('/vehicles', [VehiclesController::class, 'index'])
             ->name('vehicles.index');
+        });
 
+        Route::middleware('company.feature:fuel_manual')->group(function () {
         Route::get('/fuel', [FuelController::class, 'index'])
             ->name('fuel.index');
         Route::get('/fuel/excel', [FuelController::class, 'exportExcel'])
@@ -129,8 +134,10 @@ Route::middleware(['company'])
         Route::post('/fuel/{fuelRefill}/generate-invoice', [FuelController::class, 'generateInvoice'])
             ->name('fuel.generate-invoice')
             ->whereNumber('fuelRefill');
+        });
 
-        // Reports
+        // Reports — Basic: index, service; Standard: mileage, tax, vehicle cost; Pro: comprehensive
+        Route::middleware('company.feature:basic_reports')->group(function () {
         Route::get('/reports', [ReportsController::class, 'index'])
             ->name('reports.index');
         Route::get('/reports/service', [ServiceReportController::class, 'index'])
@@ -139,32 +146,39 @@ Route::middleware(['company'])
             ->name('reports.service.excel');
         Route::get('/reports/service/pdf', [ServiceReportController::class, 'exportPdf'])
             ->name('reports.service.pdf');
+        Route::get('/reports/download/{export}', [\App\Http\Controllers\Company\ReportsController::class, 'downloadExport'])
+            ->name('reports.download')
+            ->whereUuid('export');
+        });
+        Route::middleware('company.feature:distance_reports')->group(function () {
         Route::get('/reports/mileage', [ReportsController::class, 'mileage'])
             ->name('reports.mileage');
+        Route::get('/reports/mileage/excel', [\App\Http\Controllers\Company\MileageReportController::class, 'exportExcel'])
+            ->name('reports.mileage.excel');
+        Route::get('/reports/mileage/pdf', [\App\Http\Controllers\Company\MileageReportController::class, 'exportPdf'])
+            ->name('reports.mileage.pdf');
+        });
+        Route::middleware('company.feature:tax_reports')->group(function () {
         Route::get('/reports/tax', [\App\Http\Controllers\Company\TaxReportController::class, 'index'])
             ->name('reports.tax');
         Route::get('/reports/tax/pdf', [\App\Http\Controllers\Company\TaxReportController::class, 'exportPdf'])
             ->name('reports.tax.pdf');
         Route::get('/reports/tax/excel', [\App\Http\Controllers\Company\TaxReportController::class, 'exportExcel'])
             ->name('reports.tax.excel');
+        });
+        Route::middleware('company.feature:advanced_reports')->group(function () {
         Route::get('/reports/comprehensive', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'index'])
             ->name('reports.comprehensive');
         Route::get('/reports/comprehensive/pdf', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'exportPdf'])
             ->name('reports.comprehensive.pdf');
         Route::get('/reports/comprehensive/excel', [\App\Http\Controllers\Company\ComprehensiveReportController::class, 'exportExcel'])
             ->name('reports.comprehensive.excel');
-        Route::get('/reports/mileage/excel', [\App\Http\Controllers\Company\MileageReportController::class, 'exportExcel'])
-            ->name('reports.mileage.excel');
-        Route::get('/reports/mileage/pdf', [\App\Http\Controllers\Company\MileageReportController::class, 'exportPdf'])
-            ->name('reports.mileage.pdf');
-        Route::get('/reports/download/{export}', [\App\Http\Controllers\Company\ReportsController::class, 'downloadExport'])
-            ->name('reports.download')
-            ->whereUuid('export');
-
+        });
         // Insurances (My Insurance)
         Route::get('/insurances', [\App\Http\Controllers\Company\InsurancesController::class, 'index'])
             ->name('insurances.index');
 
+        Route::middleware('company.feature:limited_vehicles')->group(function () {
         Route::get('/vehicles/create', [VehiclesController::class, 'create'])
             ->name('vehicles.create');
 
@@ -189,17 +203,19 @@ Route::middleware(['company'])
         Route::get('/vehicles/{vehicle}/images', [VehiclesController::class, 'images'])
             ->name('vehicles.images')
             ->whereNumber('vehicle');
+        Route::middleware('company.feature:vehicle_cost_reports')->group(function () {
         Route::get('/vehicles/{vehicle}/reports', [VehiclesController::class, 'reports'])
             ->name('vehicles.reports')
-            ->whereNumber('vehicle');
-        Route::get('/vehicles/{vehicle}/mileage', [VehiclesController::class, 'mileage'])
-            ->name('vehicles.mileage')
             ->whereNumber('vehicle');
         Route::get('/vehicles/{vehicle}/report/excel', [\App\Http\Controllers\Company\VehicleReportController::class, 'exportExcel'])
             ->name('vehicles.report.excel')
             ->whereNumber('vehicle');
         Route::get('/vehicles/{vehicle}/report/pdf', [\App\Http\Controllers\Company\VehicleReportController::class, 'exportPdf'])
             ->name('vehicles.report.pdf')
+            ->whereNumber('vehicle');
+        });
+        Route::get('/vehicles/{vehicle}/mileage', [VehiclesController::class, 'mileage'])
+            ->name('vehicles.mileage')
             ->whereNumber('vehicle');
 
         Route::get('/vehicles/{vehicle}/edit', [VehiclesController::class, 'edit'])
@@ -235,8 +251,10 @@ Route::middleware(['company'])
         Route::get('/vehicles/{vehicle}/documents/insurance/download', [\App\Http\Controllers\Company\VehicleDocumentController::class, 'downloadInsurance'])
             ->name('vehicles.documents.insurance.download')
             ->whereNumber('vehicle');
+        });
 
         // Tracking
+        Route::middleware('company.feature:vehicle_tracking')->group(function () {
         Route::get('/vehicles/{vehicle}/track', [TrackingController::class, 'show'])
             ->name('vehicles.track')
             ->whereNumber('vehicle');
@@ -247,6 +265,7 @@ Route::middleware(['company'])
             ->name('tracking.index');
         Route::post('/tracking/fetch-all', [TrackingController::class, 'fetchAll'])
             ->name('tracking.fetch_all');
+        });
 
         // Branches
         Route::get('/branches', [BranchesController::class, 'index'])
@@ -266,6 +285,7 @@ Route::middleware(['company'])
             ->name('branches.update')
             ->whereNumber('branch');
         // Maintenance Requests (RFQ workflow)
+        Route::middleware('company.feature:request_maintenance_offers')->group(function () {
         Route::get('/maintenance-requests/create', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'create'])
             ->name('maintenance-requests.create');
         Route::post('/maintenance-requests', [\App\Http\Controllers\Company\MaintenanceRequestController::class, 'store'])
@@ -333,6 +353,7 @@ Route::middleware(['company'])
         Route::delete('/maintenance-invoices/company/{companyMaintenanceInvoice}', [\App\Http\Controllers\Company\MaintenanceInvoiceController::class, 'destroyCompanyInvoice'])
             ->name('maintenance-invoices.company.destroy')
             ->whereNumber('companyMaintenanceInvoice');
+        });
 
         // Vehicle Inspections
         Route::get('/inspections', [VehicleInspectionController::class, 'index'])

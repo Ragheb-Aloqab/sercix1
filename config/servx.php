@@ -32,6 +32,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Subscription Plan
+    |--------------------------------------------------------------------------
+    | Plan ID assigned to new companies. Null = no plan (allow all features for backward compat).
+    */
+    'default_plan_id' => env('DEFAULT_PLAN_ID'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Map Style
     |--------------------------------------------------------------------------
     | Default map tile style: carto_dark, osm_humanitarian, stadia_alidade, esri_imagery.
@@ -66,6 +74,31 @@ return [
     | Companies with white_label_enabled can access their dashboard at:
     | {subdomain}.{white_label_domain}
     */
-    'white_label_domain' => env('WHITE_LABEL_DOMAIN', 'servx.sa'),
+    'white_label_domain' => env('WHITE_LABEL_DOMAIN', 'servxmotors.com'),
+
+    'subscription_plans' => [
+        'features' => [
+            'fuel_manual' => 'Manual fuel entry',
+            'maintenance_manual' => 'Manual maintenance entry',
+            'basic_reports' => 'Basic reports',
+            'dashboard' => 'Dashboard access',
+            'driver_accounts' => 'Driver accounts',
+            'request_maintenance_offers' => 'Request maintenance offers from service centers',
+            'limited_vehicles' => 'Limited vehicle management',
+            'data_assistant_partial' => 'Data assistant (partial)',
+            'auto_fuel_invoice' => 'Automatic fuel invoice registration via fuel providers',
+            'auto_maintenance_invoice' => 'Automatic maintenance invoice registration via service centers',
+            'vehicle_cost_reports' => 'Vehicle cost reports',
+            'distance_reports' => 'Distance reports',
+            'tax_reports' => 'Tax reports',
+            'cost_per_km' => 'Cost per kilometer analysis',
+            'enhanced_driver_accounts' => 'Enhanced driver accounts',
+            'driver_alerts' => 'Driver alerts',
+            'vehicle_tracking' => 'Vehicle tracking via application',
+            'advanced_reports' => 'Advanced and comprehensive reports',
+            'white_label' => 'White Label support for large companies',
+            'api_integration' => 'API integration with external systems',
+        ],
+    ],
 
 ];

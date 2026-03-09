@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Customers;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCustomerRequest extends FormRequest
 {
@@ -21,9 +22,17 @@ class StoreCustomerRequest extends FormRequest
             'city' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
             'status' => ['nullable', 'in:active,suspended'],
+            'plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
             'vehicle_quota' => ['nullable', 'integer', 'min:1', 'max:9999'],
             'white_label_enabled' => ['nullable', 'boolean'],
-            'subdomain' => ['nullable', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/', 'unique:companies,subdomain'],
+            'subdomain' => [
+                'nullable',
+                Rule::when($this->filled('subdomain'), [
+                    'string', 'min:3', 'max:30',
+                    'regex:/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/',
+                    'unique:companies,subdomain',
+                ]),
+            ],
             'primary_color' => ['nullable', 'string', 'max:20', 'regex:/^#([0-9A-Fa-f]{3}){1,2}$/'],
             'secondary_color' => ['nullable', 'string', 'max:20', 'regex:/^#([0-9A-Fa-f]{3}){1,2}$/'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],

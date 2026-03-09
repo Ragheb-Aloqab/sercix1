@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Company;
+use App\Services\SubdomainRedirectService;
 use App\Services\TenantSecurityLogger;
 use Closure;
 use Illuminate\Http\Request;
@@ -46,10 +47,8 @@ class LoadCompanyFromSubdomain
                 $authCompany = Auth::guard('company')->user();
                 if ($authCompany->id !== $company->id) {
                     TenantSecurityLogger::tenantMismatch($authCompany->id, $company->id);
-                    Auth::guard('company')->logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-                    abort(403, __('errors.forbidden_message'));
+                    $redirectUrl = SubdomainRedirectService::companyDashboardUrl($authCompany, $request);
+                    return redirect()->to($redirectUrl);
                 }
             }
 
@@ -77,9 +76,9 @@ class LoadCompanyFromSubdomain
 
     private function resolveTenantFromSubdomain(string $subdomain): ?Company
     {
+        // SaaS: All companies with subdomains can access their tenant dashboard
         return Company::query()
             ->where('subdomain', $subdomain)
-            ->where('white_label_enabled', true)
             ->where('status', 'active')
             ->first();
     }
